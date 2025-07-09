@@ -1,0 +1,2087 @@
+ 
+ 
+ 
+ <!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Trang Tổng Quan - EduShare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts"></link>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+  <link rel="stylesheet" href="../../css/main-fixes.css">
+  <link rel="stylesheet" href="../../css/account.css">
+  <link rel="stylesheet" href="../../css/footer-modern.css">
+  <link rel="stylesheet" href="../../css/search-modern.css">
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --primary-light: rgba(67, 97, 238, 0.1);
+      --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.1);
+      --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
+      --warning: #f59e0b;
+      --warning-light: rgba(245, 158, 11, 0.1);
+      --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.1);
+      --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --radius: 0.375rem;
+      --radius-lg: 0.5rem;
+      --radius-xl: 0.75rem;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      background-color: #f5f7fb;
+      min-height: 100vh;
+    }
+    
+    .dashboard-page {
+      padding-top: 2rem;
+      padding-bottom: 3rem;
+    }
+    
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    
+    .dashboard-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .date-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      background-color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+    
+    .refresh-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--primary);
+      background-color: var(--primary-light);
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .refresh-button:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .dashboard-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .dashboard-sidebar {
+      width: 280px;
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 0;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+      overflow: hidden;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 0;
+      position: relative;
+      background-color: var(--primary-light);
+    }
+    
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-bottom: 0.5rem;
+    }
+    
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 1rem;
+    }
+    
+    .user-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+    }
+    
+    .user-email {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 1rem;
+    }
+    
+    .user-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .user-status-icon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      margin-right: 0.5rem;
+    }
+    
+    .sidebar-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 0.5rem;
+    }
+    
+   
+    
+    .sidebar-menu-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      padding-left: 0.5rem;
+    }
+    
+    .sidebar-menu-item {
+      margin-bottom: 0.25rem;
+    }
+    
+    .sidebar-menu-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: var(--gray-700);
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      font-size: 0.95rem;
+    }
+    
+    .sidebar-menu-link:hover {
+      color: var(--primary);
+      background-color: var(--primary-light);
+    }
+    
+    .sidebar-menu-link.active {
+      color: var(--primary);
+      font-weight: 600;
+      background-color: var(--primary-light);
+    }
+    
+    .sidebar-menu-link.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background-color: var(--primary);
+    }
+    
+    .sidebar-icon {
+      width: 1.25rem;
+      margin-right: 0.75rem;
+      text-align: center;
+    }
+    
+    .sidebar-badge {
+      margin-left: auto;
+      background-color: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+    }
+    
+    .dashboard-main {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      border: 1px solid var(--gray-100);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .stat-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      position: relative;
+      margin-bottom: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    
+    .stat-icon.primary {
+      background: var(--primary-gradient);
+      color: white;
+    }
+    
+    .stat-icon.success {
+      background: var(--success-gradient);
+      color: white;
+    }
+    
+    .stat-icon.warning {
+      background: var(--warning-gradient);
+      color: white;
+    }
+    
+    .stat-icon.danger {
+      background: var(--danger-gradient);
+      color: white;
+    }
+    
+    .stat-info {
+      width: 100%;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      margin-bottom: 0.25rem;
+      max-width: 100%;
+      display: block;
+      line-height: 1.2;
+      white-space: normal;
+    }
+    
+    .stat-trend {
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .trend-positive {
+      color: var(--success);
+    }
+    
+    .trend-negative {
+      color: var(--danger);
+    }
+    
+    .trend-icon {
+      margin-right: 0.25rem;
+    }
+    
+    .trend-period {
+      color: var(--gray-500);
+      margin-left: 0.25rem;
+    }
+    
+    /* Dashboard Sections */
+    .dashboard-section {
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2.5rem;
+      border: 1px solid var(--gray-100);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+    }
+    
+    
+    .section-actions {
+      display: flex;
+      align-items: center;
+    }
+    
+    .action-button {
+      padding: 0.5rem 0.875rem;
+      border-radius: var(--radius);
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+    
+    .time-range-select {
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-300);
+      background-color: var(--white);
+      font-size: 0.875rem;
+      color: var(--gray-700);
+      cursor: pointer;
+    }
+    
+    /* Activity Chart */
+    .chart-container {
+      width: 100%;
+      height: 300px;
+    }
+    
+    /* Activity List */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      padding: 1.25rem;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+    
+    .activity-item:hover {
+      background-color: var(--gray-50);
+      border-color: var(--gray-200);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .activity-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .activity-title {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+    }
+    
+    .activity-description {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 0.5rem;
+    }
+    
+    .activity-meta {
+      display: flex;
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      gap: 1rem;
+    }
+    
+    .activity-meta-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .activity-meta-icon {
+      margin-right: 0.25rem;
+    }
+    
+    /* Document Cards */
+    .documents-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.75rem;
+    }
+    
+    .document-card {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border: 1px solid var(--gray-100);
+    }
+    
+    .document-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-light);
+    }
+    
+    .document-image {
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .document-image::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%);
+      z-index: 1;
+    }
+    
+    .document-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .document-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .document-title {
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--gray-900);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+    
+    .document-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      margin-bottom: 0.75rem;
+    }
+    
+    .document-meta-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .document-meta-icon {
+      margin-right: 0.25rem;
+    }
+    
+    .document-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--gray-200);
+    }
+    
+    .action-button {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: none;
+      background-color: var(--gray-100);
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .action-button:hover {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .view-all-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.875rem;
+      margin-top: 1.25rem;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      background: var(--primary-gradient);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .view-all-link:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      filter: brightness(1.05);
+    }
+    
+    .view-all-icon {
+      margin-left: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .view-all-link:hover .view-all-icon {
+      transform: translateX(3px);
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .documents-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .dashboard-content {
+        flex-direction: column;
+      }
+      
+      .dashboard-sidebar {
+        width: 100%;
+        position: static;
+        margin-bottom: 2rem;
+      }
+      
+      .sidebar-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .sidebar-menu-title {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .documents-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .activity-item {
+        flex-direction: column;
+      }
+      
+      .activity-icon {
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    .dashboard-page {
+      margin-top: 2rem;
+    }
+
+
+    .toast {
+  min-width: 250px;
+  margin-top: 10px;
+  background-color: #323232;
+  color: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+
+
+
+.doc-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: space-between;
+}
+
+.doc-card-item {
+  width: calc(100% - 16px); /* tăng khoảng cách và chiều rộng */
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  
+}
+/* Khi ẩn đi */
+.doc-card-item.fade-out {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  
+}
+
+
+.doc-card-item.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.doc-card-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.15);
+}
+
+.doc-card-img-wrapper {
+  aspect-ratio: 16 / 9; /* Hoặc 4 / 3 nếu bạn muốn hình vuông hơn */
+  position: relative;
+  overflow: hidden;
+  object-fit: cover; 
+  border-radius: 10px;
+  flex: 0 0 180px; /* Cố định chiều rộng ảnh */
+}
+
+.doc-card-img-wrapper img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.doc-card-item:hover img {
+  transform: scale(1.05);
+}
+
+.doc-card-popup {
+  position: absolute;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  width: 100%;
+  padding: 14px;
+  text-align: center;
+  font-size: 1rem;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.doc-card-item:hover .doc-card-popup {
+  transform: translateY(0%);
+}
+
+.doc-card-content {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.doc-card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.doc-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.doc-card-meta i {
+  margin-right: 6px;
+  color: #888;
+}
+
+.doc-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.doc-card-price {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #28a745;
+}
+
+.doc-card-btn {
+  background: #f1f1f1;
+  border: none;
+  padding: 10px;
+  margin-left: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background 0.3s;
+}
+
+.doc-card-btn:hover {
+  background: #ddd;
+}
+
+@media (max-width: 768px) {
+  .doc-card-item {
+    width: 100%;
+  }
+}
+
+
+
+
+
+
+.doc-card-hover {
+  position: relative;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 1rem;
+  background-color: #fff;
+  width: 320px;
+  transition: box-shadow 0.3s;
+}
+
+.doc-card-hover:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.doc-popup-tooltip {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.doc-card-hover:hover .doc-popup-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.doc-card-image img {
+  width: 100%;
+  border-radius: 6px;
+}
+
+.doc-card-title {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  font-weight: bold;
+}
+
+.doc-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.doc-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.doc-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.doc-price {
+  font-weight: bold;
+  color: #e67e22;
+}
+
+/* Mặc định: dạng lưới */
+.doc-card-container.grid-view .doc-card-item {
+  width: calc(50% - 16px);
+}
+
+/* Dạng danh sách: 1 sản phẩm mỗi dòng */
+.doc-card-container.list-view .doc-card-item {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.doc-card-container.list-view .doc-card-img-wrapper {
+  flex: 0 0 250px; /* cố định chiều rộng ảnh */
+  max-width: 250px
+}
+
+.doc-card-container.list-view .doc-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.doc-card-container.list-view .doc-card-content {
+  padding: 16px;
+  flex: 1;
+}
+
+
+.view-toggle {
+    display: flex;
+    gap: 1rem;
+  }
+  .view-toggle button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 2.5rem;
+    color: #444;
+    position: relative;
+    width: 50px;
+    height: 50px;
+    transition: color 0.3s ease;
+  }
+  .view-toggle button:focus {
+    outline: none;
+    color: #007bff;
+  }
+  .view-toggle button.active {
+    color: #007bff;
+  }
+  /* Hiệu ứng chuyển icon nhẹ */
+  .view-toggle i {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+  .view-toggle button.active i {
+    transform: scale(1.2);
+  }
+
+
+  .result-badge.premium {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ffc107;
+  color: #000;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+
+.doc-popup-toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #333;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 9999;
+}
+
+.doc-popup-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.view-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #333;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 9999;
+}
+
+.view-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.sort-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.sort-btn {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sort-btn input[type="radio"] {
+  display: none;
+}
+
+.sort-btn span {
+  padding: 10px 16px;
+  border: 2px solid #007bff;
+  border-radius: 30px;
+  color: #007bff;
+  background-color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.sort-btn input[type="radio"]:checked + span {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+  transform: scale(1.05);
+}
+
+
+
+.sort-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(to right, #ff416c, #ff4b2b);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-weight: bold;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+  transition: all 0.5s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.sort-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+
+
+.sort-options {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.sort-card {
+  position: relative;
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1 1 100px;
+  min-width: 100px;
+}
+
+.sort-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.sort-card input {
+  display: none;
+}
+
+.sort-card i {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.sort-card input:checked + i,
+.sort-card input:checked + i + span {
+  color: #ffeb3b;
+  text-shadow: 0 0 6px #fff700;
+}
+
+
+
+/* Hiệu ứng ẩn hiện từng học liệu khi sắp xếp */
+.doc-item {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.doc-fade-out {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.doc-fade-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.pagination-controls {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.pagination-btn {
+  background: #f1f1f1;
+  border: none;
+  margin: 0 5px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+
+.pagination-btn:hover {
+  background: #ddd;
+}
+
+.pagination-btn.active {
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+
+
+
+
+
+/* Toàn bộ màn hình phủ loading */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Spinner dạng tròn quay */
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animation quay */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+
+
+
+.local-loading {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #eee;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.section-title-icon {
+      margin-right: 0.75rem;
+      color: var(--primary);
+      font-size: 1.125rem;
+    }
+.search-layout-options {
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 2px;
+  background: rgba(249, 250, 251, 0.8);
+  position: relative;
+}
+
+/* Highlight glow cho layout options */
+.search-layout-options::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), transparent, rgba(67, 97, 238, 0.1));
+  border-radius: var(--radius-lg);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.search-layout-options:hover::after {
+  opacity: 1;
+}
+.layout-option {
+  border: none;
+  background: transparent;
+  padding: var(--spacing-3) var(--spacing-5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 2;
+  border-radius: var(--radius-md);
+}
+
+.layout-option:hover {
+  background-color: rgba(242, 242, 247, 0.8);
+  color: #4361EE;
+}
+
+.layout-option.active {
+  background: linear-gradient(135deg, #4361EE, #3A0CA3);
+  color: var(--white);
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+}
+
+.layout-option i {
+  transition: transform 0.3s ease;
+}
+
+.layout-option:hover i {
+  transform: scale(1.1);
+}
+
+
+  </style>
+</head>
+
+<body>
+
+ 
+
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+          <div class="header-content">
+              <div class="logo">
+                  <a href="../../index.html">
+                      <div class="logo-icon">E</div>
+                      <span class="logo-text">EduShare</span>
+                  </a>
+              </div>
+
+
+
+              
+              <nav class="main-nav">
+                  <a href="../../index.html" class="nav-link">Trang chủ</a>
+                  <a href="../categories.html" class="nav-link">Danh mục</a>
+                  <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                  <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+                  <a href="../about.html" class="nav-link">Giới thiệu</a>
+              </nav>
+              <div class="header-actions">
+                  <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+                      <span class="dark-mode-handle" id="darkModeHandle"></span>
+                  </button>
+                  <a href="../login.html" class="login-btn">
+                      <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                  </a>
+                  <a href="../register.html" class="register-btn active">
+                      <i class="fas fa-user-plus"></i> Đăng ký
+                  </a>
+              </div>
+              <div class="mobile-menu-toggle" id="mobileMenuBtn">
+                  <i class="fas fa-bars"></i>
+              </div>
+          </div>
+      </div>
+      <!-- Mobile menu -->
+      <div id="mobileMenu" class="mobile-menu">
+          <div class="mobile-search">
+              <input type="text" placeholder="Tìm kiếm tài liệu...">
+              <button>
+                  <i class="fas fa-search"></i>
+              </button>
+          </div>
+          <nav class="mobile-nav">
+            <a href="../../index.html" class="nav-link">Trang chủ</a>
+            <a href="../categories.html" class="nav-link">Danh mục</a>
+            <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+            <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+              <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+          </nav>
+          <div class="mobile-auth">
+              <a href="../login.html" class="mobile-login-btn">Đăng nhập</a>
+              <a href="../register.html" class="mobile-register-btn">Đăng ký</a>
+          </div>
+      </div>
+  </header>
+
+  <main>
+    <div class="container dashboard-page">
+      
+  
+      <div class="dashboard-content">
+        <!-- Sidebar -->
+        <div class="dashboard-sidebar">
+          <div class="sidebar-header">
+            <div class="user-profile">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="User avatar" class="user-avatar">
+              <div class="user-name">Nguyễn Văn Anh</div>
+              <div class="user-email">nguyenvananh@gmail.com</div>
+              <div class="user-status">
+                <span class="user-status-icon"></span>
+                Tài khoản Premium
+              </div>
+            </div>
+            <div class="sidebar-title">Quản lý tài khoản</div>
+          </div>
+          
+          <ul class="sidebar-menu">
+            <li class="sidebar-menu-title">Tài liệu</li>
+            
+            <li class="sidebar-menu-item">
+              <a href="dashboard.html" class="sidebar-menu-link active">
+                <i class="fas fa-tachometer-alt sidebar-icon"></i>
+                Tổng quan
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-item">
+              <a href="documents.html" class="sidebar-menu-link">
+                <i class="fas fa-file-alt sidebar-icon"></i>
+                Tài liệu của tôi
+                <span class="sidebar-badge">15</span>
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-item">
+              <a href="../search.html" class="sidebar-menu-link">
+                <i class="fas fa-search sidebar-icon"></i>
+                Khám phá tài liệu
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-item">
+              <a href="../upload.html" class="sidebar-menu-link">
+                <i class="fas fa-cloud-upload-alt sidebar-icon"></i>
+                Tải lên tài liệu
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-item">
+              <a href="favorites.html" class="sidebar-menu-link">
+                <i class="fas fa-bookmark sidebar-icon"></i>
+                Tài liệu đã lưu
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-title">Tài khoản</li>
+            
+            <li class="sidebar-menu-item">
+              <a href="profile.html" class="sidebar-menu-link">
+                <i class="fas fa-user sidebar-icon"></i>
+                Thông tin cá nhân
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-item">
+              <a href="transactions.html" class="sidebar-menu-link">
+                <i class="fas fa-history sidebar-icon"></i>
+                Lịch sử giao dịch
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-item">
+              <a href="recharge.html" class="sidebar-menu-link">
+                <i class="fas fa-coins sidebar-icon"></i>
+                Nạp xu
+                <span class="sidebar-badge">250</span>
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-title">Cài đặt</li>
+            
+            <li class="sidebar-menu-item">
+              <a href="security.html" class="sidebar-menu-link">
+                <i class="fas fa-shield-alt sidebar-icon"></i>
+                Bảo mật
+              </a>
+            </li>
+            
+            <li class="sidebar-menu-item">
+              <a href="notifications.html" class="sidebar-menu-link">
+                <i class="fas fa-bell sidebar-icon"></i>
+                Thông báo
+              </a>
+            </li>
+            <li class="sidebar-menu-item">
+              <a href="options.html" class="sidebar-menu-link">
+                <i class="fas fa-cog sidebar-icon"></i>
+                Tùy chọn
+              </a>
+            </li>
+            <li class="sidebar-menu-item">
+              <a href="support.html" class="sidebar-menu-link">
+                <i class="fas fa-headset sidebar-icon"></i>
+                Hỗ trợ
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="dashboard-main">
+          
+          
+          
+          
+          <!-- Chart -->
+          <div class="dashboard-section" style="position: relative;">
+
+           
+
+            
+            
+            <div class="section-header">
+              <h1 class="section-title">
+                <i class="fas fa-bookmark section-title-icon"></i>
+                Danh sách tài liệu đã lưu:
+              </h1>
+              <!-- Search Stats Bar -->
+
+          
+          <div class="search-options">
+            <div class="search-layout-options">
+              <button class="layout-option active" data-layout="grid" id="gridBtn" onclick="setGridView()" title="Xem dạng lưới">
+                <i class="fas fa-th-large"></i>
+              </button>
+              <button class="layout-option" data-layout="list" id="listBtn" onclick="setListView()" title="Xem dạng danh sách">
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
+                        <div class="search-sort-options">
+              <span class="sort-label">Sắp xếp:</span>
+              <select id="sortSelect" class="sort-select">
+                <option value="default" selected>Mặc định</option>
+                <option value="price-asc">Giá tăng</option>
+                <option value="price-desc">Giá giảm</option>
+                <option value="rating-desc">Đánh giá cao nhất</option>
+              </select>
+            </div> 
+          </div>
+
+              
+
+            
+            
+           
+              
+            
+            </div>
+            <div class="doc-card-container grid-view" id="docContainer">
+
+             
+                <!-- Các sản phẩm -->
+                <div class="doc-card-item" data-price="50000" data-rating="4.8">
+                  <div class="doc-card-img-wrapper">
+                    <div class="result-badge premium">
+                      <i class="fas fa-coins"></i> 50.000 đ
+                    </div>
+                    <img
+                      src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                      alt="Tài liệu React"
+                      class="doc-img-fixed"
+                    >
+                    <div class="doc-card-popup">
+                      <p><strong>Mẹo:</strong> Click để xem chi tiết tài liệu!</p>
+                    </div>
+                  </div>
+                
+                  <div class="doc-card-content">
+                    <h3 class="doc-card-title">Lập trình web với React và NodeJS</h3>
+                    <div class="doc-card-meta">
+                      <span><i class="fas fa-folder"></i> Công nghệ</span>
+                      <span><i class="fas fa-file-pdf"></i> PDF</span>
+                      <span><i class="fas fa-user"></i> Nguyễn Văn A</span>
+                      <span><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                    <div class="doc-card-actions">
+                      <div>
+                        <button class="doc-card-btn" onclick="handleDownload()">
+                          <i class="fas fa-download"></i>
+                        </button>
+                        <button class="doc-card-btn">
+                          <i class="fas fa-bookmark"></i>
+                        </button>
+                        <button class="doc-card-btn" onclick="handleShare()">
+                          <i class="fas fa-share-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+
+
+                <div class="doc-card-item" data-price="25000" data-rating="4.8">
+                  <div class="doc-card-img-wrapper">
+                    <div class="result-badge premium">
+                      <i class="fas fa-coins"></i> 25.000 đ
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="React Performance document thumbnail">
+                    <div class="doc-card-popup">
+                      <p><strong>Mẹo:</strong> Click để xem chi tiết tài liệu!</p>
+                    </div>
+                  </div>
+                  <div class="doc-card-content">
+                    <h3 class="doc-card-title">Lập trình web với React và NodeJS</h3>
+                    <div class="doc-card-meta">
+                      <span><i class="fas fa-folder"></i> Công nghệ</span>
+                      <span><i class="fas fa-file-pdf"></i> PDF</span>
+                      <span><i class="fas fa-user"></i> Nguyễn Văn A</span>
+                      <span><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                    <div class="doc-card-actions">
+                      <div>
+                        <button class="doc-card-btn" onclick="handleDownload()">
+                          <i class="fas fa-download"></i>
+                        </button>
+                        <button class="doc-card-btn">
+                          <i class="fas fa-bookmark"></i>
+                        </button>
+                        <button class="doc-card-btn" onclick="handleShare()">
+                          <i class="fas fa-share-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="doc-card-item">
+                  <div class="doc-card-img-wrapper">
+                    <!-- Giá tiền nằm góc phải trên ảnh -->
+                    <div class="result-badge premium">
+                      <i class="fas fa-coins"></i> 25.000 đ
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1579403124614-197f69d8187b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Redux document thumbnail">                    <div class="doc-card-popup">
+                      <p><strong>Mẹo:</strong> Click để xem chi tiết tài liệu!</p>
+                    </div>
+                  </div>
+                  <div class="doc-card-content">
+                    <h3 class="doc-card-title">Lập trình web với React và NodeJS</h3>
+                    <div class="doc-card-meta">
+                      <span><i class="fas fa-folder"></i> Công nghệ</span>
+                      <span><i class="fas fa-file-pdf"></i> PDF</span>
+                      <span><i class="fas fa-user"></i> Nguyễn Văn A</span>
+                      <span><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                    <div class="doc-card-actions">
+                      <div>
+                        <button class="doc-card-btn" onclick="handleDownload()">
+                          <i class="fas fa-download"></i>
+                        </button>
+                        <button class="doc-card-btn"><i class="fas fa-bookmark"></i></button>
+                        <button class="doc-card-btn" onclick="handleShare()">
+                          <i class="fas fa-share-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+                    
+                  </div>
+                </div>
+
+                <div class="doc-card-item">
+                  <div class="doc-card-img-wrapper">
+                    <!-- Giá tiền nằm góc phải trên ảnh -->
+                    <div class="result-badge premium">
+                      <i class="fas fa-coins"></i> 25.000 đ
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="React Native document thumbnail">
+                    <div class="doc-card-popup">
+                      <p><strong>Mẹo:</strong> Click để xem chi tiết tài liệu!</p>
+                    </div>
+                  </div>
+                  <div class="doc-card-content">
+                    <h3 class="doc-card-title">Lập trình web với React và NodeJS</h3>
+                    <div class="doc-card-meta">
+                      <span><i class="fas fa-folder"></i> Công nghệ</span>
+                      <span><i class="fas fa-file-pdf"></i> PDF</span>
+                      <span><i class="fas fa-user"></i> Nguyễn Văn A</span>
+                      <span><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                    <div class="doc-card-actions">
+                      <div>
+                        <button class="doc-card-btn" onclick="handleDownload()">
+                          <i class="fas fa-download"></i>
+                        </button>
+                        <button class="doc-card-btn"><i class="fas fa-bookmark"></i></button>
+                        <button class="doc-card-btn" onclick="handleShare()">
+                          <i class="fas fa-share-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+                    
+                  </div>
+                </div>
+
+
+                <div class="doc-card-item">
+                  <div class="doc-card-img-wrapper">
+                    <!-- Giá tiền nằm góc phải trên ảnh -->
+                    <div class="result-badge premium">
+                      <i class="fas fa-coins"></i> 25.000 đ
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1555952517-2e8e729e0b44?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="React Hooks document thumbnail">
+
+                    <div class="doc-card-popup">
+                      <p><strong>Mẹo:</strong> Click để xem chi tiết tài liệu!</p>
+                    </div>
+                  </div>
+                  <div class="doc-card-content">
+                    <h3 class="doc-card-title">Lập trình web với React và NodeJS</h3>
+                    <div class="doc-card-meta">
+                      <span><i class="fas fa-folder"></i> Công nghệ</span>
+                      <span><i class="fas fa-file-pdf"></i> PDF</span>
+                      <span><i class="fas fa-user"></i> Nguyễn Văn A</span>
+                      <span><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                    <div class="doc-card-actions">
+                      <div>
+                        <button class="doc-card-btn" onclick="handleDownload()">
+                          <i class="fas fa-download"></i>
+                        </button>
+                        <button class="doc-card-btn"><i class="fas fa-bookmark"></i></button>
+                        <button class="doc-card-btn" onclick="handleShare()">
+                          <i class="fas fa-share-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+
+                
+                <!-- ... -->
+              </div>
+
+              <div id="pagination" class="pagination-controls">
+                <!-- Nút phân trang sẽ được JS tạo ở đây -->
+              </div>
+              
+
+             
+
+            <div class="documents-grid">
+             
+              
+              
+            
+        
+            
+          </div>
+          
+          
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-about">
+          <div class="footer-logo">
+            <div class="logo-icon footer-logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </div>
+          <p class="footer-description">
+            Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất lượng cao.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Khám phá</h3>
+          <ul class="footer-links">
+            <li><a href="../categories.html">Danh mục</a></li>
+            <li><a href="../search.html?sort=newest">Tài liệu mới</a></li>
+            <li><a href="../search.html?sort=popular">Tài liệu phổ biến</a></li>
+            <li><a href="#">Tác giả hàng đầu</a></li>
+            <li><a href="#">Sự kiện & Tin tức</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Thông tin</h3>
+          <ul class="footer-links">
+            <li><a href="#">Giới thiệu</a></li>
+            <li><a href="#">Chính sách bảo mật</a></li>
+            <li><a href="#">Điều khoản sử dụng</a></li>
+            <li><a href="#">Chương trình tác giả</a></li>
+            <li><a href="#">Hợp tác & Liên kết</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Liên hệ</h3>
+          <ul class="contact-info">
+            <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+            <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+            <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <div class="copyright">
+          &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#">Chính sách bảo mật</a>
+          <a href="#">Điều khoản sử dụng</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Trợ giúp</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back To Top Button -->
+  <button id="backToTop" class="back-to-top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+  
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="../../js/main.js"></script>
+  <script src="../../js/account.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script src="../account/js/page.js"></script>
+  <script src="../js/loading.js"></script>
+  <script src="../account/js/sort_document.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Chart initialization
+      const chartOptions = {
+        series: [
+          {
+            name: 'Lượt tải xuống',
+            data: [12, 19, 13, 14, 22, 27, 20]
+          }, 
+          {
+            name: 'Lượt xem',
+            data: [45, 52, 38, 45, 65, 71, 60]
+          },
+          {
+            name: 'Xu nhận được',
+            data: [5, 8, 7, 10, 12, 15, 10]
+          }
+        ],
+        chart: {
+          height: 350,
+          type: 'area',
+          fontFamily: 'Nunito, sans-serif',
+          toolbar: {
+            show: false
+          }
+        },
+        colors: ['#4361ee', '#10b981', '#f59e0b'],
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 2
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.7,
+            opacityTo: 0.3,
+            stops: [0, 90, 100]
+          }
+        },
+        grid: {
+          xaxis: {
+            lines: {
+              show: true
+            }
+          },
+          yaxis: {
+            lines: {
+              show: true
+            }
+          },
+          padding: {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 10
+          }
+        },
+        xaxis: {
+          categories: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontFamily: 'Nunito, sans-serif'
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontFamily: 'Nunito, sans-serif'
+            },
+            formatter: function(value) {
+              return value.toFixed(0);
+            }
+          }
+        },
+        tooltip: {
+          x: {
+            format: 'dd/MM/yy'
+          },
+          shared: true
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'right',
+          offsetY: -15,
+          markers: {
+            width: 12,
+            height: 12,
+            radius: 12
+          },
+          itemMargin: {
+            horizontal: 10
+          }
+        }
+      };
+
+      const chart = new ApexCharts(document.querySelector("#activityChart"), chartOptions);
+      chart.render();
+      
+      // Chart time range selector
+      document.getElementById('chartTimeRange').addEventListener('change', function() {
+        const timeRange = this.value;
+        let newData = [];
+        let newCategories = [];
+        
+        if (timeRange === 'day') {
+          newCategories = ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
+          newData = [
+            [3, 5, 2, 4, 8, 10, 5],
+            [10, 15, 8, 12, 20, 25, 15],
+            [1, 3, 2, 3, 4, 5, 3]
+          ];
+        } else if (timeRange === 'week') {
+          newCategories = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+          newData = [
+            [12, 19, 13, 14, 22, 27, 20],
+            [45, 52, 38, 45, 65, 71, 60],
+            [5, 8, 7, 10, 12, 15, 10]
+          ];
+        } else if (timeRange === 'month') {
+          newCategories = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+          newData = [
+            [50, 65, 80, 95],
+            [150, 180, 200, 220],
+            [25, 30, 40, 45]
+          ];
+        } else if (timeRange === 'year') {
+          newCategories = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+          newData = [
+            [100, 120, 150, 180, 200, 220, 240, 250, 270, 290, 310, 330],
+            [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850],
+            [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160]
+          ];
+        }
+        
+        chart.updateOptions({
+          xaxis: {
+            categories: newCategories
+          }
+        });
+        
+        chart.updateSeries([
+          {
+            name: 'Lượt tải xuống',
+            data: newData[0]
+          },
+          {
+            name: 'Lượt xem',
+            data: newData[1]
+          },
+          {
+            name: 'Xu nhận được',
+            data: newData[2]
+          }
+        ]);
+      });
+      
+      // Document action buttons
+      const actionButtons = document.querySelectorAll('.action-button');
+      actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const action = this.getAttribute('title');
+          const documentCard = this.closest('.document-card');
+          const documentTitle = documentCard.querySelector('.document-title').textContent;
+          
+          if (action === 'Xem chi tiết') {
+            alert(`Đang mở tài liệu: ${documentTitle}`);
+          } else if (action === 'Chỉnh sửa') {
+            alert(`Đang chỉnh sửa tài liệu: ${documentTitle}`);
+          } else if (action === 'Xóa') {
+            if (confirm(`Bạn có chắc chắn muốn xóa tài liệu: ${documentTitle}?`)) {
+              alert(`Đã xóa tài liệu: ${documentTitle}`);
+            }
+          }
+        });
+      });
+      
+      // Initializing the user menu dropdown
+      const userMenuTrigger = document.querySelector('.user-menu-trigger');
+      const userDropdown = document.querySelector('.user-dropdown');
+      
+      if (userMenuTrigger && userDropdown) {
+        userMenuTrigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          userDropdown.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', function(e) {
+          if (!userMenuTrigger.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.remove('show');
+          }
+        });
+      }
+    });
+  </script>
+
+
+
+
+
+<script src="../account/js/popup.js"></script>
+
+<script src="../account/js/grid_list.js"></script>
+
+
+
+
+
+
+
+
+<script>
+  // Lấy pathname (ví dụ: /dashboard.html)
+  const currentPath = window.location.pathname.split('/').pop();
+
+  document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+    const linkPath = link.getAttribute('href');
+    if (linkPath === currentPath) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+</script>
+
+</body>
+<div id="docToast" class="doc-popup-toast">Liên kết đã được sao chép!</div>
+<div id="sort-toast" class="sort-toast">Sắp xếp: Mặc định</div>
+
+
+</html>

@@ -1,0 +1,243 @@
+/* Responsive Styles for EduShare */
+
+/* Tablets and larger devices (768px and up) */
+@media (min-width: 768px) {
+  /* Typography */
+  h1 {
+    font-size: 3rem;
+  }
+  
+  h2 {
+    font-size: 2.25rem;
+  }
+  
+  /* Header */
+  .header-content {
+    height: 5rem;
+  }
+  
+  .mobile-menu {
+    top: 5rem;
+    height: calc(100vh - 5rem);
+  }
+  
+  .main-nav {
+    display: flex;
+    margin-left: 2rem;
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+  }
+  
+  .mobile-menu-toggle {
+    display: none;
+  }
+  
+  /* Hero Section */
+  .hero {
+    padding: 10rem 0 6rem;
+  }
+  
+  .hero-content {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2.5rem;
+  }
+  
+  .hero-text {
+    text-align: left;
+    flex: 1;
+    margin-bottom: 0;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-btns {
+    flex-direction: row;
+  }
+  
+  .users-counter {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .hero-image {
+    flex: 1;
+  }
+  
+  /* Categories Section */
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Featured Documents Section */
+  .section-header-with-controls {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .header-text {
+    text-align: left;
+    margin-bottom: 0;
+  }
+  
+  .documents-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Upload Document Section */
+  .upload-content {
+    flex-direction: row;
+  }
+  
+  .upload-info {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .upload-form-container {
+    flex: 1;
+  }
+  
+  /* How It Works Section */
+  .steps-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Testimonials Section */
+  .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Download App Section */
+  .download-content {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    gap: 2.5rem;
+  }
+  
+  .download-text {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  
+  .app-buttons {
+    flex-direction: row;
+  }
+  
+  .app-preview {
+    flex: 1;
+  }
+  
+  /* Newsletter Section */
+  .newsletter-form {
+    flex-direction: row;
+  }
+  
+  /* Footer */
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .footer-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+/* Desktop and larger devices (992px and up) */
+@media (min-width: 992px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .documents-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .steps-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .testimonials-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .footer-content {
+    grid-template-columns: 1.5fr repeat(3, 1fr);
+  }
+}
+
+/* Large desktop devices (1200px and up) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+  
+  .hero-title {
+    font-size: 4rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .dark-mode-toggle,
+  .mobile-menu-toggle,
+  .mobile-menu {
+    display: none !important;
+  }
+  
+  body {
+    background-color: white;
+    color: black;
+  }
+  
+  main {
+    padding: 0;
+  }
+  
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .hero {
+    padding: 1rem 0;
+  }
+  
+  .hero-content,
+  .upload-content,
+  .download-content {
+    flex-direction: column;
+  }
+  
+  .categories-grid,
+  .documents-grid,
+  .steps-container,
+  .testimonials-grid {
+    display: block;
+  }
+  
+  .category-card,
+  .document-card,
+  .step,
+  .testimonial-card {
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  
+  .document-overlay,
+  .document-badge {
+    display: none;
+  }
+}

@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý yêu cầu rút tiền - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/withdrawals.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Sidebar với menu doanh thu được mở rộng -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu open">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu visible">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item active">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Nội dung chính - Quản lý yêu cầu rút tiền -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Quản lý yêu cầu rút tiền</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <a href="coin-packages.html">Quản lý doanh thu</a>
+                    <span>/</span>
+                    <span>Yêu cầu rút tiền</span>
+                </div>
+            </div>
+
+            <!-- Date range selector -->
+            <div class="date-range-selector">
+                <div class="date-inputs">
+                    <div class="date-input-group">
+                        <label for="startDate">Từ ngày</label>
+                        <div class="date-picker">
+                            <input type="text" id="startDate" placeholder="DD/MM/YYYY">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                    </div>
+                    <div class="date-input-group">
+                        <label for="endDate">Đến ngày</label>
+                        <div class="date-picker">
+                            <input type="text" id="endDate" placeholder="DD/MM/YYYY">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                    </div>
+                    <button class="primary-btn">Áp dụng</button>
+                    <button class="secondary-btn">Đặt lại</button>
+                </div>
+                <div class="quick-date-filters">
+                    <button class="quick-filter active">Hôm nay</button>
+                    <button class="quick-filter">7 ngày qua</button>
+                    <button class="quick-filter">30 ngày qua</button>
+                    <button class="quick-filter">Tháng này</button>
+                    <button class="quick-filter">Quý này</button>
+                </div>
+            </div>
+
+            <!-- Bộ lọc tìm kiếm -->
+            <div class="management-tools">
+                <div class="search-filters">
+                    <div class="tool-item">
+                        <input type="text" placeholder="Tìm theo ID/Người dùng..." class="search-input"
+                            id="withdrawal-search">
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select" id="withdrawal-status-filter">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="pending">Chờ xử lý</option>
+                            <option value="approved">Đã duyệt</option>
+                            <option value="rejected">Đã từ chối</option>
+                            <option value="processing">Đang xử lý</option>
+                            <option value="completed">Đã hoàn thành</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select" id="withdrawal-amount-filter">
+                            <option value="all">Tất cả số tiền</option>
+                            <option value="small">
+                                < 500,000 VNĐ</option>
+                            <option value="medium">500,000 - 2,000,000 VNĐ</option>
+                            <option value="large">> 2,000,000 VNĐ</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select" id="withdrawal-date-filter">
+                            <option value="all">Tất cả thời gian</option>
+                            <option value="today">Hôm nay</option>
+                            <option value="yesterday">Hôm qua</option>
+                            <option value="week">7 ngày qua</option>
+                            <option value="month">30 ngày qua</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="secondary-btn"><i class="fas fa-filter"></i> Lọc nâng cao</button>
+                </div>
+            </div>
+
+            <!-- Bảng yêu cầu rút tiền -->
+            <div class="data-container">
+                <table class="data-table withdrawal-table">
+                    <thead>
+                        <tr>
+                            <th>ID Yêu cầu</th>
+                            <th>Người dùng</th>
+                            <th>Số Gold Coin</th>
+                            <th>Số tiền (VNĐ)</th>
+                            <th>Ngân hàng/Phương thức</th>
+                            <th>Ngày yêu cầu</th>
+                            <th>Trạng thái</th>
+                            <th>Tác vụ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Danh sách yêu cầu rút tiền -->
+                        <tr>
+                            <td>WD-2025060301</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Nguyễn Văn A</span>
+                                </div>
+                            </td>
+                            <td>500</td>
+                            <td>500,000 VNĐ</td>
+                            <td>Vietcombank **** 1234</td>
+                            <td>09/06/2025 09:15</td>
+                            <td><span class="status-badge pending">Chờ xử lý</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn approve" title="Duyệt yêu cầu"><i
+                                            class="fas fa-check"></i></button>
+                                    <button class="action-btn reject" title="Từ chối yêu cầu"><i
+                                            class="fas fa-times"></i></button>
+                                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WD-2025060302</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/women/41.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Trần Thị B</span>
+                                </div>
+                            </td>
+                            <td>2,000</td>
+                            <td>2,000,000 VNĐ</td>
+                            <td>MBBank **** 5678</td>
+                            <td>09/06/2025 10:30</td>
+                            <td><span class="status-badge pending">Chờ xử lý</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn approve" title="Duyệt yêu cầu"><i
+                                            class="fas fa-check"></i></button>
+                                    <button class="action-btn reject" title="Từ chối yêu cầu"><i
+                                            class="fas fa-times"></i></button>
+                                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WD-2025060303</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/men/28.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Lê Văn C</span>
+                                </div>
+                            </td>
+                            <td>1,000</td>
+                            <td>1,000,000 VNĐ</td>
+                            <td>Techcombank **** 9012</td>
+                            <td>08/06/2025 15:45</td>
+                            <td><span class="status-badge approved">Đã duyệt</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn process" title="Xử lý chuyển khoản"><i
+                                            class="fas fa-money-bill-wave"></i></button>
+                                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WD-2025060304</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/women/63.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Phạm Thị D</span>
+                                </div>
+                            </td>
+                            <td>3,000</td>
+                            <td>3,000,000 VNĐ</td>
+                            <td>ACB **** 3456</td>
+                            <td>08/06/2025 14:20</td>
+                            <td><span class="status-badge processing">Đang xử lý</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn complete" title="Hoàn thành"><i
+                                            class="fas fa-check-double"></i></button>
+                                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WD-2025060305</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Hoàng Văn E</span>
+                                </div>
+                            </td>
+                            <td>1,500</td>
+                            <td>1,500,000 VNĐ</td>
+                            <td>BIDV **** 7890</td>
+                            <td>07/06/2025 11:10</td>
+                            <td><span class="status-badge completed">Đã hoàn thành</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WD-2025060306</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/women/22.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Vũ Thị F</span>
+                                </div>
+                            </td>
+                            <td>800</td>
+                            <td>800,000 VNĐ</td>
+                            <td>Sacombank **** 2345</td>
+                            <td>07/06/2025 09:30</td>
+                            <td><span class="status-badge rejected">Đã từ chối</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="pagination">
+                <button class="pagination-btn prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-pages">
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                </div>
+                <button class="pagination-btn next-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/withdrawals.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+    <!-- Modal Từ Chối Yêu Cầu Rút Tiền -->
+    <div class="modal" id="rejectWithdrawalModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Từ chối yêu cầu rút tiền</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="withdrawalRejectReason">Lý do từ chối <span class="required">*</span></label>
+                    <select id="withdrawalRejectReason" class="form-control">
+                        <option value="">Chọn lý do từ chối</option>
+                        <option value="invalid_account">Thông tin tài khoản ngân hàng không hợp lệ</option>
+                        <option value="verification_needed">Chưa xác thực danh tính</option>
+                        <option value="coins_limit">Vượt quá giới hạn xu rút trong tháng</option>
+                        <option value="suspicious_activity">Phát hiện hoạt động đáng ngờ</option>
+                        <option value="policy_violation">Vi phạm chính sách sàn</option>
+                        <option value="other">Lý do khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="withdrawalRejectNote">Ghi chú</label>
+                    <textarea id="withdrawalRejectNote" rows="4"
+                        placeholder="Nhập ghi chú hoặc hướng dẫn thêm cho người dùng..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="notifyUserReject" checked>
+                        <span class="checkbox-custom"></span>
+                        Thông báo cho người dùng qua email
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn" id="cancelRejectBtn"><i class="fas fa-times-circle"></i> Hủy bỏ</button>
+                <button class="danger-btn" id="confirmRejectBtn"><i class="fas fa-ban"></i> Xác nhận từ chối</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xử Lý Chuyển Khoản -->
+    <div class="modal" id="processWithdrawalModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Xử lý chuyển khoản</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="withdrawal-summary">
+                    <div class="info-row">
+                        <div class="info-label">ID yêu cầu:</div>
+                        <div class="info-value">WD-2025060303</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Người nhận:</div>
+                        <div class="info-value">Lê Văn C</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Ngân hàng:</div>
+                        <div class="info-value">Techcombank</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Số tài khoản:</div>
+                        <div class="info-value">**** **** **** 9012</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Số tiền:</div>
+                        <div class="info-value"><strong>1,000,000 VNĐ</strong></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="transactionCode">Mã giao dịch <span class="required">*</span></label>
+                    <input type="text" id="transactionCode" placeholder="Nhập mã giao dịch chuyển khoản">
+                </div>
+                <div class="form-group">
+                    <label for="processNote">Ghi chú</label>
+                    <textarea id="processNote" rows="2" placeholder="Ghi chú thêm về giao dịch (nếu có)..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="transferProof">Minh chứng chuyển khoản (tùy chọn)</label>
+                    <div class="file-upload">
+                        <input type="file" id="transferProof" class="file-input">
+                        <label for="transferProof" class="file-label">
+                            <i class="fas fa-upload"></i>
+                            <span>Chọn file ảnh hoặc PDF</span>
+                        </label>
+                        <div class="file-preview"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="notifyUserProcess" checked>
+                        <span class="checkbox-custom"></span>
+                        Thông báo cho người dùng qua email
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn" id="cancelProcessBtn"><i class="fas fa-times-circle"></i> Hủy bỏ</button>
+                <button class="primary-btn" id="confirmProcessBtn"><i class="fas fa-check-circle"></i> Xác nhận đã xử
+                    lý</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Hoàn Thành Yêu Cầu Rút Tiền -->
+    <div class="modal" id="completeWithdrawalModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Hoàn thành yêu cầu rút tiền</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="withdrawal-summary">
+                    <div class="info-row">
+                        <div class="info-label">ID yêu cầu:</div>
+                        <div class="info-value">WD-2025060304</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Người nhận:</div>
+                        <div class="info-value">Phạm Thị D</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Số tiền:</div>
+                        <div class="info-value"><strong>3,000,000 VNĐ</strong></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Mã giao dịch:</div>
+                        <div class="info-value">TXN-ACB-202506090014</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="completeNote">Ghi chú hoàn thành</label>
+                    <textarea id="completeNote" rows="2"
+                        placeholder="Ghi chú thêm khi hoàn thành (nếu có)..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="notifyUserComplete" checked>
+                        <span class="checkbox-custom"></span>
+                        Thông báo cho người dùng qua email
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn" id="cancelCompleteBtn"><i class="fas fa-times-circle"></i> Hủy bỏ</button>
+                <button class="primary-btn" id="confirmCompleteBtn"><i class="fas fa-check-double"></i> Xác nhận hoàn
+                    thành</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xem Chi Tiết Yêu Cầu Rút Tiền -->
+    <div class="modal" id="withdrawalDetailModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container large">
+            <div class="modal-header">
+                <h3>Chi tiết yêu cầu rút tiền <span class="withdrawal-id">#WD-2025060301</span></h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="withdrawal-detail">
+                    <!-- Thanh trạng thái và loại yêu cầu -->
+                    <div class="transaction-type-banner">
+                        <div class="transaction-type">
+                            <div class="transaction-icon withdrawal-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div>
+                                <h4 class="transaction-type-title">Yêu cầu rút tiền</h4>
+                                <p class="transaction-time"><i class="far fa-clock"></i> 09/06/2025 09:15:00</p>
+                            </div>
+                        </div>
+                        <div class="transaction-status">
+                            <span class="status-badge pending">Chờ xử lý</span>
+                        </div>
+                    </div>
+
+                    <!-- Bảng thông tin chi tiết -->
+                    <div class="transaction-info-grid">
+                        <!-- Thông tin cơ bản -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-info-circle"></i> Thông tin cơ bản</h4>
+                            <div class="card-content">
+                                <div class="info-row">
+                                    <div class="info-label">Mã yêu cầu:</div>
+                                    <div class="info-value">WD-2025060301</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Loại yêu cầu:</div>
+                                    <div class="info-value"><span class="badge withdrawal">Rút tiền</span></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Số Gold Coin:</div>
+                                    <div class="info-value">500 Coins</div>
+                                </div>
+                                <div class="info-divider"></div>
+                                <div class="info-row">
+                                    <div class="info-label">Số tiền quy đổi:</div>
+                                    <div class="info-value">500.000 VNĐ</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Phí giao dịch (0%):</div>
+                                    <div class="info-value">0 VNĐ</div>
+                                </div>
+                                <div class="info-row total-row">
+                                    <div class="info-label">Số tiền thực nhận:</div>
+                                    <div class="info-value">500.000 VNĐ</div>
+                                </div>
+                                <div class="info-divider"></div>
+                                <div class="info-row">
+                                    <div class="info-label">Ngày tạo:</div>
+                                    <div class="info-value">09/06/2025 09:15:00</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Cập nhật lần cuối:</div>
+                                    <div class="info-value">09/06/2025 09:15:00</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Trạng thái:</div>
+                                    <div class="info-value"><span class="status-badge pending">Chờ xử lý</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin người dùng -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-user-circle"></i> Thông tin người dùng</h4>
+                            <div class="card-content">
+                                <div class="user-profile-info">
+                                    <div class="user-avatar-container">
+                                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Avatar"
+                                            class="large-avatar">
+                                        <button class="view-profile-btn"><i class="fas fa-external-link-alt"></i> Xem hồ
+                                            sơ</button>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="info-row">
+                                            <div class="info-label">Họ tên:</div>
+                                            <div class="info-value">Nguyễn Văn A</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Email:</div>
+                                            <div class="info-value">nguyenvana@example.com</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">SĐT:</div>
+                                            <div class="info-value">0912345678</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">ID người dùng:</div>
+                                            <div class="info-value">USR123456</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Số dư hiện tại:</div>
+                                            <div class="info-value">1.250 Coins</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Tài liệu đã bán:</div>
+                                            <div class="info-value">5 tài liệu</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin ngân hàng -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-university"></i> Thông tin ngân hàng</h4>
+                            <div class="card-content">
+                                <div class="info-row">
+                                    <div class="info-label">Ngân hàng:</div>
+                                    <div class="info-value">Vietcombank</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Tên tài khoản:</div>
+                                    <div class="info-value">Nguyễn Văn A</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Số tài khoản:</div>
+                                    <div class="info-value">**** **** **** 1234</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Chi nhánh:</div>
+                                    <div class="info-value">Hà Nội</div>
+                                </div>
+                                <div class="info-divider"></div>
+                                <div class="info-row">
+                                    <div class="info-label">Trạng thái xác thực:</div>
+                                    <div class="info-value"><span class="badge verified"><i
+                                                class="fas fa-check-circle"></i> Đã xác thực</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin bổ sung -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-clipboard-list"></i> Thông tin bổ sung</h4>
+                            <div class="card-content">
+                                <div class="info-row">
+                                    <div class="info-label">Thiết bị:</div>
+                                    <div class="info-value"><i class="fas fa-laptop"></i> MacBook Pro (Chrome 98.0)
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">IP yêu cầu:</div>
+                                    <div class="info-value">192.168.1.105</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Vị trí:</div>
+                                    <div class="info-value">Hà Nội, Việt Nam</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Ghi chú người dùng:</div>
+                                    <div class="info-value">Vui lòng chuyển đúng tài khoản đã đăng ký.</div>
+                                </div>
+                                <div class="info-divider"></div>
+                                <h5>Lịch sử rút tiền</h5>
+                                <div class="withdrawal-history">
+                                    <table class="data-table small-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Ngày</th>
+                                                <th>Số tiền</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>WD-2025050501</td>
+                                                <td>05/05/2025</td>
+                                                <td>1,000,000 VNĐ</td>
+                                                <td><span class="status-badge completed">Đã hoàn thành</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>WD-2025040201</td>
+                                                <td>02/04/2025</td>
+                                                <td>800,000 VNĐ</td>
+                                                <td><span class="status-badge completed">Đã hoàn thành</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tiến trình xử lý -->
+                    <div class="transaction-status-timeline">
+                        <div class="timeline-header">
+                            <h4>Tiến trình xử lý yêu cầu</h4>
+                        </div>
+                        <div class="timeline">
+                            <div class="timeline-step completed">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-file-invoice"></i>
+                                </div>
+                                <div class="timeline-date">09/06/2025 09:15:00</div>
+                                <div class="timeline-title">Tạo yêu cầu</div>
+                                <div class="timeline-desc">Yêu cầu đã được tạo thành công</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </div>
+                                <div class="timeline-date">Chưa hoàn thành</div>
+                                <div class="timeline-title">Xác nhận yêu cầu</div>
+                                <div class="timeline-desc">Kiểm tra và duyệt yêu cầu</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="timeline-date">Chưa hoàn thành</div>
+                                <div class="timeline-title">Chuyển tiền</div>
+                                <div class="timeline-desc">Thực hiện chuyển khoản đến ngân hàng</div>
+                            </div>
+                            <div class="timeline-step">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="timeline-date">Chưa hoàn thành</div>
+                                <div class="timeline-title">Hoàn thành</div>
+                                <div class="timeline-desc">Yêu cầu rút tiền hoàn tất</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="admin-notes-section">
+                    <h5><i class="fas fa-sticky-note"></i> Ghi chú của quản trị viên</h5>
+                    <textarea class="admin-notes"
+                        placeholder="Thêm ghi chú của quản trị viên về yêu cầu rút tiền này"></textarea>
+                </div>
+                <div class="action-buttons">
+                    <div class="left-buttons">
+                        <button class="secondary-btn history-btn"><i class="fas fa-history"></i> Lịch sử</button>
+                        <button class="secondary-btn email-btn"><i class="fas fa-envelope"></i> Gửi email</button>
+                    </div>
+                    <div class="right-buttons">
+                        <button class="danger-btn reject-withdrawal-btn"><i class="fas fa-times"></i> Từ chối</button>
+                        <button class="secondary-btn" id="closeDetailBtn"><i class="fas fa-times-circle"></i>
+                            Đóng</button>
+                        <button class="primary-btn process-withdrawal-btn"><i class="fas fa-money-check"></i> Xử
+                            lý</button>
+                        <button class="success-btn approve-withdrawal-btn"><i class="fas fa-check-circle"></i> Hoàn
+                            thành</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

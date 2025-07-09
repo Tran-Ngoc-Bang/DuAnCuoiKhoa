@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Bảo mật - EduShare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+  <link rel="stylesheet" href="../../css/main-fixes.css">
+  <link rel="stylesheet" href="../../css/account.css">
+  <link rel="stylesheet" href="../../css/footer-modern.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-v+CMEg1a6z5iIYHhq6J2wB1Q1lm9Efdv7p5TgDcN8IkKqzDnKbcZH3yHhAqT1Mn9sk9ms5mW9Z+dSbRUz7F+jQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --primary-light: rgba(67, 97, 238, 0.1);
+      --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.1);
+      --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
+      --warning: #f59e0b;
+      --warning-light: rgba(245, 158, 11, 0.1);
+      --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.1);
+      --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --radius: 0.375rem;
+      --radius-lg: 0.5rem;
+      --radius-xl: 0.75rem;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      background-color: #f5f7fb;
+      min-height: 100vh;
+    }
+
+    .dashboard-page {
+      padding-top: 2rem;
+      padding-bottom: 3rem;
+    }
+
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .dashboard-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .date-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      background-color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+
+    .refresh-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--primary);
+      background-color: var(--primary-light);
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .refresh-button:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .dashboard-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .dashboard-sidebar {
+      width: 280px;
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 0;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 0;
+      position: relative;
+      background-color: var(--primary-light);
+    }
+
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-bottom: 0.5rem;
+    }
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 1rem;
+    }
+
+    .user-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+    }
+
+    .user-email {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 1rem;
+    }
+
+    .user-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .user-status-icon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      margin-right: 0.5rem;
+    }
+
+    .sidebar-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0.75rem 0;
+      margin: 0;
+    }
+
+    .sidebar-menu-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      padding-left: 0.5rem;
+    }
+
+    .sidebar-menu-item {
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-menu-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: var(--gray-700);
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      font-size: 0.95rem;
+    }
+
+    .sidebar-menu-link:hover {
+      color: var(--primary);
+      background-color: var(--primary-light);
+    }
+
+    .sidebar-menu-link.active {
+      color: var(--primary);
+      font-weight: 600;
+      background-color: var(--primary-light);
+    }
+
+    .sidebar-menu-link.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background-color: var(--primary);
+    }
+
+    .sidebar-icon {
+      width: 1.25rem;
+      margin-right: 0.75rem;
+      text-align: center;
+    }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background-color: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+    }
+
+    .dashboard-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      border: 1px solid var(--gray-100);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      position: relative;
+      margin-bottom: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .stat-icon.primary {
+      background: var(--primary-gradient);
+      color: white;
+    }
+
+    .stat-icon.success {
+      background: var(--success-gradient);
+      color: white;
+    }
+
+    .stat-icon.warning {
+      background: var(--warning-gradient);
+      color: white;
+    }
+
+    .stat-icon.danger {
+      background: var(--danger-gradient);
+      color: white;
+    }
+
+    .stat-info {
+      width: 100%;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      margin-bottom: 0.25rem;
+      max-width: 100%;
+      display: block;
+      line-height: 1.2;
+      white-space: normal;
+    }
+
+    .stat-trend {
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .trend-positive {
+      color: var(--success);
+    }
+
+    .trend-negative {
+      color: var(--danger);
+    }
+
+    .trend-icon {
+      margin-right: 0.25rem;
+    }
+
+    .trend-period {
+      color: var(--gray-500);
+      margin-left: 0.25rem;
+    }
+
+    /* Dashboard Sections */
+    .dashboard-section {
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2.5rem;
+      border: 1px solid var(--gray-100);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title-icon {
+      margin-right: 0.75rem;
+      color: var(--primary);
+      font-size: 1.125rem;
+    }
+
+    .section-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .action-button {
+      padding: 0.5rem 0.875rem;
+      border-radius: var(--radius);
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .time-range-select {
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-300);
+      background-color: var(--white);
+      font-size: 0.875rem;
+      color: var(--gray-700);
+      cursor: pointer;
+    }
+
+    /* Activity Chart */
+    .chart-container {
+      width: 100%;
+      height: 300px;
+    }
+
+    /* Activity List */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      padding: 1.25rem;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .activity-item:hover {
+      background-color: var(--gray-50);
+      border-color: var(--gray-200);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .activity-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .activity-title {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+    }
+
+    .activity-description {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 0.5rem;
+    }
+
+    .activity-meta {
+      display: flex;
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      gap: 1rem;
+    }
+
+    .activity-meta-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .activity-meta-icon {
+      margin-right: 0.25rem;
+    }
+
+    /* Document Cards */
+    .documents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.75rem;
+    }
+
+    .document-card {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border: 1px solid var(--gray-100);
+    }
+
+    .document-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-light);
+    }
+
+    .document-image {
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .document-image::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 50%);
+      z-index: 1;
+    }
+
+    .document-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .document-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .document-title {
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--gray-900);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+
+    .document-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      margin-bottom: 0.75rem;
+    }
+
+    .document-meta-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .document-meta-icon {
+      margin-right: 0.25rem;
+    }
+
+    .document-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .action-button {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: none;
+      background-color: var(--gray-100);
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-button:hover {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .view-all-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.875rem;
+      margin-top: 1.25rem;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      background: var(--primary-gradient);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .view-all-link:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      filter: brightness(1.05);
+    }
+
+    .view-all-icon {
+      margin-left: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .view-all-link:hover .view-all-icon {
+      transform: translateX(3px);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .documents-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-content {
+        flex-direction: column;
+      }
+
+      .dashboard-sidebar {
+        width: 100%;
+        position: static;
+        margin-bottom: 2rem;
+      }
+
+      .sidebar-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .sidebar-menu-title {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .documents-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-item {
+        flex-direction: column;
+      }
+
+      .activity-icon {
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    .dashboard-page {
+      margin-top: 2rem;
+    }
+
+
+    .toast {
+      min-width: 250px;
+      margin-top: 10px;
+      background-color: #323232;
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      font-size: 14px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+
+    .security-settings {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .sec-section h3 {
+      font-size: 1.125rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .sec-label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .sec-input {
+      width: 100%;
+      padding: 0.625rem;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+    }
+
+    .sec-button {
+      padding: 0.5rem 1.25rem;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .sec-button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .sec-toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sec-device-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .sec-device-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      background-color: #fff;
+    }
+
+    .sec-device-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .sec-device-info i {
+      font-size: 1.25rem;
+      color: var(--gray-600);
+    }
+
+    .sec-logout-btn {
+      background-color: var(--danger);
+      color: #fff;
+      padding: 0.5rem 0.875rem;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .sec-logout-btn:hover {
+      background-color: var(--danger-dark);
+    }
+
+
+    #notification-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 300px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .notification {
+      background-color: #323232;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.3);
+      opacity: 0;
+      transform: translateX(100%);
+      animation: slideIn 0.3s forwards;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .notification.success {
+      background-color: #4CAF50;
+    }
+
+    .notification.error {
+      background-color: #F44336;
+    }
+
+    .notification.info {
+      background-color: #2196F3;
+    }
+
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideOut {
+      to {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+
+
+
+    .activity-log {
+      max-height: 300px;
+      /* Giới hạn chiều cao */
+      overflow-y: auto;
+      /* Tự động có thanh cuộn dọc */
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .activity-log h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-weight: 700;
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 6px;
+    }
+
+    .activity-item {
+      background: white;
+      border-left: 4px solid #4CAF50;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+      cursor: default;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideInFromRight 0.4s ease forwards;
+      opacity: 0;
+    }
+
+    .activity-item strong {
+      color: #4CAF50;
+      min-width: 140px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .activity-item .icon {
+      font-size: 1.2rem;
+      color: #4CAF50;
+      flex-shrink: 0;
+    }
+
+    /* Animation xuất hiện từ phải sang */
+    @keyframes slideInFromRight {
+      0% {
+        transform: translateX(50px);
+        opacity: 0;
+      }
+
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+
+
+    /* Container */
+    .sec-toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Segoe UI', sans-serif;
+      margin-bottom: 12px;
+    }
+
+    /* Switch style */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+
+    /* Hide default checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* Slider (the track) */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+
+    /* Circle (the knob) */
+    .slider::before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    /* When checkbox is checked */
+    .switch input:checked+.slider {
+      background-color: #4CAF50;
+    }
+
+    /* Move the knob when checked */
+    .switch input:checked+.slider::before {
+      transform: translateX(24px);
+    }
+
+    /* Optional: round edges */
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round::before {
+      border-radius: 50%;
+    }
+
+
+
+
+    .required {
+      color: red;
+      margin-left: 2px;
+    }
+
+
+
+
+
+
+
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .sec-input {
+      width: 100%;
+      padding: 10px 42px 10px 12px;
+      /* padding right để chừa icon */
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+
+    .sec-input:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+
+    /* Icon con mắt */
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: #888;
+      transition: color 0.3s ease;
+    }
+
+    .toggle-password:hover {
+      color: #333;
+    }
+
+    /* Label */
+    .sec-label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      color: #333;
+    }
+
+    /* Required dấu sao đỏ */
+    .required {
+      color: red;
+    }
+
+
+    .sec-button:hover {
+      background: #45a049;
+    }
+
+
+
+
+    input:disabled {
+      background-color: #f5f5f5;
+      opacity: 0.8;
+    }
+
+
+
+
+
+    #otpOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    #otpModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      width: 350px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      padding: 25px;
+      font-family: Arial, sans-serif;
+    }
+
+    .otp-content h3 {
+      margin: 0 0 10px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+
+    .otp-content p {
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .otp-content input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .otp-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    .otp-actions button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #btnVerifyOtp {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .resend {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+
+    .otp-help {
+      font-size: 0.75rem;
+      text-align: center;
+      margin-top: 15px;
+      color: #666;
+    }
+
+    .otp-close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+
+<div id="notification-popup" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background-color: #333;
+    color: #fff;
+    font-size: 0.95rem;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: fadeInOut 3s ease-in-out;
+"></div>
+
+<style>
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    10% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    90% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+</style>
+
+
+<body>
+
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a href="../../index.html">
+            <div class="logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </a>
+        </div>
+
+
+
+
+        <nav class="main-nav">
+          <a href="../../index.html" class="nav-link">Trang chủ</a>
+          <a href="../categories.html" class="nav-link">Danh mục</a>
+          <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+          <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+          <a href="../about.html" class="nav-link">Giới thiệu</a>
+        </nav>
+        <div class="header-actions">
+          <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+            <span class="dark-mode-handle" id="darkModeHandle"></span>
+          </button>
+          <a href="../login.html" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+          </a>
+          <a href="../register.html" class="register-btn active">
+            <i class="fas fa-user-plus"></i> Đăng ký
+          </a>
+        </div>
+        <div class="mobile-menu-toggle" id="mobileMenuBtn">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="mobile-menu">
+      <div class="mobile-search">
+        <input type="text" placeholder="Tìm kiếm tài liệu...">
+        <button>
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      <nav class="mobile-nav">
+        <a href="../../index.html" class="nav-link">Trang chủ</a>
+        <a href="../categories.html" class="nav-link">Danh mục</a>
+        <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+        <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+        <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+      </nav>
+      <div class="mobile-auth">
+        <a href="../login.html" class="mobile-login-btn">Đăng nhập</a>
+        <a href="../register.html" class="mobile-register-btn">Đăng ký</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container dashboard-page">
+
+      <!-- <div class="dashboard-header">
+        <div class="dashboard-header-actions">
+          <div class="date-display">
+            <i class="far fa-calendar-alt"></i>
+            <span id="currentDate">Ngày 22 tháng 5, 2025</span>
+          </div>
+          <button class="refresh-button">
+            <i class="fas fa-sync-alt"></i> Làm mới
+          </button>
+        </div>
+      </div> -->
+
+      <div class="dashboard-content">
+        <!-- Sidebar -->
+        <div class="dashboard-sidebar">
+          <div class="sidebar-header">
+            <div class="user-profile">
+              <img
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                alt="User avatar" class="user-avatar">
+              <div class="user-name">Nguyễn Văn Anh</div>
+              <div class="user-email">nguyenvananh@gmail.com</div>
+              <div class="user-status">
+                <span class="user-status-icon"></span>
+                Tài khoản Premium
+              </div>
+            </div>
+            <div class="sidebar-title">Quản lý tài khoản</div>
+          </div>
+
+          <ul class="sidebar-menu">
+            <li class="sidebar-menu-title">Tài liệu</li>
+
+            <li class="sidebar-menu-item">
+              <a href="dashboard.html" class="sidebar-menu-link active">
+                <i class="fas fa-tachometer-alt sidebar-icon"></i>
+                Tổng quan
+              </a>
+            </li>
+
+            <li class="sidebar-menu-item">
+              <a href="documents.html" class="sidebar-menu-link">
+                <i class="fas fa-file-alt sidebar-icon"></i>
+                Tài liệu của tôi
+                <span class="sidebar-badge">15</span>
+              </a>
+            </li>
+
+            <li class="sidebar-menu-item">
+              <a href="../search.html" class="sidebar-menu-link">
+                <i class="fas fa-search sidebar-icon"></i>
+                Khám phá tài liệu
+              </a>
+            </li>
+
+            <li class="sidebar-menu-item">
+              <a href="../upload.html" class="sidebar-menu-link">
+                <i class="fas fa-cloud-upload-alt sidebar-icon"></i>
+                Tải lên tài liệu
+              </a>
+            </li>
+
+            <li class="sidebar-menu-item">
+              <a href="favorites.html" class="sidebar-menu-link">
+                <i class="fas fa-bookmark sidebar-icon"></i>
+                Tài liệu đã lưu
+              </a>
+            </li>
+
+            <li class="sidebar-menu-title">Tài khoản</li>
+
+            <li class="sidebar-menu-item">
+              <a href="profile.html" class="sidebar-menu-link">
+                <i class="fas fa-user sidebar-icon"></i>
+                Thông tin cá nhân
+              </a>
+            </li>
+
+            <li class="sidebar-menu-item">
+              <a href="transactions.html" class="sidebar-menu-link">
+                <i class="fas fa-history sidebar-icon"></i>
+                Lịch sử giao dịch
+              </a>
+            </li>
+
+            <li class="sidebar-menu-item">
+              <a href="recharge.html" class="sidebar-menu-link">
+                <i class="fas fa-coins sidebar-icon"></i>
+                Nạp xu
+                <span class="sidebar-badge">250</span>
+              </a>
+            </li>
+
+            <li class="sidebar-menu-title">Cài đặt</li>
+
+            <li class="sidebar-menu-item">
+              <a href="security.html" class="sidebar-menu-link">
+                <i class="fas fa-shield-alt sidebar-icon"></i>
+                Bảo mật
+              </a>
+            </li>
+
+            <li class="sidebar-menu-item">
+              <a href="notifications.html" class="sidebar-menu-link">
+                <i class="fas fa-bell sidebar-icon"></i>
+                Thông báo
+              </a>
+            </li>
+            <li class="sidebar-menu-item">
+              <a href="options.html" class="sidebar-menu-link">
+                <i class="fas fa-cog sidebar-icon"></i>
+                Tùy chọn
+              </a>
+            </li>
+            <li class="sidebar-menu-item">
+              <a href="support.html" class="sidebar-menu-link">
+                <i class="fas fa-headset sidebar-icon"></i>
+                Hỗ trợ
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="dashboard-main">
+
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon primary">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">Mạnh</div>
+                <div class="stat-label">Độ bảo mật</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Xác thực 2FA</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon warning">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">7 ngày</div>
+                <div class="stat-label">Đổi mật khẩu lần cuối</div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Security Settings Section -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-key section-title-icon"></i>
+                Đổi mật khẩu
+              </h2>
+            </div>
+            
+            <div class="security-settings">
+              <div class="sec-section">
+                <!-- Mật khẩu hiện tại -->
+                <label class="sec-label">Mật khẩu hiện tại <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <input type="password" class="sec-input" id="currentPassword" placeholder="Nhập mật khẩu hiện tại">
+                  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this, 'currentPassword')"></i>
+                </div>
+
+                <!-- Mật khẩu mới -->
+                <label class="sec-label">Mật khẩu mới <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <input type="password" class="sec-input" id="newPassword" placeholder="Nhập mật khẩu mới" maxlength="20">
+                  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this, 'newPassword')"></i>
+                  <small id="lengthWarning" style="color: red; display: none;">⚠️ Tối đa 20 ký tự</small>
+                </div>
+
+                <!-- Xác nhận mật khẩu mới -->
+                <label class="sec-label">Xác nhận mật khẩu mới <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <input type="password" class="sec-input" id="confirmPassword" placeholder="Xác nhận mật khẩu mới" maxlength="20">
+                  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this, 'confirmPassword')"></i>
+                </div>
+
+                <!-- Nút xác nhận mật khẩu -->
+                <button id="btnConfirmPassword" class="sec-button" type="button">Xác nhận mật khẩu</button>
+
+                <!-- Nút đổi mật khẩu -->
+                <button id="btnChangePassword" class="sec-button" disabled style="opacity: 0.6; cursor: not-allowed;">Đổi mật khẩu</button>
+
+                <br><br>
+
+                <!-- Thanh đo độ mạnh và trạng thái -->
+                <div id="passwordStrength" style="margin-top: 4px;"></div>
+                <br>
+                <div id="passwordMatchStatus"></div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-envelope section-title-icon"></i>
+                Đổi địa chỉ email
+              </h2>
+            </div>
+            <div class="security-settings">
+              <div class="sec-section">
+                <label class="sec-label">Email hiện tại<span class="required">*</span></label>
+                <input type="email" class="sec-input" id="oldEmail" placeholder="example@email.com">
+                
+                <label class="sec-label">Email mới <span class="required">*</span></label>
+                <input type="email" class="sec-input" id="newEmail" placeholder="Nhập email mới">
+                <div id="emailStatus" style="font-size: 0.85rem; color: #666; margin-top: 4px;"></div>
+                <br>
+                <button id="btnChangeEmail" class="sec-button">Đổi email</button>
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- 2FA Settings Section -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-mobile-alt section-title-icon"></i>
+                Xác thực 2 yếu tố
+              </h2>
+            </div>
+            
+            <div class="security-settings">
+              <div class="sec-section">
+                <p style="margin-bottom: 1rem; color: #555;">
+                  Bật xác thực 2 yếu tố để tăng cường bảo mật tài khoản. Mỗi lần đăng nhập, bạn sẽ cần nhập mã xác minh được gửi đến email hoặc điện thoại.
+                </p>
+                <div class="sec-toggle-switch">
+                  <label class="switch">
+                    <input type="checkbox" id="twofaToggle">
+                    <span class="slider round"></span>
+                  </label>
+                  <label for="twofaToggle">Bật xác thực 2 yếu tố</label>
+                </div>
+                
+                <div id="twofaStatus" style="margin-top: 10px; font-size: 0.9rem; color: #666;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Log Section -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-history section-title-icon"></i>
+                Lịch sử hoạt động
+              </h2>
+            </div>
+            <div id="activityHistory" class="activity-log">
+
+              <!-- Các dòng lịch sử sẽ được chèn ở đây -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-about">
+          <div class="footer-logo">
+            <div class="logo-icon footer-logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </div>
+          <p class="footer-description">
+            Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất
+            lượng cao.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Khám phá</h3>
+          <ul class="footer-links">
+            <li><a href="../categories.html">Danh mục</a></li>
+            <li><a href="../search.html?sort=newest">Tài liệu mới</a></li>
+            <li><a href="../search.html?sort=popular">Tài liệu phổ biến</a></li>
+            <li><a href="#">Tác giả hàng đầu</a></li>
+            <li><a href="#">Sự kiện & Tin tức</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Thông tin</h3>
+          <ul class="footer-links">
+            <li><a href="#">Giới thiệu</a></li>
+            <li><a href="#">Chính sách bảo mật</a></li>
+            <li><a href="#">Điều khoản sử dụng</a></li>
+            <li><a href="#">Chương trình tác giả</a></li>
+            <li><a href="#">Hợp tác & Liên kết</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Liên hệ</h3>
+          <ul class="contact-info">
+            <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+            <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+            <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="copyright">
+          &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#">Chính sách bảo mật</a>
+          <a href="#">Điều khoản sử dụng</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Trợ giúp</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back To Top Button -->
+  <button id="backToTop" class="back-to-top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="../../js/main.js"></script>
+  <script src="../../js/account.js"></script>
+  <script src="../account/js/popup.js"></script>
+  <script src="../account/js/Hictory.js"></script>
+  <script src="../account/js/show_password.js"></script>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Chart initialization
+      const chartOptions = {
+        series: [
+          {
+            name: 'Lượt tải xuống',
+            data: [12, 19, 13, 14, 22, 27, 20]
+          },
+          {
+            name: 'Lượt xem',
+            data: [45, 52, 38, 45, 65, 71, 60]
+          },
+          {
+            name: 'Xu nhận được',
+            data: [5, 8, 7, 10, 12, 15, 10]
+          }
+        ],
+        chart: {
+          height: 350,
+          type: 'area',
+          fontFamily: 'Nunito, sans-serif',
+          toolbar: {
+            show: false
+          }
+        },
+        colors: ['#4361ee', '#10b981', '#f59e0b'],
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 2
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.7,
+            opacityTo: 0.3,
+            stops: [0, 90, 100]
+          }
+        },
+        grid: {
+          xaxis: {
+            lines: {
+              show: true
+            }
+          },
+          yaxis: {
+            lines: {
+              show: true
+            }
+          },
+          padding: {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 10
+          }
+        },
+        xaxis: {
+          categories: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontFamily: 'Nunito, sans-serif'
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#6b7280',
+              fontSize: '12px',
+              fontFamily: 'Nunito, sans-serif'
+            },
+            formatter: function (value) {
+              return value.toFixed(0);
+            }
+          }
+        },
+        tooltip: {
+          x: {
+            format: 'dd/MM/yy'
+          },
+          shared: true
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'right',
+          offsetY: -15,
+          markers: {
+            width: 12,
+            height: 12,
+            radius: 12
+          },
+          itemMargin: {
+            horizontal: 10
+          }
+        }
+      };
+
+      const chart = new ApexCharts(document.querySelector("#activityChart"), chartOptions);
+      chart.render();
+
+      // Chart time range selector
+      document.getElementById('chartTimeRange').addEventListener('change', function () {
+        const timeRange = this.value;
+        let newData = [];
+        let newCategories = [];
+
+        if (timeRange === 'day') {
+          newCategories = ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
+          newData = [
+            [3, 5, 2, 4, 8, 10, 5],
+            [10, 15, 8, 12, 20, 25, 15],
+            [1, 3, 2, 3, 4, 5, 3]
+          ];
+        } else if (timeRange === 'week') {
+          newCategories = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+          newData = [
+            [12, 19, 13, 14, 22, 27, 20],
+            [45, 52, 38, 45, 65, 71, 60],
+            [5, 8, 7, 10, 12, 15, 10]
+          ];
+        } else if (timeRange === 'month') {
+          newCategories = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+          newData = [
+            [50, 65, 80, 95],
+            [150, 180, 200, 220],
+            [25, 30, 40, 45]
+          ];
+        } else if (timeRange === 'year') {
+          newCategories = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+          newData = [
+            [100, 120, 150, 180, 200, 220, 240, 250, 270, 290, 310, 330],
+            [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850],
+            [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160]
+          ];
+        }
+
+        chart.updateOptions({
+          xaxis: {
+            categories: newCategories
+          }
+        });
+
+        chart.updateSeries([
+          {
+            name: 'Lượt tải xuống',
+            data: newData[0]
+          },
+          {
+            name: 'Lượt xem',
+            data: newData[1]
+          },
+          {
+            name: 'Xu nhận được',
+            data: newData[2]
+          }
+        ]);
+      });
+
+      // Document action buttons
+      const actionButtons = document.querySelectorAll('.action-button');
+      actionButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          const action = this.getAttribute('title');
+          const documentCard = this.closest('.document-card');
+          const documentTitle = documentCard.querySelector('.document-title').textContent;
+
+          if (action === 'Xem chi tiết') {
+            alert(`Đang mở tài liệu: ${documentTitle}`);
+          } else if (action === 'Chỉnh sửa') {
+            alert(`Đang chỉnh sửa tài liệu: ${documentTitle}`);
+          } else if (action === 'Xóa') {
+            if (confirm(`Bạn có chắc chắn muốn xóa tài liệu: ${documentTitle}?`)) {
+              alert(`Đã xóa tài liệu: ${documentTitle}`);
+            }
+          }
+        });
+      });
+
+      // Initializing the user menu dropdown
+      const userMenuTrigger = document.querySelector('.user-menu-trigger');
+      const userDropdown = document.querySelector('.user-dropdown');
+
+      if (userMenuTrigger && userDropdown) {
+        userMenuTrigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          userDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function (e) {
+          if (!userMenuTrigger.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.remove('show');
+          }
+        });
+      }
+    });
+  </script>
+
+
+  <div id="toast-container" style="
+position: fixed;
+bottom: 20px;
+right: 20px;
+z-index: 9999;
+"></div>
+
+
+
+
+
+
+
+
+
+
+
+  <div id="notification-container"></div>
+
+
+
+
+</body>
+
+
+<script>
+  // Lấy pathname hiện tại (VD: "/admin/documents.html")
+  const currentPath = window.location.pathname.split('/').pop();
+
+  // Lấy tất cả menu links
+  const menuLinks = document.querySelectorAll('.sidebar-menu-link');
+
+  menuLinks.forEach(link => {
+    const linkPath = link.getAttribute('href');
+    if (linkPath === currentPath) {
+      // Thêm class active vào link hiện tại
+      link.classList.add('active');
+    } else {
+      // Xóa active ở những mục khác
+      link.classList.remove('active');
+    }
+  });
+</script>
+
+
+
+
+
+<!-- Overlay mờ nền -->
+<div id="otpOverlay" style="display: none;"></div>
+
+<!-- Popup OTP -->
+<div id="otpModal" style="display: none;">
+  <div class="otp-content">
+    <button class="otp-close" id="btnCloseOtp">&times;</button>
+    <h3>Xác thực OTP</h3>
+    <p>Vui lòng xác thực mã OTP qua Email/SMS</p>
+    <input type="text" id="otpCodeInput" placeholder="Nhập mã OTP">
+
+    <div class="otp-actions">
+      <button id="btnVerifyOtp">Xác minh</button>
+      <button id="btnResendOtp" class="resend">Gửi lại mã</button>
+    </div>
+
+    <p class="otp-help">Bạn không nhận được mã? <a href="#">Cần trợ giúp?</a></p>
+  </div>
+</div>
+
+
+
+<script>
+  // Lấy pathname hiện tại (VD: "/admin/documents.html")
+  const currentPath = window.location.pathname.split('/').pop();
+
+  // Lấy tất cả menu links
+  const menuLinks = document.querySelectorAll('.sidebar-menu-link');
+
+  menuLinks.forEach(link => {
+    const linkPath = link.getAttribute('href');
+    if (linkPath === currentPath) {
+      // Thêm class active vào link hiện tại
+      link.classList.add('active');
+    } else {
+      // Xóa active ở những mục khác
+      link.classList.remove('active');
+    }
+  });
+</script>
+
+
+
+
+</html>
