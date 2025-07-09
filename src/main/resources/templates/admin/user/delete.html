@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Xóa người dùng - EduShare Admin</title>
+    <th:block th:replace="fragments/admin/layout :: head"></th:block>
+  </head>
+  <body>
+    <th:block th:replace="fragments/admin/layout :: body">
+      <section>
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Xóa người dùng</h1>
+          <div class="admin-breadcrumbs">
+            <a href="/admin/index.html">Admin</a>
+            <span>/</span>
+            <a href="/admin/users.html">Quản lý người dùng</a>
+            <span>/</span>
+            <span>Xóa người dùng</span>
+          </div>
+        </div>
+        <div class="user-delete-container">
+          <div class="user-delete-info">
+            <p>Bạn có chắc chắn muốn xóa người dùng sau không?</p>
+            <div class="user-detail-row"><span>Họ tên:</span> Nguyễn Văn A</div>
+            <div class="user-detail-row">
+              <span>Email:</span> nguyenvana@example.com
+            </div>
+            <div class="user-detail-row">
+              <span>Vai trò:</span> Quản trị viên
+            </div>
+          </div>
+          <form method="post" action="#">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+              <a href="/admin/users.html" class="btn btn-secondary">Hủy</a>
+            </div>
+          </form>
+        </div>
+      </section>
+    </th:block>
+  </body>
+</html>

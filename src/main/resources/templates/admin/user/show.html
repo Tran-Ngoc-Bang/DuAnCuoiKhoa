@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Danh sách người dùng - EduShare Admin</title>
+    <th:block th:replace="fragments/admin/layout :: head"></th:block>
+  </head>
+  <body>
+    <th:block th:replace="fragments/admin/layout :: body">
+      <section>
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Danh sách người dùng</h1>
+          <div class="admin-breadcrumbs">
+            <a href="/admin/index.html">Admin</a>
+            <span>/</span>
+            <span>Danh sách người dùng</span>
+          </div>
+        </div>
+        <div class="data-container">
+          <table class="data-table users-table">
+            <thead>
+              <tr>
+                <th>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="selectAll" />
+                    <label for="selectAll"></label>
+                  </div>
+                </th>
+                <th>Người dùng</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th class="sortable" data-sort="joinDate">
+                  Ngày đăng ký <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" data-sort="documents">
+                  Số tài liệu <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" data-sort="downloads">
+                  Lượt tải <i class="fas fa-sort"></i>
+                </th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Dữ liệu mẫu, sẽ thay bằng Thymeleaf hoặc JS -->
+              <tr>
+                <td>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="user1" />
+                    <label for="user1"></label>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-info">
+                    <img
+                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                      alt="Nguyễn Văn A"
+                      class="user-avatar"
+                    />
+                    <div class="user-details">
+                      <div class="user-name">Nguyễn Văn A</div>
+                      <div class="user-username">
+                        @nguyenvana
+                        <i
+                          class="fas fa-sticky-note note-indicator"
+                          title="Có ghi chú"
+                          style="display: none"
+                        ></i>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>nguyenvana@example.com</td>
+                <td><span class="role-badge admin">Quản trị viên</span></td>
+                <td>15/03/2023</td>
+                <td>32</td>
+                <td>120</td>
+                <td><span class="status-badge approved">Hoạt động</span></td>
+                <td>
+                  <div class="action-buttons">
+                    <a
+                      href="detail.html"
+                      class="action-btn"
+                      title="Xem chi tiết"
+                      ><i class="fas fa-eye"></i
+                    ></a>
+                    <a
+                      href="edit.html"
+                      class="action-btn edit-user-btn"
+                      title="Chỉnh sửa"
+                      ><i class="fas fa-edit"></i
+                    ></a>
+                    <a href="delete.html" class="action-btn" title="Xóa"
+                      ><i class="fas fa-trash"></i
+                    ></a>
+                  </div>
+                </td>
+              </tr>
+              <!-- Thêm các dòng khác tương tự -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </th:block>
+  </body>
+</html>

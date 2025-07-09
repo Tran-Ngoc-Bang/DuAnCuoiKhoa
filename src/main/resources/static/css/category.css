@@ -1,0 +1,305 @@
+/* Category Specific Styles */
+
+/* Category Header */
+.category-header {
+    padding: 6rem 0 2rem;
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(247, 37, 133, 0.1));
+}
+
+.category-header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.category-icon {
+    width: 5rem;
+    height: 5rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.it-icon {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.business-icon {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.language-icon {
+    background-color: var(--accent-light);
+    color: var(--accent);
+}
+
+.engineering-icon {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.social-icon {
+    background-color: rgba(139, 92, 246, 0.1);
+    color: rgb(124, 58, 237);
+}
+
+.category-header-title {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.category-header-description {
+    color: var(--gray-600);
+    max-width: 40rem;
+    margin: 0 auto 1.5rem;
+}
+
+.subcategories {
+    padding: 2rem 0;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.subcategory-pills {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.subcategory-pills::-webkit-scrollbar {
+    display: none;
+}
+
+.subcategory-pill {
+    white-space: nowrap;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--gray-200);
+    font-size: 0.875rem;
+    font-weight: 500;
+    background-color: transparent;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.subcategory-pill:hover, .subcategory-pill.active {
+    background-color: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+.category-documents {
+    padding: 3rem 0;
+    background-color: var(--gray-50);
+}
+
+.category-filters {
+    background-color: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.filter-group {
+    flex: 1;
+}
+
+.filter-group-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--gray-700);
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.filter-option input[type="checkbox"],
+.filter-option input[type="radio"] {
+    accent-color: var(--primary);
+}
+
+.filter-text {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.reset-filters-btn {
+    align-self: flex-start;
+    padding: 0.5rem 1rem;
+    background-color: var(--gray-100);
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.reset-filters-btn:hover {
+    background-color: var(--gray-200);
+}
+
+.category-documents-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.load-more {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.load-more-btn {
+    padding: 0.75rem 2rem;
+    background-color: var(--white);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.load-more-btn:hover {
+    background-color: var(--primary-light);
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    color: var(--gray-600);
+}
+
+@media (min-width: 768px) {
+    .category-header-content {
+        flex-direction: row;
+        text-align: left;
+        align-items: center;
+        gap: 2rem;
+    }
+    
+    .category-icon {
+        margin-bottom: 0;
+    }
+    
+    .category-filters {
+        flex-direction: row;
+        align-items: flex-end;
+    }
+    
+    .category-documents-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .category-documents-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .category-documents-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+body.dark-mode .subcategories {
+    background-color: var(--gray-800);
+    border-color: var(--gray-700);
+}
+
+body.dark-mode .subcategory-pill {
+    border-color: var(--gray-700);
+    color: var(--gray-300);
+}
+
+body.dark-mode .subcategory-pill:hover,
+body.dark-mode .subcategory-pill.active {
+    background-color: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+body.dark-mode .category-documents {
+    background-color: var(--gray-900);
+}
+
+body.dark-mode .category-filters {
+    background-color: var(--gray-800);
+}
+
+body.dark-mode .filter-group-title {
+    color: var(--gray-300);
+}
+
+body.dark-mode .filter-text {
+    color: var(--gray-400);
+}
+
+body.dark-mode .filter-select {
+    background-color: var(--gray-700);
+    border-color: var(--gray-700);
+    color: var(--gray-300);
+}
+
+body.dark-mode .reset-filters-btn {
+    background-color: var(--gray-700);
+    color: var(--gray-300);
+    border-color: var(--gray-600);
+}
+
+body.dark-mode .reset-filters-btn:hover {
+    background-color: var(--gray-600);
+}
+
+body.dark-mode .load-more-btn {
+    background-color: var(--gray-800);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+body.dark-mode .load-more-btn:hover {
+    background-color: rgba(67, 97, 238, 0.2);
+}
+
+body.dark-mode .no-results {
+    background-color: var(--gray-800);
+    color: var(--gray-400);
+}

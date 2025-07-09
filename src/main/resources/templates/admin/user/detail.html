@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Chi tiết người dùng - EduShare Admin</title>
+    <th:block th:replace="fragments/admin/layout :: head"></th:block>
+    <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
+  </head>
+  <body>
+    <th:block th:replace="fragments/admin/layout :: body">
+      <main class="admin-content">
+        <!-- Breadcrumb & Tiêu đề -->
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Chi tiết người dùng</h1>
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin/index}">Admin</a>
+            <span>/</span>
+            <a th:href="@{/admin/users}">Quản lý người dùng</a>
+            <span>/</span>
+            <span>Chi tiết người dùng</span>
+          </div>
+        </div>
+        <!-- Thông tin chi tiết user -->
+        <div class="user-detail-container">
+          <div class="user-detail-header">
+            <img
+              th:src="${user.avatarUrl != null ? user.avatarUrl : '/static/images/avatar/default.png'}"
+              th:alt="${user.fullName}"
+              class="user-avatar-large"
+            />
+            <div class="user-detail-info">
+              <h2 class="user-name" th:text="${user.fullName}"></h2>
+              <div class="user-username" th:text="'@' + ${user.username}"></div>
+              <div class="user-role">
+                <span class="role-badge" th:text="${user.role}"></span>
+              </div>
+              <div class="user-status">
+                <span class="status-badge" th:text="${user.status}"></span>
+              </div>
+            </div>
+          </div>
+          <div class="user-detail-body">
+            <div class="user-detail-row">
+              <span>Email:</span> <span th:text="${user.email}"></span>
+            </div>
+            <div class="user-detail-row">
+              <span>Số điện thoại:</span>
+              <span th:text="${user.phoneNumber}"></span>
+            </div>
+            <div class="user-detail-row">
+              <span>Ngày đăng ký:</span>
+              <span
+                th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}"
+              ></span>
+            </div>
+            <div class="user-detail-row">
+              <span>Địa chỉ:</span> <span th:text="${user.address}"></span>
+            </div>
+            <div class="user-detail-row">
+              <span>Giới tính:</span> <span th:text="${user.gender}"></span>
+            </div>
+            <div class="user-detail-row">
+              <span>Ngày sinh:</span>
+              <span th:text="${user.dateOfBirth}"></span>
+            </div>
+          </div>
+          <div class="user-detail-actions">
+            <a
+              th:href="@{'/admin/users/edit/' + ${user.id}}"
+              class="btn btn-primary"
+              >Chỉnh sửa</a
+            >
+            <a th:href="@{/admin/users}" class="btn btn-secondary">Quay lại</a>
+          </div>
+        </div>
+      </main>
+    </th:block>
+  </body>
+</html>

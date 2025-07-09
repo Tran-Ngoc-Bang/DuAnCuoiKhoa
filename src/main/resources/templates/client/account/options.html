@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>Tùy chọn - EduShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts">
+    </link>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/main-fixes.css">
+    <link rel="stylesheet" href="../../css/account.css">
+    <link rel="stylesheet" href="../../css/footer-modern.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: rgba(67, 97, 238, 0.1);
+            --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --radius: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        /* Settings Specific Styles */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .setting-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .setting-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .setting-card.danger-card {
+            border-color: var(--danger-light);
+            background: rgba(239, 68, 68, 0.02);
+        }
+
+        .setting-card.danger-card:hover {
+            border-color: var(--danger);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+        }
+
+        .setting-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .setting-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .setting-info h3.setting-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .setting-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .setting-control {
+            flex-shrink: 0;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-300);
+            transition: var(--transition);
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+            box-shadow: var(--shadow-sm);
+        }
+
+        input:checked+.toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Color Picker */
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .color-input {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .color-preset {
+            width: 24px;
+            height: 24px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .color-preset:hover,
+        .color-preset.active {
+            border-color: var(--gray-400);
+            transform: scale(1.1);
+        }
+
+        /* Action Buttons */
+        .action-button-options {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-button-options:hover {
+            background: var(--gray-200);
+            border-color: var(--gray-400);
+        }
+
+        .btn-danger {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Settings Actions */
+        .settings-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--gray-200);
+            margin-top: 2rem;
+        }
+
+        /* Form Elements */
+        .form-select {
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 120px;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .setting-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .setting-header {
+                width: 100%;
+            }
+
+            .setting-control {
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .settings-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: rgba(67, 97, 238, 0.1);
+            --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --radius: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+
+        .dashboard-page {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .date-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--gray-600);
+            background-color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .refresh-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--primary);
+            background-color: var(--primary-light);
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .refresh-button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .dashboard-sidebar {
+            width: 280px;
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 0;
+            position: relative;
+            background-color: var(--primary-light);
+        }
+
+        .user-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-bottom: 0.5rem;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1rem;
+        }
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+        }
+
+        .user-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .user-status-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0.75rem 0;
+            margin: 0;
+        }
+
+        .sidebar-menu-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            padding-left: 0.5rem;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-menu-link:hover {
+            color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .sidebar-menu-link.active {
+            color: var(--primary);
+            font-weight: 600;
+            background-color: var(--primary-light);
+        }
+
+        .sidebar-menu-link.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--primary);
+        }
+
+        .sidebar-icon {
+            width: 1.25rem;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        .sidebar-badge {
+            margin-left: auto;
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+        }
+
+        .dashboard-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: 1px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-icon.primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .stat-icon.success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .stat-icon.warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .stat-icon.danger {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .stat-info {
+            width: 100%;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+            max-width: 100%;
+            display: block;
+            line-height: 1.2;
+            white-space: normal;
+        }
+
+        .stat-trend {
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .trend-positive {
+            color: var(--success);
+        }
+
+        .trend-negative {
+            color: var(--danger);
+        }
+
+        .trend-icon {
+            margin-right: 0.25rem;
+        }
+
+        .trend-period {
+            color: var(--gray-500);
+            margin-left: 0.25rem;
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--gray-100);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title-icon {
+            margin-right: 0.75rem;
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .section-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button {
+            padding: 0.5rem 0.875rem;
+            border-radius: var(--radius);
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .time-range-select {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-300);
+            background-color: var(--white);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            cursor: pointer;
+        }
+
+        /* Activity Chart */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            border-radius: var(--radius-lg);
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .activity-item:hover {
+            background-color: var(--gray-50);
+            border-color: var(--gray-200);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .activity-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-meta {
+            display: flex;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            gap: 1rem;
+        }
+
+        .activity-meta-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-meta-icon {
+            margin-right: 0.25rem;
+        }
+
+        /* Document Cards */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+        }
+
+        .document-card {
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border: 1px solid var(--gray-100);
+        }
+
+        .document-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .document-image {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .document-image::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 50%);
+            z-index: 1;
+        }
+
+        .document-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .document-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .document-title {
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--gray-900);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .document-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-bottom: 0.75rem;
+        }
+
+        .document-meta-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .document-meta-icon {
+            margin-right: 0.25rem;
+        }
+
+        .document-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .action-button {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--gray-100);
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-all-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem;
+            margin-top: 1.25rem;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radius-lg);
+            transition: var(--transition);
+            background: var(--primary-gradient);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-all-link:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            filter: brightness(1.05);
+        }
+
+        .view-all-icon {
+            margin-left: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .view-all-link:hover .view-all-icon {
+            transform: translateX(3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .documents-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-content {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .sidebar-menu-title {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-item {
+                flex-direction: column;
+            }
+
+            .activity-icon {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .dashboard-page {
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../../index.html">
+                        <div class="logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </a>
+                </div>
+
+
+
+
+                <nav class="main-nav">
+                    <a href="../../index.html" class="nav-link">Trang chủ</a>
+                    <a href="../categories.html" class="nav-link">Danh mục</a>
+                    <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                    <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+                    <a href="../about.html" class="nav-link">Giới thiệu</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+                        <span class="dark-mode-handle" id="darkModeHandle"></span>
+                    </button>
+                    <a href="../login.html" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
+                    <a href="../register.html" class="register-btn active">
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </a>
+                </div>
+                <div class="mobile-menu-toggle" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="mobile-menu">
+            <div class="mobile-search">
+                <input type="text" placeholder="Tìm kiếm tài liệu...">
+                <button>
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <nav class="mobile-nav">
+                <a href="../../index.html" class="nav-link">Trang chủ</a>
+                <a href="../categories.html" class="nav-link">Danh mục</a>
+                <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+                <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+            </nav>
+            <div class="mobile-auth">
+                <a href="../login.html" class="mobile-login-btn">Đăng nhập</a>
+                <a href="../register.html" class="mobile-register-btn">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container dashboard-page">
+            <div class="dashboard-content">
+                <!-- Sidebar -->
+                <div class="dashboard-sidebar">
+                    <div class="sidebar-header">
+                        <div class="user-profile">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                                alt="User avatar" class="user-avatar">
+                            <div class="user-name">Nguyễn Văn Anh</div>
+                            <div class="user-email">nguyenvananh@gmail.com</div>
+                            <div class="user-status">
+                                <span class="user-status-icon"></span>
+                                Tài khoản Premium
+                            </div>
+                        </div>
+                        <div class="sidebar-title">Quản lý tài khoản</div>
+                    </div>
+
+                    <ul class="sidebar-menu">
+                        <li class="sidebar-menu-title">Tài liệu</li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="dashboard.html" class="sidebar-menu-link active">
+                                <i class="fas fa-tachometer-alt sidebar-icon"></i>
+                                Tổng quan
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="documents.html" class="sidebar-menu-link">
+                                <i class="fas fa-file-alt sidebar-icon"></i>
+                                Tài liệu của tôi
+                                <span class="sidebar-badge">15</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="../search.html" class="sidebar-menu-link">
+                                <i class="fas fa-search sidebar-icon"></i>
+                                Khám phá tài liệu
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="../upload.html" class="sidebar-menu-link">
+                                <i class="fas fa-cloud-upload-alt sidebar-icon"></i>
+                                Tải lên tài liệu
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="favorites.html" class="sidebar-menu-link">
+                                <i class="fas fa-bookmark sidebar-icon"></i>
+                                Tài liệu đã lưu
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-title">Tài khoản</li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="profile.html" class="sidebar-menu-link">
+                                <i class="fas fa-user sidebar-icon"></i>
+                                Thông tin cá nhân
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="transactions.html" class="sidebar-menu-link">
+                                <i class="fas fa-history sidebar-icon"></i>
+                                Lịch sử giao dịch
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="recharge.html" class="sidebar-menu-link">
+                                <i class="fas fa-coins sidebar-icon"></i>
+                                Nạp xu
+                                <span class="sidebar-badge">250</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-title">Cài đặt</li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="security.html" class="sidebar-menu-link">
+                                <i class="fas fa-shield-alt sidebar-icon"></i>
+                                Bảo mật
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="notifications.html" class="sidebar-menu-link">
+                                <i class="fas fa-bell sidebar-icon"></i>
+                                Thông báo
+                            </a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="options.html" class="sidebar-menu-link">
+                                <i class="fas fa-cog sidebar-icon"></i>
+                                Tùy chọn
+                            </a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="support.html" class="sidebar-menu-link">
+                              <i class="fas fa-headset sidebar-icon"></i>
+                              Hỗ trợ
+                            </a>
+                          </li>
+                    </ul>
+                </div>
+
+                <!-- Main Content -->
+                <div class="dashboard-main">
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon primary">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">25</div>
+                                <div class="stat-label">Tùy chọn đã cài đặt</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">12</div>
+                                <div class="stat-label">Thông báo đã bật</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">Cao</div>
+                                <div class="stat-label">Mức bảo mật</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon danger">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">3.2MB</div>
+                                <div class="stat-label">Dữ liệu đã tải</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <!-- Interface Settings -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h2 class="section-title">
+                                    <i class="fas fa-palette section-title-icon"></i>
+                                    Giao diện
+                                </h2>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-moon"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Chế độ tối</h3>
+                                            <p class="setting-description">Bật chế độ tối để bảo vệ mắt khi sử dụng ban
+                                                đêm
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="darkMode">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-text-height"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Kích thước chữ</h3>
+                                            <p class="setting-description">Điều chỉnh kích thước chữ phù hợp với nhu cầu
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select class="form-select" id="fontSize">
+                                            <option value="small">Nhỏ</option>
+                                            <option value="medium" selected>Vừa</option>
+                                            <option value="large">Lớn</option>
+                                            <option value="extra-large">Rất lớn</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-paint-brush"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Màu chủ đạo</h3>
+                                            <p class="setting-description">Chọn màu chủ đạo cho giao diện của bạn</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <div class="color-picker">
+                                            <input type="color" value="#4361ee" id="themeColor" class="color-input">
+                                            <div class="color-presets">
+                                                <button class="color-preset" data-color="#4361ee"
+                                                    style="background: #4361ee;"></button>
+                                                <button class="color-preset" data-color="#10b981"
+                                                    style="background: #10b981;"></button>
+                                                <button class="color-preset" data-color="#f59e0b"
+                                                    style="background: #f59e0b;"></button>
+                                                <button class="color-preset" data-color="#ef4444"
+                                                    style="background: #ef4444;"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notification Settings -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h2 class="section-title">
+                                    <i class="fas fa-bell section-title-icon"></i>
+                                    Thông báo
+                                </h2>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Thông báo email</h3>
+                                            <p class="setting-description">Nhận thông báo qua email về hoạt động tài
+                                                khoản
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="emailNotifications" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Thông báo trình duyệt</h3>
+                                            <p class="setting-description">Hiển thị thông báo ngay trên trình duyệt</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="browserNotifications" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-file-download"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Thông báo tải xuống</h3>
+                                            <p class="setting-description">Thông báo khi có tài liệu mới được tải xuống
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="downloadNotifications" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Thông báo yêu thích</h3>
+                                            <p class="setting-description">Thông báo khi có tài liệu được thêm vào yêu
+                                                thích
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="favoriteNotifications">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Download & Storage Settings -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h2 class="section-title">
+                                    <i class="fas fa-download section-title-icon"></i>
+                                    Tải xuống & Lưu trữ
+                                </h2>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-folder"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Thư mục tải xuống mặc định</h3>
+                                            <p class="setting-description">Chọn thư mục mặc định để lưu tài liệu tải
+                                                xuống
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <button class="action-button-options" id="selectDownloadFolder">
+                                            <i class="fas fa-folder-open"></i>
+                                            Chọn thư mục
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-compress-arrows-alt"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Tự động nén file</h3>
+                                            <p class="setting-description">Nén file tự động khi tải xuống để tiết kiệm
+                                                dung
+                                                lượng</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="autoCompress">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-cloud"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Đồng bộ đám mây</h3>
+                                            <p class="setting-description">Tự động đồng bộ tài liệu với dịch vụ đám mây
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select class="form-select" id="cloudSync">
+                                            <option value="none">Không đồng bộ</option>
+                                            <option value="google">Google Drive</option>
+                                            <option value="dropbox">Dropbox</option>
+                                            <option value="onedrive">OneDrive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Privacy Settings -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h2 class="section-title">
+                                    <i class="fas fa-user-shield section-title-icon"></i>
+                                    Quyền riêng tư
+                                </h2>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Hiển thị hồ sơ công khai</h3>
+                                            <p class="setting-description">Cho phép người dùng khác xem hồ sơ của bạn
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="publicProfile" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-share-alt"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Chia sẻ hoạt động</h3>
+                                            <p class="setting-description">Hiển thị hoạt động của bạn với bạn bè</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="shareActivity">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Thu thập dữ liệu phân tích</h3>
+                                            <p class="setting-description">Cho phép thu thập dữ liệu để cải thiện dịch
+                                                vụ
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="analytics" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Language & Region -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h2 class="section-title">
+                                    <i class="fas fa-globe section-title-icon"></i>
+                                    Ngôn ngữ & Khu vực
+                                </h2>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-language"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Ngôn ngữ hiển thị</h3>
+                                            <p class="setting-description">Chọn ngôn ngữ chính cho giao diện</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select class="form-select" id="language">
+                                            <option value="vi" selected>Tiếng Việt</option>
+                                            <option value="en">English</option>
+                                            <option value="zh">中文</option>
+                                            <option value="ja">日本語</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Múi giờ</h3>
+                                            <p class="setting-description">Thiết lập múi giờ cho hiển thị thời gian</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select class="form-select" id="timezone">
+                                            <option value="Asia/Ho_Chi_Minh" selected>GMT+7 (Việt Nam)</option>
+                                            <option value="Asia/Tokyo">GMT+9 (Tokyo)</option>
+                                            <option value="America/New_York">GMT-5 (New York)</option>
+                                            <option value="Europe/London">GMT+0 (London)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Đơn vị tiền tệ</h3>
+                                            <p class="setting-description">Chọn đơn vị tiền tệ hiển thị</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select class="form-select" id="currency">
+                                            <option value="VND" selected>VNĐ (Việt Nam Đồng)</option>
+                                            <option value="USD">USD (US Dollar)</option>
+                                            <option value="EUR">EUR (Euro)</option>
+                                            <option value="JPY">JPY (Japanese Yen)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Settings -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h2 class="section-title">
+                                    <i class="fas fa-cogs section-title-icon"></i>
+                                    Cài đặt nâng cao
+                                </h2>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Chế độ nhà phát triển</h3>
+                                            <p class="setting-description">Bật các tính năng dành cho nhà phát triển</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="developerMode">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-bug"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Gửi báo cáo lỗi</h3>
+                                            <p class="setting-description">Tự động gửi báo cáo khi gặp lỗi</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="errorReporting" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-tachometer-alt"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Chế độ hiệu suất cao</h3>
+                                            <p class="setting-description">Tối ưu hóa hiệu suất cho thiết bị yếu</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="performanceMode">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Management -->
+                        <div class="dashboard-section">
+                            <div class="section-header">
+                                <h2 class="section-title">
+                                    <i class="fas fa-database section-title-icon"></i>
+                                    Quản lý dữ liệu
+                                </h2>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-file-export"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Xuất dữ liệu</h3>
+                                            <p class="setting-description">Tải xuống bản sao dữ liệu tài khoản của bạn
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <button class="view-all-link" id="exportData">
+                                            <i class="fas fa-download"></i>
+                                            Xuất dữ liệu
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Xóa cache</h3>
+                                            <p class="setting-description">Xóa dữ liệu cache để giải phóng dung lượng
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <button class="action-button-options" id="clearCache">
+                                            <i class="fas fa-broom"></i>
+                                            Xóa cache
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="setting-card danger-card">
+                                    <div class="setting-header">
+                                        <div class="setting-icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="setting-info">
+                                            <h3 class="setting-title">Xóa tài khoản</h3>
+                                            <p class="setting-description">Xóa vĩnh viễn tài khoản và tất cả dữ liệu</p>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <button class="btn-danger" id="deleteAccount">
+                                            <i class="fas fa-trash"></i>
+                                            Xóa tài khoản
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Settings Section -->
+                        <div class="dashboard-section">
+                            <div class="settings-actions">
+                                <button class="view-all-link" id="saveSettings">
+                                    <i class="fas fa-save"></i>
+                                    Lưu tất cả cài đặt
+                                </button>
+                                <button class="action-button-options" id="resetSettings">
+                                    <i class="fas fa-undo"></i>
+                                    Khôi phục mặc định
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon footer-logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </div>
+                    <p class="footer-description">
+                        Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài
+                        liệu chất lượng cao.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Khám phá</h3>
+                    <ul class="footer-links">
+                        <li><a href="../categories.html">Danh mục</a></li>
+                        <li><a href="../search.html?sort=newest">Tài liệu mới</a></li>
+                        <li><a href="../search.html?sort=popular">Tài liệu phổ biến</a></li>
+                        <li><a href="#">Tác giả hàng đầu</a></li>
+                        <li><a href="#">Sự kiện & Tin tức</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Thông tin</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chương trình tác giả</a></li>
+                        <li><a href="#">Hợp tác & Liên kết</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Liên hệ</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+                        <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+                        <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Liên hệ</a>
+                    <a href="#">Trợ giúp</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set active menu item
+            const menuItems = document.querySelectorAll('.sidebar-menu a');
+            menuItems.forEach(item => {
+                if (item.href.includes('options.html')) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Dark mode toggle integration
+            const darkModeToggle = document.getElementById('darkMode');
+            const mainDarkModeToggle = document.getElementById('darkModeToggle');
+
+            if (darkModeToggle && mainDarkModeToggle) {
+                // Sync with main dark mode state
+                darkModeToggle.addEventListener('change', function () {
+                    if (this.checked) {
+                        document.body.classList.add('dark-mode');
+                        localStorage.setItem('darkMode', 'enabled');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        localStorage.setItem('darkMode', 'disabled');
+                    }
+
+                    // Update main toggle state
+                    const handle = document.getElementById('darkModeHandle');
+                    if (handle) {
+                        if (this.checked) {
+                            handle.style.transform = 'translateX(20px)';
+                        } else {
+                            handle.style.transform = 'translateX(0)';
+                        }
+                    }
+                });
+
+                // Initialize dark mode state
+                const darkMode = localStorage.getItem('darkMode');
+                if (darkMode === 'enabled') {
+                    darkModeToggle.checked = true;
+                    document.body.classList.add('dark-mode');
+                }
+            }
+
+            // Color picker functionality
+            const colorInput = document.getElementById('themeColor');
+            const colorPresets = document.querySelectorAll('.color-preset');
+
+            if (colorInput) {
+                colorInput.addEventListener('change', function () {
+                    const color = this.value;
+                    document.documentElement.style.setProperty('--primary', color);
+                    localStorage.setItem('themeColor', color);
+
+                    // Update active preset
+                    colorPresets.forEach(preset => preset.classList.remove('active'));
+                    const matchingPreset = document.querySelector(`[data-color="${color}"]`);
+                    if (matchingPreset) {
+                        matchingPreset.classList.add('active');
+                    }
+                });
+            }
+
+            // Color preset buttons
+            colorPresets.forEach(preset => {
+                preset.addEventListener('click', function () {
+                    const color = this.dataset.color;
+                    if (colorInput) {
+                        colorInput.value = color;
+                        colorInput.dispatchEvent(new Event('change'));
+                    }
+                });
+            });
+
+            // Font size functionality
+            const fontSizeSelect = document.getElementById('fontSize');
+            if (fontSizeSelect) {
+                fontSizeSelect.addEventListener('change', function () {
+                    const size = this.value;
+                    let fontSize = '16px';
+
+                    switch (size) {
+                        case 'small': fontSize = '14px'; break;
+                        case 'medium': fontSize = '16px'; break;
+                        case 'large': fontSize = '18px'; break;
+                        case 'extra-large': fontSize = '20px'; break;
+                    }
+
+                    document.documentElement.style.setProperty('--base-font-size', fontSize);
+                    localStorage.setItem('fontSize', size);
+                });
+
+                // Initialize font size
+                const savedFontSize = localStorage.getItem('fontSize');
+                if (savedFontSize) {
+                    fontSizeSelect.value = savedFontSize;
+                    fontSizeSelect.dispatchEvent(new Event('change'));
+                }
+            }
+
+            // Language functionality
+            const languageSelect = document.getElementById('language');
+            if (languageSelect) {
+                languageSelect.addEventListener('change', function () {
+                    const language = this.value;
+                    localStorage.setItem('language', language);
+
+                    // Show confirmation message
+                    showNotification('Ngôn ngữ đã được thay đổi. Trang sẽ được tải lại.', 'success');
+
+                    // Simulate language change (in real app, this would reload with new language)
+                    setTimeout(() => {
+                        // location.reload();
+                    }, 1500);
+                });
+            }
+
+            // Timezone functionality
+            const timezoneSelect = document.getElementById('timezone');
+            if (timezoneSelect) {
+                timezoneSelect.addEventListener('change', function () {
+                    const timezone = this.value;
+                    localStorage.setItem('timezone', timezone);
+                    showNotification('Múi giờ đã được cập nhật.', 'success');
+                });
+            }
+
+            // Currency functionality
+            const currencySelect = document.getElementById('currency');
+            if (currencySelect) {
+                currencySelect.addEventListener('change', function () {
+                    const currency = this.value;
+                    localStorage.setItem('currency', currency);
+                    showNotification('Đơn vị tiền tệ đã được thay đổi.', 'success');
+                });
+            }
+
+            // Notification settings
+            const notificationSettings = {
+                'emailNotifications': 'Thông báo email',
+                'browserNotifications': 'Thông báo trình duyệt',
+                'downloadNotifications': 'Thông báo tải xuống',
+                'favoriteNotifications': 'Thông báo yêu thích'
+            };
+
+            Object.keys(notificationSettings).forEach(settingId => {
+                const toggle = document.getElementById(settingId);
+                if (toggle) {
+                    toggle.addEventListener('change', function () {
+                        const isEnabled = this.checked;
+                        localStorage.setItem(settingId, isEnabled);
+                        const message = `${notificationSettings[settingId]} đã được ${isEnabled ? 'bật' : 'tắt'}.`;
+                        showNotification(message, 'info');
+                    });
+
+                    // Initialize from localStorage
+                    const saved = localStorage.getItem(settingId);
+                    if (saved !== null) {
+                        toggle.checked = saved === 'true';
+                    }
+                }
+            });
+
+            // Privacy settings
+            const privacySettings = {
+                'publicProfile': 'Hiển thị hồ sơ công khai',
+                'shareActivity': 'Chia sẻ hoạt động',
+                'analytics': 'Thu thập dữ liệu phân tích'
+            };
+
+            Object.keys(privacySettings).forEach(settingId => {
+                const toggle = document.getElementById(settingId);
+                if (toggle) {
+                    toggle.addEventListener('change', function () {
+                        const isEnabled = this.checked;
+                        localStorage.setItem(settingId, isEnabled);
+                        const message = `${privacySettings[settingId]} đã được ${isEnabled ? 'bật' : 'tắt'}.`;
+                        showNotification(message, 'info');
+                    });
+
+                    // Initialize from localStorage
+                    const saved = localStorage.getItem(settingId);
+                    if (saved !== null) {
+                        toggle.checked = saved === 'true';
+                    }
+                }
+            });
+
+            // Advanced settings
+            const advancedSettings = {
+                'developerMode': 'Chế độ nhà phát triển',
+                'errorReporting': 'Gửi báo cáo lỗi',
+                'performanceMode': 'Chế độ hiệu suất cao',
+                'autoCompress': 'Tự động nén file'
+            };
+
+            Object.keys(advancedSettings).forEach(settingId => {
+                const toggle = document.getElementById(settingId);
+                if (toggle) {
+                    toggle.addEventListener('change', function () {
+                        const isEnabled = this.checked;
+                        localStorage.setItem(settingId, isEnabled);
+                        const message = `${advancedSettings[settingId]} đã được ${isEnabled ? 'bật' : 'tắt'}.`;
+                        showNotification(message, 'info');
+                    });
+
+                    // Initialize from localStorage
+                    const saved = localStorage.getItem(settingId);
+                    if (saved !== null) {
+                        toggle.checked = saved === 'true';
+                    }
+                }
+            });
+
+            // Cloud sync functionality
+            const cloudSyncSelect = document.getElementById('cloudSync');
+            if (cloudSyncSelect) {
+                cloudSyncSelect.addEventListener('change', function () {
+                    const service = this.value;
+                    localStorage.setItem('cloudSync', service);
+
+                    if (service === 'none') {
+                        showNotification('Đồng bộ đám mây đã được tắt.', 'info');
+                    } else {
+                        showNotification(`Đã kết nối với ${service}. Đang đồng bộ dữ liệu...`, 'success');
+                    }
+                });
+            }
+
+            // Download folder selection
+            const selectFolderBtn = document.getElementById('selectDownloadFolder');
+            if (selectFolderBtn) {
+                selectFolderBtn.addEventListener('click', function () {
+                    // In a real application, this would open a file picker
+                    showNotification('Chức năng chọn thư mục sẽ được triển khai sau.', 'info');
+                });
+            }
+
+            // Export data functionality
+            const exportDataBtn = document.getElementById('exportData');
+            if (exportDataBtn) {
+                exportDataBtn.addEventListener('click', function () {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xuất...';
+                    this.disabled = true;
+
+                    setTimeout(() => {
+                        // Simulate data export
+                        const data = {
+                            settings: getAllSettings(),
+                            exportDate: new Date().toISOString(),
+                            version: '1.0'
+                        };
+
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'edushare-settings.json';
+                        a.click();
+                        URL.revokeObjectURL(url);
+
+                        this.innerHTML = '<i class="fas fa-download"></i> Xuất dữ liệu';
+                        this.disabled = false;
+                        showNotification('Dữ liệu đã được xuất thành công.', 'success');
+                    }, 2000);
+                });
+            }
+
+            // Clear cache functionality
+            const clearCacheBtn = document.getElementById('clearCache');
+            if (clearCacheBtn) {
+                clearCacheBtn.addEventListener('click', function () {
+                    if (confirm('Bạn có chắc chắn muốn xóa cache? Điều này có thể làm chậm tải trang lần đầu.')) {
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
+                        this.disabled = true;
+
+                        setTimeout(() => {
+                            // Clear browser cache (limited by browser security)
+                            if ('caches' in window) {
+                                caches.keys().then(names => {
+                                    names.forEach(name => {
+                                        caches.delete(name);
+                                    });
+                                });
+                            }
+
+                            this.innerHTML = '<i class="fas fa-broom"></i> Xóa cache';
+                            this.disabled = false;
+                            showNotification('Cache đã được xóa thành công.', 'success');
+                        }, 1500);
+                    }
+                });
+            }
+
+            // Delete account functionality
+            const deleteAccountBtn = document.getElementById('deleteAccount');
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', function () {
+                    const confirmation = prompt('Để xác nhận xóa tài khoản, vui lòng nhập "XOA TAI KHOAN":');
+                    if (confirmation === 'XOA TAI KHOAN') {
+                        showNotification('Chức năng xóa tài khoản sẽ được triển khai sau.', 'warning');
+                    } else if (confirmation !== null) {
+                        showNotification('Xác nhận không đúng. Tài khoản không được xóa.', 'error');
+                    }
+                });
+            }
+
+            // Save all settings
+            const saveSettingsBtn = document.getElementById('saveSettings');
+            if (saveSettingsBtn) {
+                saveSettingsBtn.addEventListener('click', function () {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+                    this.disabled = true;
+
+                    setTimeout(() => {
+                        // Save all current settings to localStorage
+                        const allSettings = getAllSettings();
+                        localStorage.setItem('allSettings', JSON.stringify(allSettings));
+
+                        this.innerHTML = '<i class="fas fa-save"></i> Lưu tất cả cài đặt';
+                        this.disabled = false;
+                        showNotification('Tất cả cài đặt đã được lưu thành công.', 'success');
+                    }, 1000);
+                });
+            }
+
+            // Reset settings
+            const resetSettingsBtn = document.getElementById('resetSettings');
+            if (resetSettingsBtn) {
+                resetSettingsBtn.addEventListener('click', function () {
+                    if (confirm('Bạn có chắc chắn muốn khôi phục tất cả cài đặt về mặc định?')) {
+                        // Reset all settings to default
+                        const settingsToReset = [
+                            'darkMode', 'themeColor', 'fontSize', 'language', 'timezone', 'currency',
+                            'emailNotifications', 'browserNotifications', 'downloadNotifications', 'favoriteNotifications',
+                            'publicProfile', 'shareActivity', 'analytics',
+                            'developerMode', 'errorReporting', 'performanceMode', 'autoCompress', 'cloudSync'
+                        ];
+
+                        settingsToReset.forEach(setting => {
+                            localStorage.removeItem(setting);
+                        });
+
+                        showNotification('Tất cả cài đặt đã được khôi phục về mặc định. Trang sẽ được tải lại.', 'success');
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    }
+                });
+            }
+
+            // Helper function to get all current settings
+            function getAllSettings() {
+                const settings = {};
+                const settingsList = [
+                    'darkMode', 'themeColor', 'fontSize', 'language', 'timezone', 'currency',
+                    'emailNotifications', 'browserNotifications', 'downloadNotifications', 'favoriteNotifications',
+                    'publicProfile', 'shareActivity', 'analytics',
+                    'developerMode', 'errorReporting', 'performanceMode', 'autoCompress', 'cloudSync'
+                ];
+
+                settingsList.forEach(setting => {
+                    const value = localStorage.getItem(setting);
+                    if (value !== null) {
+                        settings[setting] = value;
+                    }
+                });
+
+                return settings;
+            }
+
+            // Helper function to show notifications
+            function showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.innerHTML = `
+      <div class="notification-content">
+        <i class="fas fa-${getNotificationIcon(type)}"></i>
+        <span>${message}</span>
+      </div>
+      <button class="notification-close">&times;</button>
+    `;
+
+                // Add styles
+                notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-left: 4px solid ${getNotificationColor(type)};
+      z-index: 1000;
+      max-width: 400px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+    `;
+
+                document.body.appendChild(notification);
+
+                // Show notification
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+
+                // Auto hide
+                setTimeout(() => {
+                    hideNotification(notification);
+                }, 5000);
+
+                // Manual close
+                const closeBtn = notification.querySelector('.notification-close');
+                closeBtn.addEventListener('click', () => hideNotification(notification));
+            }
+
+            function hideNotification(notification) {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+
+            function getNotificationIcon(type) {
+                switch (type) {
+                    case 'success': return 'check-circle';
+                    case 'warning': return 'exclamation-triangle';
+                    case 'error': return 'times-circle';
+                    default: return 'info-circle';
+                }
+            }
+
+            function getNotificationColor(type) {
+                switch (type) {
+                    case 'success': return '#10b981';
+                    case 'warning': return '#f59e0b';
+                    case 'error': return '#ef4444';
+                    default: return '#4361ee';
+                }
+            }
+
+            // Initialize all settings from localStorage on page load
+            function initializeSettings() {
+                const savedSettings = localStorage.getItem('allSettings');
+                if (savedSettings) {
+                    try {
+                        const settings = JSON.parse(savedSettings);
+                        Object.keys(settings).forEach(key => {
+                            if (!localStorage.getItem(key)) {
+                                localStorage.setItem(key, settings[key]);
+                            }
+                        });
+                    } catch (e) {
+                        console.log('Error loading saved settings:', e);
+                    }
+                }
+            }
+
+            // Initialize settings
+            initializeSettings();
+        });
+    </script>
+
+</body>
+
+</html>
