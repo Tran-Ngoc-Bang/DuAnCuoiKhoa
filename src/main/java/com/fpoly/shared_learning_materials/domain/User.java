@@ -96,6 +96,15 @@ public class User {
     @Column(name = "role", length = 50)
     private String role = "user";
 
+    @Column(name = "coin_balance")
+    private Integer coinBalance = 0;
+
+    @Column(name = "total_spent", precision = 18, scale = 2)
+    private java.math.BigDecimal totalSpent = java.math.BigDecimal.ZERO;
+
+    @Column(name = "total_coins_purchased")
+    private Integer totalCoinsPurchased = 0;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -208,6 +208,294 @@
                     </button>
                 </div>
             </div>
+             <!-- Advanced Filters Toggle -->
+             <div class="advanced-filters-toggle">
+                <button type="button" class="advanced-filter-toggle" id="advancedFilterToggle">
+                    <i class="fas fa-sliders-h"></i>
+                    Bộ lọc nâng cao
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </button>
+            </div>
+            <!-- Advanced Filters Panel -->
+            <div class="advanced-filters-panel" id="advancedFiltersPanel">
+                <div class="advanced-filters-header">
+                    <h3>
+                        <i class="fas fa-filter"></i>
+                        Bộ lọc nâng cao
+                    </h3>
+                    <div class="advanced-filters-actions">
+                        <button type="button" class="filter-preset-btn" id="saveFilterPreset" title="Lưu bộ lọc">
+                            <i class="fas fa-bookmark"></i>
+                            Lưu
+                        </button>
+                        <button type="button" class="filter-preset-btn" id="loadFilterPreset" title="Tải bộ lọc đã lưu">
+                            <i class="fas fa-folder-open"></i>
+                            Tải
+                        </button>
+                        <button type="button" class="filter-clear-btn" id="clearAllFilters" title="Xóa tất cả bộ lọc">
+                            <i class="fas fa-eraser"></i>
+                            Xóa tất cả
+                        </button>
+                    </div>
+                </div>
+
+                <div class="advanced-filters-content">
+                    <!-- Date Range Filters -->
+                    <div class="filter-group">
+                        <h4 class="filter-group-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Khoảng thởi gian
+                        </h4>
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>Ngày đăng ký từ:</label>
+                                <input type="date" class="date-filter" id="regDateFrom">
+                            </div>
+                            <div class="filter-item">
+                                <label>Đến:</label>
+                                <input type="date" class="date-filter" id="regDateTo">
+                            </div>
+                        </div>
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>Đăng nhập cuối từ:</label>
+                                <input type="date" class="date-filter" id="lastLoginFrom">
+                            </div>
+                            <div class="filter-item">
+                                <label>Đến:</label>
+                                <input type="date" class="date-filter" id="lastLoginTo">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Filters -->
+                    <div class="filter-group">
+                        <h4 class="filter-group-title">
+                            <i class="fas fa-chart-line"></i>
+                            Hoạt động người dùng
+                        </h4>
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>Số tài liệu tối thiểu:</label>
+                                <input type="number" class="number-filter" id="minDocuments" min="0" placeholder="0">
+                            </div>
+                            <div class="filter-item">
+                                <label>Số tải xuống tối thiểu:</label>
+                                <input type="number" class="number-filter" id="minDownloads" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>Đánh giá tối thiểu:</label>
+                                <select class="filter-select" id="minRating">
+                                    <option value="">Tất cả</option>
+                                    <option value="1">1 sao trở lên</option>
+                                    <option value="2">2 sao trở lên</option>
+                                    <option value="3">3 sao trở lên</option>
+                                    <option value="4">4 sao trở lên</option>
+                                    <option value="5">5 sao</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>Trạng thái hoạt động:</label>
+                                <select class="filter-select" id="activityStatus">
+                                    <option value="">Tất cả</option>
+                                    <option value="very-active">Rất tích cực (7 ngày)</option>
+                                    <option value="active">Tích cực (30 ngày)</option>
+                                    <option value="inactive">Ít hoạt động (90 ngày)</option>
+                                    <option value="dormant">Không hoạt động (>90 ngày)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Multi-Select Filters -->
+                    <div class="filter-group">
+                        <h4 class="filter-group-title">
+                            <i class="fas fa-check-square"></i>
+                            Lựa chọn nhiều tiêu chí
+                        </h4>
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>Vai trò (nhiều lựa chọn):</label>
+                                <div class="multi-select-container">
+                                    <div class="multi-select-display" id="roleMultiSelect">
+                                        <span class="placeholder">Chọn vai trò...</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="multi-select-dropdown" id="roleMultiDropdown">
+                                        <div class="multi-select-option">
+                                            <input type="checkbox" id="role_admin" value="admin">
+                                            <label for="role_admin">
+                                                <i class="fas fa-crown"></i>
+                                                Quản trị viên
+                                            </label>
+                                        </div>
+                                        <div class="multi-select-option">
+                                            <input type="checkbox" id="role_contributor" value="contributor">
+                                            <label for="role_contributor">
+                                                <i class="fas fa-user-edit"></i>
+                                                Cộng tác viên
+                                            </label>
+                                        </div>
+                                        <div class="multi-select-option">
+                                            <input type="checkbox" id="role_user" value="user">
+                                            <label for="role_user">
+                                                <i class="fas fa-user"></i>
+                                                Người dùng
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label>Trạng thái (nhiều lựa chọn):</label>
+                                <div class="multi-select-container">
+                                    <div class="multi-select-display" id="statusMultiSelect">
+                                        <span class="placeholder">Chọn trạng thái...</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="multi-select-dropdown" id="statusMultiDropdown">
+                                        <div class="multi-select-option">
+                                            <input type="checkbox" id="status_active" th:value="${@constants.STATUS_ACTIVE}">
+                                            <label for="status_active">
+                                                <i class="fas fa-check-circle status-active"></i>
+                                                Hoạt động
+                                            </label>
+                                        </div>
+                                        <div class="multi-select-option">
+                                            <input type="checkbox" id="status_inactive" th:value="${@constants.STATUS_INACTIVE}">
+                                            <label for="status_inactive">
+                                                <i class="fas fa-ban status-inactive"></i>
+                                                Tạm khóa
+                                            </label>
+                                        </div>
+                                        <div class="multi-select-option">
+                                            <input type="checkbox" id="status_pending" value="pending">
+                                            <label for="status_pending">
+                                                <i class="fas fa-clock status-pending"></i>
+                                                Chờ xác nhận
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Search Filters -->
+                    <div class="filter-group">
+                        <h4 class="filter-group-title">
+                            <i class="fas fa-search"></i>
+                            Tìm kiếm nâng cao
+                        </h4>
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>Tìm theo email:</label>
+                                <input type="email" class="text-filter" id="emailSearch" placeholder="Nhập email...">
+                            </div>
+                            <div class="filter-item">
+                                <label>Tìm theo tên đầy đủ:</label>
+                                <input type="text" class="text-filter" id="fullNameSearch" placeholder="Nhập tên...">
+                            </div>
+                        </div>
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label>Tìm theo số điện thoại:</label>
+                                <input type="tel" class="text-filter" id="phoneSearch"
+                                    placeholder="Nhập số điện thoại...">
+                            </div>
+                            <div class="filter-item">
+                                <label>Tìm theo ID người dùng:</label>
+                                <input type="text" class="text-filter" id="userIdSearch" placeholder="Nhập User ID...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters Footer -->
+                <div class="advanced-filters-footer">
+                    <div class="filter-results-info">
+                        <span id="filterResultsCount">Hiển thị tất cả người dùng</span>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="button" class="filter-apply-btn" id="applyAdvancedFilters">
+                            <i class="fas fa-check"></i>
+                            Áp dụng bộ lọc
+                        </button>
+                        <button type="button" class="filter-reset-btn" id="resetAdvancedFilters">
+                            <i class="fas fa-undo"></i>
+                            Đặt lại
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Bulk Actions Toolbar (Hidden by default) -->
+            <div class="bulk-actions-toolbar" id="bulkActionsToolbar">
+                <div class="bulk-actions-content">
+                    <div class="bulk-actions-info">
+                        <span class="selected-count">0</span> người dùng được chọn
+                    </div>
+
+                    <div class="bulk-actions-buttons">
+                        <button type="button" class="bulk-action-btn" id="bulkActivateBtn" title="Kích hoạt tài khoản">
+                            <i class="fas fa-check-circle"></i>
+                            Kích hoạt
+                        </button>
+
+                        <button type="button" class="bulk-action-btn" id="bulkDeactivateBtn" title="Khóa tài khoản">
+                            <i class="fas fa-ban"></i>
+                            Khóa
+                        </button>
+
+                        <div class="bulk-action-dropdown">
+                            <button type="button" class="bulk-action-btn dropdown-toggle" id="bulkRoleBtn" title="Thay đổi vai trò">
+                                <i class="fas fa-user-tag"></i>
+                                Vai trò
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="dropdown-menu" id="bulkRoleDropdown">
+                                <button type="button" class="dropdown-item" data-role="admin">
+                                    <i class="fas fa-crown"></i>
+                                    Quản trị viên
+                                </button>
+                                <button type="button" class="dropdown-item" data-role="contributor">
+                                    <i class="fas fa-user-edit"></i>
+                                    Cộng tác viên
+                                </button>
+                                <button type="button" class="dropdown-item" data-role="user">
+                                    <i class="fas fa-user"></i>
+                                    Người dùng
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" class="bulk-action-btn" id="bulkEmailBtn" title="Gửi email">
+                            <i class="fas fa-envelope"></i>
+                            Gửi email
+                        </button>
+
+                        <button type="button" class="bulk-action-btn danger" id="bulkDeleteBtn" title="Xóa người dùng">
+                            <i class="fas fa-trash"></i>
+                            Xóa
+                        </button>
+
+                        <button type="button" class="bulk-action-btn secondary" id="bulkClearBtn" title="Bỏ chọn tất cả">
+                            <i class="fas fa-times"></i>
+                            Bỏ chọn
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar for Bulk Operations -->
+                <div class="bulk-progress" id="bulkProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Đang xử lý...</div>
+                </div>
+            </div>
+
             <!-- Users Table -->
             <div class="data-container">
                 <table class="data-table users-table">

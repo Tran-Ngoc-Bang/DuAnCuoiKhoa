@@ -22,12 +22,12 @@
   </head>
   <body class="admin-body">
     <!-- Admin Header -->
-    <header class="admin-header">
+    <header th:fragment="header" class="admin-header">
       <div class="admin-header-content">
         <div class="admin-logo">
-          <a href="/admin/index.html" class="logo">
-            <div class="logo-icon">E</div>
-            <div class="logo-text">EduShare</div>
+          <a th:href="@{/admin}">
+            <div class="logo-icon">A</div>
+            <span class="logo-text">Admin Panel</span>
           </a>
         </div>
         <div class="admin-header-actions">
@@ -126,10 +126,10 @@
                 <i class="fas fa-chevron-down submenu-icon"></i>
               </a>
               <ul class="submenu">
-                <li class="submenu-item">
-                  <a href="/admin/coin-packages.html">
-                    <i class="fas fa-box"></i>
-                    <span>Gói xu</span>
+                <li class="admin-nav-item">
+                  <a th:href="@{/admin/coin-packages}" class="admin-nav-link">
+                    <i class="fas fa-coins"></i>
+                    <span>Quản lý gói xu</span>
                   </a>
                 </li>
                 <li class="submenu-item">
@@ -165,6 +165,12 @@
       <main class="admin-content">
         <th:block th:replace="~{::section}"></th:block>
       </main>
+    </div>
+
+    <!-- Scripts Fragment -->
+    <div th:fragment="scripts">
+      <script th:src="@{/js/admin/admin.js}"></script>
+      <script th:src="@{/js/admin/toast.js}"></script>
     </div>
   </body>
 </html>

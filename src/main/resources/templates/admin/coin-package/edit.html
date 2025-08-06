@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chỉnh sửa gói xu - Admin</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
+  </head>
+
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <!-- Error Message -->
+        <div th:if="${error}" class="error-message">
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}">Lỗi</span>
+          </div>
+        </div>
+
+        <!-- Admin Content Header -->
+        <div class="admin-content-header">
+          <div>
+            <h1 class="admin-page-title">Chỉnh sửa gói xu</h1>
+            <div class="admin-breadcrumbs">
+              <a th:href="@{/admin}">Admin</a>
+              <span class="breadcrumb-separator">/</span>
+              <a th:href="@{/admin/coin-packages}">Quản lý gói xu</a>
+              <span class="breadcrumb-separator">/</span>
+              <span
+                th:text="${coinPackage != null ? coinPackage.name : 'Chỉnh sửa'}"
+                >Gói Starter</span
+              >
+            </div>
+          </div>
+          <div class="dashboard-actions">
+            <a th:href="@{/admin/coin-packages}" class="secondary-btn">
+              <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+            <a
+              th:if="${coinPackage != null}"
+              th:href="@{/admin/coin-packages/{id}/detail(id=${coinPackage.id})}"
+              class="primary-btn"
+            >
+              <i class="fas fa-eye"></i> Xem chi tiết
+            </a>
+          </div>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container" th:if="${coinPackage != null}">
+          <div class="form-card">
+            <div class="form-header">
+              <h2>Chỉnh sửa thông tin gói xu</h2>
+              <p>
+                Cập nhật thông tin gói xu
+                <strong th:text="${coinPackage.name}">Gói Starter</strong>
+              </p>
+            </div>
+
+            <form
+              th:action="@{/admin/coin-packages/{id}/edit(id=${coinPackage.id})}"
+              th:object="${coinPackage}"
+              method="post"
+              id="editPackageForm"
+            >
+              <input type="hidden" th:field="*{id}" />
+
+              <!-- Basic Information Section -->
+              <div class="form-section">
+                <h3 class="section-title">
+                  <i class="fas fa-info-circle"></i>
+                  Thông tin cơ bản
+                </h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="code"
+                      >Mã gói <span class="required">*</span></label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        id="code"
+                        th:field="*{code}"
+                        class="form-input"
+                        placeholder="VD: COIN-S"
+                        required
+                      />
+                      <button
+                        type="button"
+                        id="generateCodeBtn"
+                        class="secondary-btn"
+                        title="Tạo mã tự động"
+                      >
+                        <i class="fas fa-magic"></i>
+                      </button>
+                    </div>
+                    <div class="form-help">
+                      Mã gói phải là duy nhất, không được trùng lặp
+                    </div>
+                    <span
+                      th:if="${#fields.hasErrors('code')}"
+                      th:errors="*{code}"
+                      class="error-message"
+                    ></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="name"
+                      >Tên gói <span class="required">*</span></label
+                    >
+                    <input
+                      type="text"
+                      id="name"
+                      th:field="*{name}"
+                      class="form-input"
+                      placeholder="VD: Gói Starter"
+                      required
+                    />
+                    <span
+                      th:if="${#fields.hasErrors('name')}"
+                      th:errors="*{name}"
+                      class="error-message"
+                    ></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="description">Mô tả</label>
+                    <textarea
+                      id="description"
+                      th:field="*{description}"
+                      class="form-textarea"
+                      placeholder="Mô tả chi tiết về gói xu..."
+                      rows="3"
+                    ></textarea>
+                    <span
+                      th:if="${#fields.hasErrors('description')}"
+                      th:errors="*{description}"
+                      class="error-message"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pricing Section -->
+              <div class="form-section">
+                <h3 class="section-title">
+                  <i class="fas fa-tags"></i>
+                  Thông tin giá
+                </h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="coinAmount"
+                      >Số xu <span class="required">*</span></label
+                    >
+                    <input
+                      type="number"
+                      id="coinAmount"
+                      th:field="*{coinAmount}"
+                      class="form-input"
+                      placeholder="VD: 100"
+                      min="1"
+                      required
+                    />
+                    <span
+                      th:if="${#fields.hasErrors('coinAmount')}"
+                      th:errors="*{coinAmount}"
+                      class="error-message"
+                    ></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="originalPrice"
+                      >Giá gốc (₫) <span class="required">*</span></label
+                    >
+                    <input
+                      type="number"
+                      id="originalPrice"
+                      th:field="*{originalPrice}"
+                      class="form-input"
+                      placeholder="VD: 100000"
+                      min="0"
+                      required
+                    />
+                    <span
+                      th:if="${#fields.hasErrors('originalPrice')}"
+                      th:errors="*{originalPrice}"
+                      class="error-message"
+                    ></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="salePrice"
+                      >Giá bán (₫) <span class="required">*</span></label
+                    >
+                    <input
+                      type="number"
+                      id="salePrice"
+                      th:field="*{salePrice}"
+                      class="form-input"
+                      placeholder="VD: 90000"
+                      min="0"
+                      required
+                    />
+                    <div class="form-help">
+                      Giá bán phải nhỏ hơn hoặc bằng giá gốc
+                    </div>
+                    <span
+                      th:if="${#fields.hasErrors('salePrice')}"
+                      th:errors="*{salePrice}"
+                      class="error-message"
+                    ></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="discountPercent"
+                      >Phần trăm khuyến mãi (%)</label
+                    >
+                    <input
+                      type="number"
+                      id="discountPercent"
+                      th:field="*{discountPercent}"
+                      class="form-input"
+                      placeholder="VD: 10"
+                      min="0"
+                      max="100"
+                    />
+                    <span
+                      th:if="${#fields.hasErrors('discountPercent')}"
+                      th:errors="*{discountPercent}"
+                      class="error-message"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Settings Section -->
+              <div class="form-section">
+                <h3 class="section-title">
+                  <i class="fas fa-cog"></i>
+                  Cài đặt
+                </h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="status"
+                      >Trạng thái <span class="required">*</span></label
+                    >
+                    <select
+                      id="status"
+                      th:field="*{status}"
+                      class="form-input"
+                      required
+                    >
+                      <option value="">Chọn trạng thái</option>
+                      <option value="ACTIVE">Hoạt động</option>
+                      <option value="INACTIVE">Tạm ngưng</option>
+                      <option value="PROMOTION">Khuyến mãi</option>
+                    </select>
+                    <span
+                      th:if="${#fields.hasErrors('status')}"
+                      th:errors="*{status}"
+                      class="error-message"
+                    ></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="sortOrder">Thứ tự hiển thị</label>
+                    <input
+                      type="number"
+                      id="sortOrder"
+                      th:field="*{sortOrder}"
+                      class="form-input"
+                      placeholder="VD: 1"
+                      min="0"
+                    />
+                    <span
+                      th:if="${#fields.hasErrors('sortOrder')}"
+                      th:errors="*{sortOrder}"
+                      class="error-message"
+                    ></span>
+                  </div>
+
+                  <div class="form-group span-2">
+                    <label for="validFrom">Thời gian hiệu lực</label>
+                    <div class="date-range-group">
+                      <div class="date-inputs">
+                        <input
+                          type="datetime-local"
+                          id="validFrom"
+                          th:field="*{validFrom}"
+                          class="form-input"
+                          placeholder="Từ ngày"
+                        />
+                        <span class="date-separator">đến</span>
+                        <input
+                          type="datetime-local"
+                          id="validTo"
+                          th:field="*{validTo}"
+                          class="form-input"
+                          placeholder="Đến ngày"
+                        />
+                      </div>
+                    </div>
+                    <span
+                      th:if="${#fields.hasErrors('validFrom')}"
+                      th:errors="*{validFrom}"
+                      class="error-message"
+                    ></span>
+                    <span
+                      th:if="${#fields.hasErrors('validTo')}"
+                      th:errors="*{validTo}"
+                      class="error-message"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="secondary-btn"
+                  onclick="history.back()"
+                >
+                  Hủy bỏ
+                </button>
+                <button type="submit" class="primary-btn">
+                  Cập nhật gói xu
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
+    <script th:src="@{/js/admin/coin-packages-edit.js}"></script>
+  </body>
+</html>

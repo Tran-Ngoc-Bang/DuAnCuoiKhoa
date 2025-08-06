@@ -18,7 +18,10 @@ public class CoinPackage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 255, nullable = false)
+    @Column(name = "code", length = 50, nullable = false, unique = true)
+    private String code;
+
+    @Column(name = "name", length = 255, nullable = false, columnDefinition = "nvarchar(max)")
     private String name;
 
     @Column(name = "description", columnDefinition = "nvarchar(max)")
@@ -27,8 +30,14 @@ public class CoinPackage {
     @Column(name = "coin_amount", nullable = false)
     private Integer coinAmount;
 
-    @Column(name = "price", precision = 18, scale = 2, nullable = false)
-    private BigDecimal price;
+    @Column(name = "original_price", precision = 18, scale = 2, nullable = false)
+    private BigDecimal originalPrice;
+
+    @Column(name = "sale_price", precision = 18, scale = 2, nullable = false)
+    private BigDecimal salePrice;
+
+    @Column(name = "discount_percent", precision = 5, scale = 2)
+    private BigDecimal discountPercent = BigDecimal.ZERO;
 
     @Column(name = "currency", length = 10)
     private String currency = "VND";
@@ -36,11 +45,18 @@ public class CoinPackage {
     @Column(name = "bonus_coins")
     private Integer bonusCoins = 0;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status = "active";
+    private PackageStatus status = PackageStatus.ACTIVE;
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;
+
+    @Column(name = "valid_from")
+    private LocalDateTime validFrom;
+
+    @Column(name = "valid_to")
+    private LocalDateTime validTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
@@ -64,5 +80,27 @@ public class CoinPackage {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // Enum cho trạng thái gói xu
+    public enum PackageStatus {
+        ACTIVE("Hoạt động"),
+        INACTIVE("Tạm ngưng"),
+        PROMOTION("Khuyến mãi");
+
+        private final String displayName;
+
+        PackageStatus(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
+    // Helper method để lấy text trạng thái
+    public String getStatusText() {
+        return status != null ? status.getDisplayName() : "Không xác định";
     }
 }
