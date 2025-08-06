@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--  <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+    <title>Quản lý danh mục - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/categories.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+    <style type="text/css">
+    .pagination-btn.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a th:href="@{/admin/index}" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm..." class="search-input" id="headerSearchInput">
+                    <button id="headerSearchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn Anh</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item"><a th:href="@{/admin/index}"><i class="fas fa-tachometer-alt"></i><span>Bảng điều khiển</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/users}"><i class="fas fa-users"></i><span>Quản lý người dùng</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/documents}"><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a></li>
+                    <li class="admin-menu-item active"><a th:href="@{/admin/categories}"><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/tags}"><i class="fas fa-tags"></i><span>Quản lý tags</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/comments}"><i class="fas fa-comments"></i><span>Quản lý bình luận</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/reports}"><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/ip-bans}"><i class="fas fa-ban"></i><span>IP bị cấm</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/statistics}"><i class="fas fa-chart-bar"></i><span>Thống kê</span></a></li>
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item"><a th:href="@{/admin/coin-packages}"><i class="fas fa-box"></i><span>Gói xu</span></a></li>
+                            <li class="submenu-item"><a th:href="@{/admin/transactions}"><i class="fas fa-exchange-alt"></i><span>Giao dịch</span></a></li>
+                            <li class="submenu-item"><a th:href="@{/admin/withdrawals}"><i class="fas fa-money-bill-wave"></i><span>Yêu cầu rút tiền</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/settings}"><i class="fas fa-cog"></i><span>Cài đặt</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+         <main class="admin-content">
+        <div class="admin-content-header">
+            <h1 class="admin-page-title">Quản lý danh mục</h1>
+            <p class="admin-page-description">Quản lý tất cả danh mục và phân loại nội dung trong hệ thống</p>
+            <div class="admin-breadcrumbs">
+                <a th:href="@{/admin/index}">Admin</a>
+                <span>/</span>
+                <span>Quản lý danh mục</span>
+            </div>
+        </div>
+
+        <div class="management-tools">
+            <form id="filterForm" th:action="@{/admin/categories}" method="get">
+                <div class="search-filters">
+                    <div class="tool-item">
+                        <input type="text" name="filter" placeholder="Tìm kiếm danh mục..." class="search-input" id="searchInput" th:value="${filter}">
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select" id="statusFilter" name="status" onchange="this.form.submit()">
+                            <option value="all" th:selected="${status == 'all'}">Tất cả trạng thái</option>
+                            <option value="active" th:selected="${status == 'active'}">Hoạt động</option>
+                            <option value="inactive" th:selected="${status == 'inactive'}">Vô hiệu hóa</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select" id="sortFilter" name="sort" onchange="this.form.submit()">
+                            <option value="none" th:selected="${sort == 'none'}">Sắp xếp theo</option>
+                            <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên (A-Z)</option>
+                            <option value="name_desc" th:selected="${sort == 'name_desc'}">Tên (Z-A)</option>
+                            <option value="date_newest" th:selected="${sort == 'date_newest'}">Ngày tạo (Mới nhất)</option>
+                            <option value="date_oldest" th:selected="${sort == 'date_oldest'}">Ngày tạo (Cũ nhất)</option>
+                            <option value="count_most" th:selected="${sort == 'count_most'}">Số tài liệu (Nhiều nhất)</option>
+                            <option value="count_least" th:selected="${sort == 'count_least'}">Số tài liệu (Ít nhất)</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <div class="action-buttons">
+                <a th:href="@{/admin/categories/create}" class="add-new-btn" id="addCategoryBtn">
+                    <i class="fas fa-plus"></i> Thêm danh mục
+                </a>
+                <button id="deleteSelectedBtn" class="add-new-btn danger">Xóa mục đã chọn</button>
+                <button class="export-btn" id="exportCategoriesBtn">
+                    <i class="fas fa-download"></i> Xuất dữ liệu
+                </button>
+            </div>
+        </div>
+
+        <div class="management-view-options">
+            <button class="view-option active" data-view="grid">
+                <i class="fas fa-th-large"></i> Dạng lưới
+            </button>
+            <button class="view-option" data-view="table">
+                <i class="fas fa-list"></i> Dạng bảng
+            </button>
+        </div>
+
+        <div class="categories-grid-view" id="gridView">
+            <div class="categories-grid">
+                <div class="category-admin-card" th:each="cat : ${categories}">
+                    <div class="category-admin-header">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" class="category-checkbox" th:attr="data-category-id=${cat.id}" th:id="'cat-checkbox-' + ${cat.id}">
+                            <label th:for="'cat-checkbox-' + ${cat.id}"></label>
+                        </div>
+                        <div class="category-admin-actions">
+                            <a class="action-btn view" th:href="@{/admin/categories/details/{id}(id=${cat.id})}" title="Xem"><i class="fas fa-eye"></i></a>
+                            <a class="action-btn edit" th:href="@{/admin/categories/edit/{id}(id=${cat.id})}" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
+                            <button class="action-btn delete" th:attr="data-category-id=${cat.id}" title="Xóa"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="category-admin-content">
+                        <div class="category-info">
+                            <div class="category-icon"><i class="fas fa-folder"></i></div>
+                            <div class="category-details">
+                                <h4 class="category-admin-title" th:text="${cat.name}"></h4>
+                            </div>
+                        </div>
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Tài liệu</span>
+                                <span class="stat-value" th:text="${cat.documents}"></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Mục con</span>
+                                <span class="stat-value" th:text="${cat.subcategories}"></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Ngày tạo</span>
+                                <span class="stat-value" th:text="${cat.hierarchyCreatedAt != null} ? ${#temporals.format(cat.hierarchyCreatedAt, 'dd/MM/yyyy')} : ${#temporals.format(cat.createdAt, 'dd/MM/yyyy')}"></span>
+                            </div>
+                        </div>
+                        <div class="category-admin-status">
+                            <span th:class="'status-badge ' + ${cat.status == 'active' ? 'badge-success' : 'badge-danger'}" th:text="${cat.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"></span>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${categories.isEmpty()}" class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-folder"></i></div>
+                    <h3>Không có danh mục nào</h3>
+                    <p>Không tìm thấy danh mục nào phù hợp với bộ lọc hiện tại.</p>
+                    <a th:href="@{/admin/categories/create}" class="add-new-btn">Tạo danh mục đầu tiên</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-container" id="tableView" style="display: none;">
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="selectAll">
+                                    <label for="selectAll"></label>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="name">Danh mục <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="documents">Số tài liệu <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="subcategories">Danh mục con <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="hierarchyCreatedAt">Ngày tạo <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="status">Trạng thái <i class="fas fa-sort"></i></th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cat : ${categories}">
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="category-checkbox" th:attr="data-category-id=${cat.id}" th:id="'cat-checkbox-table-' + ${cat.id}">
+                                    <label th:for="'cat-checkbox-table-' + ${cat.id}"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon"><i class="fas fa-folder"></i></div>
+                                    <div class="category-details">
+                                        <h4 class="category-name" th:text="${cat.name}"></h4>
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:text="${cat.documents}"></td>
+                            <td><div class="stat-item"><i class="fas fa-sitemap"></i> <span th:text="${cat.subcategories}"></span></div></td>
+                            <td><div class="stat-item"><i class="fas fa-calendar-alt"></i> <span th:text="${cat.hierarchyCreatedAt != null} ? ${#temporals.format(cat.hierarchyCreatedAt, 'dd/MM/yyyy')} : ${#temporals.format(cat.createdAt, 'dd/MM/yyyy')}"></span></div></td>
+                            <td><span th:class="'status-badge ' + ${cat.status == 'active' ? 'badge-success' : 'badge-danger'}" th:text="${cat.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"></span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a class="action-btn view" th:href="@{/admin/categories/details/{id}(id=${cat.id})}" title="Xem"><i class="fas fa-eye"></i></a>
+                                    <a class="action-btn edit" th:href="@{/admin/categories/edit/{id}(id=${cat.id})}" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
+                                    <button class="action-btn delete" th:attr="data-category-id=${cat.id}" title="Xóa"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${categories.isEmpty()}">
+                            <td colspan="7">Không có danh mục nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination" th:if="${totalPages > 0}">
+            <a th:if="${currentPage > 1}"
+               th:href="@{/admin/categories(page=${currentPage - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'})}"
+               class="pagination-btn prev-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <a th:if="${currentPage == 1}" class="pagination-btn prev-btn disabled">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <div class="pagination-pages">
+                <!-- Trang đầu -->
+                <a th:if="${currentPage > 3}"
+                   th:href="@{/admin/categories(page=1, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'})}"
+                   class="pagination-btn page-btn">1</a>
+                <span th:if="${currentPage > 4}" class="pagination-ellipsis">...</span>
+                
+                <!-- Các trang gần currentPage -->
+                <a th:each="i : ${#numbers.sequence(currentPage - 2 > 1 ? currentPage - 2 : 1, currentPage + 2 < totalPages ? currentPage + 2 : totalPages)}"
+                   th:href="@{/admin/categories(page=${i}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'})}"
+                   th:class="${i == currentPage ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
+                   th:text="${i}"></a>
+                
+                <!-- Dấu ... và trang cuối -->
+                <span th:if="${currentPage < totalPages - 3}" class="pagination-ellipsis">...</span>
+                <a th:if="${currentPage < totalPages - 2}"
+                   th:href="@{/admin/categories(page=${totalPages}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'})}"
+                   class="pagination-btn page-btn" th:text="${totalPages}"></a>
+            </div>
+            <a th:if="${currentPage < totalPages}"
+               th:href="@{/admin/categories(page=${currentPage + 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'})}"
+               class="pagination-btn next-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            <a th:if="${currentPage == totalPages}" class="pagination-btn next-btn disabled">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+
+        <!-- Confirm Delete Modal -->
+        <div class="modal" id="confirmDeleteModal">
+            <div class="modal-overlay" data-modal-close></div>
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3>Xác nhận xóa</h3>
+                    <button class="modal-close" data-modal-close><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="confirm-delete-content">
+                        <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <p>Bạn có chắc chắn muốn xóa danh mục này không?</p>
+                        <p class="text-muted">Hành động này không thể hoàn tác.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" data-modal-close>Hủy</button>
+                    <button class="add-new-btn danger" id="confirmDeleteBtn">Xóa</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Action Modal -->
+        <div class="modal" id="bulkActionModal">
+            <div class="modal-overlay" data-modal-close></div>
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 id="bulkActionTitle">Xác nhận thao tác</h3>
+                    <button class="modal-close" data-modal-close><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bulk-action-content">
+                        <p id="bulkActionMessage">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+                        <div class="bulk-action-details">
+                            <strong>Số danh mục được chọn: <span id="bulkActionCount">0</span></strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" data-modal-close>Hủy</button>
+                    <button class="save-btn" id="confirmBulkActionBtn">Thực hiện</button>
+                </div>
+            </div>
+        </div>
+
+            <!-- Toast Container -->
+            <div class="toast-container" id="toastContainer"></div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/categories.js}"></script>
+</body>
+</html>
