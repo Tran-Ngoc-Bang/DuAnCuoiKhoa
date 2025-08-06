@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - EduShare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/main-fixes.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/footer-modern.css">
+    <link rel="stylesheet" href="../css/password-recovery.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">
+                        <div class="logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="../index.html" class="nav-link">Trang chủ</a>
+                    <a href="categories.html" class="nav-link">Danh mục</a>
+                    <a href="search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                    <a href="search.html?filter=premium" class="nav-link">Cao cấp</a>
+                    <a href="about.html" class="nav-link">Giới thiệu</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+                        <span class="dark-mode-handle" id="darkModeHandle"></span>
+                    </button>
+                    <a href="login.html" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
+                    <a href="register.html" class="register-btn active">
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </a>
+                </div>
+                <div class="mobile-menu-toggle" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="mobile-menu">
+            <div class="mobile-search">
+                <input type="text" placeholder="Tìm kiếm tài liệu...">
+                <button>
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <nav class="mobile-nav">
+                <a href="../index.html" class="mobile-nav-link">Trang chủ</a>
+                <a href="categories.html" class="mobile-nav-link">Danh mục</a>
+                <a href="search.html?sort=newest" class="mobile-nav-link">Tài liệu mới</a>
+                <a href="search.html?filter=premium" class="mobile-nav-link">Cao cấp</a>
+                <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+            </nav>
+            <div class="mobile-auth">
+                <a href="login.html" class="mobile-login-btn">Đăng nhập</a>
+                <a href="register.html" class="mobile-register-btn">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <section class="auth-section">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <div class="auth-header-content">
+                        <h1>Chia sẻ & Khám phá kiến thức</h1>
+                        <p>Cộng đồng chia sẻ tài liệu học tập hàng đầu dành cho sinh viên và chuyên gia Việt Nam</p>
+                    </div>
+                </div>
+                
+                <div class="auth-body">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">Đăng nhập</button>
+                        <button class="auth-tab" data-tab="register">
+                            <a href="register.html">Đăng ký</a>
+                        </button>
+                    </div>
+                    
+                    <div class="auth-forms">
+                        <!-- Auth Error/Success Message -->
+                        <div class="auth-error">
+                            <i class="fas fa-exclamation-circle"></i> 
+                            <span class="error-message">Thông tin đăng nhập không chính xác. Vui lòng thử lại.</span>
+                        </div>
+                        
+                        <div class="auth-success">
+                            <i class="fas fa-check-circle"></i>
+                            <span class="success-message">Đăng nhập thành công. Đang chuyển hướng...</span>
+                        </div>
+                        
+                        <!-- Login Form -->
+                        <form id="loginForm" class="auth-form active" data-form="login">
+                            <h2 class="form-title">Chào mừng trở lại</h2>
+                            <p class="form-description">Đăng nhập để tiếp tục hành trình học tập của bạn</p>
+                            
+                            <div class="form-group">
+                                <label for="loginEmail">Email</label>
+                                <div class="input-group">
+                                    <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" id="loginEmail" placeholder="Nhập địa chỉ email" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="loginPassword">Mật khẩu</label>
+                                <div class="input-group">
+                                    <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                    <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" required>
+                                    <button type="button" class="password-toggle">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="rememberMe">
+                                    <span>Ghi nhớ đăng nhập</span>
+                                </label>
+                                
+                                <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block login-submit-btn">
+                                Đăng nhập
+                            </button>
+                            
+                            <div class="form-footer">
+                                <p>Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a></p>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Feature Cards for Mobile -->
+                    <div class="features-area">
+                        <h3 class="features-title">Tại sao chọn EduShare?</h3>
+                        
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-card-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <h3>Tài liệu chất lượng cao</h3>
+                                <p>Tiếp cận kho tài liệu học tập đa dạng, được kiểm duyệt và đánh giá.</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-card-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <h3>Kiếm xu từ chia sẻ</h3>
+                                <p>Chia sẻ tài liệu của bạn và nhận xu từ mỗi lượt tải xuống.</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-card-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3>Cộng đồng học tập</h3>
+                                <p>Kết nối với người học, chuyên gia trong cùng lĩnh vực của bạn.</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-card-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <h3>Bảo mật cao</h3>
+                                <p>Dữ liệu của bạn luôn được bảo mật và an toàn trên hệ thống của chúng tôi.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-section">
+                            <div class="stat-item">
+                                <div class="stat-value">500K+</div>
+                                <div class="stat-label">thành viên</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">200K+</div>
+                                <div class="stat-label">tài liệu</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">5M+</div>
+                                <div class="stat-label">lượt tải</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Forgot Password Modal -->
+    <div class="modal" id="forgotPasswordModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Khôi phục mật khẩu</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Form chính -->
+                <div id="forgotPasswordFormContainer">
+                    <p class="modal-description">Vui lòng nhập địa chỉ email đã đăng ký. Chúng tôi sẽ gửi cho bạn liên kết để đặt lại mật khẩu.</p>
+                    
+                    <form id="forgotPasswordForm">
+                        <div class="form-group">
+                            <label for="resetEmail">Email</label>
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <input type="email" id="resetEmail" placeholder="Nhập địa chỉ email" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Thông báo thành công (sẽ hiển thị bằng JS) -->
+                <div id="forgotPasswordSuccess" class="forgot-success" style="display:none;">
+                    <div class="forgot-success-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h4 class="forgot-success-title">Yêu cầu đã được gửi!</h4>
+                    <p class="forgot-success-message">Chúng tôi đã gửi email chứa liên kết đặt lại mật khẩu đến địa chỉ của bạn. Vui lòng kiểm tra hộp thư và làm theo hướng dẫn.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline cancel-btn">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary submit-btn">Gửi yêu cầu</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CSS đã được chuyển sang file password-recovery.css -->
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon footer-logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </div>
+                    <p class="footer-description">
+                        Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất lượng cao.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Khám phá</h3>
+                    <ul class="footer-links">
+                        <li><a href="../pages/categories.html">Danh mục</a></li>
+                        <li><a href="../pages/search.html?sort=newest">Tài liệu mới</a></li>
+                        <li><a href="../pages/search.html?sort=popular">Tài liệu phổ biến</a></li>
+                        <li><a href="#">Tác giả hàng đầu</a></li>
+                        <li><a href="#">Sự kiện & Tin tức</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Thông tin</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chương trình tác giả</a></li>
+                        <li><a href="#">Hợp tác & Liên kết</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Liên hệ</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+                        <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+                        <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Liên hệ</a>
+                    <a href="#">Trợ giúp</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

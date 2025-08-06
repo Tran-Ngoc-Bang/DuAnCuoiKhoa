@@ -1,0 +1,413 @@
+/* Modern How It Works Section Styles */
+
+.how-it-works {
+  padding: 7rem 0;
+  background-color: #f9fafb;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background elements */
+.how-it-works::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0) 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.how-it-works::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  left: -50px;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(247, 37, 133, 0.08) 0%, rgba(247, 37, 133, 0) 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+/* Section header styling */
+.how-it-works .section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  position: relative;
+}
+
+.how-it-works .section-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  position: relative;
+  display: inline-block;
+}
+
+.how-it-works .section-title::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  width: 120px;
+  height: 5px;
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+  transform: translateX(-50%);
+  border-radius: 30px;
+  /* Remove animation for a cleaner look */
+}
+
+.how-it-works .section-description {
+  font-size: 1.2rem;
+  color: #4b5563;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Steps container styling */
+.steps-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.5rem;
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Timeline connector */
+.steps-container::before {
+  content: '';
+  position: absolute;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899, #10b981);
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+  border-radius: 4px;
+}
+
+/* Static dots on timeline instead of animation */
+.steps-container::after {
+  content: none; /* Remove the moving dot animation */
+}
+
+/* Add static dots for each step */
+.step::before {
+  content: '';
+  position: absolute;
+  top: -33px; /* Position above the step card */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #fff;
+  z-index: 3;
+  transition: all 0.3s ease;
+}
+
+.step:nth-child(1)::before {
+  box-shadow: 0 0 0 3px #4f46e5, 0 0 0 6px rgba(79, 70, 229, 0.1);
+}
+
+.step:nth-child(2)::before {
+  box-shadow: 0 0 0 3px #7c3aed, 0 0 0 6px rgba(124, 58, 237, 0.1);
+}
+
+.step:nth-child(3)::before {
+  box-shadow: 0 0 0 3px #ec4899, 0 0 0 6px rgba(236, 72, 153, 0.1);
+}
+
+.step:nth-child(4)::before {
+  box-shadow: 0 0 0 3px #10b981, 0 0 0 6px rgba(16, 185, 129, 0.1);
+}
+
+/* Enlarge dots on hover */
+.step:hover::before {
+  transform: translateX(-50%) scale(1.3);
+  box-shadow: 0 0 0 3px #4f46e5, 0 0 10px rgba(79, 70, 229, 0.6);
+}
+
+.step:nth-child(2):hover::before {
+  box-shadow: 0 0 0 3px #7c3aed, 0 0 10px rgba(124, 58, 237, 0.6);
+}
+
+.step:nth-child(3):hover::before {
+  box-shadow: 0 0 0 3px #ec4899, 0 0 10px rgba(236, 72, 153, 0.6);
+}
+
+.step:nth-child(4):hover::before {
+  box-shadow: 0 0 0 3px #10b981, 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+/* Step card styling */
+.step {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem 1.5rem 2rem;
+  position: relative;
+  z-index: 3;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transform: translateY(0);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: transparent;
+}
+
+/* Step number styling */
+.step-number {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #818cf8);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  z-index: 4;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+  border: 4px solid #ffffff;
+}
+
+.step:hover .step-number {
+  transform: scale(1.15) rotate(10deg);
+  box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+}
+
+/* Different colored step numbers */
+.step-number-secondary {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+}
+
+.step-number-accent {
+  background: linear-gradient(135deg, #ec4899, #f472b6);
+  box-shadow: 0 10px 20px rgba(236, 72, 153, 0.3);
+}
+
+.step-number-success {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Pulse animation for step numbers only on hover */
+.step-number::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.step:nth-child(1) .step-number::after {
+  border-color: rgba(79, 70, 229, 0.5);
+}
+
+.step:nth-child(2) .step-number::after {
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+.step:nth-child(3) .step-number::after {
+  border-color: rgba(236, 72, 153, 0.5);
+}
+
+.step:nth-child(4) .step-number::after {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Show pulse effect only on hover */
+.step:hover .step-number::after {
+  animation: pulse 1.5s infinite;
+  opacity: 0.8;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+/* Step content styling */
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.step-description {
+  color: #6b7280;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+/* Step icons */
+.step::before {
+  content: '';
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.1;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: all 0.3s ease;
+}
+
+.step:hover::before {
+  opacity: 0.2;
+  transform: scale(1.2);
+}
+
+.step:nth-child(1)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234f46e5'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.step:nth-child(2)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237c3aed'%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.step:nth-child(3)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ec4899'%3E%3Cpath d='M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.step:nth-child(4)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Footer Section styling */
+.section-footer {
+  margin-top: 4rem;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+
+.section-footer .primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-footer .primary-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s ease;
+}
+
+.section-footer .primary-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(79, 70, 229, 0.5);
+  background: linear-gradient(135deg, #4338ca, #6d28d9);
+}
+
+.section-footer .primary-btn:hover::before {
+  left: 100%;
+}
+
+.section-footer .primary-btn::after {
+  content: '→';
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.section-footer .primary-btn:hover::after {
+  transform: translateX(5px);
+}
+
+/* Responsive design */
+@media (max-width: 1100px) {
+  .steps-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .steps-container::before {
+    display: none;
+  }
+  
+  .steps-container::after {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .how-it-works {
+    padding: 5rem 0;
+  }
+  
+  .how-it-works .section-title {
+    font-size: 2.5rem;
+  }
+  
+  .step {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .steps-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .how-it-works .section-title {
+    font-size: 2rem;
+  }
+}

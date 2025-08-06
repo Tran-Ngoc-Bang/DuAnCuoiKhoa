@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý giao dịch - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/transactions.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Sidebar với menu doanh thu được mở rộng -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu open">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu visible">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item active">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Nội dung chính - Quản lý giao dịch -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Quản lý giao dịch</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <a href="transactions.html">Quản lý doanh thu</a>
+                    <span>/</span>
+                    <span>Giao dịch</span>
+                </div>
+            </div>
+
+            <!-- Date Range Picker -->
+            <div class="date-range-selector">
+                <div class="date-preset-btns">
+                    <button class="date-btn active" data-range="today">Hôm nay</button>
+                    <button class="date-btn" data-range="week">Tuần này</button>
+                    <button class="date-btn" data-range="month">Tháng này</button>
+                    <button class="date-btn" data-range="quarter">Quý này</button>
+                    <button class="date-btn" data-range="year">Năm nay</button>
+                    <button class="date-btn" data-range="custom">Tùy chỉnh</button>
+                </div>
+                <div class="custom-date-range" style="display: none;">
+                    <div class="date-inputs">
+                        <input type="text" id="startDate" placeholder="Từ ngày">
+                        <span>đến</span>
+                        <input type="text" id="endDate" placeholder="Đến ngày">
+                    </div>
+                    <button class="apply-date-btn">Áp dụng</button>
+                </div>
+            </div>
+
+            <!-- Transaction Management -->
+            <div class="section-header">
+                <h2>Quản lý giao dịch</h2>
+                <div class="section-actions">
+                    <button class="export-btn"><i class="fas fa-download"></i> Xuất báo cáo</button>
+                </div>
+            </div>
+
+            <!-- Transaction Filters -->
+            <div class="management-tools">
+                <div class="search-filters">
+                    <div class="tool-item">
+                        <input type="text" placeholder="Tìm theo ID/Người dùng..." class="search-input">
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả loại giao dịch</option>
+                            <option value="document">Mua tài liệu</option>
+                            <option value="subscription">Đăng ký gói</option>
+                            <option value="donation">Quyên góp</option>
+                            <option value="featured">Phí đăng tải</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="success">Thành công</option>
+                            <option value="pending">Đang xử lý</option>
+                            <option value="failed">Thất bại</option>
+                            <option value="refunded">Đã hoàn tiền</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-currency">
+                            <option value="all">Tất cả loại xu</option>
+                            <option value="gold">Gold Coin</option>
+                            <option value="blue">Blue Coin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="secondary-btn"><i class="fas fa-filter"></i> Lọc nâng cao</button>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="data-container">
+                <table class="data-table transactions-table">
+                    <thead>
+                        <tr>
+                            <th>ID Giao dịch</th>
+                            <th>Người dùng</th>
+                            <th>Loại</th>
+                            <th>Loại xu</th>
+                            <th>Số lượng</th>
+                            <th>Mô tả</th>
+                            <th>Số tiền</th>
+                            <th>Phương thức</th>
+                            <th>Trạng thái</th>
+                            <th>Thời gian</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Nạp Gold Coin -->
+                        <tr>
+                            <td>TRX-2025060301</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"
+                                        class="user-avatar large">
+
+                                    <span>Nguyễn Văn A</span>
+                                </div>
+                            </td>
+                            <td><span class="badge recharge">Nạp tiền</span></td>
+                            <td><span class="coin-badge gold">Gold</span></td>
+                            <td>300</td>
+                            <td>Nạp xu - Gói Medium</td>
+                            <td>140.000 ₫</td>
+                            <td><i class="fab fa-cc-visa"></i> Visa</td>
+                            <td><span class="status-badge completed">Hoàn thành</span></td>
+                            <td>03/06/2025 08:30</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-transaction" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn" title="Xuất hóa đơn"><i
+                                            class="fas fa-file-invoice"></i></button>
+                                    <button class="action-btn refund-btn" title="Hoàn tiền"><i
+                                            class="fas fa-undo"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Thưởng Blue Coin -->
+                        <tr>
+                            <td>TRX-2025060302</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Nguyễn Văn A</span>
+                                </div>
+                            </td>
+                            <td><span class="badge bonus">Thưởng</span></td>
+                            <td><span class="coin-badge blue">Blue</span></td>
+                            <td>45</td>
+                            <td>Thưởng xu - Gói Medium</td>
+                            <td>0 ₫</td>
+                            <td><i class="fas fa-gift"></i> Thưởng</td>
+                            <td><span class="status-badge completed">Hoàn thành</span></td>
+                            <td>03/06/2025 08:30</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-transaction" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Mua tài liệu bằng Gold Coin -->
+                        <tr>
+                            <td>TRX-2025060303</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Nguyễn Văn A</span>
+                                </div>
+                            </td>
+                            <td><span class="badge document">Tài liệu</span></td>
+                            <td><span class="coin-badge gold">Gold</span></td>
+                            <td>50</td>
+                            <td>Giáo trình Java nâng cao</td>
+                            <td>-</td>
+                            <td><i class="fas fa-coins"></i> Xu</td>
+                            <td><span class="status-badge completed">Hoàn thành</span></td>
+                            <td>03/06/2025 10:15</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-transaction" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn refund-btn" title="Hoàn xu"><i
+                                            class="fas fa-undo"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Chuyển đổi từ Gold sang Blue -->
+                        <tr>
+                            <td>TRX-2025060304</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Trần Thị B</span>
+                                </div>
+                            </td>
+                            <td><span class="badge exchange">Chuyển đổi</span></td>
+                            <td><span class="coin-badge gold">Gold</span> → <span class="coin-badge blue">Blue</span>
+                            </td>
+                            <td>100 → 120</td>
+                            <td>Đổi Gold Coin sang Blue Coin</td>
+                            <td>-</td>
+                            <td><i class="fas fa-exchange-alt"></i> Chuyển đổi</td>
+                            <td><span class="status-badge completed">Hoàn thành</span></td>
+                            <td>04/06/2025 14:20</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-transaction" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Rút tiền từ Gold Coin -->
+                        <tr>
+                            <td>TRX-2025060305</td>
+                            <td>
+                                <div class="user-info">
+                                    <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="User"
+                                        class="user-avatar">
+                                    <span>Trần Thị B</span>
+                                </div>
+                            </td>
+                            <td><span class="badge withdrawal">Rút tiền</span></td>
+                            <td><span class="coin-badge gold">Gold</span></td>
+                            <td>200</td>
+                            <td>Rút tiền về tài khoản ngân hàng</td>
+                            <td>90.000 ₫</td>
+                            <td><i class="fas fa-university"></i> Ngân hàng</td>
+                            <td><span class="status-badge pending">Đang xử lý</span></td>
+                            <td>05/06/2025 09:45</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-transaction" title="Xem chi tiết"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn approve" title="Duyệt"><i
+                                            class="fas fa-check"></i></button>
+                                    <button class="action-btn reject" title="Từ chối"><i
+                                            class="fas fa-times"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-pages">
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                    <span class="pagination-ellipsis">...</span>
+                    <button class="pagination-btn">10</button>
+                </div>
+                <button class="pagination-btn next-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/transactions.js"></script>
+
+    <!-- Modal Xem Chi Tiết Giao Dịch -->
+    <div class="modal" id="transactionDetailModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container wide-modal">
+            <div class="modal-header">
+                <h3>Chi tiết giao dịch</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="transaction-detail">
+                    <div class="transaction-header">
+                        <div class="transaction-id">
+                            <h4>#TRX-2025060301</h4>
+                            <span class="status-badge completed">Thành công</span>
+                        </div>
+                        <div class="transaction-date">03/06/2025 08:30</div>
+                    </div>
+
+                    <div class="transaction-info-grid">
+                        <div class="info-group">
+                            <h5>Thông tin giao dịch</h5>
+                            <div class="info-row">
+                                <div class="info-label">Loại giao dịch:</div>
+                                <div class="info-value"><span class="badge recharge">Nạp tiền</span></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Loại xu:</div>
+                                <div class="info-value"><span class="coin-badge gold">Gold</span></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Số lượng:</div>
+                                <div class="info-value">300</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Số tiền:</div>
+                                <div class="info-value">140.000 ₫</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Mô tả:</div>
+                                <div class="info-value">Nạp xu - Gói Medium</div>
+                            </div>
+                        </div>
+
+                        <div class="info-group">
+                            <h5>Thông tin thanh toán</h5>
+                            <div class="info-row">
+                                <div class="info-label">Phương thức:</div>
+                                <div class="info-value"><i class="fab fa-cc-visa"></i> Visa</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Mã giao dịch:</div>
+                                <div class="info-value">PAY123456789</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Thời gian thanh toán:</div>
+                                <div class="info-value">03/06/2025 08:29</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Đơn vị thanh toán:</div>
+                                <div class="info-value">VNPay</div>
+                            </div>
+                        </div>
+
+                        <div class="info-group">
+                            <h5>Thông tin người dùng</h5>
+                            <div class="user-info detail-user-info">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"
+                                    class="user-avatar large">
+                                <div class="user-details">
+                                    <div class="user-name">Nguyễn Văn A</div>
+                                    <div class="user-email">nguyenvana@example.com</div>
+                                    <div class="user-id">ID: USR123456</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn">Đóng</button>
+                <button class="primary-btn">Xuất hóa đơn</button>
+                <button class="danger-btn refund-btn">Hoàn tiền</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Hoàn Tiền -->
+    <div class="modal" id="refundModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Xác nhận hoàn tiền</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="refund-confirmation">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p class="confirmation-text">Bạn chắc chắn muốn hoàn tiền cho giao dịch <strong
+                            id="refundTransactionId">#TRX-2025060301</strong> với số tiền <strong
+                            id="refundAmount">150.000 ₫</strong>?</p>
+                    <p>Hành động này không thể hoàn tác.</p>
+
+                    <div class="form-group">
+                        <label for="refundReason">Lý do hoàn tiền</label>
+                        <select id="refundReason" class="form-select">
+                            <option value="">-- Chọn lý do --</option>
+                            <option value="user_request">Yêu cầu từ người dùng</option>
+                            <option value="wrong_product">Sản phẩm không đúng mô tả</option>
+                            <option value="technical_issue">Lỗi kỹ thuật</option>
+                            <option value="fraud">Gian lận</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="refundNote">Ghi chú</label>
+                        <textarea id="refundNote" placeholder="Nhập thêm thông tin chi tiết..."></textarea>
+                    </div>
+
+                    <div class="refund-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="notifyUser">
+                            <span class="checkmark"></span>
+                            Gửi email thông báo cho người dùng
+                        </label>
+
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="notifyCreator">
+                            <span class="checkmark"></span>
+                            Gửi email thông báo cho người tạo tài liệu
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn cancel-btn">Hủy bỏ</button>
+                <button class="danger-btn" id="confirmRefundBtn">Xác nhận hoàn tiền</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Chi tiết giao dịch -->
+    <div class="modal" id="transactionDetailModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container large">
+            <div class="modal-header">
+                <h3>Chi tiết giao dịch <span class="transaction-id">#TRX-2025060301</span></h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="transaction-detail">
+                    <!-- Thanh trạng thái và loại giao dịch -->
+                    <div class="transaction-type-banner">
+                        <div class="transaction-type">
+                            <div class="transaction-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div>
+                                <h4 class="transaction-type-title">Mua gói Coin</h4>
+                                <p class="transaction-time"><i class="far fa-clock"></i> 03/06/2025 14:30:45</p>
+                            </div>
+                        </div>
+                        <div class="transaction-status">
+                            <span class="status-badge completed">Đã hoàn thành</span>
+                        </div>
+                    </div>
+
+                    <!-- Tiến trình trạng thái -->
+                    <div class="transaction-status-timeline">
+                        <div class="timeline-header">
+                            <h4>Tiến trình giao dịch</h4>
+                        </div>
+                        <div class="timeline">
+                            <div class="timeline-step completed">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-file-invoice"></i>
+                                </div>
+                                <div class="timeline-date">03/06/2025 14:30:00</div>
+                                <div class="timeline-title">Tạo giao dịch</div>
+                                <div class="timeline-desc">Giao dịch đã được khởi tạo</div>
+                            </div>
+                            <div class="timeline-step completed">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="timeline-date">03/06/2025 14:30:25</div>
+                                <div class="timeline-title">Thanh toán</div>
+                                <div class="timeline-desc">Thanh toán thành công</div>
+                            </div>
+                            <div class="timeline-step completed">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="timeline-date">03/06/2025 14:30:35</div>
+                                <div class="timeline-title">Phân bổ Coins</div>
+                                <div class="timeline-desc">Coins đã được cộng vào tài khoản</div>
+                            </div>
+                            <div class="timeline-step completed">
+                                <div class="timeline-step-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="timeline-date">03/06/2025 14:30:45</div>
+                                <div class="timeline-title">Hoàn thành</div>
+                                <div class="timeline-desc">Giao dịch hoàn tất</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bảng thông tin chi tiết -->
+                    <div class="transaction-info-grid">
+                        <!-- Thông tin cơ bản -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-info-circle"></i> Thông tin cơ bản</h4>
+                            <div class="card-content">
+                                <div class="info-row">
+                                    <div class="info-label">Mã giao dịch:</div>
+                                    <div class="info-value">TRX-2025060301</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Loại giao dịch:</div>
+                                    <div class="info-value">Mua gói Coin</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Tên gói:</div>
+                                    <div class="info-value">Gold Package</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Số lượng Coin:</div>
+                                    <div class="info-value">1.000 Coins</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Coin bonus:</div>
+                                    <div class="info-value">+100 Coins (10%)</div>
+                                </div>
+                                <div class="info-divider"></div>
+                                <div class="info-row">
+                                    <div class="info-label">Đơn giá:</div>
+                                    <div class="info-value">1.000.000 VNĐ</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Khuyến mãi:</div>
+                                    <div class="info-value">-100.000 VNĐ (10%)</div>
+                                </div>
+                                <div class="info-row total-row">
+                                    <div class="info-label">Tổng thanh toán:</div>
+                                    <div class="info-value">900.000 VNĐ</div>
+                                </div>
+                                <div class="info-divider"></div>
+                                <div class="info-row">
+                                    <div class="info-label">Ngày tạo:</div>
+                                    <div class="info-value">03/06/2025 14:30:00</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Cập nhật lần cuối:</div>
+                                    <div class="info-value">03/06/2025 14:30:45</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Trạng thái:</div>
+                                    <div class="info-value"><span class="status-badge completed">Đã hoàn thành</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin người dùng -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-user-circle"></i> Thông tin người dùng</h4>
+                            <div class="card-content">
+                                <div class="user-profile-info">
+                                    <div class="user-avatar-container">
+                                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Avatar"
+                                            class="large-avatar">
+                                        <button class="view-profile-btn"><i class="fas fa-external-link-alt"></i> Xem hồ
+                                            sơ</button>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="info-row">
+                                            <div class="info-label">Họ tên:</div>
+                                            <div class="info-value">Nguyễn Văn A</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Email:</div>
+                                            <div class="info-value">nguyenvana@example.com</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">SĐT:</div>
+                                            <div class="info-value">0912345678</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Tham gia:</div>
+                                            <div class="info-value">15/01/2025</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Loại tài khoản:</div>
+                                            <div class="info-value"><span class="role-badge member">Thành viên</span>
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Số dư hiện tại:</div>
+                                            <div class="info-value">1.350 Coins</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Tổng giao dịch:</div>
+                                            <div class="info-value">5 giao dịch (4.500.000 VNĐ)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin thanh toán -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-credit-card"></i> Thông tin thanh toán</h4>
+                            <div class="card-content">
+                                <div class="info-row">
+                                    <div class="info-label">Phương thức:</div>
+                                    <div class="info-value"><i class="far fa-credit-card"></i> Thẻ tín dụng/ghi nợ</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Cổng thanh toán:</div>
+                                    <div class="info-value">VNPay</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Mã giao dịch cổng:</div>
+                                    <div class="info-value">VNPAY123456789</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Thông tin thẻ:</div>
+                                    <div class="info-value">**** **** **** 4567</div>
+                                </div>
+                                <div class="info-divider"></div>
+                                <div class="info-row">
+                                    <div class="info-label">IP thanh toán:</div>
+                                    <div class="info-value">192.168.1.105</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Thiết bị:</div>
+                                    <div class="info-value"><i class="fas fa-mobile-alt"></i> iPhone 13 (iOS 15.4)</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Trình duyệt:</div>
+                                    <div class="info-value">Chrome 98.0.4758.102</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Vị trí:</div>
+                                    <div class="info-value">Hồ Chí Minh, Việt Nam</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ghi chú và lịch sử -->
+                        <div class="transaction-info-card">
+                            <h4><i class="fas fa-clipboard-list"></i> Ghi chú & Lịch sử</h4>
+                            <div class="card-content">
+                                <div class="notes-section">
+                                    <h5>Ghi chú hệ thống</h5>
+                                    <div class="system-notes">
+                                        <div class="note-item">
+                                            <div class="note-time">03/06/2025 14:30:45</div>
+                                            <div class="note-content">Giao dịch hoàn thành tự động</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="add-note-section">
+                                        <h5>Thêm ghi chú</h5>
+                                        <div class="note-input-group">
+                                            <textarea placeholder="Nhập ghi chú của bạn..." rows="3"></textarea>
+                                            <button class="add-note-btn"><i class="fas fa-plus"></i> Thêm ghi
+                                                chú</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="action-buttons">
+                    <button class="danger-btn refund-btn"><i class="fas fa-undo"></i> Hoàn tiền</button>
+                    <button class="secondary-btn" id="transactionInvoiceBtn"><i class="fas fa-file-invoice"></i> Xuất
+                        hóa đơn</button>
+                    <button class="primary-btn" id="transactionEmailBtn"><i class="fas fa-envelope"></i> Gửi
+                        email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

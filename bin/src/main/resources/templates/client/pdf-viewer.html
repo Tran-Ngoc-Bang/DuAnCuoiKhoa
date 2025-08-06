@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Xem trước tài liệu - EduShare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- PDF.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.min.js"></script>
+  <script>
+    // Đặt worker path cho thư viện PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js';
+  </script>
+  
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="stylesheet" href="../css/main-fixes.css">
+  <link rel="stylesheet" href="../css/page-transition.css">
+  <link rel="stylesheet" href="../css/pdf-viewer.css">
+  <link rel="stylesheet" href="../css/pdf-viewer-new.css">
+  <link rel="stylesheet" href="../css/toast.css">
+  <link rel="stylesheet" href="../css/footer-modern.css">
+  <link rel="stylesheet" href="../css/pdf-viewer-enhanced-new.css">
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <a href="../index.html">
+          <div class="logo-icon">E</div>
+          <span class="logo-text">EduShare</span>
+        </a>
+      </div>
+      <nav class="main-nav">
+        <a href="../index.html" class="nav-link">Trang chủ</a>
+        <a href="categories.html" class="nav-link active">Danh mục</a>
+        <a href="search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+        <a href="search.html?filter=premium" class="nav-link">Cao cấp</a>
+        <a href="about.html" class="nav-link">Giới thiệu</a>
+      </nav>
+      <div class="header-actions">
+        <!-- Đã xóa ô tìm kiếm theo yêu cầu -->
+        <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+          <span class="dark-mode-handle" id="darkModeHandle"></span>
+        </button>
+        <a href="login.html" class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Đăng nhập
+        </a>
+        <a href="register.html" class="register-btn">
+          <i class="fas fa-user-plus"></i> Đăng ký
+        </a>
+      </div>
+      <div class="mobile-menu-toggle" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+      </div>
+    </div>
+  </div>
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="mobile-menu">
+    <div class="mobile-search">
+      <input type="text" placeholder="Tìm kiếm tài liệu...">
+      <button>
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+    <nav class="mobile-nav">
+      <a href="../index.html" class="mobile-nav-link">Trang chủ</a>
+      <a href="categories.html" class="mobile-nav-link active">Danh mục</a>
+      <a href="search.html?sort=newest" class="mobile-nav-link">Tài liệu mới</a>
+      <a href="search.html?filter=premium" class="mobile-nav-link">Cao cấp</a>
+      <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+    </nav>
+    <div class="mobile-auth">
+      <a href="login.html" class="mobile-login-btn">Đăng nhập</a>
+      <a href="register.html" class="mobile-register-btn">Đăng ký</a>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Document Viewer Section -->
+    <section class="document-viewer-section">
+      <div class="container">
+        <!-- Document Header -->
+        <div class="document-viewer-header">
+          <div class="document-title-wrapper">
+            <h1 class="document-title">Master Spring & Spring Boot với Hibernate & React</h1>
+            <div class="document-subtitle">
+              <div class="document-category">
+                <i class="fas fa-folder"></i> Lập trình Java
+              </div>
+              <div class="document-author">
+                <i class="fas fa-user"></i> Ranga Karnan
+              </div>
+              <div class="document-date">
+                <i class="fas fa-calendar-alt"></i> 15/01/2023
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-actions">
+            <a href="document-details.html" class="action-button secondary">
+              <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+            <button class="action-button primary" id="downloadDocument">
+              <i class="fas fa-download"></i> Tải xuống (25 xu)
+            </button>
+          </div>
+        </div>
+        
+        <!-- Document Viewer Container -->
+        <div class="document-viewer-container">
+          <!-- Document Toolbar -->
+          <div class="document-toolbar">
+            <div class="toolbar-left">
+              <div class="toolbar-group">
+                <button class="toolbar-button" id="toggleSidebar" title="Hiển thị bản xem trước">
+                  <i class="fas fa-th-large"></i>
+                </button>
+                <button class="toolbar-button" id="toggleNotes" title="Ghi chú">
+                  <i class="fas fa-sticky-note"></i>
+                </button>
+              </div>
+              
+              <div class="toolbar-group">
+                <button class="toolbar-button" id="searchDocument" title="Tìm kiếm trong tài liệu">
+                  <i class="fas fa-search"></i>
+                </button>
+                <button class="toolbar-button" id="printDocument" title="In tài liệu">
+                  <i class="fas fa-print"></i>
+                </button>
+                <button class="toolbar-button" id="downloadButton" title="Tải xuống">
+                  <i class="fas fa-download"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="toolbar-right">
+              <div class="page-navigation">
+                <button class="toolbar-button" id="prevPage" title="Trang trước">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <input type="number" class="current-page" id="currentPage" value="1" min="1">
+                <span class="total-pages">/ 45</span>
+                <button class="toolbar-button" id="nextPage" title="Trang sau">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+              
+              <div class="zoom-controls">
+                <button class="toolbar-button" id="zoomOut" title="Thu nhỏ">
+                  <i class="fas fa-search-minus"></i>
+                </button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="toolbar-button" id="zoomIn" title="Phóng to">
+                  <i class="fas fa-search-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Document Content Area -->
+          <div class="document-content-area">
+            <!-- Document Sidebar -->
+            <div class="document-sidebar" id="documentSidebar">
+              <div class="document-sidebar-header">
+                <h3 class="sidebar-title">Xem trước trang</h3>
+                <button class="close-sidebar" id="closeSidebar">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              
+              <div class="document-thumbs">
+                <div class="thumb-item active" data-page="1">
+                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+1" class="thumb-img" alt="Thumbnail trang 1">
+                  <span class="thumb-number">1</span>
+                </div>
+                <div class="thumb-item" data-page="2">
+                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+2" class="thumb-img" alt="Thumbnail trang 2">
+                  <span class="thumb-number">2</span>
+                </div>
+                <div class="thumb-item" data-page="3">
+                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+3" class="thumb-img" alt="Thumbnail trang 3">
+                  <span class="thumb-number">3</span>
+                </div>
+                <div class="thumb-item" data-page="4">
+                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+4" class="thumb-img" alt="Thumbnail trang 4">
+                  <span class="thumb-number">4</span>
+                </div>
+                <div class="thumb-item" data-page="5">
+                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+5" class="thumb-img" alt="Thumbnail trang 5">
+                  <span class="thumb-number">5</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Document Notes Panel -->
+            <div class="document-notes-panel" id="notesPanel">
+              <div class="notes-panel-header">
+                <h3 class="notes-panel-title">Ghi chú của tôi</h3>
+                <button class="close-notes" id="closeNotes">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              
+              <div class="notes-content">
+                <div class="note-form">
+                  <textarea class="note-textarea" placeholder="Thêm ghi chú của bạn cho trang này..." id="noteTextarea"></textarea>
+                  <button class="note-submit" id="saveNote">Lưu ghi chú</button>
+                </div>
+                
+                <div class="notes-list" id="notesList">
+                  <div class="note-item">
+                    <div class="note-meta">
+                      <span class="note-page">Trang 1</span>
+                      <span class="note-date">12/04/2023</span>
+                    </div>
+                    <div class="note-text">
+                      Phần giới thiệu về React Hooks rất hữu ích. Cần đọc kỹ phần này để hiểu các khái niệm cơ bản.
+                    </div>
+                  </div>
+                  
+                  <div class="note-item">
+                    <div class="note-meta">
+                      <span class="note-page">Trang 3</span>
+                      <span class="note-date">14/04/2023</span>
+                    </div>
+                    <div class="note-text">
+                      Hướng dẫn cài đặt và thiết lập môi trường Node.js rất chi tiết. Cần làm theo từng bước.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Document Main View -->
+            <div class="document-main-view" id="documentMainView">
+              <div class="document-pages">
+                <!-- Direct PDF preview - first 5 pages only -->
+                <div id="pdf-preview-container">
+                  <canvas id="pdf-canvas1" class="pdf-canvas"></canvas>
+                  <canvas id="pdf-canvas2" class="pdf-canvas"></canvas>
+                  <canvas id="pdf-canvas3" class="pdf-canvas"></canvas>
+                  <canvas id="pdf-canvas4" class="pdf-canvas"></canvas>
+                  <canvas id="pdf-canvas5" class="pdf-canvas"></canvas>
+                  
+                  <!-- Locked canvas placeholders for pages 6-7 -->
+                  <div class="document-page locked" id="page6">
+                    <div class="page-watermark">BẢN XEM TRƯỚC</div>
+                    <canvas id="pdf-canvas6" class="pdf-canvas"></canvas>
+                    <div class="page-number">6 / 45</div>
+                    <div class="page-lock-icon">
+                      <i class="fas fa-lock"></i>
+                    </div>
+                  </div>
+                  
+                  <div class="document-page locked" id="page7">
+                    <div class="page-watermark">BẢN XEM TRƯỚC</div>
+                    <canvas id="pdf-canvas7" class="pdf-canvas"></canvas>
+                    <div class="page-number">7 / 45</div>
+                    <div class="page-lock-icon">
+                      <i class="fas fa-lock"></i>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Locked pages overlay - thiết kế mới -->
+                <div class="locked-pages-overlay">
+                  <div class="locked-icon">
+                    <i class="fas fa-lock"></i>
+                  </div>
+                  <h3 class="locked-title">Đã hết phần xem trước</h3>
+                  <p class="locked-description">
+                    Tài liệu này có tổng cộng 45 trang, bạn đã xem 5/45 trang. Để truy cập toàn bộ nội dung, vui lòng tải xuống.
+                  </p>
+                  <button class="unlock-button" id="unlockDocumentBtn">
+                    <i class="fas fa-download"></i> Tải xuống đầy đủ (25 xu)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div class="pdf-viewer-loader" id="documentLoader" style="display: none;">
+          <div class="loader-spinner"></div>
+          <div class="loading-text">Đang tải trang...</div>
+        </div>
+        
+        <!-- Document Information -->
+        <div class="document-info-section">
+          <div class="section-header">
+            <h2 class="section-title">Thông tin tài liệu</h2>
+            <p class="section-description">Chi tiết về tài liệu và thông số kỹ thuật</p>
+          </div>
+          
+          <div class="info-cards">
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="info-content">
+                <h3>Tác giả</h3>
+                <p>Ranga Karnan</p>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <div class="info-content">
+                <h3>Ngày đăng</h3>
+                <p>15/01/2023</p>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              <div class="info-content">
+                <h3>Định dạng</h3>
+                <p>PDF (2.5 MB)</p>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-book"></i>
+              </div>
+              <div class="info-content">
+                <h3>Số trang</h3>
+                <p>45 trang</p>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-eye"></i>
+              </div>
+              <div class="info-content">
+                <h3>Lượt xem</h3>
+                <p>1,245</p>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-download"></i>
+              </div>
+              <div class="info-content">
+                <h3>Lượt tải</h3>
+                <p>267</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Related Documents -->
+        <div class="related-documents">
+          <div class="section-header">
+            <h2 class="section-title">Tài liệu liên quan</h2>
+            <p class="section-description">Các tài liệu cùng chủ đề có thể bạn quan tâm</p>
+          </div>
+          
+          <div class="document-grid">
+            <div class="document-card">
+              <div class="document-card-image">
+                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document Thumbnail">
+                <div class="document-badge premium">
+                  <i class="fas fa-coins"></i> 15 xu
+                </div>
+              </div>
+              <div class="document-card-content">
+                <div class="document-card-category">Công nghệ</div>
+                <h3 class="document-card-title">JavaScript: Những kỹ thuật nâng cao cho lập trình viên</h3>
+                <div class="document-card-meta">
+                  <div class="doc-meta-item">
+                    <i class="fas fa-star"></i> 4.7
+                  </div>
+                  <div class="doc-meta-item">
+                    <i class="fas fa-eye"></i> 823
+                  </div>
+                  <div class="doc-meta-author">
+                    <div class="doc-author-avatar">
+                      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" alt="Author">
+                    </div>
+                    <span class="doc-author-name">Lê Thị B</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="document-card">
+              <div class="document-card-image">
+                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document Thumbnail">
+                <div class="document-badge free">
+                  <i class="fas fa-unlock"></i> Miễn phí
+                </div>
+              </div>
+              <div class="document-card-content">
+                <div class="document-card-category">Lập trình</div>
+                <h3 class="document-card-title">Nhập môn HTML5 và CSS3 cho người mới bắt đầu</h3>
+                <div class="document-card-meta">
+                  <div class="meta-item">
+                    <i class="fas fa-star"></i> 4.5
+                  </div>
+                  <div class="meta-item">
+                    <i class="fas fa-eye"></i> 1,205
+                  </div>
+                  <div class="meta-author">
+                    <div class="author-avatar">
+                      <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" alt="Author">
+                    </div>
+                    <span class="author-name">Trần Văn C</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="document-card">
+              <div class="document-card-image">
+                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document Thumbnail">
+                <div class="document-badge premium">
+                  <i class="fas fa-coins"></i> 20 xu
+                </div>
+              </div>
+              <div class="document-card-content">
+                <div class="document-card-category">Web App</div>
+                <h3 class="document-card-title">Xây dựng API với NodeJS và Express</h3>
+                <div class="document-card-meta">
+                  <div class="meta-item">
+                    <i class="fas fa-star"></i> 4.8
+                  </div>
+                  <div class="meta-item">
+                    <i class="fas fa-eye"></i> 752
+                  </div>
+                  <div class="meta-author">
+                    <div class="author-avatar">
+                      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" alt="Author">
+                    </div>
+                    <span class="author-name">Phạm Thị D</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer Section -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-about">
+          <div class="footer-logo">
+            <div class="logo-icon footer-logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </div>
+          <p class="footer-description">
+            Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất lượng cao.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Khám phá</h3>
+          <ul class="footer-links">
+            <li><a href="../index.html">Trang chủ</a></li>
+            <li><a href="search.html?sort=newest">Tài liệu mới</a></li>
+            <li><a href="search.html?sort=popular">Phổ biến nhất</a></li>
+            <li><a href="categories.html">Danh mục</a></li>
+            <li><a href="upload.html">Đóng góp tài liệu</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Thông tin</h3>
+          <ul class="footer-links">
+            <li><a href="#">Giới thiệu</a></li>
+            <li><a href="#">Chính sách bảo mật</a></li>
+            <li><a href="#">Điều khoản sử dụng</a></li>
+            <li><a href="#">Chương trình tác giả</a></li>
+            <li><a href="#">Hợp tác & Liên kết</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Liên hệ</h3>
+          <ul class="contact-info">
+            <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+            <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+            <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <div class="copyright">
+          &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#">Chính sách bảo mật</a>
+          <a href="#">Điều khoản sử dụng</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Trợ giúp</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back To Top Button -->
+  <button id="backToTop" class="back-to-top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- Toasts -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="../js/main.js"></script>
+  <script src="../js/document-detail.js"></script>
+  <script src="../js/pdf-viewer-new.js"></script>
+</body>
+</html>

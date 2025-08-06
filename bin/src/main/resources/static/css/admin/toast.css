@@ -1,0 +1,102 @@
+
+/* Toast Notification Styles */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    min-width: 300px;
+    padding: 15px;
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideIn 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+}
+
+.toast.success::before { background: var(--admin-gradient-success); }
+.toast.error::before { background: var(--admin-gradient-danger); }
+.toast.info::before { background: var(--admin-gradient-info); }
+.toast.warning::before { background: var(--admin-gradient-warning); }
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast-icon {
+    font-size: 18px;
+}
+
+.toast.success .toast-icon { color: var(--admin-success); }
+.toast.error .toast-icon { color: var(--admin-danger); }
+.toast.info .toast-icon { color: var(--admin-info); }
+.toast.warning .toast-icon { color: var(--admin-warning); }
+
+.toast-message {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--gray-600);
+}
+
+.toast.hide {
+    animation: slideOut 0.3s ease-in-out forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+body.dark-mode .toast {
+    background-color: var(--gray-800);
+    color: var(--gray-100);
+}
+
+body.dark-mode .toast-close {
+    color: var(--gray-400);
+}

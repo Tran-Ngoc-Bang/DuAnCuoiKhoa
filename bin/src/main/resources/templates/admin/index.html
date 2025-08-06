@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng điều khiển Admin - EduShare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item active">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header"
+                style="margin-bottom: 1.8rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="admin-page-title"
+                        style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">
+                        Bảng điều khiển</h1>
+                    <div class="admin-breadcrumbs"
+                        style="display: flex; align-items: center; font-size: 0.85rem; color: #6b7280;">
+                        <a href="index.html" style="color: #4361ee; text-decoration: none; font-weight: 500;">Admin</a>
+                        <span style="margin: 0 0.5rem; color: #9ca3af;">/</span>
+                        <span style="color: #4b5563;">Bảng điều khiển</span>
+                    </div>
+                </div>
+                <div class="dashboard-actions" style="display: flex; gap: 1rem;">
+                    <button
+                        style="padding: 0.5rem 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #4b5563; cursor: pointer; transition: all 0.3s ease;">
+                        <i class="fas fa-calendar-alt" style="color: #4361ee;"></i> Hôm nay
+                    </button>
+                    <button
+                        style="padding: 0.5rem 1rem; background: #4361ee; border: none; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(67, 97, 238, 0.3);">
+                        <i class="fas fa-plus"></i> Tạo báo cáo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-card-info">
+                            <h3>Người dùng</h3>
+                            <div class="stat-number">5,482</div>
+                            <div class="stat-change up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>12.7%</span>
+                                <span class="stat-period">so với tháng trước</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <a href="users.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-card-info">
+                            <h3>Tài liệu</h3>
+                            <div class="stat-number">12,394</div>
+                            <div class="stat-change up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>8.4%</span>
+                                <span class="stat-period">so với tháng trước</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <a href="documents.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-card-info">
+                            <h3>Lượt tải</h3>
+                            <div class="stat-number">58,592</div>
+                            <div class="stat-change up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>15.3%</span>
+                                <span class="stat-period">so với tháng trước</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <a href="statistics.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-card-info">
+                            <h3>Doanh thu</h3>
+                            <div class="stat-number">3,458,921 VNĐ</div>
+                            <div class="stat-change down">
+                                <i class="fas fa-arrow-down"></i>
+                                <span>2.1%</span>
+                                <span class="stat-period">so với tháng trước</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <a href="revenue.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Charts -->
+            <div class="dashboard-charts">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Thống kê hoạt động</h3>
+                        <div class="chart-actions">
+                            <select class="chart-period-select">
+                                <option value="7days">7 ngày qua</option>
+                                <option value="30days" selected>30 ngày qua</option>
+                                <option value="3months">3 tháng qua</option>
+                                <option value="year">Năm nay</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="activityChart"></canvas>
+                        <div class="chart-placeholder">
+                            <div class="chart-mock"
+                                style="display: flex; align-items: flex-end; justify-content: space-between; height: 250px; padding: 1rem 0; position: relative;">
+                                <div
+                                    style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-bottom: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: space-between; z-index: 0; pointer-events: none;">
+                                    <div style="width: 100%; height: 1px; background: rgba(229, 231, 235, 0.5);"></div>
+                                    <div style="width: 100%; height: 1px; background: rgba(229, 231, 235, 0.5);"></div>
+                                    <div style="width: 100%; height: 1px; background: rgba(229, 231, 235, 0.5);"></div>
+                                    <div style="width: 100%; height: 1px; background: rgba(229, 231, 235, 0.5);"></div>
+                                </div>
+                                <div class="chart-bar"
+                                    style="height: 30%; width: 40px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, #4361ee 0%, #3f37c9 100%); margin: 0 5px; transition: all 0.3s ease; position: relative; z-index: 1;">
+                                    <div
+                                        style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563;">
+                                        30%</div>
+                                </div>
+                                <div class="chart-bar"
+                                    style="height: 50%; width: 40px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, #4361ee 0%, #3f37c9 100%); margin: 0 5px; transition: all 0.3s ease; position: relative; z-index: 1;">
+                                    <div
+                                        style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563;">
+                                        50%</div>
+                                </div>
+                                <div class="chart-bar"
+                                    style="height: 70%; width: 40px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, #4361ee 0%, #3f37c9 100%); margin: 0 5px; transition: all 0.3s ease; position: relative; z-index: 1;">
+                                    <div
+                                        style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563;">
+                                        70%</div>
+                                </div>
+                                <div class="chart-bar"
+                                    style="height: 60%; width: 40px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, #4361ee 0%, #3f37c9 100%); margin: 0 5px; transition: all 0.3s ease; position: relative; z-index: 1;">
+                                    <div
+                                        style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563;">
+                                        60%</div>
+                                </div>
+                                <div class="chart-bar"
+                                    style="height: 75%; width: 40px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, #4361ee 0%, #3f37c9 100%); margin: 0 5px; transition: all 0.3s ease; position: relative; z-index: 1;">
+                                    <div
+                                        style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563;">
+                                        75%</div>
+                                </div>
+                                <div class="chart-bar"
+                                    style="height: 85%; width: 40px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, #4361ee 0%, #3f37c9 100%); margin: 0 5px; transition: all 0.3s ease; position: relative; z-index: 1;">
+                                    <div
+                                        style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563;">
+                                        85%</div>
+                                </div>
+                                <div class="chart-bar"
+                                    style="height: 60%; width: 40px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, #4361ee 0%, #3f37c9 100%); margin: 0 5px; transition: all 0.3s ease; position: relative; z-index: 1;">
+                                    <div
+                                        style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: #4b5563;">
+                                        60%</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                                <span style="font-size: 0.75rem; color: #6b7280;">T2</span>
+                                <span style="font-size: 0.75rem; color: #6b7280;">T3</span>
+                                <span style="font-size: 0.75rem; color: #6b7280;">T4</span>
+                                <span style="font-size: 0.75rem; color: #6b7280;">T5</span>
+                                <span style="font-size: 0.75rem; color: #6b7280;">T6</span>
+                                <span style="font-size: 0.75rem; color: #6b7280;">T7</span>
+                                <span style="font-size: 0.75rem; color: #6b7280;">CN</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Phân loại tài liệu</h3>
+                        <div class="chart-actions">
+                            <button class="chart-filter-btn active">Premium</button>
+                            <button class="chart-filter-btn">Miễn phí</button>
+                            <button class="chart-filter-btn">Tất cả</button>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="categoryChart"></canvas>
+                        <div class="chart-placeholder">
+                            <div class="chart-pie" style="position: relative; width: 250px; height: 250px; margin: 0 auto; border-radius: 50%; background: conic-gradient(
+                                #4361ee 0deg 108deg,
+                                #f72585 108deg 180deg,
+                                #10b981 180deg 252deg,
+                                #f59e0b 252deg 324deg,
+                                #8b5cf6 324deg 360deg
+                            ); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);">
+                                <div
+                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                                    <span style="font-weight: 600; color: #2d3748;">Tổng: 253</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities & Tasks -->
+            <div class="dashboard-activities">
+                <div class="recent-activity-card">
+                    <div class="card-header">
+                        <h3>Hoạt động gần đây</h3>
+                        <button class="refresh-btn"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                    <div class="card-body">
+                        <ul class="activity-list">
+                            <li class="activity-item">
+                                <div class="activity-icon upload">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        <a href="#" class="activity-user">Nguyễn Văn B</a> đã đăng tải một tài liệu mới:
+                                        <a href="#" class="activity-document">Ngôn ngữ lập trình C++</a>
+                                    </div>
+                                    <div class="activity-time">
+                                        <i class="far fa-clock"></i>
+                                        <span>15 phút trước</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon register">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        <a href="#" class="activity-user">Trần Thị C</a> đã đăng ký tài khoản mới
+                                    </div>
+                                    <div class="activity-time">
+                                        <i class="far fa-clock"></i>
+                                        <span>45 phút trước</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon download">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        <a href="#" class="activity-user">Lê Văn D</a> đã tải xuống tài liệu: <a
+                                            href="#" class="activity-document">Kỹ thuật lập trình nâng cao</a>
+                                    </div>
+                                    <div class="activity-time">
+                                        <i class="far fa-clock"></i>
+                                        <span>2 giờ trước</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon payment">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        <a href="#" class="activity-user">Phạm Thị E</a> đã nạp 200,000 VNĐ vào tài
+                                        khoản
+                                    </div>
+                                    <div class="activity-time">
+                                        <i class="far fa-clock"></i>
+                                        <span>3 giờ trước</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon report">
+                                    <i class="fas fa-flag"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        <a href="#" class="activity-user">Vũ Văn F</a> đã báo cáo tài liệu: <a href="#"
+                                            class="activity-document">Tin học đại cương</a>
+                                    </div>
+                                    <div class="activity-time">
+                                        <i class="far fa-clock"></i>
+                                        <span>5 giờ trước</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <a href="activities.html">Xem tất cả hoạt động</a>
+                    </div>
+                </div>
+
+                <div class="pending-tasks-card">
+                    <div class="card-header">
+                        <h3>Công việc chờ xử lý</h3>
+                        <span class="badge">8</span>
+                    </div>
+                    <div class="card-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <div class="task-content">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" id="task1">
+                                        <label for="task1"></label>
+                                    </div>
+                                    <div class="task-text">
+                                        <h4>Duyệt tài liệu mới</h4>
+                                        <p>Duyệt 15 tài liệu mới được đăng tải</p>
+                                    </div>
+                                </div>
+                                <div class="task-meta">
+                                    <span class="task-priority high">Cao</span>
+                                    <span class="task-deadline">Hôm nay</span>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-content">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" id="task2">
+                                        <label for="task2"></label>
+                                    </div>
+                                    <div class="task-text">
+                                        <h4>Xem xét báo cáo vi phạm</h4>
+                                        <p>Kiểm tra 5 báo cáo vi phạm từ người dùng</p>
+                                    </div>
+                                </div>
+                                <div class="task-meta">
+                                    <span class="task-priority medium">Trung bình</span>
+                                    <span class="task-deadline">Hôm nay</span>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-content">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" id="task3">
+                                        <label for="task3"></label>
+                                    </div>
+                                    <div class="task-text">
+                                        <h4>Xác nhận giao dịch nạp tiền</h4>
+                                        <p>Xác nhận 3 giao dịch nạp tiền từ người dùng</p>
+                                    </div>
+                                </div>
+                                <div class="task-meta">
+                                    <span class="task-priority high">Cao</span>
+                                    <span class="task-deadline">Hôm nay</span>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-content">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" id="task4">
+                                        <label for="task4"></label>
+                                    </div>
+                                    <div class="task-text">
+                                        <h4>Cập nhật danh mục mới</h4>
+                                        <p>Thêm 2 danh mục mới vào hệ thống</p>
+                                    </div>
+                                </div>
+                                <div class="task-meta">
+                                    <span class="task-priority low">Thấp</span>
+                                    <span class="task-deadline">Ngày mai</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <a href="tasks.html">Xem tất cả công việc</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Documents Table -->
+            <div class="recent-documents-section">
+                <div class="section-header">
+                    <h3>Tài liệu mới đăng tải</h3>
+                    <a href="documents.html" class="view-all-btn">Xem tất cả</a>
+                </div>
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tên tài liệu</th>
+                                <th>Người đăng</th>
+                                <th>Danh mục</th>
+                                <th>Ngày đăng</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="document-info">
+                                        <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
+                                        <div class="document-name">Kỹ thuật lập trình nâng cao</div>
+                                    </div>
+                                </td>
+                                <td>Nguyễn Văn B</td>
+                                <td>Công nghệ thông tin</td>
+                                <td>10/04/2023</td>
+                                <td><span class="status-badge pending">Chờ duyệt</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="Duyệt"><i class="fas fa-check"></i></button>
+                                        <button class="action-btn" title="Từ chối"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="document-info">
+                                        <div class="document-icon"><i class="fas fa-file-word"></i></div>
+                                        <div class="document-name">Nguyên lý kế toán căn bản</div>
+                                    </div>
+                                </td>
+                                <td>Trần Thị C</td>
+                                <td>Kinh tế - Quản trị</td>
+                                <td>09/04/2023</td>
+                                <td><span class="status-badge approved">Đã duyệt</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="Chỉnh sửa"><i
+                                                class="fas fa-edit"></i></button>
+                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="document-info">
+                                        <div class="document-icon"><i class="fas fa-file-powerpoint"></i></div>
+                                        <div class="document-name">IELTS Writing: Cách đạt điểm 7.0+</div>
+                                    </div>
+                                </td>
+                                <td>Lê Văn D</td>
+                                <td>Ngoại ngữ</td>
+                                <td>08/04/2023</td>
+                                <td><span class="status-badge approved">Đã duyệt</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="Chỉnh sửa"><i
+                                                class="fas fa-edit"></i></button>
+                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="document-info">
+                                        <div class="document-icon"><i class="fas fa-file-excel"></i></div>
+                                        <div class="document-name">Phân tích dữ liệu với Python</div>
+                                    </div>
+                                </td>
+                                <td>Phạm Thị E</td>
+                                <td>Công nghệ thông tin</td>
+                                <td>07/04/2023</td>
+                                <td><span class="status-badge rejected">Từ chối</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="Lý do"><i
+                                                class="fas fa-info-circle"></i></button>
+                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="document-info">
+                                        <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
+                                        <div class="document-name">Giải tích 1 cho sinh viên kỹ thuật</div>
+                                    </div>
+                                </td>
+                                <td>Vũ Văn F</td>
+                                <td>Kỹ thuật - Công nghệ</td>
+                                <td>06/04/2023</td>
+                                <td><span class="status-badge approved">Đã duyệt</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="Chỉnh sửa"><i
+                                                class="fas fa-edit"></i></button>
+                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/index.js"></script>
+</body>
+
+</html>

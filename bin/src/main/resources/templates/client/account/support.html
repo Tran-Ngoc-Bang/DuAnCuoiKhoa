@@ -1,0 +1,2719 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>Hỗ trợ & Trợ giúp - EduShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts">
+    </link>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/main-fixes.css">
+    <link rel="stylesheet" href="../../css/account.css">
+    <link rel="stylesheet" href="../../css/footer-modern.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: rgba(67, 97, 238, 0.1);
+            --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --radius: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+
+        .dashboard-page {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .date-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--gray-600);
+            background-color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .refresh-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--primary);
+            background-color: var(--primary-light);
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .refresh-button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .dashboard-sidebar {
+            width: 280px;
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 0;
+            position: relative;
+            background-color: var(--primary-light);
+        }
+
+        .user-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-bottom: 0.5rem;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1rem;
+        }
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+        }
+
+        .user-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .user-status-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0.75rem 0;
+            margin: 0;
+        }
+
+        .sidebar-menu-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border-radius: 0;
+        }
+
+        .sidebar-menu-link:hover {
+            color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .sidebar-menu-link.active {
+            color: var(--primary);
+            background-color: var(--primary-light);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-menu-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .stat-card.success::before {
+            background: var(--success-gradient);
+        }
+
+        .stat-card.warning::before {
+            background: var(--warning-gradient);
+        }
+
+        .stat-card.danger::before {
+            background: var(--danger-gradient);
+        }
+
+        .stat-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-details {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.primary {
+            background: var(--primary-gradient);
+        }
+
+        .stat-icon.success {
+            background: var(--success-gradient);
+        }
+
+        .stat-icon.warning {
+            background: var(--warning-gradient);
+        }
+
+        .stat-icon.danger {
+            background: var(--danger-gradient);
+        }
+
+        .dashboard-section {
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+        .section-title-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--primary);
+        }
+
+        .section-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .view-all-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .view-all-link:hover {
+            color: var(--primary-dark);
+        }
+
+        .view-all-icon {
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .view-all-link:hover .view-all-icon {
+            transform: translateX(3px);
+        }
+
+        /* Quick Access Grid */
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .quick-access-card {
+            background-color: white;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-access-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .quick-access-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-access-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .quick-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem;
+            transition: var(--transition);
+        }
+
+        .quick-access-card:hover .quick-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .quick-access-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .quick-access-card p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* FAQ Styles */
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            color: var(--gray-400);
+            font-size: 0.9rem;
+        }
+
+        .search-box input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: 0.95rem;
+            width: 300px;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .faq-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .faq-category-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--gray-200);
+            background-color: white;
+            color: var(--gray-600);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .faq-category-btn:hover,
+        .faq-category-btn.active {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .faq-item {
+            background-color: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary-light);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: white;
+            transition: var(--transition);
+        }
+
+        .faq-question:hover {
+            background-color: var(--primary-light);
+        }
+
+        .faq-question h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        .faq-question i {
+            color: var(--primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 1.5rem;
+            max-height: 500px;
+        }
+
+        .faq-answer p,
+        .faq-answer ul,
+        .faq-answer ol {
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .faq-answer ul,
+        .faq-answer ol {
+            padding-left: 1.5rem;
+        }
+
+        .faq-answer li {
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-answer strong {
+            color: var(--gray-900);
+        }
+
+        /* Support Form */
+        .support-form-container {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+        }
+
+        .support-form {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .file-upload {
+            position: relative;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .file-upload-label {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        .file-upload-label i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-200);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        /* Guides Grid */
+        .guides-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .guide-card {
+            background-color: white;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .guide-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .guide-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .guide-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .guide-content p {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .guide-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+
+        .guide-time {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--gray-500);
+        }
+
+        .guide-level {
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .guide-level.beginner {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+
+        .guide-level.intermediate {
+            background-color: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .guide-level.advanced {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+
+        /* Troubleshooting */
+        .troubleshoot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .troubleshoot-category {
+            background-color: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+        }
+
+        .troubleshoot-category h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+        }
+
+        .troubleshoot-category h3 i {
+            color: var(--primary);
+        }
+
+        .troubleshoot-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .troubleshoot-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .troubleshoot-list li:last-child {
+            border-bottom: none;
+        }
+
+        .troubleshoot-list strong {
+            color: var(--gray-900);
+        }
+
+        /* Contact Grid */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .contact-card {
+            background-color: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .contact-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .contact-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin: 0 auto 1rem;
+        }
+
+        .contact-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-card p {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .quick-access-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .guides-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .troubleshoot-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .faq-categories {
+                flex-direction: column;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+
+        body {
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+
+        .dashboard-page {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .date-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--gray-600);
+            background-color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .refresh-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--primary);
+            background-color: var(--primary-light);
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .refresh-button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .dashboard-sidebar {
+            width: 280px;
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 0;
+            position: relative;
+            background-color: var(--primary-light);
+        }
+
+        .user-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-bottom: 0.5rem;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1rem;
+        }
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+        }
+
+        .user-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .user-status-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0.75rem 0;
+            margin: 0;
+        }
+
+        .sidebar-menu-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            padding-left: 0.5rem;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-menu-link:hover {
+            color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .sidebar-menu-link.active {
+            color: var(--primary);
+            font-weight: 600;
+            background-color: var(--primary-light);
+        }
+
+        .sidebar-menu-link.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--primary);
+        }
+
+        .sidebar-icon {
+            width: 1.25rem;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        .sidebar-badge {
+            margin-left: auto;
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+        }
+
+        .dashboard-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: 1px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-icon.primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .stat-icon.success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .stat-icon.warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .stat-icon.danger {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .stat-info {
+            width: 100%;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+            max-width: 100%;
+            display: block;
+            line-height: 1.2;
+            white-space: normal;
+        }
+
+        .stat-trend {
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .trend-positive {
+            color: var(--success);
+        }
+
+        .trend-negative {
+            color: var(--danger);
+        }
+
+        .trend-icon {
+            margin-right: 0.25rem;
+        }
+
+        .trend-period {
+            color: var(--gray-500);
+            margin-left: 0.25rem;
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            background-color: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--gray-100);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title-icon {
+            margin-right: 0.75rem;
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .section-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button {
+            padding: 0.5rem 0.875rem;
+            border-radius: var(--radius);
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .time-range-select {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-300);
+            background-color: var(--white);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            cursor: pointer;
+        }
+
+        /* Activity Chart */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            border-radius: var(--radius-lg);
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .activity-item:hover {
+            background-color: var(--gray-50);
+            border-color: var(--gray-200);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .activity-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-meta {
+            display: flex;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            gap: 1rem;
+        }
+
+        .activity-meta-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-meta-icon {
+            margin-right: 0.25rem;
+        }
+
+        /* Document Cards */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+        }
+
+        .document-card {
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border: 1px solid var(--gray-100);
+        }
+
+        .document-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .document-image {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .document-image::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 50%);
+            z-index: 1;
+        }
+
+        .document-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .document-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .document-title {
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--gray-900);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .document-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-bottom: 0.75rem;
+        }
+
+        .document-meta-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .document-meta-icon {
+            margin-right: 0.25rem;
+        }
+
+        .document-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .action-button {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--gray-100);
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-all-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem;
+            margin-top: 1.25rem;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radius-lg);
+            transition: var(--transition);
+            background: var(--primary-gradient);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-all-link:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            filter: brightness(1.05);
+        }
+
+        .view-all-icon {
+            margin-left: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .view-all-link:hover .view-all-icon {
+            transform: translateX(3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .documents-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-content {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .sidebar-menu-title {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-item {
+                flex-direction: column;
+            }
+
+            .activity-icon {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .dashboard-page {
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../../index.html">
+                        <div class="logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </a>
+                </div>
+
+
+
+
+                <nav class="main-nav">
+                    <a href="../../index.html" class="nav-link">Trang chủ</a>
+                    <a href="../categories.html" class="nav-link">Danh mục</a>
+                    <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                    <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+                    <a href="../about.html" class="nav-link">Giới thiệu</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+                        <span class="dark-mode-handle" id="darkModeHandle"></span>
+                    </button>
+                    <a href="../login.html" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
+                    <a href="../register.html" class="register-btn active">
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </a>
+                </div>
+                <div class="mobile-menu-toggle" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="mobile-menu">
+            <div class="mobile-search">
+                <input type="text" placeholder="Tìm kiếm tài liệu...">
+                <button>
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <nav class="mobile-nav">
+                <a href="../../index.html" class="nav-link">Trang chủ</a>
+                <a href="../categories.html" class="nav-link">Danh mục</a>
+                <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+                <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+            </nav>
+            <div class="mobile-auth">
+                <a href="../login.html" class="mobile-login-btn">Đăng nhập</a>
+                <a href="../register.html" class="mobile-register-btn">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container dashboard-page">
+            <div class="dashboard-content">
+                <!-- Sidebar -->
+                <div class="dashboard-sidebar">
+                    <div class="sidebar-header">
+                        <div class="user-profile">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                                alt="User avatar" class="user-avatar">
+                            <div class="user-name">Nguyễn Văn Anh</div>
+                            <div class="user-email">nguyenvananh@gmail.com</div>
+                            <div class="user-status">
+                                <span class="user-status-icon"></span>
+                                Tài khoản Premium
+                            </div>
+                        </div>
+                        <div class="sidebar-title">Quản lý tài khoản</div>
+                    </div>
+
+                    <ul class="sidebar-menu">
+                        <li class="sidebar-menu-title">Tài liệu</li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="dashboard.html" class="sidebar-menu-link">
+                                <i class="fas fa-tachometer-alt sidebar-icon"></i>
+                                Tổng quan
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="documents.html" class="sidebar-menu-link">
+                                <i class="fas fa-file-alt sidebar-icon"></i>
+                                Tài liệu của tôi
+                                <span class="sidebar-badge">15</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="../search.html" class="sidebar-menu-link">
+                                <i class="fas fa-search sidebar-icon"></i>
+                                Khám phá tài liệu
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="../upload.html" class="sidebar-menu-link">
+                                <i class="fas fa-cloud-upload-alt sidebar-icon"></i>
+                                Tải lên tài liệu
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="favorites.html" class="sidebar-menu-link">
+                                <i class="fas fa-bookmark sidebar-icon"></i>
+                                Tài liệu đã lưu
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-title">Tài khoản</li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="profile.html" class="sidebar-menu-link">
+                                <i class="fas fa-user sidebar-icon"></i>
+                                Thông tin cá nhân
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="transactions.html" class="sidebar-menu-link">
+                                <i class="fas fa-history sidebar-icon"></i>
+                                Lịch sử giao dịch
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="recharge.html" class="sidebar-menu-link">
+                                <i class="fas fa-coins sidebar-icon"></i>
+                                Nạp xu
+                                <span class="sidebar-badge">250</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-title">Cài đặt</li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="security.html" class="sidebar-menu-link">
+                                <i class="fas fa-shield-alt sidebar-icon"></i>
+                                Bảo mật
+                            </a>
+                        </li>
+
+                        <li class="sidebar-menu-item">
+                            <a href="notifications.html" class="sidebar-menu-link">
+                                <i class="fas fa-bell sidebar-icon"></i>
+                                Thông báo
+                            </a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="options.html" class="sidebar-menu-link">
+                                <i class="fas fa-cog sidebar-icon"></i>
+                                Tùy chọn
+                            </a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="support.html" class="sidebar-menu-link active">
+                                <i class="fas fa-headset sidebar-icon"></i>
+                                Hỗ trợ
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="dashboard-main">
+
+
+                    <div class="dashboard-main">
+                        <!-- Stats Cards -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-info">
+                                    <div class="stat-details">
+                                        <div class="stat-number">24/7</div>
+                                        <div class="stat-label">Hỗ trợ trực tuyến</div>
+                                        <div class="stat-change positive">
+                                            <i class="fas fa-arrow-up"></i>
+                                            Luôn sẵn sàng
+                                        </div>
+                                    </div>
+                                    <div class="stat-icon primary">
+                                        <i class="fas fa-headset"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card success">
+                                <div class="stat-info">
+                                    <div class="stat-details">
+                                        <div class="stat-number">98%</div>
+                                        <div class="stat-label">Độ hài lòng khách hàng</div>
+                                        <div class="stat-change positive">
+                                            <i class="fas fa-arrow-up"></i>
+                                            +2% tuần này
+                                        </div>
+                                    </div>
+                                    <div class="stat-icon success">
+                                        <i class="fas fa-smile"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card warning">
+                                <div class="stat-info">
+                                    <div class="stat-details">
+                                        <div class="stat-number">
+                                            < 5min</div>
+                                                <div class="stat-label">Thời gian phản hồi</div>
+                                                <div class="stat-change positive">
+                                                    <i class="fas fa-arrow-down"></i>
+                                                    Nhanh hơn 30%
+                                                </div>
+                                        </div>
+                                        <div class="stat-icon warning">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card danger">
+                                    <div class="stat-info">
+                                        <div class="stat-details">
+                                            <div class="stat-number">150+</div>
+                                            <div class="stat-label">Hướng dẫn chi tiết</div>
+                                            <div class="stat-change positive">
+                                                <i class="fas fa-arrow-up"></i>
+                                                +12 bài mới
+                                            </div>
+                                        </div>
+                                        <div class="stat-icon danger">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Access Support -->
+                            <div class="dashboard-section">
+                                <div class="section-header">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-rocket section-title-icon"></i>
+                                        Truy cập nhanh
+                                    </h2>
+                                </div>
+                                <div class="quick-access-grid">
+                                    <a href="#faq" class="quick-access-card">
+                                        <div class="quick-icon">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                        <h3>Câu hỏi thường gặp</h3>
+                                        <p>Tìm câu trả lời nhanh cho các vấn đề phổ biến</p>
+                                    </a>
+                                    <a href="#contact" class="quick-access-card">
+                                        <div class="quick-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <h3>Liên hệ hỗ trợ</h3>
+                                        <p>Gửi yêu cầu hỗ trợ trực tiếp đến đội ngũ</p>
+                                    </a>
+                                    <a href="#guides" class="quick-access-card">
+                                        <div class="quick-icon">
+                                            <i class="fas fa-book-open"></i>
+                                        </div>
+                                        <h3>Hướng dẫn sử dụng</h3>
+                                        <p>Học cách sử dụng tất cả tính năng của EduShare</p>
+                                    </a>
+                                    <a href="#troubleshoot" class="quick-access-card">
+                                        <div class="quick-icon">
+                                            <i class="fas fa-tools"></i>
+                                        </div>
+                                        <h3>Khắc phục sự cố</h3>
+                                        <p>Giải quyết các vấn đề kỹ thuật thường gặp</p>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- FAQ Section -->
+                            <div class="dashboard-section" id="faq">
+                                <div class="section-header">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-question-circle section-title-icon"></i>
+                                        Câu hỏi thường gặp
+                                    </h2>
+                                    <div class="section-actions">
+                                        <div class="search-box">
+                                            <i class="fas fa-search"></i>
+                                            <input type="text" placeholder="Tìm kiếm câu hỏi..." id="faqSearch">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="faq-categories">
+                                    <button class="faq-category-btn active" data-category="all">Tất cả</button>
+                                    <button class="faq-category-btn" data-category="account">Tài khoản</button>
+                                    <button class="faq-category-btn" data-category="documents">Tài liệu</button>
+                                    <button class="faq-category-btn" data-category="payment">Thanh toán</button>
+                                    <button class="faq-category-btn" data-category="technical">Kỹ thuật</button>
+                                </div>
+                                <div class="faq-list">
+                                    <div class="faq-item" data-category="account">
+                                        <div class="faq-question">
+                                            <h3>Làm thế nào để đăng ký tài khoản EduShare?</h3>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="faq-answer">
+                                            <p>Để đăng ký tài khoản EduShare, bạn có thể:</p>
+                                            <ul>
+                                                <li>Truy cập trang đăng ký tại
+                                                    <strong>eduShare.com/register</strong>
+                                                </li>
+                                                <li>Điền đầy đủ thông tin: email, mật khẩu, họ tên</li>
+                                                <li>Xác nhận email qua liên kết được gửi đến hộp thư</li>
+                                                <li>Hoàn tất thiết lập hồ sơ cá nhân</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="faq-item" data-category="account">
+                                        <div class="faq-question">
+                                            <h3>Tôi quên mật khẩu, làm sao để khôi phục?</h3>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="faq-answer">
+                                            <p>Để khôi phục mật khẩu:</p>
+                                            <ol>
+                                                <li>Truy cập trang đăng nhập</li>
+                                                <li>Nhấp vào "Quên mật khẩu?"</li>
+                                                <li>Nhập email đã đăng ký</li>
+                                                <li>Kiểm tra email và làm theo hướng dẫn</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    <div class="faq-item" data-category="documents">
+                                        <div class="faq-question">
+                                            <h3>Làm thế nào để tải lên tài liệu?</h3>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="faq-answer">
+                                            <p>Bạn có thể tải lên tài liệu bằng cách:</p>
+                                            <ul>
+                                                <li>Truy cập "Tài liệu của tôi" trong dashboard</li>
+                                                <li>Nhấp nút "Tải lên tài liệu"</li>
+                                                <li>Chọn file từ máy tính (hỗ trợ PDF, DOC, PPT)</li>
+                                                <li>Điền thông tin mô tả và danh mục</li>
+                                                <li>Nhấp "Đăng tải" để hoàn tất</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="faq-item" data-category="payment">
+                                        <div class="faq-question">
+                                            <h3>Các phương thức thanh toán được hỗ trợ?</h3>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="faq-answer">
+                                            <p>EduShare hỗ trợ các phương thức thanh toán sau:</p>
+                                            <ul>
+                                                <li><strong>Thẻ tín dụng/ghi nợ:</strong> Visa, MasterCard, JCB
+                                                </li>
+                                                <li><strong>Ví điện tử:</strong> MoMo, ZaloPay, ViettelPay</li>
+                                                <li><strong>Internet Banking:</strong> Các ngân hàng lớn</li>
+                                                <li><strong>Thẻ cào điện thoại:</strong> Viettel, Mobifone,
+                                                    Vinaphone</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="faq-item" data-category="technical">
+                                        <div class="faq-question">
+                                            <h3>Tại sao tôi không thể tải xuống tài liệu?</h3>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="faq-answer">
+                                            <p>Có thể do một số nguyên nhân sau:</p>
+                                            <ul>
+                                                <li>Không đủ điểm trong tài khoản</li>
+                                                <li>Kết nối mạng không ổn định</li>
+                                                <li>Trình duyệt đang chặn popup</li>
+                                                <li>Tài liệu đã bị gỡ xuống</li>
+                                            </ul>
+                                            <p>Hãy thử làm mới trang hoặc liên hệ hỗ trợ nếu vẫn gặp vấn đề.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Support Contact Form -->
+                            <div class="dashboard-section" id="contact">
+                                <div class="section-header">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-envelope section-title-icon"></i>
+                                        Gửi yêu cầu hỗ trợ
+                                    </h2>
+                                </div>
+                                <div class="support-form-container">
+                                    <form class="support-form" id="supportForm">
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label for="supportName">Họ tên *</label>
+                                                <input type="text" id="supportName" name="name" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="supportEmail">Email *</label>
+                                                <input type="email" id="supportEmail" name="email" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="supportCategory">Loại vấn đề *</label>
+                                                <select id="supportCategory" name="category" required>
+                                                    <option value="">Chọn loại vấn đề</option>
+                                                    <option value="account">Vấn đề tài khoản</option>
+                                                    <option value="payment">Thanh toán & nạp điểm</option>
+                                                    <option value="document">Tài liệu & tải xuống</option>
+                                                    <option value="technical">Lỗi kỹ thuật</option>
+                                                    <option value="feature">Đề xuất tính năng</option>
+                                                    <option value="other">Khác</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="supportPriority">Mức độ ưu tiên</label>
+                                                <select id="supportPriority" name="priority">
+                                                    <option value="low">Thấp</option>
+                                                    <option value="medium" selected>Trung bình</option>
+                                                    <option value="high">Cao</option>
+                                                    <option value="urgent">Khẩn cấp</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="supportSubject">Tiêu đề *</label>
+                                            <input type="text" id="supportSubject" name="subject" required
+                                                placeholder="Mô tả ngắn gọn vấn đề của bạn">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="supportMessage">Mô tả chi tiết *</label>
+                                            <textarea id="supportMessage" name="message" rows="6" required
+                                                placeholder="Mô tả chi tiết vấn đề bạn gặp phải, các bước đã thực hiện, và kết quả mong muốn..."></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="supportAttachment">Đính kèm file (tùy chọn)</label>
+                                            <div class="file-upload">
+                                                <input type="file" id="supportAttachment" name="attachment" multiple
+                                                    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                                                <label for="supportAttachment" class="file-upload-label">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                    <span>Chọn file hoặc kéo thả vào đây</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="button" class="btn-secondary" onclick="resetForm()">
+                                                <i class="fas fa-undo"></i>
+                                                Đặt lại
+                                            </button>
+                                            <button type="submit" class="btn-primary">
+                                                <i class="fas fa-paper-plane"></i>
+                                                Gửi yêu cầu
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- User Guides -->
+                            <div class="dashboard-section" id="guides">
+                                <div class="section-header">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-book-open section-title-icon"></i>
+                                        Hướng dẫn sử dụng
+                                    </h2>
+                                    <div class="section-actions">
+                                        <a href="#" class="view-all-link">
+                                            Xem tất cả
+                                            <i class="fas fa-arrow-right view-all-icon"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="guides-grid">
+                                    <div class="guide-card">
+                                        <div class="guide-icon">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                        <div class="guide-content">
+                                            <h3>Bắt đầu với EduShare</h3>
+                                            <p>Hướng dẫn đăng ký tài khoản và thiết lập hồ sơ cá nhân đầy đủ</p>
+                                            <div class="guide-meta">
+                                                <span class="guide-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    5 phút đọc
+                                                </span>
+                                                <span class="guide-level beginner">Cơ bản</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="guide-card">
+                                        <div class="guide-icon">
+                                            <i class="fas fa-upload"></i>
+                                        </div>
+                                        <div class="guide-content">
+                                            <h3>Tải lên tài liệu</h3>
+                                            <p>Cách tải lên, quản lý và chia sẻ tài liệu hiệu quả trên nền tảng
+                                            </p>
+                                            <div class="guide-meta">
+                                                <span class="guide-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    8 phút đọc
+                                                </span>
+                                                <span class="guide-level intermediate">Trung cấp</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="guide-card">
+                                        <div class="guide-icon">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                        <div class="guide-content">
+                                            <h3>Tìm kiếm tài liệu</h3>
+                                            <p>Sử dụng bộ lọc và tìm kiếm nâng cao để tìm tài liệu phù hợp</p>
+                                            <div class="guide-meta">
+                                                <span class="guide-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    6 phút đọc
+                                                </span>
+                                                <span class="guide-level intermediate">Trung cấp</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="guide-card">
+                                        <div class="guide-icon">
+                                            <i class="fas fa-coins"></i>
+                                        </div>
+                                        <div class="guide-content">
+                                            <h3>Hệ thống điểm và thanh toán</h3>
+                                            <p>Hiểu về hệ thống điểm, cách nạp tiền và sử dụng hiệu quả</p>
+                                            <div class="guide-meta">
+                                                <span class="guide-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    10 phút đọc
+                                                </span>
+                                                <span class="guide-level advanced">Nâng cao</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="guide-card">
+                                        <div class="guide-icon">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="guide-content">
+                                            <h3>Bảo mật tài khoản</h3>
+                                            <p>Thiết lập bảo mật 2 lớp và bảo vệ tài khoản của bạn</p>
+                                            <div class="guide-meta">
+                                                <span class="guide-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    7 phút đọc
+                                                </span>
+                                                <span class="guide-level intermediate">Trung cấp</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="guide-card">
+                                        <div class="guide-icon">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </div>
+                                        <div class="guide-content">
+                                            <h3>Sử dụng trên di động</h3>
+                                            <p>Tối ưu hóa trải nghiệm sử dụng EduShare trên thiết bị di động</p>
+                                            <div class="guide-meta">
+                                                <span class="guide-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    4 phút đọc
+                                                </span>
+                                                <span class="guide-level beginner">Cơ bản</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Troubleshooting -->
+                            <div class="dashboard-section" id="troubleshoot">
+                                <div class="section-header">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-tools section-title-icon"></i>
+                                        Khắc phục sự cố
+                                    </h2>
+                                </div>
+                                <div class="troubleshoot-grid">
+                                    <div class="troubleshoot-category">
+                                        <h3>
+                                            <i class="fas fa-globe"></i>
+                                            Vấn đề kết nối
+                                        </h3>
+                                        <ul class="troubleshoot-list">
+                                            <li>
+                                                <strong>Trang web tải chậm:</strong> Kiểm tra kết nối internet,
+                                                xóa cache trình duyệt
+                                            </li>
+                                            <li>
+                                                <strong>Không thể đăng nhập:</strong> Kiểm tra
+                                                username/password, thử trình duyệt khác
+                                            </li>
+                                            <li>
+                                                <strong>Timeout lỗi:</strong> Làm mới trang, kiểm tra
+                                                firewall/antivirus
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="troubleshoot-category">
+                                        <h3>
+                                            <i class="fas fa-download"></i>
+                                            Lỗi tải xuống
+                                        </h3>
+                                        <ul class="troubleshoot-list">
+                                            <li>
+                                                <strong>File không tải được:</strong> Kiểm tra dung lượng đĩa
+                                                cứng, quyền ghi file
+                                            </li>
+                                            <li>
+                                                <strong>Tải xuống bị ngắt:</strong> Sử dụng download manager,
+                                                kiểm tra kết nối
+                                            </li>
+                                            <li>
+                                                <strong>File bị lỗi:</strong> Tải lại file, kiểm tra phần mềm
+                                                đọc file
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="troubleshoot-category">
+                                        <h3>
+                                            <i class="fas fa-credit-card"></i>
+                                            Thanh toán
+                                        </h3>
+                                        <ul class="troubleshoot-list">
+                                            <li>
+                                                <strong>Thẻ bị từ chối:</strong> Kiểm tra số dư, thông tin thẻ,
+                                                liên hệ ngân hàng
+                                            </li>
+                                            <li>
+                                                <strong>Giao dịch thất bại:</strong> Thử lại sau 5 phút, sử dụng
+                                                phương thức khác
+                                            </li>
+                                            <li>
+                                                <strong>Điểm chưa cập nhật:</strong> Đợi 5-10 phút, liên hệ hỗ
+                                                trợ nếu cần
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="troubleshoot-category">
+                                        <h3>
+                                            <i class="fas fa-user"></i>
+                                            Tài khoản
+                                        </h3>
+                                        <ul class="troubleshoot-list">
+                                            <li>
+                                                <strong>Quên mật khẩu:</strong> Sử dụng tính năng "Quên mật
+                                                khẩu" tại trang đăng nhập
+                                            </li>
+                                            <li>
+                                                <strong>Email chưa xác nhận:</strong> Kiểm tra thư mục spam, yêu
+                                                cầu gửi lại
+                                            </li>
+                                            <li>
+                                                <strong>Tài khoản bị khóa:</strong> Liên hệ hỗ trợ để được hỗ
+                                                trợ mở khóa
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact Information -->
+                            <div class="dashboard-section">
+                                <div class="section-header">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-phone section-title-icon"></i>
+                                        Thông tin liên hệ
+                                    </h2>
+                                </div>
+                                <div class="contact-grid">
+                                    <div class="contact-card">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-headset"></i>
+                                        </div>
+                                        <h3>Hỗ trợ trực tuyến</h3>
+                                        <p>Chat với đội ngũ hỗ trợ 24/7</p>
+                                        <button class="contact-btn" onclick="openLiveChat()">
+                                            <i class="fas fa-comments"></i>
+                                            Bắt đầu chat
+                                        </button>
+                                    </div>
+
+                                    <div class="contact-card">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <h3>Email hỗ trợ</h3>
+                                        <p>support@edushare.com</p>
+                                        <button class="contact-btn"
+                                            onclick="window.location.href='mailto:support@edushare.com'">
+                                            <i class="fas fa-paper-plane"></i>
+                                            Gửi email
+                                        </button>
+                                    </div>
+
+                                    <div class="contact-card">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <h3>Hotline</h3>
+                                        <p>1900 1234 (24/7)</p>
+                                        <button class="contact-btn" onclick="window.location.href='tel:19001234'">
+                                            <i class="fas fa-phone-alt"></i>
+                                            Gọi ngay
+                                        </button>
+                                    </div>
+
+                                    <div class="contact-card">
+                                        <div class="contact-icon">
+                                            <i class="fab fa-facebook"></i>
+                                        </div>
+                                        <h3>Facebook</h3>
+                                        <p>Fanpage EduShare Vietnam</p>
+                                        <button class="contact-btn"
+                                            onclick="window.open('https://facebook.com/edushare', '_blank')">
+                                            <i class="fab fa-facebook-f"></i>
+                                            Nhắn tin
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon footer-logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </div>
+                    <p class="footer-description">
+                        Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài
+                        liệu chất lượng cao.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Khám phá</h3>
+                    <ul class="footer-links">
+                        <li><a href="../categories.html">Danh mục</a></li>
+                        <li><a href="../search.html?sort=newest">Tài liệu mới</a></li>
+                        <li><a href="../search.html?sort=popular">Tài liệu phổ biến</a></li>
+                        <li><a href="#">Tác giả hàng đầu</a></li>
+                        <li><a href="#">Sự kiện & Tin tức</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Thông tin</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chương trình tác giả</a></li>
+                        <li><a href="#">Hợp tác & Liên kết</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Liên hệ</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+                        <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+                        <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Liên hệ</a>
+                    <a href="#">Trợ giúp</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Current date display
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('vi-VN', options);
+        }
+
+        // FAQ functionality
+        function initializeFAQ() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            const faqSearch = document.getElementById('faqSearch');
+            const categoryButtons = document.querySelectorAll('.faq-category-btn');
+
+            // FAQ toggle
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+
+                    // Close all FAQ items
+                    faqItems.forEach(faqItem => {
+                        faqItem.classList.remove('active');
+                    });
+
+                    // Open clicked item if it wasn't active
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+
+            // FAQ search
+            if (faqSearch) {
+                faqSearch.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+
+                    faqItems.forEach(item => {
+                        const question = item.querySelector('.faq-question h3').textContent.toLowerCase();
+                        const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+
+                        if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // FAQ category filter
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const category = button.dataset.category;
+
+                    // Update active button
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // Filter FAQ items
+                    faqItems.forEach(item => {
+                        if (category === 'all' || item.dataset.category === category) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        }
+
+        // Support form functionality
+        function initializeSupportForm() {
+            const supportForm = document.getElementById('supportForm');
+
+            if (supportForm) {
+                supportForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    // Basic form validation
+                    const name = document.getElementById('supportName').value.trim();
+                    const email = document.getElementById('supportEmail').value.trim();
+                    const category = document.getElementById('supportCategory').value;
+                    const subject = document.getElementById('supportSubject').value.trim();
+                    const message = document.getElementById('supportMessage').value.trim();
+
+                    if (!name || !email || !category || !subject || !message) {
+                        alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                        return;
+                    }
+
+                    // Email validation
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        alert('Vui lòng nhập email hợp lệ!');
+                        return;
+                    }
+
+                    // Simulate form submission
+                    showSuccessMessage();
+                });
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            const form = document.getElementById('supportForm');
+            if (form) {
+                form.reset();
+            }
+        }
+
+        // Success message
+        function showSuccessMessage() {
+            alert('Yêu cầu hỗ trợ đã được gửi thành công! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+            resetForm();
+        }
+
+        // Live chat function
+        function openLiveChat() {
+            // Simulate opening live chat
+            alert('Tính năng chat trực tuyến sẽ được triển khai sớm!');
+        }
+
+        // File upload handling
+        function initializeFileUpload() {
+            const fileInput = document.getElementById('supportAttachment');
+            const fileLabel = document.querySelector('.file-upload-label span');
+
+            if (fileInput && fileLabel) {
+                fileInput.addEventListener('change', (e) => {
+                    const files = e.target.files;
+                    if (files.length > 0) {
+                        const fileNames = Array.from(files).map(file => file.name).join(', ');
+                        fileLabel.textContent = `Đã chọn: ${fileNames}`;
+                    } else {
+                        fileLabel.textContent = 'Chọn file hoặc kéo thả vào đây';
+                    }
+                });
+            }
+        }
+
+        // Smooth scrolling for quick access links
+        function initializeSmoothScrolling() {
+            const quickAccessLinks = document.querySelectorAll('.quick-access-card[href^="#"]');
+
+            quickAccessLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+
+        // Active menu highlighting
+        function setActiveMenu() {
+            const currentPath = window.location.pathname;
+            const menuLinks = document.querySelectorAll('.sidebar-menu-link');
+
+            menuLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === 'support.html' ||
+                    currentPath.includes('support.html')) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // User dropdown functionality
+        function initializeUserDropdown() {
+            const userBtn = document.querySelector('.user-btn');
+            const userMenu = document.querySelector('.user-menu');
+
+            if (userBtn && userMenu) {
+                userBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    userMenu.classList.remove('show');
+                });
+            }
+        }
+
+        // Initialize all functionality when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            updateCurrentDate();
+            initializeFAQ();
+            initializeSupportForm();
+            initializeFileUpload();
+            initializeSmoothScrolling();
+            setActiveMenu();
+            initializeUserDropdown();
+
+            // Update time every minute
+            setInterval(updateCurrentDate, 60000);
+        });
+
+        // Refresh page function
+        window.addEventListener('load', function () {
+            console.log('Support page loaded successfully');
+        });
+    </script>

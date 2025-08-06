@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${userDTO.id} != null 
+                    ? 'Chỉnh sửa người dùng - EduShare Admin' 
+                    : 'Thêm người dùng - EduShare Admin'">
+        Form User
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}">
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button type="button" class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item active">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+		<main class="admin-content">
+		            <!-- Tiêu đề và breadcrumbs -->
+		            <div class="admin-content-header">
+		                <h1 class="admin-page-title"
+		                    th:text="${userDTO.id} != null ? 'Chỉnh sửa người dùng' : 'Thêm người dùng'">
+		                    Form
+		                </h1>
+		                <div class="admin-breadcrumbs">
+		                    <a th:href="@{/admin}">Admin</a><span>/</span>
+		                    <a th:href="@{/admin/users}">Quản lý người dùng</a><span>/</span>
+		                    <span th:text="${userDTO.id} != null ? 'Chỉnh sửa' : 'Thêm mới'">Form</span>
+		                </div>
+		            </div>
+		
+		            <!-- Form -->
+		            <div class="form-container">
+		                <form th:action="@{${userDTO.id} != null 
+		                                    ? '/admin/users/' + ${userDTO.id} + '/edit' 
+		                                    : '/admin/users/create'}"
+		                      th:object="${userDTO}"
+		                      method="post"
+		                      enctype="multipart/form-data"
+		                      class="user-form">
+		
+		                    <!-- Họ và tên -->
+		                    <div class="form-group">
+		                        <label for="fullName">Họ và tên</label>
+		                        <input type="text" id="fullName" th:readonly="${readonly}" th:field="*{fullName}"
+		                               placeholder="Nhập họ và tên" required>
+		                    </div>
+		
+		                    <!-- Email -->
+		                    <div class="form-group">
+		                        <label for="email">Email</label>
+		                        <input type="email" id="email" th:field="*{email}"
+		                               placeholder="Nhập email" th:readonly="${readonly}" required>
+		                        <div style="color: red" th:if="${emailError}" th:text="${emailError}"></div>
+		                    </div>
+		
+		                    <!-- Username -->
+		                    <div class="form-group">
+		                        <label for="username">Tên đăng nhập</label>
+		                        <input type="text" th:readonly="${readonly}" id="username" th:field="*{username}"
+		                               placeholder="Nhập username" required>
+		                        <div style="color: red" th:if="${usernameError}" th:text="${usernameError}"></div>
+		                    </div>
+		
+		                    <div class="form-group">
+		                        <label for="password">Mật khẩu</label>
+		                        <input type="password" id="password" th:disabled="${readonly}" th:field="*{password}"
+		                               th:required="${userDTO.id} == null"
+		                               placeholder="Nhập mật khẩu">
+		                    </div>
+		
+		                    <div class="form-group">
+		                        <label for="role">Vai trò</label>
+		                        <select id="role" th:disabled="${readonly}" th:field="*{role}">
+		                            <option value="user">Người dùng</option>
+		                            <option value="contributor">Cộng tác viên</option>
+		                            <option value="admin">Quản trị viên</option>
+		                        </select>
+		                    </div>
+		
+		                    <!-- Trạng thái -->
+		                    <div class="form-group">
+		                        <label for="status">Trạng thái</label>
+		                        <select id="status" th:disabled="${readonly}" th:field="*{status}">
+		                            <option value="active">Hoạt động</option>
+		                            <option value="inactive">Tạm khóa</option>
+		                            <option value="pending">Chờ xác nhận</option>
+		                        </select>
+		                    </div>
+		
+		                    <!-- Ảnh đại diện -->
+		                    <div class="form-group full-width avatar-upload-group">
+		                        <label>Ảnh đại diện</label>
+		                        <div class="avatar-upload">
+		                            <div class="avatar-preview">
+		                                <img id="avatarPreview"
+		                                     th:src="${userDTO.avatarUrl} != null 
+		                                                ? @{/image/{f}(f=${userDTO.avatarUrl})}
+		                                                : '/images/default-avatar.png'"
+		                                     alt="avatar" class="user-avatar">
+		                            </div>
+		                            <div class="avatar-actions">
+		                                <button th:if="${!readonly}" type="button" class="avatar-upload-btn"
+		                                        onclick="document.getElementById('file').click();">
+		                                    <i class="fas fa-upload"></i> Tải lên
+		                                </button>
+		                            </div>
+		                            <input type="file" id="file" th:field="*{file}"
+		                                   accept="image/*" style="display:none;"
+		                                   onchange="previewAvatar(this);">
+		                            <input type="hidden" th:field="*{avatarUrl}">
+		                        </div>
+		                    </div>
+		
+		                    <!-- Giới thiệu -->
+		                    <div class="form-group full-width">
+		                        <label for="bio">Giới thiệu</label>
+		                        <textarea th:readonly="${readonly}" id="bio" rows="4" th:field="*{bio}"
+		                                  placeholder="Nhập giới thiệu"></textarea>
+		                    </div>
+		
+		                    <!-- Nút hành động -->
+		                    <div class="form-actions">
+		                        <button th:if="${!readonly}" type="submit" class="btn btn-primary">
+		                            <i class="fas fa-save"></i>
+		                            <span th:text="${userDTO.id} != null ? 'Cập nhật' : 'Tạo mới'">
+		                                Lưu
+		                            </span>
+		                        </button>
+		                        <a th:href="@{/admin/users}" class="btn btn-secondary">
+		                            <i class="fas fa-arrow-left"></i> Hủy
+		                        </a>
+		                    </div>
+		                </form>
+		            </div>
+		        </main>
+		    </div>
+		
+		    <script>
+		        function previewAvatar(input) {
+		            const file = input.files[0];
+		            if (!file || !file.type.startsWith('image/')) return;
+		            const reader = new FileReader();
+		            reader.onload = e => {
+		                document.getElementById('avatarPreview').src = e.target.result;
+		                document.querySelector('input[name="avatarUrl"]').value = '';
+		            };
+		            reader.readAsDataURL(file);
+		        }
+		    </script>
+		</body>
+
+</html>

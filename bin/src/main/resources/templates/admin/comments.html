@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bình luận - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/comments.css">
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item active">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Quản lý bình luận</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <span>Quản lý bình luận</span>
+                </div>
+            </div>
+
+            <!-- Comments Stats Cards -->
+            <div class="comments-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">12,845</div>
+                        <div class="stat-label">Tổng số bình luận</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon new-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">145</div>
+                        <div class="stat-label">Bình luận mới trong tuần</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon reported-icon">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">28</div>
+                        <div class="stat-label">Bình luận bị báo cáo</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon hidden-icon">
+                        <i class="fas fa-eye-slash"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">346</div>
+                        <div class="stat-label">Bình luận bị ẩn</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Management Tools -->
+            <div class="management-tools">
+                <div class="search-filters">
+                    <div class="tool-item">
+                        <input type="text" placeholder="Tìm kiếm bình luận..." class="search-input">
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả danh mục</option>
+                            <option value="1">Công nghệ thông tin</option>
+                            <option value="2">Kinh tế - Quản trị</option>
+                            <option value="3">Ngoại ngữ</option>
+                            <option value="4">Kỹ thuật - Công nghệ</option>
+                            <option value="5">Khoa học xã hội</option>
+                            <option value="6">Khoa học tự nhiên</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="visible">Hiển thị</option>
+                            <option value="hidden">Đã ẩn</option>
+                            <option value="reported">Bị báo cáo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="export-btn">
+                        <i class="fas fa-download"></i> Xuất dữ liệu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Comments Tabs -->
+            <div class="comments-tabs">
+                <button class="tab-button active" data-tab="all">Tất cả (12,845)</button>
+                <button class="tab-button" data-tab="recent">Gần đây (145)</button>
+                <button class="tab-button" data-tab="reported">Bị báo cáo (28)</button>
+                <button class="tab-button" data-tab="hidden">Đã ẩn (346)</button>
+            </div>
+
+            <!-- Comments List -->
+            <div class="comments-list">
+                <!-- Comment Item 1 -->
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <div class="commenter-info">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                alt="User Avatar">
+                            <div class="commenter-details">
+                                <div class="commenter-name">Nguyễn Văn A</div>
+                                <div class="comment-meta">
+                                    <span class="comment-time">15/04/2023 - 10:24</span>
+                                    <span class="document-title">Trên: <a href="#">Lập trình ứng dụng web với
+                                            React</a></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment-status visible">
+                            <i class="fas fa-eye"></i> Hiển thị
+                        </div>
+                    </div>
+
+                    <div class="comment-content">
+                        <p>Tài liệu này quá tuyệt vời! Tôi đã tìm kiếm một hướng dẫn đầy đủ về React từ lâu, và cuối
+                            cùng đã tìm thấy ở đây. Cảm ơn tác giả rất nhiều vì đã chia sẻ kiến thức quý báu.</p>
+                    </div>
+
+                    <div class="comment-actions">
+                        <div class="comment-reply">
+                            <span class="reply-count"><i class="fas fa-reply"></i> 2 phản hồi</span>
+                            <button class="toggle-replies" data-id="comment1">Xem phản hồi</button>
+                        </div>
+                        <div class="comment-buttons">
+                            <button class="action-btn" title="Ẩn bình luận"><i class="fas fa-eye-slash"></i></button>
+                            <button class="action-btn" title="Xóa bình luận"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="comment-replies" id="comment1-replies" style="display: none;">
+                        <div class="reply-item">
+                            <div class="reply-header">
+                                <div class="commenter-info">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="User Avatar">
+                                    <div class="commenter-details">
+                                        <div class="commenter-name">Trần Văn B</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-time">15/04/2023 - 11:05</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment-status visible">
+                                    <i class="fas fa-eye"></i> Hiển thị
+                                </div>
+                            </div>
+                            <div class="reply-content">
+                                <p>Mình cũng thấy tài liệu này rất hữu ích. Bạn đã thực hành các ví dụ trong đó chưa?
+                                </p>
+                            </div>
+                            <div class="reply-actions">
+                                <div class="comment-buttons">
+                                    <button class="action-btn" title="Ẩn phản hồi"><i
+                                            class="fas fa-eye-slash"></i></button>
+                                    <button class="action-btn" title="Xóa phản hồi"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reply-item">
+                            <div class="reply-header">
+                                <div class="commenter-info">
+                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="User Avatar">
+                                    <div class="commenter-details">
+                                        <div class="commenter-name">Nguyễn Văn A</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-time">15/04/2023 - 12:30</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment-status visible">
+                                    <i class="fas fa-eye"></i> Hiển thị
+                                </div>
+                            </div>
+                            <div class="reply-content">
+                                <p>Mình đã thực hành hết các ví dụ rồi, đặc biệt là phần về Hooks và Context API, rất dễ
+                                    hiểu!</p>
+                            </div>
+                            <div class="reply-actions">
+                                <div class="comment-buttons">
+                                    <button class="action-btn" title="Ẩn phản hồi"><i
+                                            class="fas fa-eye-slash"></i></button>
+                                    <button class="action-btn" title="Xóa phản hồi"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment Item 2 -->
+                <div class="comment-item reported">
+                    <div class="comment-header">
+                        <div class="commenter-info">
+                            <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                alt="User Avatar">
+                            <div class="commenter-details">
+                                <div class="commenter-name">Lê Văn C</div>
+                                <div class="comment-meta">
+                                    <span class="comment-time">14/04/2023 - 15:42</span>
+                                    <span class="document-title">Trên: <a href="#">Python cho Data Science</a></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment-status reported">
+                            <i class="fas fa-flag"></i> Bị báo cáo
+                        </div>
+                    </div>
+
+                    <div class="comment-content">
+                        <p>Tôi thấy tài liệu này không đáng số tiền bỏ ra. Nội dung sơ sài và không khác gì so với các
+                            bài viết miễn phí trên mạng. Các bạn nên tìm đọc tài liệu của XYZ thay vì mất tiền vào đây!
+                            Liên hệ tôi qua email: ***@gmail.com để lấy tài liệu tốt hơn.</p>
+                    </div>
+
+                    <div class="report-info">
+                        <div class="report-header">
+                            <i class="fas fa-exclamation-triangle"></i> Bình luận này đã bị báo cáo
+                        </div>
+                        <div class="report-details">
+                            <div class="reporter">
+                                <span>Người báo cáo:</span> Phạm Thị D
+                            </div>
+                            <div class="report-reason">
+                                <span>Lý do:</span> Spam / Quảng cáo
+                            </div>
+                            <div class="report-time">
+                                <span>Thời gian:</span> 14/04/2023 - 16:20
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comment-actions">
+                        <div class="report-actions">
+                            <button class="report-approve">Chấp nhận báo cáo</button>
+                            <button class="report-reject">Từ chối báo cáo</button>
+                        </div>
+                        <div class="comment-buttons">
+                            <button class="action-btn" title="Ẩn bình luận"><i class="fas fa-eye-slash"></i></button>
+                            <button class="action-btn" title="Xóa bình luận"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment Item 3 -->
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <div class="commenter-info">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                alt="User Avatar">
+                            <div class="commenter-details">
+                                <div class="commenter-name">Trần Thị D</div>
+                                <div class="comment-meta">
+                                    <span class="comment-time">14/04/2023 - 09:15</span>
+                                    <span class="document-title">Trên: <a href="#">IELTS Writing: Cách đạt điểm
+                                            cao</a></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment-status visible">
+                            <i class="fas fa-eye"></i> Hiển thị
+                        </div>
+                    </div>
+
+                    <div class="comment-content">
+                        <p>Tài liệu rất đầy đủ và chi tiết. Mình đặc biệt thích phần phân tích các bài mẫu band 8.0 và
+                            những lưu ý khi viết Task 2. Sau khi áp dụng các kỹ thuật trong tài liệu, mình đã cải thiện
+                            điểm Writing từ 6.5 lên 7.5. Rất đáng để tham khảo!</p>
+                    </div>
+
+                    <div class="comment-actions">
+                        <div class="comment-reply">
+                            <span class="reply-count"><i class="fas fa-reply"></i> 0 phản hồi</span>
+                        </div>
+                        <div class="comment-buttons">
+                            <button class="action-btn" title="Ẩn bình luận"><i class="fas fa-eye-slash"></i></button>
+                            <button class="action-btn" title="Xóa bình luận"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment Item 4 -->
+                <div class="comment-item hidden">
+                    <div class="comment-header">
+                        <div class="commenter-info">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                alt="User Avatar">
+                            <div class="commenter-details">
+                                <div class="commenter-name">Hoàng Văn E</div>
+                                <div class="comment-meta">
+                                    <span class="comment-time">13/04/2023 - 14:22</span>
+                                    <span class="document-title">Trên: <a href="#">Quản trị chiến lược kinh
+                                            doanh</a></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment-status hidden">
+                            <i class="fas fa-eye-slash"></i> Đã ẩn
+                        </div>
+                    </div>
+
+                    <div class="comment-content">
+                        <p>[Nội dung bình luận này đã bị ẩn bởi quản trị viên]</p>
+                    </div>
+
+                    <div class="hidden-info">
+                        <div class="hidden-header">
+                            <i class="fas fa-lock"></i> Nội dung gốc (chỉ admin có thể xem)
+                        </div>
+                        <div class="hidden-content">
+                            <p>*@#$% &*@$#@! Thật là một tài liệu vô dụng! Tất cả đều là lý thuyết suông không có thực
+                                tế gì cả! Tôi đã mất 25 xu cho thứ rác rưởi này! @#$%^ &*(@#!</p>
+                        </div>
+                        <div class="hidden-reason">
+                            <span>Lý do ẩn:</span> Vi phạm quy tắc cộng đồng - Ngôn từ không phù hợp
+                        </div>
+                        <div class="hidden-by">
+                            <span>Ẩn bởi:</span> Admin - Nguyễn Văn A
+                        </div>
+                        <div class="hidden-time">
+                            <span>Thời gian:</span> 13/04/2023 - 15:10
+                        </div>
+                    </div>
+
+                    <div class="comment-actions">
+                        <div class="comment-buttons">
+                            <button class="action-btn show-btn" title="Hiển thị bình luận"><i
+                                    class="fas fa-eye"></i></button>
+                            <button class="action-btn" title="Xóa bình luận"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment Item 5 -->
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <div class="commenter-info">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                alt="User Avatar">
+                            <div class="commenter-details">
+                                <div class="commenter-name">Phạm Thị G</div>
+                                <div class="comment-meta">
+                                    <span class="comment-time">13/04/2023 - 11:05</span>
+                                    <span class="document-title">Trên: <a href="#">Giải tích 1 cho sinh viên kỹ
+                                            thuật</a></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment-status visible">
+                            <i class="fas fa-eye"></i> Hiển thị
+                        </div>
+                    </div>
+
+                    <div class="comment-content">
+                        <p>Cách trình bày trong tài liệu rất dễ hiểu. Mình là sinh viên năm nhất ngành Điện tử, trước
+                            giờ rất sợ môn Giải tích, nhưng nhờ tài liệu này mà đã hiểu rõ hơn rất nhiều. Đặc biệt phần
+                            về đạo hàm và tích phân được giải thích bằng các ví dụ trực quan. Cảm ơn tác giả rất nhiều!
+                        </p>
+                    </div>
+
+                    <div class="comment-actions">
+                        <div class="comment-reply">
+                            <span class="reply-count"><i class="fas fa-reply"></i> 1 phản hồi</span>
+                            <button class="toggle-replies" data-id="comment5">Xem phản hồi</button>
+                        </div>
+                        <div class="comment-buttons">
+                            <button class="action-btn" title="Ẩn bình luận"><i class="fas fa-eye-slash"></i></button>
+                            <button class="action-btn" title="Xóa bình luận"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="comment-replies" id="comment5-replies" style="display: none;">
+                        <div class="reply-item">
+                            <div class="reply-header">
+                                <div class="commenter-info">
+                                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="User Avatar">
+                                    <div class="commenter-details">
+                                        <div class="commenter-name">Đặng Văn H</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-time">13/04/2023 - 14:10</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment-status visible">
+                                    <i class="fas fa-eye"></i> Hiển thị
+                                </div>
+                            </div>
+                            <div class="reply-content">
+                                <p>Mình cũng đang học ngành Điện tử, có thể chia sẻ thêm những bài tập trong tài liệu
+                                    này không? Mình đang gặp khó khăn với phần đạo hàm riêng.</p>
+                            </div>
+                            <div class="reply-actions">
+                                <div class="comment-buttons">
+                                    <button class="action-btn" title="Ẩn phản hồi"><i
+                                            class="fas fa-eye-slash"></i></button>
+                                    <button class="action-btn" title="Xóa phản hồi"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-pages">
+                    <button class="pagination-btn page-btn active">1</button>
+                    <button class="pagination-btn page-btn">2</button>
+                    <button class="pagination-btn page-btn">3</button>
+                    <span class="pagination-ellipsis">...</span>
+                    <button class="pagination-btn page-btn">128</button>
+                </div>
+                <button class="pagination-btn next-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Comment Action Modal -->
+            <div class="modal" id="commentActionModal">
+                <div class="modal-overlay"></div>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h3>Xử lý bình luận</h3>
+                        <button class="modal-close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="action-form">
+                            <div class="form-group">
+                                <label for="actionType">Hành động</label>
+                                <select id="actionType">
+                                    <option value="hide">Ẩn bình luận</option>
+                                    <option value="delete">Xóa bình luận</option>
+                                    <option value="warn">Cảnh báo người dùng</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="actionReason">Lý do</label>
+                                <select id="actionReason">
+                                    <option value="inappropriate">Nội dung không phù hợp</option>
+                                    <option value="spam">Spam / Quảng cáo</option>
+                                    <option value="harassment">Quấy rối / Xúc phạm</option>
+                                    <option value="privacy">Vi phạm quyền riêng tư</option>
+                                    <option value="other">Lý do khác</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="actionNote">Ghi chú (không hiển thị cho người dùng)</label>
+                                <textarea id="actionNote" rows="3"
+                                    placeholder="Thêm ghi chú về hành động..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="notifyUser">Thông báo cho người dùng</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="notifyUser" checked>
+                                    <label for="notifyUser"></label>
+                                    <span class="toggle-label">Gửi email thông báo đến người dùng</span>
+                                </div>
+                            </div>
+                            <div class="form-group message-group">
+                                <label for="userMessage">Tin nhắn cho người dùng</label>
+                                <textarea id="userMessage" rows="4"
+                                    placeholder="Nhập tin nhắn cho người dùng...">Bình luận của bạn đã bị ẩn vì vi phạm quy tắc cộng đồng của chúng tôi. Vui lòng xem lại Điều khoản Sử dụng và Quy tắc Cộng đồng để biết thêm chi tiết.</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="cancel-btn">Hủy bỏ</button>
+                        <button class="save-btn">Xác nhận</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/comments.js"></script>
+</body>
+
+</html>

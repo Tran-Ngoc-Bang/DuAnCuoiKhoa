@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài liệu - EduShare Admin</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+ <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css"> 
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/admin_documents.css">
+    <style>
+        /* 🌟 Modal Wrapper */
+.modal-content.large {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+.modal-header h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: #333; }
+
+/* Footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+/* Tabs */
+.modal-tabs .tab-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tab-btn {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-weight: 600;
+  color: #555;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.tab-btn.active {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+.tab-btn:hover { background: #eee; }
+
+/* Form */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.form-group {
+  flex: 1 1 48%;
+  display: flex;
+  flex-direction: column;
+}
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
+input, select, textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #4f46e5;
+  outline: none;
+}
+
+/* Upload */
+.file-upload {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+.file-upload:hover { border-color: #4f46e5; }
+
+.file-upload-label i { font-size: 2rem; color: #aaa; }
+.file-upload-label span { display: block; font-weight: 500; margin-top: 8px; }
+
+.thumbnail-preview img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+}
+.btn-remove:hover { color: #991b1b; }
+
+/* Helper text */
+.form-help {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.required { color: #dc2626; }
+
+    </style>
+</head>
+
+<body class="admin-page">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button type="button" class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item active">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Quản lý tài liệu</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <span>Tài liệu</span>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-cards">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number" id="totalDocuments">1,234</div>
+                        <div class="stats-label">Tổng tài liệu</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number" id="totalViews">45,678</div>
+                        <div class="stats-label">Lượt xem</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number" id="totalDownloads">12,345</div>
+                        <div class="stats-label">Lượt tải</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number" id="pendingDocuments">23</div>
+                        <div class="stats-label">Chờ duyệt</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Main Actions -->
+            <div class="admin-actions">
+                <div class="admin-actions-left">
+                    <button type="button" class="btn btn-primary" id="addDocumentBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm tài liệu</span>
+                    </button>
+                    <button type="button" class="btn btn-outline" id="importDocumentsBtn">
+                        <i class="fas fa-upload"></i>
+                        <span>Import</span>
+                    </button>
+                    <button type="button" class="btn btn-outline" id="exportDocumentsBtn">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+
+                <div class="admin-actions-right">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+                        <button type="button" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="refreshBtn">
+                        <i class="fas fa-refresh"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline" id="advancedFiltersToggle">
+                        <i class="fas fa-filter"></i>
+                        <span>Bộ lọc</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Filters Panel -->
+            <div class="advanced-filters" id="advancedFilters" style="display: none;">
+                <div class="filters-header">
+                    <h3>Bộ lọc nâng cao</h3>
+                    <button type="button" class="btn-close" id="closeFilters">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="filters-content">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Trạng thái</label>
+                            <select id="statusFilter">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="PUBLISHED">Đã xuất bản</option>
+                                <option value="PENDING">Chờ duyệt</option>
+                                <option value="REJECTED">Bị từ chối</option>
+                                <option value="DRAFT">Bản nháp</option>
+                                <option value="ARCHIVED">Đã lưu trữ</option>
+                                <option value="SUSPENDED">Đã tạm ngưng</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Danh mục</label>
+                            <select id="categoryFilter">
+                                <option value="">Tất cả danh mục</option>
+                                <option value="1">Công nghệ thông tin</option>
+                                <option value="2">Kinh tế</option>
+                                <option value="3">Y học</option>
+                                <option value="4">Luật</option>
+                                <option value="5">Giáo dục</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Loại tài liệu</label>
+                            <select id="typeFilter">
+                                <option value="">Tất cả loại</option>
+                                <option value="PDF">PDF</option>
+                                <option value="DOC">Word Document</option>
+                                <option value="PPT">PowerPoint</option>
+                                <option value="XLS">Excel</option>
+                                <option value="TXT">Text</option>
+                                <option value="IMAGE">Hình ảnh</option>
+                                <option value="VIDEO">Video</option>
+                                <option value="AUDIO">Audio</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Giá</label>
+                            <select id="priceFilter">
+                                <option value="">Tất cả</option>
+                                <option value="free">Miễn phí</option>
+                                <option value="paid">Có phí</option>
+                                <option value="1-10">1 - 10 coin</option>
+                                <option value="11-50">11 - 50 coin</option>
+                                <option value="51-100">51 - 100 coin</option>
+                                <option value="100+">Trên 100 coin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Tác giả</label>
+                            <input type="text" id="authorFilter" placeholder="Nhập tên tác giả...">
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Thẻ tag</label>
+                            <input type="text" id="tagsFilter" placeholder="Nhập thẻ tag...">
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Ngày tạo từ</label>
+                            <input type="date" id="dateFromFilter">
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Ngày tạo đến</label>
+                            <input type="date" id="dateToFilter">
+                        </div>
+                    </div>
+
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Kích thước file</label>
+                            <select id="sizeFilter">
+                                <option value="">Tất cả kích thước</option>
+                                <option value="0-1">
+                                    < 1 MB</option>
+                                <option value="1-10">1 - 10 MB</option>
+                                <option value="10-50">10 - 50 MB</option>
+                                <option value="50-100">50 - 100 MB</option>
+                                <option value="100+">> 100 MB</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Lượt xem</label>
+                            <select id="viewsFilter">
+                                <option value="">Tất cả</option>
+                                <option value="0-100">0 - 100</option>
+                                <option value="101-500">101 - 500</option>
+                                <option value="501-1000">501 - 1,000</option>
+                                <option value="1001-5000">1,001 - 5,000</option>
+                                <option value="5000+">Trên 5,000</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Đánh giá</label>
+                            <select id="ratingFilter">
+                                <option value="">Tất cả đánh giá</option>
+                                <option value="5">⭐⭐⭐⭐⭐ (5 sao)</option>
+                                <option value="4">⭐⭐⭐⭐ (4 sao trở lên)</option>
+                                <option value="3">⭐⭐⭐ (3 sao trở lên)</option>
+                                <option value="2">⭐⭐ (2 sao trở lên)</option>
+                                <option value="1">⭐ (1 sao trở lên)</option>
+                                <option value="0">Chưa có đánh giá</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Có vi phạm</label>
+                            <select id="violationFilter">
+                                <option value="">Tất cả</option>
+                                <option value="has_reports">Có báo cáo vi phạm</option>
+                                <option value="no_reports">Không vi phạm</option>
+                                <option value="resolved">Đã xử lý vi phạm</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filters-actions">
+                        <button type="button" class="btn btn-primary" id="applyFilters">
+                            <i class="fas fa-check"></i>
+                            <span>Áp dụng bộ lọc</span>
+                        </button>
+                        <button type="button" class="btn btn-outline" id="clearFilters">
+                            <i class="fas fa-eraser"></i>
+                            <span>Xóa bộ lọc</span>
+                        </button>
+                        <button type="button" class="btn btn-outline" id="saveFilter">
+                            <i class="fas fa-save"></i>
+                            <span>Lưu bộ lọc</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions" id="bulkActions" style="display: none;">
+                <div class="bulk-actions-content">
+                    <div class="bulk-actions-info">
+                        <span id="selectedCount">0</span> tài liệu được chọn
+                    </div>
+                    <div class="bulk-actions-buttons">
+                        <button type="button" class="btn btn-success" id="bulkApprove">
+                            <i class="fas fa-check"></i>
+                            <span>Duyệt</span>
+                        </button>
+                        <button type="button" class="btn btn-warning" id="bulkReject">
+                            <i class="fas fa-times"></i>
+                            <span>Từ chối</span>
+                        </button>
+                        <button type="button" class="btn btn-info" id="bulkArchive">
+                            <i class="fas fa-archive"></i>
+                            <span>Lưu trữ</span>
+                        </button>
+                        <button type="button" class="btn btn-danger" id="bulkDelete">
+                            <i class="fas fa-trash"></i>
+                            <span>Xóa</span>
+                        </button>
+                        <button type="button" class="btn btn-outline" id="bulkExport">
+                            <i class="fas fa-download"></i>
+                            <span>Export</span>
+                        </button>
+                        <button type="button" class="btn btn-outline" id="clearSelection">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Bỏ chọn</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Table -->
+            <div class="data-table-container">
+                <table class="data-table" id="documentsTable">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <input type="checkbox" id="selectAll" />
+                            </th>
+                            <th class="sortable" data-sort="title">
+                                Tiêu đề
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable" data-sort="author">
+                                Tác giả
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable" data-sort="category">
+                                Danh mục
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable" data-sort="status">
+                                Trạng thái
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable" data-sort="price">
+                                Giá
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable" data-sort="views">
+                                Lượt xem
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable" data-sort="downloads">
+                                Lượt tải
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable" data-sort="created_at">
+                                Ngày tạo
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="actions-column">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentsTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+
+                <template id="documentRowTemplate">
+                    <tr>
+                        <td class="checkbox-column">
+                            <input type="checkbox" class="document-checkbox">
+                        </td>
+                        <td>
+                            <div class="document-info">
+                                <div class="document-thumbnail">
+                                    <img src="" alt="" class="doc-thumb">
+                                </div>
+                                <div class="document-details">
+                                    <h4 class="doc-title"></h4>
+                                    <p class="doc-desc"></p>
+                                    <div class="doc-meta">
+                                        <span class="doc-type"></span>
+                                        <span class="doc-size"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <img src="" alt="" class="author-avatar">
+                                </div>
+                                <span class="user-name author-name"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="category-name"></span>
+                        </td>
+                        <td>
+                            <span class="status-badge"></span>
+                        </td>
+                        <td>
+                            <span class="price-display"></span>
+                        </td>
+                        <td>
+                            <div class="stats-display views-count">
+                                <i class="fas fa-eye"></i> <span></span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stats-display downloads-count">
+                                <i class="fas fa-download"></i> <span></span>
+                            </div>
+                        </td>
+                        <td class="date-column">
+                            <span class="created-date"></span>
+                        </td>
+                        <td class="actions-column">
+                            <div class="table-actions">
+                                <button type="button" class="action-btn view" title="Xem">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="action-btn edit" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="action-btn delete" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+
+                <table class="data-table" style="display: none;">
+                </table>
+
+                <div class="loading-state" id="loadingState" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Đang tải dữ liệu...</p>
+                </div>
+
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Không có tài liệu nào</h3>
+                    <p>Không tìm thấy tài liệu nào phù hợp với bộ lọc hiện tại.</p>
+                    <button type="button" class="btn btn-primary" id="createFirstDocument">
+                        <i class="fas fa-plus"></i>
+                        <span>Tạo tài liệu đầu tiên</span>
+                    </button>
+                </div>
+
+                <div class="error-state" id="errorState" style="display: none;">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Có lỗi xảy ra</h3>
+                    <p id="errorMessage">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
+                    <button type="button" class="btn btn-outline" id="retryLoad">
+                        <i class="fas fa-redo"></i>
+                        <span>Thử lại</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    <span>Hiển thị <span id="showingFrom">1</span> - <span id="showingTo">25</span> trong tổng số <span
+                            id="totalRecords">1,234</span> tài liệu</span>
+                </div>
+
+                <div class="pagination-controls">
+                    <div class="items-per-page">
+                        <label>Hiển thị:</label>
+                        <select id="itemsPerPage">
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                        </select>
+                        <span>mục/trang</span>
+                    </div>
+
+                    <div class="pagination-buttons">
+                        <button type="button" class="pagination-btn" id="firstPageBtn" disabled>
+                            <i class="fas fa-angle-double-left"></i>
+                        </button>
+                        <button type="button" class="pagination-btn" id="prevPageBtn" disabled>
+                            <i class="fas fa-angle-left"></i>
+                        </button>
+
+                        <div class="pagination-numbers" id="paginationNumbers">
+                    
+                        </div>
+
+                        <button type="button" class="pagination-btn" id="nextPageBtn">
+                            <i class="fas fa-angle-right"></i>
+                        </button>
+                        <button type="button" class="pagination-btn" id="lastPageBtn">
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Document Modal -->
+    <div class="modal" id="documentModal">
+        <div class="modal-overlay" data-modal-close></div>
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="documentModalTitle">Thêm tài liệu mới</h3>
+                <button type="button" class="modal-close" data-modal-close>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Tab Navigation -->
+                <div class="modal-tabs">
+                    <div class="tab-nav">
+                        <button type="button" class="tab-btn active" data-tab="basic">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Thông tin cơ bản</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="media">
+                            <i class="fas fa-file-upload"></i>
+                            <span>File & Media</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="advanced">
+                            <i class="fas fa-cogs"></i>
+                            <span>Cài đặt nâng cao</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form Content -->
+                <form id="documentForm">
+                    <div class="tab-content">
+                        <!-- Tab 1: Basic Information -->
+                        <div class="tab-panel active" id="tabBasic">
+                            <div class="form-section">
+                                <h4><i class="fas fa-info-circle"></i> Thông tin cơ bản</h4>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="documentTitle">Tiêu đề <span class="required">*</span></label>
+                                        <input type="text" id="documentTitle" name="title" required
+                                            placeholder="Nhập tiêu đề tài liệu">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="documentDescription">Mô tả</label>
+                                        <textarea id="documentDescription" name="description" rows="4"
+                                            placeholder="Mô tả chi tiết về tài liệu..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="documentCategory">Danh mục <span class="required">*</span></label>
+                                        <select id="documentCategory" name="category_id" required>
+                                            <option value="">Chọn danh mục</option>
+                                            <option value="1">Công nghệ thông tin</option>
+                                            <option value="2">Kinh tế</option>
+                                            <option value="3">Y học</option>
+                                            <option value="4">Luật</option>
+                                            <option value="5">Giáo dục</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="documentTags">Thẻ tag</label>
+                                        <input type="text" id="documentTags" name="tags"
+                                            placeholder="Nhập các thẻ tag, cách nhau bằng dấu phẩy">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="documentPrice">Giá (coin)</label>
+                                        <input type="number" id="documentPrice" name="price" min="0" value="0"
+                                            placeholder="0 = Miễn phí">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="documentStatus">Trạng thái</label>
+                                        <select id="documentStatus" name="status">
+                                            <option value="DRAFT">Bản nháp</option>
+                                            <option value="PENDING">Chờ duyệt</option>
+                                            <option value="PUBLISHED">Đã xuất bản</option>
+                                            <option value="ARCHIVED">Đã lưu trữ</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: File & Media -->
+                        <div class="tab-panel" id="tabMedia">
+                            <div class="form-section">
+                                <h4><i class="fas fa-file-upload"></i> File và Media</h4>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="documentFile">File tài liệu <span class="required">*</span></label>
+                                        <div class="file-upload">
+                                            <input type="file" id="documentFile" name="file"
+                                                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
+                                            <div class="file-upload-label">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <span>Chọn file hoặc kéo thả vào đây</span>
+                                                <small>Hỗ trợ: PDF, Word, PowerPoint, Excel (tối đa 100MB)</small>
+                                            </div>
+                                        </div>
+                                        <div class="file-info" id="fileInfo" style="display: none;">
+                                            <i class="fas fa-file"></i>
+                                            <span class="file-name"></span>
+                                            <span class="file-size"></span>
+                                            <button type="button" class="btn-remove" title="Xóa file">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="documentThumbnail">Ảnh đại diện</label>
+                                        <div class="file-upload">
+                                            <input type="file" id="documentThumbnail" name="thumbnail" accept="image/*">
+                                            <div class="file-upload-label">
+                                                <i class="fas fa-image"></i>
+                                                <span>Chọn ảnh đại diện</span>
+                                                <small>JPG, PNG (tối đa 5MB, kích thước khuyến nghị: 400x300px)</small>
+                                            </div>
+                                        </div>
+                                        <div class="thumbnail-preview" id="thumbnailPreview" style="display: none;">
+                                            <img src="" alt="Thumbnail preview">
+                                            <button type="button" class="btn-remove" title="Xóa ảnh">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="autoGenerateThumbnail" name="auto_thumbnail">
+                                            Tự động tạo ảnh đại diện từ file PDF
+                                        </label>
+                                        <small class="form-help">Hệ thống sẽ tự động tạo ảnh đại diện từ trang đầu tiên của file PDF</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Advanced Settings -->
+                        <div class="tab-panel" id="tabAdvanced">
+                            <div class="form-section">
+                                <h4><i class="fas fa-cogs"></i> Cài đặt nâng cao</h4>
+                                
+                                <!-- Version Management -->
+                                <div class="form-group">
+                                    <label for="versionNotes">Ghi chú phiên bản</label>
+                                    <textarea id="versionNotes" name="version_notes" rows="3"
+                                        placeholder="Mô tả các thay đổi trong phiên bản này..."></textarea>
+                                    <small class="form-help">Chỉ hiển thị khi cập nhật tài liệu đã tồn tại</small>
+                                </div>
+
+                                <!-- License -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="documentLicense">Giấy phép sử dụng</label>
+                                        <select id="documentLicense" name="license">
+                                            <option value="ALL_RIGHTS_RESERVED">Bảo lưu toàn quyền</option>
+                                            <option value="CC_BY">Creative Commons BY</option>
+                                            <option value="CC_BY_SA">Creative Commons BY-SA</option>
+                                            <option value="CC_BY_NC">Creative Commons BY-NC</option>
+                                            <option value="CC_BY_NC_SA">Creative Commons BY-NC-SA</option>
+                                            <option value="MIT">MIT License</option>
+                                            <option value="PUBLIC_DOMAIN">Tài sản công</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="documentLanguage">Ngôn ngữ</label>
+                                        <select id="documentLanguage" name="language">
+                                            <option value="vi">Tiếng Việt</option>
+                                            <option value="en">English</option>
+                                            <option value="zh">中文</option>
+                                            <option value="ja">日本語</option>
+                                            <option value="ko">한국어</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Publishing Schedule -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-calendar"></i> Lịch xuất bản</h5>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" id="schedulePublish" name="schedule_publish">
+                                                Hẹn lịch xuất bản
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row" id="scheduleFields" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="publishDate">Ngày xuất bản</label>
+                                            <input type="datetime-local" id="publishDate" name="publish_date">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="expireDate">Ngày hết hạn (tuỳ chọn)</label>
+                                            <input type="datetime-local" id="expireDate" name="expire_date">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Workflow -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-tasks"></i> Quy trình duyệt</h5>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" id="requireApproval" name="require_approval">
+                                                Yêu cầu duyệt trước khi xuất bản
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row" id="approvalFields" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="assignReviewer">Người duyệt</label>
+                                            <select id="assignReviewer" name="reviewer_id">
+                                                <option value="">Tự động chọn</option>
+                                                <option value="1">Admin 1</option>
+                                                <option value="2">Admin 2</option>
+                                                <option value="3">Editor 1</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="reviewNotes">Ghi chú cho người duyệt</label>
+                                            <textarea id="reviewNotes" name="review_notes" rows="2"
+                                                placeholder="Ghi chú đặc biệt cho người duyệt..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SEO & Metadata -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-search"></i> SEO & Metadata</h5>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="metaKeywords">Từ khóa SEO</label>
+                                            <input type="text" id="metaKeywords" name="meta_keywords"
+                                                placeholder="từ khóa 1, từ khóa 2, từ khóa 3">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="metaDescription">Mô tả SEO</label>
+                                            <textarea id="metaDescription" name="meta_description" rows="2"
+                                                placeholder="Mô tả ngắn gọn cho SEO (150-160 ký tự)"></textarea>
+                                            <small class="form-help">Còn lại: <span id="metaCharCount">160</span> ký tự</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="documentId" name="id">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Hủy</button>
+                <button type="button" class="btn btn-outline" id="saveDraftBtn">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Lưu nháp</span>
+                </button>
+                <button type="submit" class="btn btn-primary" form="documentForm">
+                    <i class="fas fa-save"></i>
+                    <span id="submitButtonText">Lưu tài liệu</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Details Modal -->
+    <div class="modal" id="documentDetailsModal">
+        <div class="modal-overlay" data-modal-close></div>
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Chi tiết tài liệu</h3>
+                <button type="button" class="modal-close" data-modal-close>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Tab Navigation -->
+                <div class="modal-tabs">
+                    <div class="tab-nav">
+                        <button type="button" class="tab-btn active" data-tab="general">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Thông tin chung</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="versions">
+                            <i class="fas fa-history"></i>
+                            <span>Lịch sử phiên bản</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="analytics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê & Phân tích</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-tab="reviews">
+                            <i class="fas fa-comments"></i>
+                            <span>Bình luận & Đánh giá</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab Content Panels -->
+                <div class="tab-content">
+                    <!-- Tab 1: General Information -->
+                    <div class="tab-panel active" id="tabGeneral">
+                        <div class="row" id="documentDetailsContent">
+                            <div class="col-md-4">
+                                <img id="detailThumbnail" src="" class="img-fluid rounded" alt="">
+                            </div>
+                            <div class="col-md-8">
+                                <h4 id="detailTitle"></h4>
+                                <p class="text-muted" id="detailDescription"></p>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-sm-6">
+                                        <strong>Tác giả:</strong> <span id="detailAuthor"></span><br>
+                                        <strong>Danh mục:</strong> <span id="detailCategory"></span><br>
+                                        <strong>Loại file:</strong> <span id="detailFileType"></span><br>
+                                        <strong>Giá:</strong> <span id="detailPrice"></span>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>Lượt xem:</strong> <span id="detailViews"></span><br>
+                                        <strong>Lượt tải:</strong> <span id="detailDownloads"></span><br>
+                                        <strong>Đánh giá:</strong> <span id="detailRating"></span><br>
+                                        <strong>Kích thước:</strong> <span id="detailFileSize"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <strong>Tags:</strong><br>
+                                    <div id="detailTags"></div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <strong>Trạng thái:</strong> 
+                                    <span id="detailStatus" class="badge"></span>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <strong>Ngày tạo:</strong> <span id="detailCreatedAt"></span>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>Ngày cập nhật:</strong> <span id="detailUpdatedAt"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Version History -->
+                    <div class="tab-panel" id="tabVersions">
+                        <div class="versions-container">
+                            <div class="versions-header">
+                                <h5>Lịch sử phiên bản</h5>
+                                <button type="button" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Tạo phiên bản mới</span>
+                                </button>
+                            </div>
+                            <div class="versions-timeline" id="versionsTimeline">
+                                <!-- Version items will be populated here -->
+                                <div class="version-item">
+                                    <div class="version-badge">v1.0</div>
+                                    <div class="version-content">
+                                        <div class="version-header">
+                                            <strong>Phiên bản ban đầu</strong>
+                                            <span class="version-date">23/06/2025, 10:30</span>
+                                        </div>
+                                        <p class="version-note">Tài liệu được tạo lần đầu</p>
+                                        <div class="version-actions">
+                                            <button type="button" class="btn btn-sm btn-outline">
+                                                <i class="fas fa-download"></i>
+                                                Tải xuống
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline">
+                                                <i class="fas fa-eye"></i>
+                                                Xem
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Analytics & Statistics -->
+                    <div class="tab-panel" id="tabAnalytics">
+                        <div class="analytics-container">
+                            <div class="analytics-header">
+                                <h5>Thống kê & Phân tích</h5>
+                                <div class="date-range-selector">
+                                    <select class="form-select form-select-sm">
+                                        <option value="7d">7 ngày qua</option>
+                                        <option value="30d">30 ngày qua</option>
+                                        <option value="90d">3 tháng qua</option>
+                                        <option value="1y">1 năm qua</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="stats-card">
+                                        <div class="stats-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <div class="stats-content">
+                                            <h6>Lượt xem</h6>
+                                            <div class="stats-number" id="analyticsViews">1,234</div>
+                                            <div class="stats-change positive">+12% từ tuần trước</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stats-card">
+                                        <div class="stats-icon">
+                                            <i class="fas fa-download"></i>
+                                        </div>
+                                        <div class="stats-content">
+                                            <h6>Lượt tải</h6>
+                                            <div class="stats-number" id="analyticsDownloads">567</div>
+                                            <div class="stats-change positive">+8% từ tuần trước</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stats-card">
+                                        <div class="stats-icon">
+                                            <i class="fas fa-share"></i>
+                                        </div>
+                                        <div class="stats-content">
+                                            <h6>Lượt chia sẻ</h6>
+                                            <div class="stats-number" id="analyticsShares">89</div>
+                                            <div class="stats-change negative">-3% từ tuần trước</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stats-card">
+                                        <div class="stats-icon">
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <div class="stats-content">
+                                            <h6>Đánh giá TB</h6>
+                                            <div class="stats-number" id="analyticsRating">4.2</div>
+                                            <div class="stats-change positive">+0.1 từ tuần trước</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="analyticsChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Reviews & Comments -->
+                    <div class="tab-panel" id="tabReviews">
+                        <div class="reviews-container">
+                            <div class="reviews-header">
+                                <h5>Bình luận & Đánh giá</h5>
+                                <div class="reviews-summary">
+                                    <div class="rating-overview">
+                                        <div class="rating-average">
+                                            <span class="rating-number">4.2</span>
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="far fa-star"></i>
+                                            </div>
+                                            <span class="rating-count">(234 đánh giá)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="reviews-list" id="reviewsList">
+                                <!-- Sample review item -->
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <div class="reviewer-info">
+                                            <img src="https://via.placeholder.com/40" class="reviewer-avatar" alt="">
+                                            <div class="reviewer-details">
+                                                <strong class="reviewer-name">Nguyễn Văn A</strong>
+                                                <div class="review-meta">
+                                                    <div class="review-rating">
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                    </div>
+                                                    <span class="review-date">2 ngày trước</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="review-actions">
+                                            <button type="button" class="btn btn-sm btn-outline">
+                                                <i class="fas fa-reply"></i>
+                                                Trả lời
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline text-danger">
+                                                <i class="fas fa-flag"></i>
+                                                Báo cáo
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="review-content">
+                                        <p>Tài liệu rất hữu ích và chi tiết. Cảm ơn tác giả đã chia sẻ!</p>
+                                    </div>
+                                </div>
+
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <div class="reviewer-info">
+                                            <img src="https://via.placeholder.com/40" class="reviewer-avatar" alt="">
+                                            <div class="reviewer-details">
+                                                <strong class="reviewer-name">Trần Thị B</strong>
+                                                <div class="review-meta">
+                                                    <div class="review-rating">
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="far fa-star"></i>
+                                                    </div>
+                                                    <span class="review-date">1 tuần trước</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="review-actions">
+                                            <button type="button" class="btn btn-sm btn-outline">
+                                                <i class="fas fa-reply"></i>
+                                                Trả lời
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline text-danger">
+                                                <i class="fas fa-flag"></i>
+                                                Báo cáo
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="review-content">
+                                        <p>Nội dung khá tốt nhưng cần cập nhật thêm một số thông tin mới.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="reviews-pagination">
+                                <button type="button" class="btn btn-outline">Xem thêm bình luận</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Đóng</button>
+                <button type="button" class="btn btn-primary" id="editDocumentFromDetails">
+                    <i class="fas fa-edit"></i>
+                    <span>Chỉnh sửa</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal" id="confirmDeleteModal">
+        <div class="modal-overlay" data-modal-close></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Xác nhận xóa</h3>
+                <button type="button" class="modal-close" data-modal-close>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="confirm-delete-content">
+                    <div class="confirm-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p>Bạn có chắc chắn muốn xóa tài liệu này không?</p>
+                    <p class="text-muted">Hành động này không thể hoàn tác.</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i>
+                    <span>Xóa</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Document Modal -->
+    <!-- <div class="modal" id="shareModal">
+        <div class="modal-overlay" data-modal-close></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chia sẻ tài liệu</h3>
+                <button type="button" class="modal-close" data-modal-close>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <h4 id="shareTitle"></h4>
+                <div class="mb-3">
+                    <label for="shareUrl" class="form-label">URL chia sẻ:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareUrl" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="copyShareUrlBtn">
+                            <i class="fas fa-copy"></i> Sao chép
+                        </button>
+                    </div>
+                </div>
+                <div class="social-share">
+                    <h5>Chia sẻ qua:</h5>
+                    <button class="btn btn-primary btn-sm me-2" id="shareToFacebookBtn">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </button>
+                    <button class="btn btn-info btn-sm me-2" id="shareToTwitterBtn">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </button>
+                    <button class="btn btn-success btn-sm" id="shareToWhatsAppBtn">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Đóng</button>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Bulk Action Confirmation Modal -->
+    <div class="modal" id="bulkActionModal">
+        <div class="modal-overlay" data-modal-close></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="bulkActionTitle">Xác nhận thao tác</h3>
+                <button type="button" class="modal-close" data-modal-close>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="bulk-action-content">
+                    <p id="bulkActionMessage">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+                    <div class="bulk-action-details">
+                        <strong>Số tài liệu được chọn: <span id="bulkActionCount">0</span></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmBulkActionBtn">
+                    <i class="fas fa-check"></i>
+                    <span>Thực hiện</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Document Modal -->
+    <div class="modal fade" id="shareModalBootstrap" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">        ">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shareModalLabel">Chia sẻ tài liệu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 id="shareTitle">Tiêu đề tài liệu</h6>
+                    <div class="mb-3">
+                        <label for="shareUrl" class="form-label">URL chia sẻ:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="shareUrl" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="copyShareUrlBtn">
+                                <i class="fas fa-copy"></i> Sao chép
+                            </button>
+                        </div>
+                    </div>
+                    <div class="social-share">
+                        <h6>Chia sẻ qua:</h6>
+                        <button class="btn btn-primary btn-sm me-2" id="shareFacebookBtn">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </button>
+                        <button class="btn btn-info btn-sm me-2" id="shareTwitterBtn">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </button>
+                        <button class="btn btn-success btn-sm" id="shareWhatsAppBtn">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/documents.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          document.querySelectorAll('.modal').forEach(modal => {
+            const tabButtons = modal.querySelectorAll('.tab-btn');
+            const tabPanels = modal.querySelectorAll('.tab-panel');
+        
+            tabButtons.forEach(button => {
+              button.addEventListener('click', function () {
+                const target = this.dataset.tab;
+                
+                // Xóa active cũ
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+        
+                // Bật active mới
+                this.classList.add('active');
+                if (target === 'basic') document.getElementById('tabBasic').classList.add('active');
+                else if (target === 'media') document.getElementById('tabMedia').classList.add('active');
+                else if (target === 'advanced') document.getElementById('tabAdvanced').classList.add('active');
+                else if (target === 'general') document.getElementById('tabGeneral').classList.add('active');
+                else if (target === 'versions') document.getElementById('tabVersions').classList.add('active');
+                else if (target === 'analytics') document.getElementById('tabAnalytics').classList.add('active');
+                else if (target === 'reviews') document.getElementById('tabReviews').classList.add('active');
+              });
+            });
+          });
+        });
+        </script>
+
+            
+</body>
+
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng tải tài liệu - EduShare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/main-fixes.css">
+    <link rel="stylesheet" href="../css/upload.css">
+    <link rel="stylesheet" href="../css/upload-modern.css">
+    <link rel="stylesheet" href="../css/footer-modern.css">
+</head>
+<body>
+    <!-- Decorative Background Elements -->
+    <div class="decorative-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">
+                        <div class="logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="../index.html" class="nav-link">Trang chủ</a>
+                    <a href="categories.html" class="nav-link">Danh mục</a>
+                    <a href="search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                    <a href="search.html?filter=premium" class="nav-link">Cao cấp</a>
+                    <a href="about.html" class="nav-link">Giới thiệu</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" id="headerSearchInput" placeholder="Tìm kiếm tài liệu...">
+                        <button id="headerSearchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                              <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+            <span class="dark-mode-handle" id="darkModeHandle"></span>
+          </button>
+                    <a href="login.html" class="login-btn">Đăng nhập</a>
+                    <a href="register.html" class="register-btn">Đăng ký</a>
+                </div>
+                <div class="mobile-menu-toggle" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="mobile-menu">
+            <div class="mobile-search">
+                <input type="text" placeholder="Tìm kiếm tài liệu...">
+                <button>
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <nav class="mobile-nav">
+                <a href="../index.html" class="mobile-nav-link">Trang chủ</a>
+                <a href="categories.html" class="mobile-nav-link">Danh mục</a>
+                <a href="search.html?sort=newest" class="mobile-nav-link">Tài liệu mới</a>
+                <a href="search.html?filter=premium" class="mobile-nav-link">Cao cấp</a>
+                <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+            </nav>
+            <div class="mobile-auth">
+                <a href="login.html" class="mobile-login-btn">Đăng nhập</a>
+                <a href="register.html" class="mobile-register-btn">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <section class="upload-section">
+            <div class="container">
+                <div class="upload-header">
+                    <div class="header-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h1 class="page-title">Đăng tải tài liệu</h1>
+                    <p class="page-description">Chia sẻ kiến thức của bạn và giúp đỡ cộng đồng học tập</p>
+                </div>
+                
+                <div class="upload-container">
+                    <div class="upload-steps">
+                        <div class="step active" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Tải lên tài liệu</div>
+                        </div>
+                        <div class="step" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Thông tin tài liệu</div>
+                        </div>
+                        <div class="step" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Cài đặt và xem trước</div>
+                        </div>
+                        <div class="step" data-step="4">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Hoàn tất</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 1: Upload File -->
+                    <div class="upload-step-content active" data-step="1">
+                        <div class="upload-dropzone" id="uploadDropzone">
+                            <input type="file" id="fileInput" class="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
+                            <div class="dropzone-content">
+                                <div class="dropzone-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h3 class="dropzone-title">Kéo thả tài liệu tại đây</h3>
+                                <p class="dropzone-description">hoặc</p>
+                                <button class="btn btn-primary browse-btn">Chọn tài liệu</button>
+                                <p class="file-requirements">Hỗ trợ tập tin: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX <br> Kích thước tối đa: 100MB</p>
+                            </div>
+                            
+                            <div class="upload-preview" style="display: none;">
+                                <div class="preview-header">
+                                    <div class="preview-file-info">
+                                        <div class="preview-file-icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </div>
+                                        <div class="preview-file-details">
+                                            <div class="preview-file-name">document.pdf</div>
+                                            <div class="preview-file-meta">
+                                                <span class="file-size">2.5 MB</span>
+                                                <span class="file-type">PDF</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-outline btn-sm change-file-btn">
+                                        <i class="fas fa-exchange-alt"></i> Đổi tài liệu
+                                    </button>
+                                </div>
+                                
+                                <div class="upload-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 65%;"></div>
+                                    </div>
+                                    <div class="progress-text">Đang tải lên... 65%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-tips">
+                            <h3 class="tips-title"><i class="fas fa-lightbulb"></i> Mẹo đăng tải</h3>
+                            <ul class="tips-list">
+                                <li>Chỉ đăng tải tài liệu mà bạn có quyền phân phối.</li>
+                                <li>Đảm bảo tài liệu không có nội dung vi phạm bản quyền.</li>
+                                <li>Chất lượng tài liệu càng cao, xếp hạng và thu nhập của bạn càng tốt.</li>
+                                <li>Tài liệu độc quyền (chưa có trên nền tảng) sẽ được ưu tiên hiển thị.</li>
+                                <li>Các tài liệu sẽ được kiểm duyệt trước khi xuất bản công khai.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="step-actions">
+                            <button class="btn btn-primary next-step" id="step1Next" disabled>Tiếp theo</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Document Info -->
+                    <div class="upload-step-content" data-step="2">
+                        <form class="document-form">
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="docTitle">Tiêu đề tài liệu<span class="required">*</span></label>
+                                    <input type="text" id="docTitle" class="form-input" placeholder="Nhập tiêu đề mô tả tài liệu" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="docCategory">Danh mục<span class="required">*</span></label>
+                                    <select id="docCategory" class="form-select" required>
+                                        <option value="" disabled selected>Chọn danh mục</option>
+                                        <option value="it">Công nghệ thông tin</option>
+                                        <option value="business">Kinh tế - Quản trị</option>
+                                        <option value="language">Ngoại ngữ</option>
+                                        <option value="engineering">Kỹ thuật - Công nghệ</option>
+                                        <option value="social">Khoa học xã hội</option>
+                                        <option value="science">Khoa học tự nhiên</option>
+                                        <option value="health">Y tế - Sức khỏe</option>
+                                        <option value="art">Nghệ thuật</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="docSubcategory">Danh mục con</label>
+                                    <select id="docSubcategory" class="form-select" disabled>
+                                        <option value="" disabled selected>Chọn danh mục con</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group full-width">
+                                    <label for="docDescription">Mô tả tài liệu<span class="required">*</span></label>
+                                    <textarea id="docDescription" class="form-input" rows="5" placeholder="Mô tả ngắn gọn về nội dung tài liệu" required></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="docLanguage">Ngôn ngữ</label>
+                                    <select id="docLanguage" class="form-select">
+                                        <option value="vi" selected>Tiếng Việt</option>
+                                        <option value="en">Tiếng Anh</option>
+                                        <option value="fr">Tiếng Pháp</option>
+                                        <option value="de">Tiếng Đức</option>
+                                        <option value="ja">Tiếng Nhật</option>
+                                        <option value="zh">Tiếng Trung</option>
+                                        <option value="ko">Tiếng Hàn</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="docPages">Số trang</label>
+                                    <input type="number" id="docPages" class="form-input" placeholder="Số trang tài liệu" min="1">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="docTags">Từ khóa</label>
+                                    <input type="text" id="docTags" class="form-input" placeholder="Nhập các từ khóa, ngăn cách bởi dấu phẩy">
+                                    <div class="form-hint">Thêm từ khóa giúp tài liệu của bạn dễ dàng được tìm thấy hơn</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="docYear">Năm xuất bản</label>
+                                    <input type="number" id="docYear" class="form-input" placeholder="Năm xuất bản tài liệu" min="1900" max="2023">
+                                </div>
+                            </div>
+                            
+                            <div class="step-actions">
+                                <button type="button" class="btn btn-outline prev-step" data-prev="1">Quay lại</button>
+                                <button type="button" class="btn btn-primary next-step" id="step2Next">Tiếp theo</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Step 3: Settings & Preview -->
+                    <div class="upload-step-content" data-step="3">
+                        <div class="setting-sections">
+                            <div class="setting-section">
+                                <h3 class="section-title">Cài đặt quyền truy cập</h3>
+                                
+                                <div class="form-group">
+                                    <label class="setting-label">Loại truy cập</label>
+                                    <div class="toggle-options">
+                                        <label class="toggle-option">
+                                            <input type="radio" name="accessType" value="free" checked>
+                                            <span class="option-label"><i class="fas fa-unlock-alt"></i> Miễn phí</span>
+                                            <span class="option-description">Ai cũng có thể xem và tải xuống tài liệu này</span>
+                                        </label>
+                                        <label class="toggle-option">
+                                            <input type="radio" name="accessType" value="premium">
+                                            <span class="option-label"><i class="fas fa-coins"></i> Trả phí</span>
+                                            <span class="option-description">Người dùng phải trả xu để tải xuống tài liệu này</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div id="priceSettings" class="price-settings" style="display: none;">
+                                    <div class="price-input">
+                                        <label for="docPrice">Giá tài liệu (xu)</label>
+                                        <div class="input-group">
+                                            <i class="fas fa-coins"></i>
+                                            <input type="number" id="docPrice" class="form-input" placeholder="Nhập số xu" min="10" max="1000" value="50">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="price-settings-info">
+                                        <h4><i class="fas fa-info-circle"></i> Thông tin thu nhập</h4>
+                                        <div class="price-calculation">
+                                            <span>Giá tài liệu:</span>
+                                            <span><span id="priceValue">50</span> xu</span>
+                                        </div>
+                                        <div class="price-calculation">
+                                            <span>Phí nền tảng (30%):</span>
+                                            <span>-<span id="platformFee">15</span> xu</span>
+                                        </div>
+                                        <div class="price-calculation">
+                                            <span>Thu nhập của bạn:</span>
+                                            <span><span id="authorEarning">35</span> xu</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-section">
+                                <h3 class="section-title">Cài đặt xem trước</h3>
+                                
+                                <div class="form-group">
+                                    <label class="setting-label">Cho phép xem trước</label>
+                                    <div class="toggle-options">
+                                        <label class="toggle-option">
+                                            <input type="radio" name="previewType" value="enable" checked>
+                                            <span class="option-label"><i class="fas fa-eye"></i> Bật xem trước</span>
+                                            <span class="option-description">Người dùng có thể xem trước một số trang của tài liệu</span>
+                                        </label>
+                                        <label class="toggle-option">
+                                            <input type="radio" name="previewType" value="disable">
+                                            <span class="option-label"><i class="fas fa-eye-slash"></i> Tắt xem trước</span>
+                                            <span class="option-description">Người dùng chỉ thấy thông tin tài liệu mà không xem được nội dung</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div id="previewSettings" class="preview-settings">
+                                    <label for="previewPages">Số trang xem trước:</label>
+                                    <div class="preview-slider">
+                                        <div class="slider-container">
+                                            <div class="slider">
+                                                <div class="slider-track" style="width: 30%"></div>
+                                                <div class="slider-thumb" style="left: 30%"></div>
+                                            </div>
+                                            <div class="slider-value" id="previewPagesValue">3</div>
+                                        </div>
+                                        <div class="preview-info">
+                                            <p class="preview-description">Cho phép người xem đọc trước <strong id="previewCount">3</strong> trang đầu tiên trước khi tải xuống</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-section">
+                                <h3 class="section-title">Tài liệu liên quan</h3>
+                                
+                                <div class="form-group">
+                                    <label class="setting-label">Gợi ý tài liệu</label>
+                                    <div class="toggle-options">
+                                        <label class="toggle-option">
+                                            <input type="radio" name="relatedDocs" value="auto" checked>
+                                            <span class="option-label"><i class="fas fa-magic"></i> Tự động</span>
+                                            <span class="option-description">Hệ thống tự động gợi ý tài liệu liên quan dựa trên nội dung</span>
+                                        </label>
+                                        <label class="toggle-option">
+                                            <input type="radio" name="relatedDocs" value="manual">
+                                            <span class="option-label"><i class="fas fa-edit"></i> Thủ công</span>
+                                            <span class="option-description">Bạn tự chọn các tài liệu liên quan từ tài liệu của mình</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div id="manualRelatedDocs" style="display: none;">
+                                    <div class="related-docs-selector">
+                                        <div class="search-related">
+                                            <input type="text" placeholder="Tìm kiếm tài liệu của bạn...">
+                                            <button><i class="fas fa-search"></i></button>
+                                        </div>
+                                        <div class="related-docs-list">
+                                            <p class="empty-state">Bạn chưa có tài liệu nào khác được xuất bản</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-actions">
+                            <button type="button" class="btn btn-outline prev-step" data-prev="2">Quay lại</button>
+                            <button type="button" class="btn btn-primary next-step" id="publishBtn">Xuất bản</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Completion -->
+                    <div class="upload-step-content" data-step="4">
+                        <div class="completion-message">
+                            <div class="completion-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h2 class="completion-title">Tải lên thành công!</h2>
+                            <div class="confetti-container" id="confetti"></div>
+                            <p class="completion-description">
+                                Tài liệu của bạn đã được tải lên và đang chờ kiểm duyệt. Quá trình này thường mất 24-48 giờ. 
+                                Bạn sẽ nhận được thông báo khi tài liệu được duyệt và công khai.
+                                <br><br>
+                                ID tài liệu: <span class="document-id">DOC-2023120001</span>
+                            </p>
+                            
+                            <div class="completion-actions">
+                                <a href="account/documents.html" class="btn btn-outline">
+                                    <i class="fas fa-file-alt"></i> Quản lý tài liệu
+                                </a>
+                                <button class="btn btn-primary" id="uploadAnotherBtn">
+                                    <i class="fas fa-plus"></i> Tải lên tài liệu khác
+                                </button>
+                            </div>
+                            
+                            <div class="completion-stats">
+                                <div class="stat-card">
+                                    <div class="stat-value">5</div>
+                                    <div class="stat-label">Tài liệu đã tải</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">125</div>
+                                    <div class="stat-label">Lượt tải xuống</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">2,500</div>
+                                    <div class="stat-label">Xu đã kiếm được</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon footer-logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </div>
+                    <p class="footer-description">
+                        Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất lượng cao.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Khám phá</h3>
+                    <ul class="footer-links">
+                        <li><a href="categories.html">Danh mục</a></li>
+                        <li><a href="search.html?sort=newest">Tài liệu mới</a></li>
+                        <li><a href="search.html?sort=popular">Tài liệu phổ biến</a></li>
+                        <li><a href="#">Tác giả hàng đầu</a></li>
+                        <li><a href="#">Sự kiện & Tin tức</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Thông tin</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chương trình tác giả</a></li>
+                        <li><a href="#">Hợp tác & Liên kết</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Liên hệ</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+                        <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+                        <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Liên hệ</a>
+                    <a href="#">Trợ giúp</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+    <script src="../js/upload.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tạo hiệu ứng confetti khi đến bước hoàn thành
+            function createConfetti() {
+                const confettiContainer = document.getElementById('confetti');
+                if (!confettiContainer) return;
+                
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti-piece';
+                    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.width = Math.random() * 10 + 5 + 'px';
+                    confetti.style.height = Math.random() * 10 + 5 + 'px';
+                    confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confettiContainer.appendChild(confetti);
+                }
+            }
+            
+            // Thêm animation cho các shapes
+            const shapes = document.querySelectorAll('.shape');
+            shapes.forEach((shape, index) => {
+                shape.style.animationDelay = `${index * 0.2}s`;
+            });
+            // File Upload
+            const dropzone = document.getElementById('uploadDropzone');
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.querySelector('.browse-btn');
+            const changeFileBtn = document.querySelector('.change-file-btn');
+            const uploadPreview = document.querySelector('.upload-preview');
+            const dropzoneContent = document.querySelector('.dropzone-content');
+            const step1NextBtn = document.getElementById('step1Next');
+            
+            // Simulate file upload when a file is selected
+            fileInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const file = this.files[0];
+                    simulateFileUpload(file);
+                }
+            });
+            
+            // Open file browser when browse button is clicked
+            browseBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+            
+            // Change file button
+            if (changeFileBtn) {
+                changeFileBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetFileUpload();
+                    fileInput.click();
+                });
+            }
+            
+            // Handle drag and drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropzone.classList.add('drag-over');
+            }
+            
+            function unhighlight() {
+                dropzone.classList.remove('drag-over');
+            }
+            
+            dropzone.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    simulateFileUpload(files[0]);
+                }
+            }
+            
+            function simulateFileUpload(file) {
+                // Update file preview
+                const fileIcon = document.querySelector('.preview-file-icon i');
+                const fileName = document.querySelector('.preview-file-name');
+                const fileSize = document.querySelector('.file-size');
+                const fileType = document.querySelector('.file-type');
+                
+                // Set appropriate icon based on file type
+                const extension = file.name.split('.').pop().toLowerCase();
+                let iconClass = 'fas fa-file';
+                
+                if (['pdf'].includes(extension)) {
+                    iconClass = 'fas fa-file-pdf';
+                } else if (['doc', 'docx'].includes(extension)) {
+                    iconClass = 'fas fa-file-word';
+                } else if (['xls', 'xlsx'].includes(extension)) {
+                    iconClass = 'fas fa-file-excel';
+                } else if (['ppt', 'pptx'].includes(extension)) {
+                    iconClass = 'fas fa-file-powerpoint';
+                }
+                
+                fileIcon.className = iconClass;
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileType.textContent = extension.toUpperCase();
+                
+                // Show upload preview and hide dropzone content
+                dropzoneContent.style.display = 'none';
+                uploadPreview.style.display = 'block';
+                
+                // Simulate progress
+                simulateProgress();
+            }
+            
+            function resetFileUpload() {
+                // Reset file input
+                fileInput.value = '';
+                
+                // Hide upload preview and show dropzone content
+                dropzoneContent.style.display = 'block';
+                uploadPreview.style.display = 'none';
+                
+                // Reset progress
+                const progressFill = document.querySelector('.progress-fill');
+                const progressText = document.querySelector('.progress-text');
+                
+                progressFill.style.width = '0%';
+                progressText.textContent = 'Đang tải lên... 0%';
+                
+                // Disable next button
+                step1NextBtn.disabled = true;
+            }
+            
+            function simulateProgress() {
+                const progressFill = document.querySelector('.progress-fill');
+                const progressText = document.querySelector('.progress-text');
+                
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressFill.style.width = `${progress}%`;
+                    progressText.textContent = `Đang tải lên... ${progress}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        progressText.textContent = 'Đã tải lên 100%';
+                        // Enable next button
+                        step1NextBtn.disabled = false;
+                    }
+                }, 150);
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Multi-step form navigation
+            const steps = document.querySelectorAll('.step');
+            const stepContents = document.querySelectorAll('.upload-step-content');
+            const nextButtons = document.querySelectorAll('.next-step');
+            const prevButtons = document.querySelectorAll('.prev-step');
+            
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Get current step
+                    const currentStepContent = document.querySelector('.upload-step-content.active');
+                    const currentStepNumber = parseInt(currentStepContent.dataset.step);
+                    
+                    // Validate current step (if needed)
+                    if (currentStepNumber === 2) {
+                        const title = document.getElementById('docTitle').value;
+                        const category = document.getElementById('docCategory').value;
+                        const description = document.getElementById('docDescription').value;
+                        
+                        if (!title || !category || !description) {
+                            alert('Vui lòng điền đầy đủ thông tin bắt buộc.');
+                            return;
+                        }
+                    }
+                    
+                    // Hide current step
+                    currentStepContent.classList.remove('active');
+                    document.querySelector(`.step[data-step="${currentStepNumber}"]`).classList.remove('active');
+                    document.querySelector(`.step[data-step="${currentStepNumber}"]`).classList.add('completed');
+                    
+                    // Show next step
+                    const nextStepNumber = currentStepNumber + 1;
+                    document.querySelector(`.upload-step-content[data-step="${nextStepNumber}"]`).classList.add('active');
+                    document.querySelector(`.step[data-step="${nextStepNumber}"]`).classList.add('active');
+                    
+                    // Tạo hiệu ứng confetti khi đến bước hoàn thành
+                    if (nextStepNumber === 4) {
+                        createConfetti();
+                    }
+                });
+            });
+            
+            prevButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Get current step
+                    const currentStepContent = document.querySelector('.upload-step-content.active');
+                    const currentStepNumber = parseInt(currentStepContent.dataset.step);
+                    
+                    // Get previous step number (from button data-prev attribute if exists)
+                    const prevStepNumber = this.dataset.prev ? parseInt(this.dataset.prev) : currentStepNumber - 1;
+                    
+                    // Hide current step
+                    currentStepContent.classList.remove('active');
+                    document.querySelector(`.step[data-step="${currentStepNumber}"]`).classList.remove('active');
+                    
+                    // Show previous step
+                    document.querySelector(`.upload-step-content[data-step="${prevStepNumber}"]`).classList.add('active');
+                    document.querySelector(`.step[data-step="${prevStepNumber}"]`).classList.add('active');
+                    document.querySelector(`.step[data-step="${prevStepNumber}"]`).classList.remove('completed');
+                });
+            });
+            
+            // Upload Another button
+            const uploadAnotherBtn = document.getElementById('uploadAnotherBtn');
+            if (uploadAnotherBtn) {
+                uploadAnotherBtn.addEventListener('click', function() {
+                    // Reset everything and go back to step 1
+                    resetFileUpload();
+                    
+                    // Hide current step
+                    document.querySelector('.upload-step-content.active').classList.remove('active');
+                    document.querySelectorAll('.step').forEach(step => {
+                        step.classList.remove('active');
+                        step.classList.remove('completed');
+                    });
+                    
+                    // Show step 1
+                    document.querySelector('.upload-step-content[data-step="1"]').classList.add('active');
+                    document.querySelector('.step[data-step="1"]').classList.add('active');
+                });
+            }
+            
+            // Price settings toggle
+            const accessTypeRadios = document.querySelectorAll('input[name="accessType"]');
+            accessTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const priceSettings = document.getElementById('priceSettings');
+                    if (this.value === 'premium') {
+                        priceSettings.style.display = 'grid';
+                    } else {
+                        priceSettings.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Preview settings toggle
+            const previewTypeRadios = document.querySelectorAll('input[name="previewType"]');
+            previewTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const previewSettings = document.getElementById('previewSettings');
+                    if (this.value === 'enable') {
+                        previewSettings.style.display = 'block';
+                    } else {
+                        previewSettings.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Related docs toggle
+            const relatedDocsRadios = document.querySelectorAll('input[name="relatedDocs"]');
+            relatedDocsRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const manualRelatedDocs = document.getElementById('manualRelatedDocs');
+                    if (this.value === 'manual') {
+                        manualRelatedDocs.style.display = 'block';
+                    } else {
+                        manualRelatedDocs.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Price calculation
+            const docPrice = document.getElementById('docPrice');
+            if (docPrice) {
+                docPrice.addEventListener('input', function() {
+                    const price = parseInt(this.value) || 0;
+                    const platformFee = Math.round(price * 0.3);
+                    const authorEarning = price - platformFee;
+                    
+                    document.getElementById('priceValue').textContent = price;
+                    document.getElementById('platformFee').textContent = platformFee;
+                    document.getElementById('authorEarning').textContent = authorEarning;
+                });
+            }
+            
+            // Slider for preview pages
+            const slider = document.querySelector('.slider');
+            const sliderThumb = document.querySelector('.slider-thumb');
+            const sliderTrack = document.querySelector('.slider-track');
+            const sliderValue = document.getElementById('previewPagesValue');
+            const previewCount = document.getElementById('previewCount');
+            
+            if (slider && sliderThumb && sliderTrack) {
+                slider.addEventListener('click', function(e) {
+                    updateSlider(e);
+                });
+                
+                sliderThumb.addEventListener('mousedown', function() {
+                    document.addEventListener('mousemove', updateSlider);
+                    document.addEventListener('mouseup', function() {
+                        document.removeEventListener('mousemove', updateSlider);
+                    });
+                });
+            }
+            
+            function updateSlider(e) {
+                const sliderRect = slider.getBoundingClientRect();
+                let position = (e.clientX - sliderRect.left) / sliderRect.width;
+                
+                // Clamp position between 0 and 1
+                position = Math.max(0, Math.min(1, position));
+                
+                // Pages from 1 to 10
+                let pages = Math.max(1, Math.min(10, Math.round(position * 10)));
+                
+                // Update UI
+                sliderTrack.style.width = (pages * 10) + '%';
+                sliderThumb.style.left = (pages * 10) + '%';
+                sliderValue.textContent = pages;
+                previewCount.textContent = pages;
+            }
+            
+            // Category-Subcategory relationship
+            const categorySelect = document.getElementById('docCategory');
+            const subcategorySelect = document.getElementById('docSubcategory');
+            
+            if (categorySelect && subcategorySelect) {
+                // Define subcategories for each category
+                const subcategories = {
+                    it: [
+                        { value: 'programming', text: 'Lập trình' },
+                        { value: 'database', text: 'Cơ sở dữ liệu' },
+                        { value: 'networking', text: 'Mạng máy tính' },
+                        { value: 'security', text: 'Bảo mật' },
+                        { value: 'web', text: 'Phát triển web' },
+                        { value: 'mobile', text: 'Phát triển ứng dụng di động' }
+                    ],
+                    business: [
+                        { value: 'marketing', text: 'Marketing' },
+                        { value: 'finance', text: 'Tài chính' },
+                        { value: 'management', text: 'Quản trị' },
+                        { value: 'hr', text: 'Nhân sự' },
+                        { value: 'economics', text: 'Kinh tế học' }
+                    ],
+                    language: [
+                        { value: 'english', text: 'Tiếng Anh' },
+                        { value: 'chinese', text: 'Tiếng Trung' },
+                        { value: 'japanese', text: 'Tiếng Nhật' },
+                        { value: 'korean', text: 'Tiếng Hàn' },
+                        { value: 'french', text: 'Tiếng Pháp' },
+                        { value: 'german', text: 'Tiếng Đức' }
+                    ],
+                    // Add more categories and subcategories as needed
+                };
+                
+                categorySelect.addEventListener('change', function() {
+                    const category = this.value;
+                    
+                    // Clear current options
+                    subcategorySelect.innerHTML = '<option value="" disabled selected>Chọn danh mục con</option>';
+                    
+                    // If category has subcategories, add them and enable the select
+                    if (subcategories[category]) {
+                        subcategories[category].forEach(subcategory => {
+                            const option = document.createElement('option');
+                            option.value = subcategory.value;
+                            option.textContent = subcategory.text;
+                            subcategorySelect.appendChild(option);
+                        });
+                        
+                        subcategorySelect.disabled = false;
+                    } else {
+                        subcategorySelect.disabled = true;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

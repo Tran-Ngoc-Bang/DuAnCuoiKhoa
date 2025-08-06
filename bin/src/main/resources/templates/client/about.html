@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Về chúng tôi - EduShare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/main-fixes.css">
+    <link rel="stylesheet" href="../css/footer-modern.css">
+</head>
+<body>
+     <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a href="../index.html">
+            <div class="logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </a>
+        </div>
+        <nav class="main-nav">
+          <a href="../index.html" class="nav-link">Trang chủ</a>
+          <a href="categories.html" class="nav-link active">Danh mục</a>
+          <a href="search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+          <a href="search.html?filter=premium" class="nav-link">Cao cấp</a>
+          <a href="about.html" class="nav-link">Giới thiệu</a>
+        </nav>
+        <div class="header-actions">
+          <!-- Đã xóa ô tìm kiếm theo yêu cầu -->
+          <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+            <span class="dark-mode-handle" id="darkModeHandle"></span>
+          </button>
+          <a href="login.html" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+          </a>
+          <a href="register.html" class="register-btn">
+            <i class="fas fa-user-plus"></i> Đăng ký
+          </a>
+        </div>
+        <div class="mobile-menu-toggle" id="mobileMenuBtn">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="mobile-menu">
+      <div class="mobile-search">
+        <input type="text" placeholder="Tìm kiếm tài liệu...">
+        <button>
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      <nav class="mobile-nav">
+        <a href="../index.html" class="mobile-nav-link">Trang chủ</a>
+        <a href="categories.html" class="mobile-nav-link active">Danh mục</a>
+        <a href="search.html?sort=newest" class="mobile-nav-link">Tài liệu mới</a>
+        <a href="search.html?filter=premium" class="mobile-nav-link">Cao cấp</a>
+        <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+      </nav>
+      <div class="mobile-auth">
+        <a href="login.html" class="mobile-login-btn">Đăng nhập</a>
+        <a href="register.html" class="mobile-register-btn">Đăng ký</a>
+      </div>
+    </div>
+  </header>
+    
+    <!-- About Header Section -->
+    <section class="about-header">
+        <div class="container">
+            <div class="about-header-content">
+                <h1 class="about-title">Về chúng tôi</h1>
+                <p class="about-description">EduShare là nền tảng chia sẻ tài liệu học tập hàng đầu, được xây dựng với sứ mệnh kết nối người học và nguồn kiến thức chất lượng cao, mang đến trải nghiệm học tập hiệu quả và thuận tiện cho cộng đồng.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Story Section -->
+    <section class="about-story">
+        <div class="container">
+            <div class="about-story-content">
+                <div class="about-story-image">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Câu chuyện của EduShare">
+                </div>
+                <div class="about-story-text">
+                    <h2 class="about-section-title">Câu chuyện của chúng tôi</h2>
+                    <p>EduShare được thành lập vào năm 2020 bởi một nhóm sinh viên Đại học với mong muốn tạo ra một nền tảng nơi mọi người có thể dễ dàng tiếp cận và chia sẻ tài liệu học tập chất lượng cao.</p>
+                    <p>Xuất phát từ khó khăn trong việc tìm kiếm tài liệu học tập đáng tin cậy và có hệ thống, chúng tôi đã phát triển EduShare với sứ mệnh "Kiến thức cho tất cả" - nơi mà bất kỳ ai cũng có thể tiếp cận nguồn kiến thức phong phú và đa dạng.</p>
+                    <p>Sau nhiều năm phát triển, EduShare đã trở thành một trong những nền tảng chia sẻ tài liệu học tập uy tín nhất Việt Nam, với hàng nghìn tài liệu chất lượng cao và một cộng đồng người dùng năng động.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Mission & Vision Section -->
+    <section class="mission-vision">
+        <div class="container">
+            <div class="mission-vision-content">
+                <div class="mission-box">
+                    <div class="icon-box">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3>Sứ mệnh</h3>
+                    <p>Kết nối và phổ biến kiến thức đến mọi người học, xóa bỏ rào cản về địa lý và kinh tế trong tiếp cận tài liệu học tập chất lượng cao.</p>
+                </div>
+                <div class="vision-box">
+                    <div class="icon-box">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Tầm nhìn</h3>
+                    <p>Trở thành nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam và Đông Nam Á, nơi mọi người có thể dễ dàng chia sẻ và tiếp cận kiến thức.</p>
+                </div>
+                <div class="values-box">
+                    <div class="icon-box">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Giá trị cốt lõi</h3>
+                    <p>Chúng tôi tin vào sức mạnh của tri thức được chia sẻ, tính cầu thị và tinh thần học hỏi không ngừng, cùng với trách nhiệm xã hội trong việc phát triển giáo dục.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <h2 class="section-title">Đội ngũ của chúng tôi</h2>
+            <p class="section-subtitle">Gặp gỡ những người đứng sau EduShare - đội ngũ nhiệt huyết với sứ mệnh nâng cao chất lượng giáo dục.</p>
+            
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" alt="Nguyễn Văn A">
+                    </div>
+                    <h3 class="team-name">Nguyễn Văn A</h3>
+                    <p class="team-role">Đồng sáng lập & CEO</p>
+                    <p class="team-bio">Tốt nghiệp Thạc sĩ Khoa học Máy tính tại Đại học, với hơn 8 năm kinh nghiệm trong lĩnh vực EdTech.</p>
+                    <div class="team-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" alt="Trần Thị B">
+                    </div>
+                    <h3 class="team-name">Trần Thị B</h3>
+                    <p class="team-role">Đồng sáng lập & CTO</p>
+                    <p class="team-bio">Kỹ sư phần mềm với hơn 10 năm kinh nghiệm phát triển các nền tảng học tập trực tuyến và quản lý tri thức.</p>
+                    <div class="team-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" alt="Lê Thị C">
+                    </div>
+                    <h3 class="team-name">Lê Thị C</h3>
+                    <p class="team-role">Giám đốc Nội dung</p>
+                    <p class="team-bio">Tiến sĩ Giáo dục học với niềm đam mê phát triển nội dung giáo dục chất lượng cao và dễ tiếp cận.</p>
+                    <div class="team-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" alt="Phạm Văn D">
+                    </div>
+                    <h3 class="team-name">Phạm Văn D</h3>
+                    <p class="team-role">Giám đốc Marketing</p>
+                    <p class="team-bio">Chuyên gia Marketing với hơn 7 năm kinh nghiệm trong lĩnh vực xây dựng thương hiệu và phát triển cộng đồng.</p>
+                    <div class="team-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="stat-number">50.000+</h3>
+                    <p class="stat-label">Người dùng</p>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3 class="stat-number">10.000+</h3>
+                    <p class="stat-label">Tài liệu</p>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3 class="stat-number">500.000+</h3>
+                    <p class="stat-label">Lượt tải</p>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="stat-number">4.8/5</h3>
+                    <p class="stat-label">Đánh giá trung bình</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Partners Section -->
+    <section class="partners-section">
+        <div class="container">
+            <h2 class="section-title">Đối tác của chúng tôi</h2>
+            <p class="section-subtitle">EduShare tự hào hợp tác với các trường đại học và tổ chức giáo dục hàng đầu.</p>
+            
+            <div class="partners-grid">
+                <div class="partner-logo">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+1" alt="Đối tác 1">
+                </div>
+                <div class="partner-logo">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+2" alt="Đối tác 2">
+                </div>
+                <div class="partner-logo">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+3" alt="Đối tác 3">
+                </div>
+                <div class="partner-logo">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+4" alt="Đối tác 4">
+                </div>
+                <div class="partner-logo">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+5" alt="Đối tác 5">
+                </div>
+                <div class="partner-logo">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+6" alt="Đối tác 6">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2 class="contact-title">Liên hệ với chúng tôi</h2>
+                    <p class="contact-description">Nếu bạn có bất kỳ câu hỏi hoặc đề xuất nào, đừng ngần ngại liên hệ với chúng tôi. Đội ngũ hỗ trợ của EduShare luôn sẵn sàng giúp đỡ bạn.</p>
+                    
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Địa chỉ</h3>
+                                <p>175 Tây Sơn, Đống Đa, Hà Nội</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Email</h3>
+                                <p>support@edushare.com</p>
+                                <p>info@edushare.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Điện thoại</h3>
+                                <p>(+84) 123 456 789</p>
+                                <p>(+84) 987 654 321</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Giờ làm việc</h3>
+                                <p>Thứ 2 - Thứ 6: 9:00 - 18:00</p>
+                                <p>Thứ 7: 9:00 - 12:00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-container">
+                    <form class="contact-form">
+                        <div class="form-group">
+                            <label for="name">Họ và tên</label>
+                            <input type="text" id="name" name="name" placeholder="Nhập họ và tên của bạn" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="Nhập địa chỉ email của bạn" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Chủ đề</label>
+                            <input type="text" id="subject" name="subject" placeholder="Nhập chủ đề liên hệ" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Nội dung</label>
+                            <textarea id="message" name="message" rows="5" placeholder="Nhập nội dung tin nhắn của bạn" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">Gửi tin nhắn</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="container">
+            <h2 class="newsletter-title">Đăng ký nhận thông báo</h2>
+            <p class="newsletter-description">Nhận thông báo về các tài liệu mới nhất và các mẹo học tập hữu ích thông qua email.</p>
+            <form class="newsletter-form">
+                <input type="email" class="newsletter-input" placeholder="Nhập địa chỉ email của bạn">
+                <button type="submit" class="newsletter-button">Đăng ký</button>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <div class="logo-icon footer-logo-icon">E</div>
+                        <span class="logo-text">EduShare</span>
+                    </div>
+                    <p class="footer-description">
+                        Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất lượng cao.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Khám phá</h3>
+                    <ul class="footer-links">
+                        <li><a href="categories.html">Danh mục</a></li>
+                        <li><a href="search.html?sort=newest">Tài liệu mới</a></li>
+                        <li><a href="search.html?sort=popular">Tài liệu phổ biến</a></li>
+                        <li><a href="#">Tác giả hàng đầu</a></li>
+                        <li><a href="#">Sự kiện & Tin tức</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Thông tin</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chương trình tác giả</a></li>
+                        <li><a href="#">Hợp tác & Liên kết</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links-section">
+                    <h3 class="footer-heading">Liên hệ</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+                        <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+                        <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Liên hệ</a>
+                    <a href="#">Trợ giúp</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+    
+    <script src="../js/main.js"></script>
+    <style>
+        /* About Page Specific Styles */
+        .about-header {
+            padding: 8rem 0 4rem;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(247, 37, 133, 0.1));
+            text-align: center;
+        }
+        
+        .about-title {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .about-description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.125rem;
+            color: var(--gray-600);
+        }
+        
+        .about-story {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+        
+        .about-story-content {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+        
+        .about-story-image {
+            flex: 1;
+        }
+        
+        .about-story-image img {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .about-story-text {
+            flex: 1;
+        }
+        
+        .about-section-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .about-section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -0.5rem;
+            width: 5rem;
+            height: 0.25rem;
+            background-color: var(--primary);
+            border-radius: var(--radius-full);
+        }
+        
+        .about-story-text p {
+            margin-bottom: 1.5rem;
+            color: var(--gray-700);
+            line-height: 1.8;
+        }
+        
+        .mission-vision {
+            padding: 5rem 0;
+            background-color: var(--gray-50);
+        }
+        
+        .mission-vision-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .mission-box, .vision-box, .values-box {
+            background-color: var(--white);
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition-normal);
+        }
+        
+        .mission-box:hover, .vision-box:hover, .values-box:hover {
+            transform: translateY(-0.5rem);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .icon-box {
+            width: 5rem;
+            height: 5rem;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .mission-box .icon-box {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        .vision-box .icon-box {
+            background-color: var(--accent-light);
+            color: var(--accent);
+        }
+        
+        .values-box .icon-box {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+        
+        .mission-box h3, .vision-box h3, .values-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .mission-box p, .vision-box p, .values-box p {
+            color: var(--gray-600);
+            line-height: 1.8;
+        }
+        
+        .team-section {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .team-card {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition-normal);
+            text-align: center;
+            padding-bottom: 2rem;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-0.5rem);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .team-avatar {
+            width: 180px;
+            height: 180px;
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin: 2rem auto;
+            border: 0.5rem solid var(--primary-light);
+        }
+        
+        .team-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .team-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .team-role {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .team-bio {
+            padding: 0 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+        
+        .team-social {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .team-social a {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-full);
+            background-color: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-700);
+            transition: var(--transition-normal);
+        }
+        
+        .team-social a:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        
+        .stats-section {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(247, 37, 133, 0.1));
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .stat-item {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition-normal);
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-0.5rem);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .stat-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: var(--radius-full);
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+        }
+        
+        .partners-section {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+        
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .partner-logo {
+            background-color: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-normal);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .partner-logo:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow);
+        }
+        
+        .partner-logo img {
+            max-width: 100%;
+            height: auto;
+            filter: grayscale(1);
+            opacity: 0.7;
+            transition: var(--transition-normal);
+        }
+        
+        .partner-logo:hover img {
+            filter: grayscale(0);
+            opacity: 1;
+        }
+        
+        .contact-section {
+            padding: 5rem 0;
+            background-color: var(--gray-50);
+        }
+        
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+        
+        .contact-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .contact-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -0.5rem;
+            width: 5rem;
+            height: 0.25rem;
+            background-color: var(--primary);
+            border-radius: var(--radius-full);
+        }
+        
+        .contact-description {
+            margin-bottom: 2rem;
+            color: var(--gray-600);
+        }
+        
+        .contact-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        
+        .contact-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius-full);
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .contact-text h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-text p {
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+        }
+        
+        .contact-form-container {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-family: var(--font-body);
+            transition: var(--transition-normal);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            outline: none;
+        }
+        
+        .submit-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            display: block;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        @media (min-width: 768px) {
+            .about-story-content {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .mission-vision-content {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .partners-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .contact-content {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .contact-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .team-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .partners-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        /* Dark Mode Styles */
+        body.dark-mode .about-header {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(247, 37, 133, 0.05));
+        }
+        
+        body.dark-mode .about-description {
+            color: var(--gray-400);
+        }
+        
+        body.dark-mode .about-story {
+            background-color: var(--gray-800);
+        }
+        
+        body.dark-mode .about-story-text p {
+            color: var(--gray-400);
+        }
+        
+        body.dark-mode .mission-vision {
+            background-color: var(--gray-900);
+        }
+        
+        body.dark-mode .mission-box, 
+        body.dark-mode .vision-box, 
+        body.dark-mode .values-box,
+        body.dark-mode .team-card,
+        body.dark-mode .stat-item,
+        body.dark-mode .contact-form-container {
+            background-color: var(--gray-800);
+        }
+        
+        body.dark-mode .team-section {
+            background-color: var(--gray-900);
+        }
+        
+        body.dark-mode .stats-section {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(247, 37, 133, 0.05));
+        }
+        
+        body.dark-mode .partners-section {
+            background-color: var(--gray-900);
+        }
+        
+        body.dark-mode .partner-logo {
+            background-color: var(--gray-800);
+            border-color: var(--gray-700);
+        }
+        
+        body.dark-mode .contact-section {
+            background-color: var(--gray-900);
+        }
+        
+        body.dark-mode .team-social a {
+            background-color: var(--gray-700);
+            color: var(--gray-300);
+        }
+        
+        body.dark-mode .team-social a:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        
+        body.dark-mode .form-group label {
+            color: var(--gray-300);
+        }
+        
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group textarea {
+            background-color: var(--gray-700);
+            border-color: var(--gray-600);
+            color: var(--white);
+        }
+    </style>
+</body>
+</html>
+

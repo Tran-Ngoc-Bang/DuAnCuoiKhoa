@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo vi phạm - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/reports.css">
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Báo cáo vi phạm</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <span>Báo cáo vi phạm</span>
+                </div>
+            </div>
+
+            <!-- Reports Summary Cards -->
+            <div class="reports-summary">
+                <div class="report-summary-card">
+                    <div class="summary-icon new-icon">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <div class="summary-content">
+                        <div class="summary-number">24</div>
+                        <div class="summary-label">Báo cáo mới</div>
+                    </div>
+                </div>
+
+                <div class="report-summary-card">
+                    <div class="summary-icon processing-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="summary-content">
+                        <div class="summary-number">15</div>
+                        <div class="summary-label">Đang xử lý</div>
+                    </div>
+                </div>
+
+                <div class="report-summary-card">
+                    <div class="summary-icon resolved-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="summary-content">
+                        <div class="summary-number">68</div>
+                        <div class="summary-label">Đã giải quyết</div>
+                    </div>
+                </div>
+
+                <div class="report-summary-card">
+                    <div class="summary-icon rejected-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="summary-content">
+                        <div class="summary-number">32</div>
+                        <div class="summary-label">Đã từ chối</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Management Tools -->
+            <div class="management-tools">
+                <div class="search-filters">
+                    <div class="tool-item">
+                        <input type="text" placeholder="Tìm kiếm báo cáo..." class="search-input">
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả loại vi phạm</option>
+                            <option value="copyright">Vi phạm bản quyền</option>
+                            <option value="inappropriate">Nội dung không phù hợp</option>
+                            <option value="spam">Spam/Quảng cáo</option>
+                            <option value="fake">Tài liệu giả mạo</option>
+                            <option value="other">Vi phạm khác</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="new">Mới</option>
+                            <option value="processing">Đang xử lý</option>
+                            <option value="resolved">Đã giải quyết</option>
+                            <option value="rejected">Đã từ chối</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="export-btn">
+                        <i class="fas fa-download"></i> Xuất dữ liệu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reports Tabs -->
+            <div class="reports-tabs">
+                <button class="tab-button active" data-tab="all">Tất cả (139)</button>
+                <button class="tab-button" data-tab="new">Mới (24)</button>
+                <button class="tab-button" data-tab="processing">Đang xử lý (15)</button>
+                <button class="tab-button" data-tab="resolved">Đã giải quyết (68)</button>
+                <button class="tab-button" data-tab="rejected">Đã từ chối (32)</button>
+            </div>
+
+            <!-- Reports Table -->
+            <div class="data-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="selectAll">
+                                    <label for="selectAll"></label>
+                                </div>
+                            </th>
+                            <th>ID</th>
+                            <th>Tài liệu báo cáo</th>
+                            <th>Người báo cáo</th>
+                            <th>Loại vi phạm</th>
+                            <th>Ngày báo cáo</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="report1">
+                                    <label for="report1"></label>
+                                </div>
+                            </td>
+                            <td>#RPT8025</td>
+                            <td>
+                                <div class="report-document">
+                                    <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
+                                    <div class="document-info">
+                                        <div class="document-title">Lập trình ứng dụng web với React</div>
+                                        <div class="document-owner">Nguyễn Văn A</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reporter-info">
+                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="Trần Thị B">
+                                    <span>Trần Thị B</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="violation-type copyright">Vi phạm bản quyền</span>
+                            </td>
+                            <td>15/04/2023</td>
+                            <td><span class="status-badge new">Mới</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8025"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn process-report" title="Xử lý" data-id="RPT8025"><i
+                                            class="fas fa-play"></i></button>
+                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8025"><i
+                                            class="fas fa-times"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="report2">
+                                    <label for="report2"></label>
+                                </div>
+                            </td>
+                            <td>#RPT8024</td>
+                            <td>
+                                <div class="report-document">
+                                    <div class="document-icon"><i class="fas fa-file-word"></i></div>
+                                    <div class="document-info">
+                                        <div class="document-title">IELTS Writing: Cách đạt điểm cao</div>
+                                        <div class="document-owner">Lê Văn C</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reporter-info">
+                                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="Phạm Thị D">
+                                    <span>Phạm Thị D</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="violation-type inappropriate">Nội dung không phù hợp</span>
+                            </td>
+                            <td>15/04/2023</td>
+                            <td><span class="status-badge new">Mới</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8024"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn process-report" title="Xử lý" data-id="RPT8024"><i
+                                            class="fas fa-play"></i></button>
+                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8024"><i
+                                            class="fas fa-times"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="report3">
+                                    <label for="report3"></label>
+                                </div>
+                            </td>
+                            <td>#RPT8023</td>
+                            <td>
+                                <div class="report-document">
+                                    <div class="document-icon"><i class="fas fa-file-powerpoint"></i></div>
+                                    <div class="document-info">
+                                        <div class="document-title">Quản trị chiến lược kinh doanh</div>
+                                        <div class="document-owner">Trần Văn E</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reporter-info">
+                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="Hoàng Văn F">
+                                    <span>Hoàng Văn F</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="violation-type spam">Spam/Quảng cáo</span>
+                            </td>
+                            <td>14/04/2023</td>
+                            <td><span class="status-badge processing">Đang xử lý</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8023"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn resolve-report" title="Đánh dấu đã giải quyết"
+                                        data-id="RPT8023"><i class="fas fa-check"></i></button>
+                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8023"><i
+                                            class="fas fa-times"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="report4">
+                                    <label for="report4"></label>
+                                </div>
+                            </td>
+                            <td>#RPT8022</td>
+                            <td>
+                                <div class="report-document">
+                                    <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
+                                    <div class="document-info">
+                                        <div class="document-title">Python cho Data Science</div>
+                                        <div class="document-owner">Đặng Thị G</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reporter-info">
+                                    <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="Đinh Văn H">
+                                    <span>Đinh Văn H</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="violation-type fake">Tài liệu giả mạo</span>
+                            </td>
+                            <td>14/04/2023</td>
+                            <td><span class="status-badge processing">Đang xử lý</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8022"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn resolve-report" title="Đánh dấu đã giải quyết"
+                                        data-id="RPT8022"><i class="fas fa-check"></i></button>
+                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8022"><i
+                                            class="fas fa-times"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="report5">
+                                    <label for="report5"></label>
+                                </div>
+                            </td>
+                            <td>#RPT8021</td>
+                            <td>
+                                <div class="report-document">
+                                    <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
+                                    <div class="document-info">
+                                        <div class="document-title">Giải tích 1 cho sinh viên kỹ thuật</div>
+                                        <div class="document-owner">Vũ Thị I</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reporter-info">
+                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="Lưu Văn K">
+                                    <span>Lưu Văn K</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="violation-type copyright">Vi phạm bản quyền</span>
+                            </td>
+                            <td>13/04/2023</td>
+                            <td><span class="status-badge resolved">Đã giải quyết</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8021"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn reopen-report" title="Mở lại" data-id="RPT8021"><i
+                                            class="fas fa-redo-alt"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="report6">
+                                    <label for="report6"></label>
+                                </div>
+                            </td>
+                            <td>#RPT8020</td>
+                            <td>
+                                <div class="report-document">
+                                    <div class="document-icon"><i class="fas fa-file-excel"></i></div>
+                                    <div class="document-info">
+                                        <div class="document-title">Phân tích dữ liệu với Excel</div>
+                                        <div class="document-owner">Nguyễn Thị L</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="reporter-info">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                        alt="Phạm Văn M">
+                                    <span>Phạm Văn M</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="violation-type other">Vi phạm khác</span>
+                            </td>
+                            <td>12/04/2023</td>
+                            <td><span class="status-badge rejected">Đã từ chối</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8020"><i
+                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn reopen-report" title="Mở lại" data-id="RPT8020"><i
+                                            class="fas fa-redo-alt"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-pages">
+                    <button class="pagination-btn page-btn active">1</button>
+                    <button class="pagination-btn page-btn">2</button>
+                    <button class="pagination-btn page-btn">3</button>
+                    <span class="pagination-ellipsis">...</span>
+                    <button class="pagination-btn page-btn">14</button>
+                </div>
+                <button class="pagination-btn next-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions">
+                <div class="bulk-actions-select">
+                    <span>Với báo cáo đã chọn:</span>
+                    <select id="bulkActionSelect">
+                        <option value="">Chọn hành động</option>
+                        <option value="process">Đánh dấu đang xử lý</option>
+                        <option value="resolve">Đánh dấu đã giải quyết</option>
+                        <option value="reject">Từ chối báo cáo</option>
+                    </select>
+                    <button class="apply-action-btn">Áp dụng</button>
+                </div>
+                <div class="selected-count">0 báo cáo được chọn</div>
+            </div>
+
+            <!-- Report Detail Modal -->
+            <div class="modal" id="reportDetailModal">
+                <div class="modal-overlay"></div>
+                <div class="modal-container modal-lg">
+                    <div class="modal-header">
+                        <h3>Chi tiết báo cáo #RPT8025</h3>
+                        <button class="modal-close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="report-detail">
+                            <div class="report-overview">
+                                <div class="report-status">
+                                    <span class="status-label">Trạng thái:</span>
+                                    <span class="status-badge new">Mới</span>
+                                </div>
+                                <div class="report-date">
+                                    <span class="date-label">Ngày báo cáo:</span>
+                                    <span class="date-value">15/04/2023 - 10:24 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="report-sections">
+                                <div class="report-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-flag"></i> Thông tin báo cáo
+                                    </h4>
+                                    <div class="section-content">
+                                        <div class="info-row">
+                                            <div class="info-label">Loại vi phạm</div>
+                                            <div class="info-value">
+                                                <span class="violation-type copyright">Vi phạm bản quyền</span>
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Người báo cáo</div>
+                                            <div class="info-value">
+                                                <div class="user-info">
+                                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                                                        alt="Trần Thị B">
+                                                    <div class="user-details">
+                                                        <div class="user-name">Trần Thị B</div>
+                                                        <div class="user-email">tranthib@example.com</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="info-row full-width">
+                                            <div class="info-label">Mô tả vi phạm</div>
+                                            <div class="info-value description">
+                                                <p>Tài liệu này đã sao chép nội dung từ cuốn sách "React - The Complete
+                                                    Guide" của tác giả John Smith mà không được sự cho phép. Tôi là đại
+                                                    diện của nhà xuất bản CodeMaster và chúng tôi sở hữu bản quyền cho
+                                                    tài liệu gốc.</p>
+                                                <p>Cụ thể, các phần từ trang 15-42 của tài liệu này hoàn toàn giống với
+                                                    nội dung từ cuốn sách của chúng tôi, chỉ có một vài sửa đổi nhỏ.</p>
+                                            </div>
+                                        </div>
+                                        <div class="info-row full-width">
+                                            <div class="info-label">Bằng chứng</div>
+                                            <div class="info-value evidence">
+                                                <div class="evidence-items">
+                                                    <div class="evidence-item">
+                                                        <img src="https://images.unsplash.com/photo-1606857521015-7f9fcf423740?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                                                            alt="Bằng chứng 1">
+                                                        <div class="evidence-overlay">
+                                                            <button class="view-evidence-btn"><i
+                                                                    class="fas fa-search-plus"></i></button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="evidence-item">
+                                                        <img src="https://images.unsplash.com/photo-1586282391535-74bc5c28a1f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                                                            alt="Bằng chứng 2">
+                                                        <div class="evidence-overlay">
+                                                            <button class="view-evidence-btn"><i
+                                                                    class="fas fa-search-plus"></i></button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="evidence-item document">
+                                                        <div class="evidence-document">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                            <span>copyright_proof.pdf</span>
+                                                        </div>
+                                                        <div class="evidence-overlay">
+                                                            <button class="download-evidence-btn"><i
+                                                                    class="fas fa-download"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="report-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-file-alt"></i> Thông tin tài liệu báo cáo
+                                    </h4>
+                                    <div class="section-content">
+                                        <div class="document-card">
+                                            <div class="document-preview">
+                                                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+                                                    alt="Document Preview">
+                                                <div class="document-icon-overlay"><i class="fas fa-file-pdf"></i></div>
+                                            </div>
+                                            <div class="document-details">
+                                                <h4 class="document-title">Lập trình ứng dụng web với React</h4>
+                                                <div class="document-meta">
+                                                    <div class="meta-item">
+                                                        <i class="fas fa-user"></i> Nguyễn Văn A
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <i class="fas fa-calendar"></i> Đăng ngày: 01/04/2023
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <i class="fas fa-download"></i> 5.2K lượt tải
+                                                    </div>
+                                                </div>
+                                                <div class="document-stats">
+                                                    <div class="stat-item">
+                                                        <span class="stat-label">Kích thước</span>
+                                                        <span class="stat-value">15.2 MB</span>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <span class="stat-label">Trang</span>
+                                                        <span class="stat-value">84</span>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <span class="stat-label">Loại</span>
+                                                        <span class="stat-value">PDF</span>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <span class="stat-label">Phiên bản</span>
+                                                        <span class="stat-value">1.2</span>
+                                                    </div>
+                                                </div>
+                                                <div class="document-actions">
+                                                    <button class="preview-btn">
+                                                        <i class="fas fa-eye"></i> Xem tài liệu
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="report-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-history"></i> Lịch sử xử lý
+                                    </h4>
+                                    <div class="section-content">
+                                        <div class="history-timeline">
+                                            <div class="timeline-item">
+                                                <div class="timeline-icon">
+                                                    <i class="fas fa-flag"></i>
+                                                </div>
+                                                <div class="timeline-content">
+                                                    <div class="timeline-header">
+                                                        <span class="timeline-title">Báo cáo được tạo</span>
+                                                        <span class="timeline-date">15/04/2023 - 10:24 AM</span>
+                                                    </div>
+                                                    <div class="timeline-body">
+                                                        Trần Thị B đã tạo báo cáo vi phạm bản quyền cho tài liệu "Lập
+                                                        trình ứng dụng web với React".
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Thêm các timeline-item khác nếu có lịch sử xử lý -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="process-form">
+                                <h4 class="form-title">Xử lý báo cáo</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="reportStatus">Cập nhật trạng thái</label>
+                                        <select id="reportStatus">
+                                            <option value="processing">Đang xử lý</option>
+                                            <option value="resolved">Đã giải quyết</option>
+                                            <option value="rejected">Từ chối</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="documentAction">Hành động với tài liệu</label>
+                                        <select id="documentAction">
+                                            <option value="none">Không có hành động</option>
+                                            <option value="hide">Ẩn tài liệu</option>
+                                            <option value="delete">Xóa tài liệu</option>
+                                            <option value="warning">Cảnh báo người đăng</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminNote">Ghi chú của admin</label>
+                                    <textarea id="adminNote" rows="4"
+                                        placeholder="Thêm ghi chú về việc xử lý báo cáo..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="responseToReporter">Phản hồi tới người báo cáo</label>
+                                    <textarea id="responseToReporter" rows="4"
+                                        placeholder="Gửi thông báo tới người báo cáo..."></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button class="cancel-btn">Hủy bỏ</button>
+                                    <button class="save-btn">Lưu & Cập nhật</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/reports.js"></script>
+</body>
+
+</html>
