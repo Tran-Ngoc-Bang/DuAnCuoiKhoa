@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Tags - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/tags.css">
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item active">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Quản lý Tags</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <span>Quản lý Tags</span>
+                </div>
+            </div>
+
+            <!-- Tag Management Tools -->
+            <div class="management-tools">
+                <div class="search-filters">
+                    <div class="tool-item">
+                        <input type="text" placeholder="Tìm kiếm tag..." class="search-input">
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả danh mục</option>
+                            <option value="1">Công nghệ thông tin</option>
+                            <option value="2">Kinh tế - Quản trị</option>
+                            <option value="3">Ngoại ngữ</option>
+                            <option value="4">Kỹ thuật - Công nghệ</option>
+                            <option value="5">Khoa học xã hội</option>
+                            <option value="6">Khoa học tự nhiên</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="none">Sắp xếp theo</option>
+                            <option value="name_asc">Tên (A-Z)</option>
+                            <option value="name_desc">Tên (Z-A)</option>
+                            <option value="popular">Phổ biến nhất</option>
+                            <option value="recent">Gần đây nhất</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="add-new-btn" id="addTagBtn">
+                        <i class="fas fa-plus"></i> Thêm tag mới
+                    </button>
+                    <button class="export-btn">
+                        <i class="fas fa-download"></i> Xuất dữ liệu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tags Overview Cards -->
+            <div class="tags-overview">
+                <div class="overview-card">
+                    <div class="overview-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="overview-info">
+                        <h3>Tổng số tags</h3>
+                        <div class="overview-number">1,245</div>
+                    </div>
+                </div>
+
+                <div class="overview-card">
+                    <div class="overview-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="overview-info">
+                        <h3>Tài liệu có gắn tag</h3>
+                        <div class="overview-number">8,765</div>
+                    </div>
+                </div>
+
+                <div class="overview-card">
+                    <div class="overview-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="overview-info">
+                        <h3>Lượt tìm kiếm theo tag</h3>
+                        <div class="overview-number">32.5K</div>
+                    </div>
+                </div>
+
+                <div class="overview-card">
+                    <div class="overview-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="overview-info">
+                        <h3>Tags mới trong tháng</h3>
+                        <div class="overview-number">78</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tag Cloud -->
+            <div class="tag-cloud-container">
+                <div class="section-header">
+                    <h3>Tag Cloud</h3>
+                    <div class="section-actions">
+                        <select class="time-filter">
+                            <option value="all">Mọi thời điểm</option>
+                            <option value="week">Tuần này</option>
+                            <option value="month" selected>Tháng này</option>
+                            <option value="quarter">Quý này</option>
+                            <option value="year">Năm nay</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tag-cloud">
+                    <a href="#" class="tag-item" style="--tag-size: 2.2em; --tag-color: var(--primary);">React</a>
+                    <a href="#" class="tag-item"
+                        style="--tag-size: 1.8em; --tag-color: var(--secondary);">JavaScript</a>
+                    <a href="#" class="tag-item" style="--tag-size: 2.5em; --tag-color: var(--accent);">Python</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.5em; --tag-color: var(--success);">SQL</a>
+                    <a href="#" class="tag-item" style="--tag-size: 2.0em; --tag-color: var(--warning);">Data
+                        Science</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.3em; --tag-color: var(--error);">Machine
+                        Learning</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.7em; --tag-color: #8b5cf6;">Web Development</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.9em; --tag-color: var(--primary);">Node.js</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.2em; --tag-color: var(--secondary);">IELTS</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.6em; --tag-color: var(--accent);">Marketing</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.4em; --tag-color: var(--success);">Finance</a>
+                    <a href="#" class="tag-item" style="--tag-size: 2.1em; --tag-color: var(--warning);">Economics</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.7em; --tag-color: var(--error);">UI/UX</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.5em; --tag-color: #8b5cf6;">Flutter</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.8em; --tag-color: var(--primary);">CSS</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.3em; --tag-color: var(--secondary);">HTML</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.2em; --tag-color: var(--accent);">Java</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.6em; --tag-color: var(--success);">C++</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.4em; --tag-color: var(--warning);">PHP</a>
+                    <a href="#" class="tag-item" style="--tag-size: 1.9em; --tag-color: var(--error);">Android</a>
+                </div>
+            </div>
+
+            <!-- Tags Table -->
+            <div class="data-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="selectAll">
+                                    <label for="selectAll"></label>
+                                </div>
+                            </th>
+                            <th>Tag</th>
+                            <th>Danh mục</th>
+                            <th>Số tài liệu</th>
+                            <th>Lượt tìm kiếm</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag1">
+                                    <label for="tag1"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(67, 97, 238, 0.1); color: var(--primary);">React</span>
+                                </div>
+                            </td>
+                            <td>Công nghệ thông tin</td>
+                            <td>352</td>
+                            <td>4.2K</td>
+                            <td>15/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag2">
+                                    <label for="tag2"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(247, 37, 133, 0.1); color: var(--accent);">Python</span>
+                                </div>
+                            </td>
+                            <td>Công nghệ thông tin</td>
+                            <td>420</td>
+                            <td>5.8K</td>
+                            <td>12/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag3">
+                                    <label for="tag3"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(16, 185, 129, 0.1); color: var(--success);">JavaScript</span>
+                                </div>
+                            </td>
+                            <td>Công nghệ thông tin</td>
+                            <td>385</td>
+                            <td>4.5K</td>
+                            <td>18/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag4">
+                                    <label for="tag4"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(245, 158, 11, 0.1); color: var(--warning);">Data
+                                        Science</span>
+                                </div>
+                            </td>
+                            <td>Công nghệ thông tin</td>
+                            <td>310</td>
+                            <td>3.9K</td>
+                            <td>20/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag5">
+                                    <label for="tag5"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6;">Economics</span>
+                                </div>
+                            </td>
+                            <td>Kinh tế - Quản trị</td>
+                            <td>287</td>
+                            <td>3.1K</td>
+                            <td>22/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag6">
+                                    <label for="tag6"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(239, 68, 68, 0.1); color: var(--error);">Marketing</span>
+                                </div>
+                            </td>
+                            <td>Kinh tế - Quản trị</td>
+                            <td>265</td>
+                            <td>2.8K</td>
+                            <td>25/03/2023</td>
+                            <td><span class="status-badge rejected">Vô hiệu hóa</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Kích hoạt"><i class="fas fa-check"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag7">
+                                    <label for="tag7"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(67, 97, 238, 0.1); color: var(--primary);">IELTS</span>
+                                </div>
+                            </td>
+                            <td>Ngoại ngữ</td>
+                            <td>248</td>
+                            <td>4.7K</td>
+                            <td>28/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="tag8">
+                                    <label for="tag8"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="tag-preview">
+                                    <span class="tag-label"
+                                        style="background-color: rgba(247, 37, 133, 0.1); color: var(--accent);">Finance</span>
+                                </div>
+                            </td>
+                            <td>Kinh tế - Quản trị</td>
+                            <td>210</td>
+                            <td>2.5K</td>
+                            <td>30/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xem tài liệu"><i
+                                            class="fas fa-file-alt"></i></button>
+                                    <button class="action-btn" title="Vô hiệu hóa"><i class="fas fa-ban"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-pages">
+                    <button class="pagination-btn page-btn active">1</button>
+                    <button class="pagination-btn page-btn">2</button>
+                    <button class="pagination-btn page-btn">3</button>
+                    <span class="pagination-ellipsis">...</span>
+                    <button class="pagination-btn page-btn">20</button>
+                </div>
+                <button class="pagination-btn next-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Add Tag Modal -->
+            <div class="modal" id="addTagModal">
+                <div class="modal-overlay"></div>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h3>Thêm tag mới</h3>
+                        <button class="modal-close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-grid">
+                            <div class="form-group">
+                                <label for="tagName">Tên tag</label>
+                                <input type="text" id="tagName" placeholder="Nhập tên tag">
+                            </div>
+                            <div class="form-group">
+                                <label for="tagSlug">Slug</label>
+                                <input type="text" id="tagSlug" placeholder="Tự động tạo từ tên tag">
+                            </div>
+                            <div class="form-group">
+                                <label for="tagCategory">Danh mục</label>
+                                <select id="tagCategory">
+                                    <option value="1">Công nghệ thông tin</option>
+                                    <option value="2">Kinh tế - Quản trị</option>
+                                    <option value="3">Ngoại ngữ</option>
+                                    <option value="4">Kỹ thuật - Công nghệ</option>
+                                    <option value="5">Khoa học xã hội</option>
+                                    <option value="6">Khoa học tự nhiên</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tagStatus">Trạng thái</label>
+                                <select id="tagStatus">
+                                    <option value="active">Hoạt động</option>
+                                    <option value="inactive">Vô hiệu hóa</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="tagDescription">Mô tả</label>
+                                <textarea id="tagDescription" rows="4"
+                                    placeholder="Nhập mô tả cho tag (không bắt buộc)"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="tagColor">Màu sắc</label>
+                                <div class="color-picker">
+                                    <input type="color" id="tagColor" value="#4361ee">
+                                    <div class="color-preview">
+                                        <div class="color-square" style="background-color: #4361ee;"></div>
+                                        <span class="color-hex">#4361ee</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Tag Preview</label>
+                                <div class="tag-preview-container">
+                                    <div class="tag-preview-item">
+                                        <span class="tag-preview-label"
+                                            style="background-color: rgba(67, 97, 238, 0.1); color: #4361ee;">Tag
+                                            Name</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="cancel-btn">Hủy bỏ</button>
+                        <button class="save-btn">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/tags.js"></script>
+
+</body>
+
+</html>
