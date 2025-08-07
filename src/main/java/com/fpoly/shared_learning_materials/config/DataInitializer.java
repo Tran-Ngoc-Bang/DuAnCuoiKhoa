@@ -1,8 +1,10 @@
 package com.fpoly.shared_learning_materials.config;
 
 import com.fpoly.shared_learning_materials.domain.CoinPackage;
+import com.fpoly.shared_learning_materials.domain.Transaction;
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.repository.CoinPackageRepository;
+import com.fpoly.shared_learning_materials.repository.TransactionRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class DataInitializer implements CommandLineRunner {
         private CoinPackageRepository coinPackageRepository;
 
         @Autowired
+        private TransactionRepository transactionRepository;
+
+        @Autowired
         private PasswordEncoder passwordEncoder;
 
         @Override
@@ -40,6 +45,13 @@ public class DataInitializer implements CommandLineRunner {
                         System.out.println("Sample coin packages created successfully!");
                 } else {
                         System.out.println("Sample coin packages already exist, skipping package initialization.");
+                }
+
+                if (!transactionRepository.existsByCodeAndDeletedAtIsNull("TXN000001")) {
+                        createSampleTransactions();
+                        System.out.println("Sample transactions created successfully!");
+                } else {
+                        System.out.println("Sample transactions already exist, skipping transaction initialization.");
                 }
         }
 
@@ -172,5 +184,49 @@ public class DataInitializer implements CommandLineRunner {
                 pkg.setCreatedAt(LocalDateTime.now());
                 pkg.setUpdatedAt(LocalDateTime.now());
                 return pkg;
+        }
+
+        private void createSampleTransactions() {
+                // Get users for transactions
+                User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
+                User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
+
+                if (user1 != null && user2 != null) {
+                        // Create sample transactions
+                        createTransaction("TXN000001", Transaction.TransactionType.PURCHASE,
+                                        new BigDecimal("50000.00"), Transaction.TransactionStatus.COMPLETED,
+                                        "VNPay", user1, "Mua xu gói starter");
+
+                        createTransaction("TXN000002", Transaction.TransactionType.PURCHASE,
+                                        new BigDecimal("100000.00"), Transaction.TransactionStatus.COMPLETED,
+                                        "VNPay", user1, "Mua xu gói premium");
+
+                        createTransaction("TXN000003", Transaction.TransactionType.WITHDRAWAL,
+                                        new BigDecimal("25000.00"), Transaction.TransactionStatus.PENDING,
+                                        "Bank Transfer", user1, "Rút tiền về tài khoản ngân hàng");
+
+                        createTransaction("TXN000004", Transaction.TransactionType.PURCHASE,
+                                        new BigDecimal("50000.00"), Transaction.TransactionStatus.COMPLETED,
+                                        "VNPay", user2, "Mua xu gói starter");
+
+                        createTransaction("TXN000005", Transaction.TransactionType.REFUND,
+                                        new BigDecimal("25000.00"), Transaction.TransactionStatus.COMPLETED,
+                                        "VNPay", user1, "Hoàn tiền giao dịch lỗi");
+                }
+        }
+
+        private void createTransaction(String code, Transaction.TransactionType type,
+                        BigDecimal amount, Transaction.TransactionStatus status,
+                        String paymentMethod, User user, String notes) {
+                Transaction transaction = new Transaction();
+                transaction.setCode(code);
+                transaction.setType(type);
+                transaction.setAmount(amount);
+                transaction.setStatus(status);
+                transaction.setPaymentMethod(paymentMethod);
+                transaction.setUser(user);
+                transaction.setNotes(notes);
+                transaction.setCreatedAt(LocalDateTime.now());
+                transactionRepository.save(transaction);
         }
 }
