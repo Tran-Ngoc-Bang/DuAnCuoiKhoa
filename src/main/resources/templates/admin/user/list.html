@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Quản lý người dùng - EduShare Admin</title>
+    <th:block th:replace="fragments/admin/layout :: head"></th:block>
+    <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
+  </head>
+  <body>
+    <th:block th:replace="fragments/admin/layout :: body">
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Quản lý người dùng</h1>
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin/index}">Admin</a>
+            <span>/</span>
+            <span>Quản lý người dùng</span>
+          </div>
+        </div>
+
+        <div class="management-tools">
+          <div class="search-filters">
+            <div class="tool-item">
+              <input
+                type="text"
+                placeholder="Tìm kiếm người dùng..."
+                class="search-input"
+              />
+            </div>
+            <div class="tool-item">
+              <select class="filter-select">
+                <option value="all">Tất cả vai trò</option>
+                <option value="admin">Quản trị viên</option>
+                <option value="user">Người dùng</option>
+                <option value="contributor">Cộng tác viên</option>
+              </select>
+            </div>
+            <div class="tool-item">
+              <select class="filter-select">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Hoạt động</option>
+                <option value="inactive">Tạm khóa</option>
+                <option value="pending">Chờ xác nhận</option>
+              </select>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <a th:href="@{/admin/users/create}" class="add-new-btn">
+              <i class="fas fa-plus"></i> Thêm người dùng
+            </a>
+            <button type="button" class="export-btn">
+              <i class="fas fa-download"></i> Xuất dữ liệu
+            </button>
+          </div>
+        </div>
+
+        <div class="advanced-filters-toggle">
+          <button
+            type="button"
+            class="advanced-filter-toggle"
+            id="advancedFilterToggle"
+          >
+            <i class="fas fa-sliders-h"></i> Bộ lọc nâng cao
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </button>
+        </div>
+        <div
+          class="advanced-filters-panel"
+          id="advancedFiltersPanel"
+          style="display: none"
+        >
+          <!-- Nội dung bộ lọc nâng cao, có thể tách fragment riêng nếu phức tạp -->
+        </div>
+
+        <div class="user-table-container">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Họ tên</th>
+                <th>Tên đăng nhập</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="user : ${users}">
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.fullName}"></td>
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${user.role}"></td>
+                <td th:text="${user.status}"></td>
+                <td>
+                  <a
+                    th:href="@{'/admin/users/detail/' + ${user.id}}"
+                    class="btn btn-info user-detail-btn"
+                    >Chi tiết</a
+                  >
+                  <a
+                    th:href="@{'/admin/users/edit/' + ${user.id}}"
+                    class="btn btn-warning user-edit-btn"
+                    >Sửa</a
+                  >
+                  <button
+                    type="button"
+                    class="btn btn-danger user-delete-btn"
+                    th:attr="data-id=${user.id}"
+                    onclick="showDeleteModal(this)"
+                  >
+                    Xóa
+                  </button>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(users)}">
+                <td colspan="7" class="user-table-empty">
+                  Không có người dùng nào.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal" id="deleteUserModal" style="display: none">
+          <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+          <div class="modal-container">
+            <div class="modal-header">
+              <h3>Xác nhận xóa người dùng</h3>
+              <button class="modal-close" onclick="closeDeleteModal()">
+                &times;
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+            </div>
+            <div class="modal-footer">
+              <form
+                th:action="@{'/admin/users/delete/' + ${deleteUserId}}"
+                method="get"
+              >
+                <button type="submit" class="btn btn-danger">Xóa</button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="closeDeleteModal()"
+                >
+                  Hủy
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div id="toast" class="toast" style="display: none"></div>
+      </main>
+      <script th:src="@{/js/admin/admin_users.js}"></script>
+      <script>
+        function showDeleteModal(btn) {
+          var userId = btn.getAttribute("data-id");
+          document.getElementById("deleteUserModal").style.display = "block";
+          var form = document.querySelector("#deleteUserModal form");
+          form.setAttribute("action", "/admin/users/delete/" + userId);
+        }
+        function closeDeleteModal() {
+          document.getElementById("deleteUserModal").style.display = "none";
+        }
+      </script>
+    </th:block>
+  </body>
+</html>

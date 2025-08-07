@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý gói xu - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/coin-packages.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Sidebar với menu doanh thu được mở rộng -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu open">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu visible">
+                            <li class="submenu-item active">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Nội dung chính - Quản lý gói xu -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Quản lý gói xu</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <a href="coin-packages.html">Quản lý doanh thu</a>
+                    <span>/</span>
+                    <span>Gói xu</span>
+                </div>
+            </div>
+
+            <!-- Date Range Picker -->
+            <div class="date-range-selector">
+                <div class="date-preset-btns">
+                    <button class="date-btn active" data-range="today">Hôm nay</button>
+                    <button class="date-btn" data-range="week">Tuần này</button>
+                    <button class="date-btn" data-range="month">Tháng này</button>
+                    <button class="date-btn" data-range="quarter">Quý này</button>
+                    <button class="date-btn" data-range="year">Năm nay</button>
+                    <button class="date-btn" data-range="custom">Tùy chỉnh</button>
+                </div>
+                <div class="custom-date-range" style="display: none;">
+                    <div class="date-inputs">
+                        <input type="text" id="startDate" placeholder="Từ ngày">
+                        <span>đến</span>
+                        <input type="text" id="endDate" placeholder="Đến ngày">
+                    </div>
+                    <button class="apply-date-btn">Áp dụng</button>
+                </div>
+            </div>
+
+            <!-- Coin Package Management -->
+            <div class="section-header">
+                <h2>Quản lý gói xu</h2>
+                <div class="section-actions">
+                    <button class="primary-btn add-package-btn" id="addPackageBtn"><i class="fas fa-plus"></i> Thêm gói
+                        xu mới</button>
+                </div>
+            </div>
+
+            <div class="data-container coin-packages">
+                <!-- Filters for package management -->
+                <div class="management-tools">
+                    <div class="search-filters">
+                        <div class="tool-item">
+                            <input type="text" placeholder="Tìm kiếm gói xu..." class="search-input">
+                        </div>
+                        <div class="tool-item">
+                            <select class="filter-select">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="active">Đang hoạt động</option>
+                                <option value="inactive">Tạm ngưng</option>
+                                <option value="promotion">Khuyến mãi</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coin Packages Table -->
+                <table class="data-table packages-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;"><input type="checkbox" class="select-all-checkbox"></th>
+                            <th>ID Gói</th>
+                            <th>Tên gói</th>
+                            <th>Gold Coin</th>
+                            <th>Blue Coin (Thưởng)</th>
+                            <th>Giá (VNĐ)</th>
+                            <th>Khuyến mãi</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample package rows -->
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>COIN-S</td>
+                            <td>Gói Starter</td>
+                            <td>100</td>
+                            <td>10</td>
+                            <td>50.000 ₫</td>
+                            <td>0%</td>
+                            <td><span class="status-badge active">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn edit-package" title="Chỉnh sửa"><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="action-btn delete-package" title="Xóa"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>COIN-M</td>
+                            <td>Gói Medium</td>
+                            <td>300</td>
+                            <td>45</td>
+                            <td>140.000 ₫</td>
+                            <td>5%</td>
+                            <td><span class="status-badge active">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn edit-package" title="Chỉnh sửa"><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="action-btn delete-package" title="Xóa"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>COIN-L</td>
+                            <td>Gói Large</td>
+                            <td>500</td>
+                            <td>100</td>
+                            <td>220.000 ₫</td>
+                            <td>10%</td>
+                            <td><span class="status-badge active">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn edit-package" title="Chỉnh sửa"><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="action-btn delete-package" title="Xóa"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>COIN-XL</td>
+                            <td>Gói Premium</td>
+                            <td>1000</td>
+                            <td>300</td>
+                            <td>420.000 ₫</td>
+                            <td>15%</td>
+                            <td><span class="status-badge promotion">Khuyến mãi</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn edit-package" title="Chỉnh sửa"><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="action-btn delete-package" title="Xóa"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>COIN-VIP</td>
+                            <td>Gói VIP</td>
+                            <td>5000</td>
+                            <td>1500</td>
+                            <td>2.000.000 ₫</td>
+                            <td>20%</td>
+                            <td><span class="status-badge promotion">Khuyến mãi</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn edit-package" title="Chỉnh sửa"><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="action-btn delete-package" title="Xóa"><i
+                                            class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Table Actions -->
+                <div class="table-actions">
+                    <div class="bulk-actions">
+                        <select class="bulk-action-select">
+                            <option value="">Chọn hành động</option>
+                            <option value="activate">Kích hoạt</option>
+                            <option value="deactivate">Tắt kích hoạt</option>
+                            <option value="promotion">Đánh dấu khuyến mãi</option>
+                            <option value="delete">Xóa</option>
+                        </select>
+                        <button class="secondary-btn apply-action">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+
+    <!-- Coin Package Modal -->
+    <div class="modal" id="coinPackageModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="packageModalTitle">Thêm gói xu mới</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="coinPackageForm" class="form-grid">
+                    <div class="form-group span-2">
+                        <label for="packageName">Tên gói <span class="required">*</span></label>
+                        <input type="text" id="packageName" name="packageName" required
+                            placeholder="Ví dụ: Gói Starter">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="packageId">ID Gói <span class="required">*</span></label>
+                        <input type="text" id="packageId" name="packageId" required placeholder="Ví dụ: COIN-S">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="packageStatus">Trạng thái</label>
+                        <select id="packageStatus" name="packageStatus">
+                            <option value="active">Hoạt động</option>
+                            <option value="inactive">Tạm ngưng</option>
+                            <option value="promotion">Khuyến mãi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="goldAmount">Số lượng Gold Coin <span class="required">*</span></label>
+                        <input type="number" id="goldAmount" name="goldAmount" required min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blueAmount">Số lượng Blue Coin thưởng</label>
+                        <input type="number" id="blueAmount" name="blueAmount" value="0" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="packagePrice">Giá (VNĐ) <span class="required">*</span></label>
+                        <input type="number" id="packagePrice" name="packagePrice" required min="0" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="discountPercent">Khuyến mãi (%)</label>
+                        <input type="number" id="discountPercent" name="discountPercent" value="0" min="0" max="100">
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label for="packageDescription">Mô tả</label>
+                        <textarea id="packageDescription" name="packageDescription" rows="3"
+                            placeholder="Mô tả về gói xu"></textarea>
+                    </div>
+
+                    <div class="form-group span-2 date-range-group">
+                        <div>
+                            <label for="promotionStart">Bắt đầu khuyến mãi</label>
+                            <input type="text" id="promotionStart" name="promotionStart" class="date-picker"
+                                placeholder="Ngày bắt đầu">
+                        </div>
+                        <div>
+                            <label for="promotionEnd">Kết thúc khuyến mãi</label>
+                            <input type="text" id="promotionEnd" name="promotionEnd" class="date-picker"
+                                placeholder="Ngày kết thúc">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn cancel-btn">Hủy</button>
+                <button class="primary-btn save-btn" form="coinPackageForm">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Package Modal -->
+    <div class="modal" id="deletePackageModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Xác nhận xóa gói xu</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="refund-confirmation">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p class="confirmation-text">Bạn chắc chắn muốn xóa gói xu <strong
+                            id="deletePackageName">Starter</strong> (<strong id="deletePackageId">COIN-S</strong>)?</p>
+                    <p>Hành động này không thể hoàn tác.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn cancel-btn">Hủy bỏ</button>
+                <button class="danger-btn" id="confirmDeleteBtn">Xác nhận xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/coin-packages.js"></script>
+</body>
+
+</html>

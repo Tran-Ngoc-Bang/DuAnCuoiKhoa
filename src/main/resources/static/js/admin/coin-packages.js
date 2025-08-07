@@ -1,208 +1,147 @@
-/**
- * JavaScript cho trang quản lý gói xu
- */
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // Kiểm tra mã gói xu có tồn tại không
-    const codeInput = document.getElementById('code');
-    if (codeInput) {
-        codeInput.addEventListener('blur', function() {
-            checkCodeExists(this.value);
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Flatpickr cho date picker
+    if (typeof flatpickr === 'function') {
+        flatpickr(".date-picker", {
+            dateFormat: "d/m/Y",
+            locale: "vi"
         });
     }
 
-    // Tạo mã tự động
-    const nameInput = document.getElementById('name');
-    const generateCodeBtn = document.getElementById('generateCode');
-    if (nameInput && generateCodeBtn) {
-        generateCodeBtn.addEventListener('click', function() {
-            generateCode(nameInput.value);
-        });
-    }
+    // Xử lý nút thêm gói xu
+    const addPackageBtn = document.getElementById('addPackageBtn');
+    if (addPackageBtn) {
+        addPackageBtn.addEventListener('click', function () {
+            // Reset form về giá trị mặc định
+            document.getElementById('coinPackageForm').reset();
+            document.getElementById('packageModalTitle').textContent = 'Thêm gói xu mới';
 
-    // Bulk action
-    const bulkActionForm = document.getElementById('bulkActionForm');
-    if (bulkActionForm) {
-        bulkActionForm.addEventListener('submit', function(e) {
-            const selectedPackages = document.querySelectorAll('input[name="packageIds"]:checked');
-            if (selectedPackages.length === 0) {
-                e.preventDefault();
-                alert('Vui lòng chọn ít nhất một gói xu để thực hiện hành động.');
-                return false;
+            // Hiển thị modal
+            const modal = document.getElementById('coinPackageModal');
+            if (modal) {
+                modal.classList.add('active');
             }
         });
     }
 
-    // Xác nhận xóa
-    const deleteButtons = document.querySelectorAll('.delete-package');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            if (!confirm('Bạn có chắc chắn muốn xóa gói xu này?')) {
-                e.preventDefault();
-                return false;
-            }
-        });
-    });
-});
+    // Gắn sự kiện cho nút chỉnh sửa gói xu
+    const editButtons = document.querySelectorAll('.edit-package');
+    if (editButtons.length > 0) {
+        editButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const row = this.closest('tr');
+                const cells = row.querySelectorAll('td');
 
-/**
- * Kiểm tra mã gói xu có tồn tại không
- */
-function checkCodeExists(code) {
-    if (!code || code.trim() === '') {
-        return;
-    }
+                // Lấy thông tin từ hàng trong bảng
+                const packageId = cells[1].textContent;
+                const packageName = cells[2].textContent;
+                const goldAmount = parseInt(cells[3].textContent);
+                const blueAmount = parseInt(cells[4].textContent);
+                const packagePrice = parseFloat(cells[5].textContent.replace(/[^\d]/g, ''));
+                const discountPercent = parseInt(cells[6].textContent.replace('%', ''));
+                const status = cells[7].querySelector('.status-badge').classList.contains('active') ? 'active' : 'promotion';
 
-    const excludeId = document.getElementById('packageId')?.value;
-    const url = excludeId ? 
-        `/admin/coin-packages/check-code?code=${encodeURIComponent(code)}&excludeId=${excludeId}` :
-        `/admin/coin-packages/check-code?code=${encodeURIComponent(code)}`;
+                // Điền vào form
+                document.getElementById('packageId').value = packageId;
+                document.getElementById('packageName').value = packageName;
+                document.getElementById('goldAmount').value = goldAmount;
+                document.getElementById('blueAmount').value = blueAmount;
+                document.getElementById('packagePrice').value = packagePrice;
+                document.getElementById('discountPercent').value = discountPercent;
+                document.getElementById('packageStatus').value = status;
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            const codeInput = document.getElementById('code');
-            const codeFeedback = document.getElementById('codeFeedback');
-            
-            if (data.exists) {
-                codeInput.classList.add('is-invalid');
-                codeInput.classList.remove('is-valid');
-                if (codeFeedback) {
-                    codeFeedback.textContent = 'Mã gói xu đã tồn tại';
-                    codeFeedback.className = 'invalid-feedback';
+                // Cập nhật tiêu đề modal
+                document.getElementById('packageModalTitle').textContent = 'Chỉnh sửa gói xu';
+
+                // Hiển thị modal
+                const modal = document.getElementById('coinPackageModal');
+                if (modal) {
+                    modal.classList.add('active');
                 }
-            } else {
-                codeInput.classList.add('is-valid');
-                codeInput.classList.remove('is-invalid');
-                if (codeFeedback) {
-                    codeFeedback.textContent = 'Mã gói xu có thể sử dụng';
-                    codeFeedback.className = 'valid-feedback';
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Lỗi khi kiểm tra mã:', error);
-        });
-}
-
-/**
- * Tạo mã gói xu tự động
- */
-function generateCode(name) {
-    if (!name || name.trim() === '') {
-        alert('Vui lòng nhập tên gói xu trước khi tạo mã.');
-        return;
-    }
-
-    fetch('/admin/coin-packages/generate-code', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `name=${encodeURIComponent(name)}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.code) {
-            const codeInput = document.getElementById('code');
-            if (codeInput) {
-                codeInput.value = data.code;
-                codeInput.classList.add('is-valid');
-                codeInput.classList.remove('is-invalid');
-                
-                const codeFeedback = document.getElementById('codeFeedback');
-                if (codeFeedback) {
-                    codeFeedback.textContent = 'Mã đã được tạo tự động';
-                    codeFeedback.className = 'valid-feedback';
-                }
-            }
-        } else if (data.error) {
-            alert('Lỗi khi tạo mã: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Lỗi khi tạo mã:', error);
-        alert('Lỗi khi tạo mã gói xu');
-    });
-}
-
-/**
- * Chọn tất cả/bỏ chọn tất cả
- */
-function toggleSelectAll() {
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const packageCheckboxes = document.querySelectorAll('input[name="packageIds"]');
-    
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            packageCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
             });
-            updateBulkActionButtons();
         });
     }
 
-    // Cập nhật trạng thái "chọn tất cả" khi chọn từng item
-    packageCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checkedCount = document.querySelectorAll('input[name="packageIds"]:checked').length;
-            const totalCount = packageCheckboxes.length;
-            
-            if (selectAllCheckbox) {
-                selectAllCheckbox.checked = checkedCount === totalCount;
-                selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+    // Gắn sự kiện cho nút xóa gói xu
+    const deleteButtons = document.querySelectorAll('.delete-package');
+    if (deleteButtons.length > 0) {
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const row = this.closest('tr');
+                const packageId = row.querySelector('td:nth-child(2)').textContent;
+                const packageName = row.querySelector('td:nth-child(3)').textContent;
+
+                // Điền thông tin vào modal xóa
+                document.getElementById('deletePackageId').textContent = packageId;
+                document.getElementById('deletePackageName').textContent = packageName;
+
+                // Hiển thị modal xóa
+                const modal = document.getElementById('deletePackageModal');
+                if (modal) {
+                    modal.classList.add('active');
+                }
+            });
+        });
+    }
+
+    // Xử lý nút confirm xóa
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function () {
+            const packageId = document.getElementById('deletePackageId').textContent;
+
+            // Tìm hàng cần xóa
+            const packageRows = document.querySelectorAll('.packages-table tbody tr');
+            let targetRow = null;
+
+            packageRows.forEach(row => {
+                const id = row.querySelector('td:nth-child(2)').textContent;
+                if (id === packageId) {
+                    targetRow = row;
+                }
+            });
+
+            if (targetRow) {
+                // Xóa hàng từ bảng
+                targetRow.parentNode.removeChild(targetRow);
+
+                // Ẩn modal xóa
+                const modal = document.getElementById('deletePackageModal');
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+
+                // Hiển thị thông báo
+                showToast('Đã xóa gói xu thành công', 'success');
             }
-            updateBulkActionButtons();
         });
-    });
-}
-
-/**
- * Cập nhật trạng thái các nút bulk action
- */
-function updateBulkActionButtons() {
-    const selectedCount = document.querySelectorAll('input[name="packageIds"]:checked').length;
-    const bulkActionButtons = document.querySelectorAll('.bulk-action-btn');
-    
-    bulkActionButtons.forEach(button => {
-        if (selectedCount === 0) {
-            button.disabled = true;
-        } else {
-            button.disabled = false;
-        }
-    });
-}
-
-/**
- * Hiển thị thông báo
- */
-function showNotification(message, type = 'success') {
-    // Tạo toast notification
-    const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
-    toast.setAttribute('aria-atomic', 'true');
-    
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    `;
-    
-    const toastContainer = document.getElementById('toastContainer');
-    if (toastContainer) {
-        toastContainer.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
     }
-}
 
-// Khởi tạo các chức năng
-document.addEventListener('DOMContentLoaded', function() {
-    toggleSelectAll();
-    updateBulkActionButtons();
-}); 
+    // Xử lý submit form gói xu
+    const coinPackageForm = document.getElementById('coinPackageForm');
+    if (coinPackageForm) {
+        coinPackageForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Lấy dữ liệu từ form
+            const formData = {
+                id: document.getElementById('packageId').value,
+                name: document.getElementById('packageName').value,
+                gold: document.getElementById('goldAmount').value,
+                blue: document.getElementById('blueAmount').value,
+                price: document.getElementById('packagePrice').value,
+                discount: document.getElementById('discountPercent').value,
+                status: document.getElementById('packageStatus').value
+            };
+
+            // Xử lý thêm/sửa gói xu
+            // Trong trường hợp này, chỉ đóng modal và hiển thị thông báo
+            const modal = document.getElementById('coinPackageModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+
+            showToast('Đã lưu gói xu thành công', 'success');
+        });
+    }
+});
