@@ -11,10 +11,21 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="../css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/toast.css">
-    <link rel="stylesheet" href="css/index.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CSS Files -->
+<link rel="stylesheet" th:href="@{/css/main.css}" />
+<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+<link rel="stylesheet" th:href="@{/css/toast.css}" />
+<link rel="stylesheet" th:href="@{/css/admin/index.css}" />
+<link rel="stylesheet" th:href="@{/css/admin/activities.css}" />
+
+
+
+
+        
 </head>
 
 <body class="admin-body">
@@ -193,75 +204,78 @@
 
             <!-- Dashboard Stats -->
             <div class="dashboard-stats">
-                <div class="stat-card">
-                    <div class="stat-card-content">
-                        <div class="stat-card-info">
-                            <h3>Người dùng</h3>
-                            <div class="stat-number">5,482</div>
-                            <div class="stat-change up">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>12.7%</span>
-                                <span class="stat-period">so với tháng trước</span>
-                            </div>
-                        </div>
-                        <div class="stat-card-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
-                    <div class="stat-card-footer">
-                        <a href="users.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
-                    </div>
+                <!-- Người dùng -->
+    <div class="stat-card">
+        <div class="stat-card-content">
+            <div class="stat-card-info">
+                <h3>Người dùng</h3>
+                <div class="stat-number" th:text="${#numbers.formatInteger(totalUsers, 0, 'COMMA')}">0</div>
+                <div class="stat-change up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>—</span>
+                    <span class="stat-period">tổng người dùng</span>
                 </div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+        <div class="stat-card-footer">
+            <a href="/admin/users">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
 
-                <div class="stat-card">
-                    <div class="stat-card-content">
-                        <div class="stat-card-info">
-                            <h3>Tài liệu</h3>
-                            <div class="stat-number">12,394</div>
-                            <div class="stat-change up">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>8.4%</span>
-                                <span class="stat-period">so với tháng trước</span>
-                            </div>
-                        </div>
-                        <div class="stat-card-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                    </div>
-                    <div class="stat-card-footer">
-                        <a href="documents.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
-                    </div>
+                <!-- Tài liệu -->
+    <div class="stat-card">
+        <div class="stat-card-content">
+            <div class="stat-card-info">
+                <h3>Tài liệu</h3>
+                <div class="stat-number" th:text="${#numbers.formatInteger(totalDocuments, 0, 'COMMA')}">0</div>
+                <div class="stat-change up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>—</span>
+                    <span class="stat-period">tổng tài liệu</span>
                 </div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+        </div>
+        <div class="stat-card-footer">
+            <a href="/admin/documents">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
 
-                <div class="stat-card">
-                    <div class="stat-card-content">
-                        <div class="stat-card-info">
-                            <h3>Lượt tải</h3>
-                            <div class="stat-number">58,592</div>
-                            <div class="stat-change up">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>15.3%</span>
-                                <span class="stat-period">so với tháng trước</span>
-                            </div>
-                        </div>
-                        <div class="stat-card-icon">
-                            <i class="fas fa-download"></i>
-                        </div>
-                    </div>
-                    <div class="stat-card-footer">
-                        <a href="statistics.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
-                    </div>
+               <!-- Lượt tải -->
+    <div class="stat-card">
+        <div class="stat-card-content">
+            <div class="stat-card-info">
+                <h3>Lượt tải</h3>
+                <div class="stat-number" th:text="${#numbers.formatInteger(totalDownloads, 0, 'COMMA')}">0</div>
+                <div class="stat-change up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>—</span>
+                    <span class="stat-period">tổng lượt tải</span>
                 </div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="fas fa-download"></i>
+            </div>
+        </div>
+        <div class="stat-card-footer">
+            <a href="/admin/statistics">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
 
                 <div class="stat-card">
                     <div class="stat-card-content">
                         <div class="stat-card-info">
                             <h3>Doanh thu</h3>
-                            <div class="stat-number">3,458,921 VNĐ</div>
-                            <div class="stat-change down">
-                                <i class="fas fa-arrow-down"></i>
-                                <span>2.1%</span>
-                                <span class="stat-period">so với tháng trước</span>
+                            <div class="stat-number" th:text="${totalRevenue != null ? #numbers.formatInteger(totalRevenue, 0, 'COMMA') + ' VNĐ' : '0 VNĐ'}">0 VNĐ</div>
+                            <div class="stat-change up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>—</span>
+                                <span class="stat-period">tổng doanh thu</span>
                             </div>
                         </div>
                         <div class="stat-card-icon">
@@ -272,6 +286,9 @@
                         <a href="revenue.html">Xem chi tiết <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
+
+
+                
             </div>
 
             <!-- Activity Charts -->
@@ -289,7 +306,7 @@
                         </div>
                     </div>
                     <div class="chart-body">
-                        <canvas id="activityChart"></canvas>
+                        <!-- <canvas id="activityChart"></canvas> -->
                         <div class="chart-placeholder">
                             <div class="chart-mock"
                                 style="display: flex; align-items: flex-end; justify-content: space-between; height: 250px; padding: 1rem 0; position: relative;">
@@ -360,27 +377,49 @@
                     <div class="chart-header">
                         <h3>Phân loại tài liệu</h3>
                         <div class="chart-actions">
-                            <button class="chart-filter-btn active">Premium</button>
-                            <button class="chart-filter-btn">Miễn phí</button>
-                            <button class="chart-filter-btn">Tất cả</button>
+                            <button class="chart-filter-btn active" data-type="all">Tất cả</button>
+                            <button class="chart-filter-btn" data-type="premium">Premium</button>
+                            <button class="chart-filter-btn" data-type="free">Miễn phí</button>
                         </div>
                     </div>
                     <div class="chart-body">
-                        <canvas id="categoryChart"></canvas>
+                       
                         <div class="chart-placeholder">
-                            <div class="chart-pie" style="position: relative; width: 250px; height: 250px; margin: 0 auto; border-radius: 50%; background: conic-gradient(
-                                #4361ee 0deg 108deg,
-                                #f72585 108deg 180deg,
-                                #10b981 180deg 252deg,
-                                #f59e0b 252deg 324deg,
-                                #8b5cf6 324deg 360deg
-                            ); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);">
-                                <div
-                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-                                    <span style="font-weight: 600; color: #2d3748;">Tổng: 253</span>
+                            <div class="document-pie-chart" style="position: relative; width: 250px; height: 250px; margin: 0 auto;">
+                                <!-- Tính toán tỷ lệ phần trăm -->
+                                <div th:with="
+                                    totalDocs=${documentStats != null ? documentStats.totalActiveDocuments : 0},
+                                    freeDocs=${documentStats != null ? documentStats.freeDocuments : 0},
+                                    premiumDocs=${documentStats != null ? documentStats.premiumDocuments : 0},
+                                    freePercent=${totalDocs > 0 ? (freeDocs * 100.0 / totalDocs) : 0},
+                                    premiumPercent=${totalDocs > 0 ? (premiumDocs * 100.0 / totalDocs) : 0},
+                                    freeDegrees=${freePercent * 3.6},
+                                    premiumDegrees=${premiumPercent * 3.6}
+                                ">
+                                    <!-- Pie chart với dữ liệu thực -->
+                                    <div class="chart-pie" 
+                                         th:style="'position: relative; width: 250px; height: 250px; border-radius: 50%; background: conic-gradient(#4facfe 0deg ' + ${freeDegrees} + 'deg, #f093fb ' + ${freeDegrees} + 'deg ' + (${freeDegrees} + ${premiumDegrees}) + 'deg, #e5e7eb ' + (${freeDegrees} + ${premiumDegrees}) + 'deg 360deg); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);'">
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                                            <span style="font-weight: 600; color: #2d3748;" th:text="'Tổng: ' + ${totalDocs}">Tổng: 0</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Legend -->
+                                    <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="width: 12px; height: 12px; background: #4facfe; border-radius: 50%;"></div>
+                                            <span style="font-size: 0.875rem; color: #6b7280;" th:text="'Miễn phí (' + ${freeDocs} + ')'">Miễn phí (0)</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="width: 12px; height: 12px; background: #f093fb; border-radius: 50%;"></div>
+                                            <span style="font-size: 0.875rem; color: #6b7280;" th:text="'Premium (' + ${premiumDocs} + ')'">Premium (0)</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        
                     </div>
                 </div>
             </div>
@@ -394,77 +433,34 @@
                     </div>
                     <div class="card-body">
                         <ul class="activity-list">
-                            <li class="activity-item">
-                                <div class="activity-icon upload">
-                                    <i class="fas fa-upload"></i>
+                            <!-- Hiển thị hoạt động từ database -->
+                            <li class="activity-item" th:each="activity : ${recentActivities}">
+                                <div class="activity-icon" th:classappend="${activity.action}">
+                                    <i th:class="${activity.iconClass}"></i>
                                 </div>
                                 <div class="activity-content">
-                                    <div class="activity-text">
-                                        <a href="#" class="activity-user">Nguyễn Văn B</a> đã đăng tải một tài liệu mới:
-                                        <a href="#" class="activity-document">Ngôn ngữ lập trình C++</a>
+                                    <div class="activity-text" th:utext="${activity.description}">
+                                        Hoạt động
                                     </div>
                                     <div class="activity-time">
                                         <i class="far fa-clock"></i>
-                                        <span>15 phút trước</span>
+                                        <span th:text="${activity.timeAgo}">vừa xong</span>
                                     </div>
                                 </div>
                             </li>
-                            <li class="activity-item">
-                                <div class="activity-icon register">
-                                    <i class="fas fa-user-plus"></i>
+                            
+                            <!-- Hiển thị thông báo nếu không có hoạt động -->
+                            <li th:if="${#lists.isEmpty(recentActivities)}" class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-info-circle"></i>
                                 </div>
                                 <div class="activity-content">
-                                    <div class="activity-text">
-                                        <a href="#" class="activity-user">Trần Thị C</a> đã đăng ký tài khoản mới
+                                    <div class="activity-text" style="color: #6b7280; font-style: italic;">
+                                        Chưa có hoạt động nào gần đây
                                     </div>
                                     <div class="activity-time">
                                         <i class="far fa-clock"></i>
-                                        <span>45 phút trước</span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon download">
-                                    <i class="fas fa-download"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        <a href="#" class="activity-user">Lê Văn D</a> đã tải xuống tài liệu: <a
-                                            href="#" class="activity-document">Kỹ thuật lập trình nâng cao</a>
-                                    </div>
-                                    <div class="activity-time">
-                                        <i class="far fa-clock"></i>
-                                        <span>2 giờ trước</span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon payment">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        <a href="#" class="activity-user">Phạm Thị E</a> đã nạp 200,000 VNĐ vào tài
-                                        khoản
-                                    </div>
-                                    <div class="activity-time">
-                                        <i class="far fa-clock"></i>
-                                        <span>3 giờ trước</span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon report">
-                                    <i class="fas fa-flag"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        <a href="#" class="activity-user">Vũ Văn F</a> đã báo cáo tài liệu: <a href="#"
-                                            class="activity-document">Tin học đại cương</a>
-                                    </div>
-                                    <div class="activity-time">
-                                        <i class="far fa-clock"></i>
-                                        <span>5 giờ trước</span>
+                                        <span>—</span>
                                     </div>
                                 </div>
                             </li>
@@ -573,115 +569,68 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr th:each="doc : ${recentDocuments}">
                                 <td>
                                     <div class="document-info">
-                                        <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
-                                        <div class="document-name">Kỹ thuật lập trình nâng cao</div>
+                                        <div class="document-title" th:text="${doc.title}">Tên tài liệu</div>
+                                        <div class="document-meta" th:text="${doc.timeAgo}">vừa xong</div>
                                     </div>
                                 </td>
-                                <td>Nguyễn Văn B</td>
-                                <td>Công nghệ thông tin</td>
-                                <td>10/04/2023</td>
-                                <td><span class="status-badge pending">Chờ duyệt</span></td>
+                                <td>
+                                    <div class="user-info">
+                                        <span th:text="${doc.uploaderName}">Người đăng</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="category-badge" th:text="${doc.categoryName}">Danh mục</span>
+                                </td>
+                                <td>
+                                    <span th:if="${doc.uploadDate != null}" th:text="${#temporals.format(doc.uploadDate, 'dd/MM/yyyy HH:mm')}">Ngày đăng</span>
+                                    <span th:unless="${doc.uploadDate != null}">Không có</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge" th:switch="${doc.status}">
+                                        <span th:case="'draft'" class="status-badge draft">Nháp</span>
+                                        <span th:case="'pending'" class="status-badge pending">Chờ duyệt</span>
+                                        <span th:case="'approved'" class="status-badge approved">Đã duyệt</span>
+                                        <span th:case="'rejected'" class="status-badge rejected">Từ chối</span>
+                                        <span th:case="*" class="status-badge unknown">Không rõ</span>
+                                    </span>
+                                </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn" title="Duyệt"><i class="fas fa-check"></i></button>
-                                        <button class="action-btn" title="Từ chối"><i class="fas fa-times"></i></button>
+                                        <button class="action-btn view-btn" title="Xem chi tiết" th:attr="data-id=${doc.id}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="action-btn edit-btn" title="Chỉnh sửa" th:attr="data-id=${doc.id}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="document-info">
-                                        <div class="document-icon"><i class="fas fa-file-word"></i></div>
-                                        <div class="document-name">Nguyên lý kế toán căn bản</div>
-                                    </div>
-                                </td>
-                                <td>Trần Thị C</td>
-                                <td>Kinh tế - Quản trị</td>
-                                <td>09/04/2023</td>
-                                <td><span class="status-badge approved">Đã duyệt</span></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn" title="Chỉnh sửa"><i
-                                                class="fas fa-edit"></i></button>
-                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="document-info">
-                                        <div class="document-icon"><i class="fas fa-file-powerpoint"></i></div>
-                                        <div class="document-name">IELTS Writing: Cách đạt điểm 7.0+</div>
-                                    </div>
-                                </td>
-                                <td>Lê Văn D</td>
-                                <td>Ngoại ngữ</td>
-                                <td>08/04/2023</td>
-                                <td><span class="status-badge approved">Đã duyệt</span></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn" title="Chỉnh sửa"><i
-                                                class="fas fa-edit"></i></button>
-                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="document-info">
-                                        <div class="document-icon"><i class="fas fa-file-excel"></i></div>
-                                        <div class="document-name">Phân tích dữ liệu với Python</div>
-                                    </div>
-                                </td>
-                                <td>Phạm Thị E</td>
-                                <td>Công nghệ thông tin</td>
-                                <td>07/04/2023</td>
-                                <td><span class="status-badge rejected">Từ chối</span></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn" title="Lý do"><i
-                                                class="fas fa-info-circle"></i></button>
-                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="document-info">
-                                        <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
-                                        <div class="document-name">Giải tích 1 cho sinh viên kỹ thuật</div>
-                                    </div>
-                                </td>
-                                <td>Vũ Văn F</td>
-                                <td>Kỹ thuật - Công nghệ</td>
-                                <td>06/04/2023</td>
-                                <td><span class="status-badge approved">Đã duyệt</span></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="action-btn" title="Xem"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn" title="Chỉnh sửa"><i
-                                                class="fas fa-edit"></i></button>
-                                        <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
-                                    </div>
+                            <!-- Hiển thị thông báo nếu không có tài liệu -->
+                            <tr th:if="${#lists.isEmpty(recentDocuments)}">
+                                <td colspan="6" style="text-align: center; color: #6b7280; padding: 2rem;">
+                                    <i class="fas fa-file-alt" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                                    <p style="margin: 0; font-size: 1rem;">Chưa có tài liệu mới nào được đăng tải</p>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    
+                    
                 </div>
             </div>
+
+            
         </main>
     </div>
 
-    <script src="../js/main.js"></script>
-    <script src="js/admin.js"></script>
-    <script src="js/index.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/dashboard.js}"></script>
+    
+    
 </body>
 
 </html>

@@ -11,10 +11,17 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="../css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/toast.css">
-    <link rel="stylesheet" href="css/reports.css">
+
+
+
+              <!-- Cách đúng -->
+<link rel="stylesheet" th:href="@{/css/main.css}" />
+<link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+<link rel="stylesheet" th:href="@{/css/toast.css}" />
+<link rel="stylesheet" th:href="@{/css/admin/reports.css}" />
+
+
+
 </head>
 
 <body class="admin-body">
@@ -175,91 +182,131 @@
                 </div>
             </div>
 
-            <!-- Reports Summary Cards -->
-            <div class="reports-summary">
-                <div class="report-summary-card">
-                    <div class="summary-icon new-icon">
-                        <i class="fas fa-flag"></i>
-                    </div>
-                    <div class="summary-content">
-                        <div class="summary-number">24</div>
-                        <div class="summary-label">Báo cáo mới</div>
-                    </div>
-                </div>
+<!-- Reports Summary Cards -->
+<div class="reports-summary">
+    <div class="report-summary-card">
+        <div class="summary-icon new-icon">
+            <i class="fas fa-flag"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-number" th:text="${newReportsCount}">0</div>
+            <div class="summary-label">Báo cáo mới</div>
+        </div>
+    </div>
 
-                <div class="report-summary-card">
-                    <div class="summary-icon processing-icon">
-                        <i class="fas fa-hourglass-half"></i>
-                    </div>
-                    <div class="summary-content">
-                        <div class="summary-number">15</div>
-                        <div class="summary-label">Đang xử lý</div>
-                    </div>
-                </div>
+    <div class="report-summary-card">
+        <div class="summary-icon processing-icon">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-number" th:text="${processingReportsCount}">0</div>
+            <div class="summary-label">Chưa giải quyết</div>
+        </div>
+    </div>
 
-                <div class="report-summary-card">
-                    <div class="summary-icon resolved-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="summary-content">
-                        <div class="summary-number">68</div>
-                        <div class="summary-label">Đã giải quyết</div>
-                    </div>
-                </div>
+    <div class="report-summary-card">
+        <div class="summary-icon resolved-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-number" th:text="${resolvedReportsCount}">0</div>
+            <div class="summary-label">Đã giải quyết</div>
+        </div>
+    </div>
 
-                <div class="report-summary-card">
-                    <div class="summary-icon rejected-icon">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <div class="summary-content">
-                        <div class="summary-number">32</div>
-                        <div class="summary-label">Đã từ chối</div>
-                    </div>
-                </div>
-            </div>
+    <div class="report-summary-card">
+        <div class="summary-icon rejected-icon">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="summary-content">
+            <div class="summary-number" th:text="${rejectedReportsCount}">0</div>
+            <div class="summary-label">Đã từ chối</div>
+        </div>
+    </div>
+</div>
 
-            <!-- Reports Management Tools -->
-            <div class="management-tools">
-                <div class="search-filters">
-                    <div class="tool-item">
-                        <input type="text" placeholder="Tìm kiếm báo cáo..." class="search-input">
-                    </div>
-                    <div class="tool-item">
-                        <select class="filter-select">
-                            <option value="all">Tất cả loại vi phạm</option>
-                            <option value="copyright">Vi phạm bản quyền</option>
-                            <option value="inappropriate">Nội dung không phù hợp</option>
-                            <option value="spam">Spam/Quảng cáo</option>
-                            <option value="fake">Tài liệu giả mạo</option>
-                            <option value="other">Vi phạm khác</option>
-                        </select>
-                    </div>
-                    <div class="tool-item">
-                        <select class="filter-select">
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="new">Mới</option>
-                            <option value="processing">Đang xử lý</option>
-                            <option value="resolved">Đã giải quyết</option>
-                            <option value="rejected">Đã từ chối</option>
-                        </select>
-                    </div>
-                </div>
+<!-- Reports Management Tools -->
+<form th:action="@{/admin/reports}" method="get" class="management-tools">
+    <div class="search-filters">
+        <!-- Tìm kiếm theo từ khóa -->
+        <div class="tool-item">
+            <input type="text" name="keyword" placeholder="Tìm kiếm báo cáo..." class="search-input"
+                   th:value="${keyword}">
+        </div>
 
-                <div class="action-buttons">
-                    <button class="export-btn">
-                        <i class="fas fa-download"></i> Xuất dữ liệu
-                    </button>
-                </div>
-            </div>
+        <!-- Lọc theo loại vi phạm -->
+        <div class="tool-item">
+            <select name="violationType" class="filter-select">
+                <option value="">Tất cả loại vi phạm</option>
+                <option value="copyright" th:selected="${violationType == 'copyright'}">Vi phạm bản quyền</option>
+                <option value="inappropriate" th:selected="${violationType == 'inappropriate'}">Nội dung không phù hợp</option>
+                <option value="spam" th:selected="${violationType == 'spam'}">Spam/Quảng cáo</option>
+                <option value="fake" th:selected="${violationType == 'fake'}">Tài liệu giả mạo</option>
+                <option value="other" th:selected="${violationType == 'other'}">Vi phạm khác</option>
+            </select>
+        </div>
 
-            <!-- Reports Tabs -->
-            <div class="reports-tabs">
-                <button class="tab-button active" data-tab="all">Tất cả (139)</button>
-                <button class="tab-button" data-tab="new">Mới (24)</button>
-                <button class="tab-button" data-tab="processing">Đang xử lý (15)</button>
-                <button class="tab-button" data-tab="resolved">Đã giải quyết (68)</button>
-                <button class="tab-button" data-tab="rejected">Đã từ chối (32)</button>
-            </div>
+        <!-- Lọc theo trạng thái -->
+        <div class="tool-item">
+            <select name="status" class="filter-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="new" th:selected="${status == 'new'}">Mới</option>
+                <option value="pending" th:selected="${status == 'pending'}">Đang xử lý</option>
+                <option value="resolved" th:selected="${status == 'resolved'}">Đã giải quyết</option>
+                <option value="rejected" th:selected="${status == 'rejected'}">Đã từ chối</option>
+            </select>
+        </div>
+
+        <!-- Nút tìm kiếm
+        <div class="tool-item">
+            <button type="submit" class="search-button">Tìm kiếm</button>
+        </div> -->
+    </div>
+
+    <!-- Nút export -->
+    <div class="action-buttons">
+        <button type="submit" class="export-btn">
+            <i class="fas fa-download"></i> Xuất dữ liệu
+        </button>
+    </div>
+
+    
+</form>
+
+
+
+<form id="tabFilterForm" method="get" th:action="@{/admin/reports}">
+    <input type="hidden" name="status" id="tabStatusInput">
+</form>
+
+<!-- Tabs -->
+<div class="reports-tabs">
+
+    <button class="tab-button" data-status="" th:classappend="${status} == null ? 'active' : ''">Tất cả (<span th:text="${totalReports}">0</span>)</button>
+    <button class="tab-button" data-status="new" th:classappend="${status} == 'new' ? 'active' : ''">Mới (<span th:text="${newReportsCount}">0</span>)</button>
+    <button class="tab-button" data-status="pending" th:classappend="${status} == 'pending' ? 'active' : ''">Đang xử lý (<span th:text="${processingReportsCount}">0</span>)</button>
+    <button class="tab-button" data-status="resolved" th:classappend="${status} == 'resolved' ? 'active' : ''">Đã giải quyết (<span th:text="${resolvedReportsCount}">0</span>)</button>
+    <button class="tab-button" data-status="rejected" th:classappend="${status} == 'rejected' ? 'active' : ''">Đã từ chối (<span th:text="${rejectedReportsCount}">0</span>)</button>
+</div>
+
+            <p th:text="'Tổng số bản ghi: ' + ${#lists.size(reports)}"></p>
+
+            <!-- <tr th:each="report : ${reports}">
+    <td th:text="${report['id']}"></td>
+    <td th:text="${report['documentTitle']}"></td>
+    <td th:text="${report['reporterName']}"></td>
+    <td th:text="${report['violationType']}"></td>
+    <td th:text="${report['reportDate']}"></td>
+    <td th:text="${report['status']}"></td>
+
+    <br>
+</tr> -->
+
+
+
+
+    
+
 
             <!-- Reports Table -->
             <div class="data-container">
@@ -282,245 +329,89 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr th:each="report : ${reports}">
                             <td>
                                 <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="report1">
-                                    <label for="report1"></label>
+                                    <input type="checkbox" class="report-checkbox" th:attr="data-id=${report['id']}" th:id="'report' + ${report['id']}">
+                                    <label th:for="'report' + ${report['id']}"></label>
                                 </div>
                             </td>
-                            <td>#RPT8025</td>
+                            <td th:text="'#RPT' + ${report['id']}"></td>
                             <td>
                                 <div class="report-document">
-                                    <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
+                                    <div class="document-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
                                     <div class="document-info">
-                                        <div class="document-title">Lập trình ứng dụng web với React</div>
-                                        <div class="document-owner">Nguyễn Văn A</div>
+                                        <div class="document-title" th:text="${report['documentTitle']}">Tên tài liệu</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 <div class="reporter-info">
-                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
-                                        alt="Trần Thị B">
-                                    <span>Trần Thị B</span>
+                                    <span th:text="${report['reporterName']}">Người báo cáo</span>
                                 </div>
                             </td>
                             <td>
-                                <span class="violation-type copyright">Vi phạm bản quyền</span>
+                                <!-- <span th:text="${report['violationType']}" class="violation-type">Loại vi phạm</span> -->
+
+                                <span class="violation-type" th:switch="${report['violationType']}">
+                                    <span th:case="'copyright'">Vi phạm bản quyền</span>
+                                    <span th:case="'inappropriate'">Nội dung không phù hợp</span>
+                                    <span th:case="'spam'">Spam / Quảng cáo</span>
+                                    <span th:case="'fake'">Tài liệu giả mạo</span>
+                                    <span th:case="'other'">Vi phạm khác</span>
+                                    <span th:case="*">Không xác định</span> <!-- fallback -->
+                                </span>
+                                
                             </td>
-                            <td>15/04/2023</td>
-                            <td><span class="status-badge new">Mới</span></td>
+                            <!-- Xử lý định dạng ngày báo cáo an toàn -->
+                            <td>
+                                <span th:if="${report['reportDate'] != null}"
+                                      th:text="${#dates.format(report['reportDate'], 'dd/MM/yyyy')}">Ngày</span>
+                                <span th:unless="${report['reportDate'] != null}">Không có</span>
+                            </td>
+                            <!-- Trạng thái -->
+                            <td>
+                                <span class="status-badge"
+                                th:switch="${report['status']}">
+                              <span th:case="'new'" class="status-badge new">Mới</span>
+                              <span th:case="'pending'" class="status-badge pending">Đang xử lý</span>
+                              <span th:case="'resolved'" class="status-badge resolved">Đã giải quyết</span>
+                              <span th:case="'rejected'" class="status-badge rejected">Đã từ chối</span>
+                              <span th:case="*">Không rõ</span> <!-- fallback khi sai giá trị -->
+                          </span>
+                          
+                            </td>
+                            <!-- Thao tác -->
                             <td>
                                 <div class="action-buttons">
-                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8025"><i
-                                            class="fas fa-eye"></i></button>
-                                    <button class="action-btn process-report" title="Xử lý" data-id="RPT8025"><i
-                                            class="fas fa-play"></i></button>
-                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8025"><i
-                                            class="fas fa-times"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="report2">
-                                    <label for="report2"></label>
-                                </div>
-                            </td>
-                            <td>#RPT8024</td>
-                            <td>
-                                <div class="report-document">
-                                    <div class="document-icon"><i class="fas fa-file-word"></i></div>
-                                    <div class="document-info">
-                                        <div class="document-title">IELTS Writing: Cách đạt điểm cao</div>
-                                        <div class="document-owner">Lê Văn C</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="reporter-info">
-                                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
-                                        alt="Phạm Thị D">
-                                    <span>Phạm Thị D</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="violation-type inappropriate">Nội dung không phù hợp</span>
-                            </td>
-                            <td>15/04/2023</td>
-                            <td><span class="status-badge new">Mới</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8024"><i
-                                            class="fas fa-eye"></i></button>
-                                    <button class="action-btn process-report" title="Xử lý" data-id="RPT8024"><i
-                                            class="fas fa-play"></i></button>
-                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8024"><i
-                                            class="fas fa-times"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="report3">
-                                    <label for="report3"></label>
-                                </div>
-                            </td>
-                            <td>#RPT8023</td>
-                            <td>
-                                <div class="report-document">
-                                    <div class="document-icon"><i class="fas fa-file-powerpoint"></i></div>
-                                    <div class="document-info">
-                                        <div class="document-title">Quản trị chiến lược kinh doanh</div>
-                                        <div class="document-owner">Trần Văn E</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="reporter-info">
-                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
-                                        alt="Hoàng Văn F">
-                                    <span>Hoàng Văn F</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="violation-type spam">Spam/Quảng cáo</span>
-                            </td>
-                            <td>14/04/2023</td>
-                            <td><span class="status-badge processing">Đang xử lý</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8023"><i
-                                            class="fas fa-eye"></i></button>
+                                    <button class="action-btn view-report" title="Xem chi tiết"
+                                            th:attr="data-id=${report['id']}"><i class="fas fa-eye"></i></button>
+                
+                                    <button class="action-btn process-report" title="Xử lý"
+                                            th:if="${report['status'] != 'resolved' and report['status'] != 'rejected'}"
+                                            th:attr="data-id=${report['id']}"><i class="fas fa-play"></i></button>
+                
                                     <button class="action-btn resolve-report" title="Đánh dấu đã giải quyết"
-                                        data-id="RPT8023"><i class="fas fa-check"></i></button>
-                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8023"><i
-                                            class="fas fa-times"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="report4">
-                                    <label for="report4"></label>
-                                </div>
-                            </td>
-                            <td>#RPT8022</td>
-                            <td>
-                                <div class="report-document">
-                                    <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
-                                    <div class="document-info">
-                                        <div class="document-title">Python cho Data Science</div>
-                                        <div class="document-owner">Đặng Thị G</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="reporter-info">
-                                    <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
-                                        alt="Đinh Văn H">
-                                    <span>Đinh Văn H</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="violation-type fake">Tài liệu giả mạo</span>
-                            </td>
-                            <td>14/04/2023</td>
-                            <td><span class="status-badge processing">Đang xử lý</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8022"><i
-                                            class="fas fa-eye"></i></button>
-                                    <button class="action-btn resolve-report" title="Đánh dấu đã giải quyết"
-                                        data-id="RPT8022"><i class="fas fa-check"></i></button>
-                                    <button class="action-btn reject-report" title="Từ chối" data-id="RPT8022"><i
-                                            class="fas fa-times"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="report5">
-                                    <label for="report5"></label>
-                                </div>
-                            </td>
-                            <td>#RPT8021</td>
-                            <td>
-                                <div class="report-document">
-                                    <div class="document-icon"><i class="fas fa-file-pdf"></i></div>
-                                    <div class="document-info">
-                                        <div class="document-title">Giải tích 1 cho sinh viên kỹ thuật</div>
-                                        <div class="document-owner">Vũ Thị I</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="reporter-info">
-                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
-                                        alt="Lưu Văn K">
-                                    <span>Lưu Văn K</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="violation-type copyright">Vi phạm bản quyền</span>
-                            </td>
-                            <td>13/04/2023</td>
-                            <td><span class="status-badge resolved">Đã giải quyết</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8021"><i
-                                            class="fas fa-eye"></i></button>
-                                    <button class="action-btn reopen-report" title="Mở lại" data-id="RPT8021"><i
-                                            class="fas fa-redo-alt"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="report6">
-                                    <label for="report6"></label>
-                                </div>
-                            </td>
-                            <td>#RPT8020</td>
-                            <td>
-                                <div class="report-document">
-                                    <div class="document-icon"><i class="fas fa-file-excel"></i></div>
-                                    <div class="document-info">
-                                        <div class="document-title">Phân tích dữ liệu với Excel</div>
-                                        <div class="document-owner">Nguyễn Thị L</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="reporter-info">
-                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
-                                        alt="Phạm Văn M">
-                                    <span>Phạm Văn M</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="violation-type other">Vi phạm khác</span>
-                            </td>
-                            <td>12/04/2023</td>
-                            <td><span class="status-badge rejected">Đã từ chối</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn view-report" title="Xem chi tiết" data-id="RPT8020"><i
-                                            class="fas fa-eye"></i></button>
-                                    <button class="action-btn reopen-report" title="Mở lại" data-id="RPT8020"><i
-                                            class="fas fa-redo-alt"></i></button>
+                                            th:if="${report['status'] == 'pending'}"
+                                            th:attr="data-id=${report['id']}"><i class="fas fa-check"></i></button>
+                
+                                    <button class="action-btn reject-report" title="Từ chối"
+                                            th:if="${report['status'] != 'rejected'}"
+                                            th:attr="data-id=${report['id']}"><i class="fas fa-times"></i></button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+                
+                
             </div>
+
+
+            
+            
 
             <!-- Pagination -->
             <div class="pagination">
@@ -545,7 +436,7 @@
                     <span>Với báo cáo đã chọn:</span>
                     <select id="bulkActionSelect">
                         <option value="">Chọn hành động</option>
-                        <option value="process">Đánh dấu đang xử lý</option>
+                        <option value="pending">Đánh dấu đang xử lý</option>
                         <option value="resolve">Đánh dấu đã giải quyết</option>
                         <option value="reject">Từ chối báo cáo</option>
                     </select>
@@ -603,15 +494,10 @@
                                         <div class="info-row full-width">
                                             <div class="info-label">Mô tả vi phạm</div>
                                             <div class="info-value description">
-                                                <p>Tài liệu này đã sao chép nội dung từ cuốn sách "React - The Complete
-                                                    Guide" của tác giả John Smith mà không được sự cho phép. Tôi là đại
-                                                    diện của nhà xuất bản CodeMaster và chúng tôi sở hữu bản quyền cho
-                                                    tài liệu gốc.</p>
-                                                <p>Cụ thể, các phần từ trang 15-42 của tài liệu này hoàn toàn giống với
-                                                    nội dung từ cuốn sách của chúng tôi, chỉ có một vài sửa đổi nhỏ.</p>
+                                                <p></p>
                                             </div>
                                         </div>
-                                        <div class="info-row full-width">
+                                        <!-- <div class="info-row full-width">
                                             <div class="info-label">Bằng chứng</div>
                                             <div class="info-value evidence">
                                                 <div class="evidence-items">
@@ -643,7 +529,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
 
@@ -732,7 +618,7 @@
                                     <div class="form-group">
                                         <label for="reportStatus">Cập nhật trạng thái</label>
                                         <select id="reportStatus">
-                                            <option value="processing">Đang xử lý</option>
+                                            <option value="pending">Đang xử lý</option>
                                             <option value="resolved">Đã giải quyết</option>
                                             <option value="rejected">Từ chối</option>
                                         </select>
@@ -769,9 +655,16 @@
         </main>
     </div>
 
-    <script src="../js/main.js"></script>
+
+
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/reports.js}"></script>
+    
+
+    <!-- <script src="../js/main.js"></script>
     <script src="js/admin.js"></script>
-    <script src="js/reports.js"></script>
+    <script src="js/reports.js"></script> -->
 </body>
 
 </html>
