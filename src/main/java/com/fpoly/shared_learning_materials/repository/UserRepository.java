@@ -4,6 +4,7 @@ import com.fpoly.shared_learning_materials.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,81 +14,79 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
-    // Basic queries
-	Optional<User> findByUsername(String username);
-	
-    Optional<User> findByUsernameAndDeletedAtIsNull(String username);
+        // Basic queries
+        Optional<User> findByUsername(String username);
 
-    Optional<User> findByEmailAndDeletedAtIsNull(String email);
+        Optional<User> findByUsernameAndDeletedAtIsNull(String username);
 
-    Optional<User> findByIdAndDeletedAtIsNull(Long id);
+        Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
-    // Check existence
-    boolean existsByUsernameAndDeletedAtIsNull(String username);
+        Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
-    boolean existsByEmailAndDeletedAtIsNull(String email);
+        // Check existence
+        boolean existsByUsernameAndDeletedAtIsNull(String username);
 
-    boolean existsByUsernameAndIdNotAndDeletedAtIsNull(String username, Long id);
+        boolean existsByEmailAndDeletedAtIsNull(String email);
 
-    boolean existsByEmailAndIdNotAndDeletedAtIsNull(String email, Long id);
+        boolean existsByUsernameAndIdNotAndDeletedAtIsNull(String username, Long id);
 
-    // Status queries
-    List<User> findByStatusAndDeletedAtIsNull(String status);
+        boolean existsByEmailAndIdNotAndDeletedAtIsNull(String email, Long id);
 
-    Page<User> findByStatusAndDeletedAtIsNull(String status, Pageable pageable);
+        // Status queries
+        List<User> findByStatusAndDeletedAtIsNull(String status);
 
-    // Role queries
-    List<User> findByRoleAndDeletedAtIsNull(String role);
+        Page<User> findByStatusAndDeletedAtIsNull(String status, Pageable pageable);
 
-    Page<User> findByRoleAndDeletedAtIsNull(String role, Pageable pageable);
+        // Role queries
+        List<User> findByRoleAndDeletedAtIsNull(String role);
 
-    // Search queries
-    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND " +
-            "(LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<User> searchUsers(@Param("keyword") String keyword, Pageable pageable);
+        Page<User> findByRoleAndDeletedAtIsNull(String role, Pageable pageable);
 
-    // Combined search and filter
-    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL " +
-            "AND (:status IS NULL OR u.status = :status) " +
-            "AND (:role IS NULL OR u.role = :role) " +
-            "AND (:keyword IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<User> findUsersWithFilters(@Param("keyword") String keyword,
-            @Param("status") String status,
-            @Param("role") String role,
-            Pageable pageable);
+        // Search queries
+        @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND " +
+                        "(LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<User> searchUsers(@Param("keyword") String keyword, Pageable pageable);
 
-    // Security related queries
-    List<User> findByFailedLoginAttemptsGreaterThanAndDeletedAtIsNull(Integer attempts);
+        // Combined search and filter
+        @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL " +
+                        "AND (:status IS NULL OR u.status = :status) " +
+                        "AND (:role IS NULL OR u.role = :role) " +
+                        "AND (:keyword IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<User> findUsersWithFilters(@Param("keyword") String keyword,
+                        @Param("status") String status,
+                        @Param("role") String role,
+                        Pageable pageable);
 
-    List<User> findByLockedUntilBeforeAndDeletedAtIsNull(LocalDateTime now);
+        // Security related queries
+        List<User> findByFailedLoginAttemptsGreaterThanAndDeletedAtIsNull(Integer attempts);
 
-    // Statistics queries
-    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.status = 'active'")
-    Long countActiveUsers();
+        List<User> findByLockedUntilBeforeAndDeletedAtIsNull(LocalDateTime now);
 
-    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.role = :role")
-    Long countUsersByRole(@Param("role") String role);
+        // Statistics queries
+        @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.status = 'active'")
+        Long countActiveUsers();
 
-    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.createdAt BETWEEN :from AND :to")
-    Long countUsersByDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+        @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.role = :role")
+        Long countUsersByRole(@Param("role") String role);
 
-    Optional<User> findByUsername(String username);
+        @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.createdAt BETWEEN :from AND :to")
+        Long countUsersByDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    Optional<User> findByEmail(String email);
+        Optional<User> findByEmail(String email);
 
-    Optional<User> findByUsernameOrEmail(String username, String email);
+        Optional<User> findByUsernameOrEmail(String username, String email);
 
-    boolean existsByUsername(String username);
+        boolean existsByUsername(String username);
 
-    boolean existsByEmail(String email);
+        boolean existsByEmail(String email);
 
-    Page<User> findAllByDeletedAtIsNullOrderByCreatedAtDesc(Pageable pageable);
+        Page<User> findAllByDeletedAtIsNullOrderByCreatedAtDesc(Pageable pageable);
 
-    List<User> findByDeletedAtIsNull();
+        List<User> findByDeletedAtIsNull();
 }
