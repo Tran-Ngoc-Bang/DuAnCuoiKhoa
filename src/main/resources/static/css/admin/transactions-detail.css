@@ -1,0 +1,407 @@
+/* Styles cho trang Transactions Detail */
+
+/* Transaction Detail Container */
+.transaction-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Transaction Type Banner */
+.transaction-type-banner {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transaction-type {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.transaction-icon {
+    width: 48px;
+    height: 48px;
+    background: #4361ee;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.transaction-type-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
+}
+
+.transaction-time {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.transaction-status {
+    display: flex;
+    align-items: center;
+}
+
+/* Transaction Status Timeline */
+.transaction-status-timeline {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-header {
+    margin-bottom: 1.5rem;
+}
+
+.timeline-header h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e5e7eb;
+}
+
+.timeline-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    position: relative;
+}
+
+.timeline-step.completed:before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 48px;
+    bottom: -1.5rem;
+    width: 2px;
+    background: #10b981;
+}
+
+.timeline-step-icon {
+    width: 48px;
+    height: 48px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-size: 1rem;
+    z-index: 1;
+}
+
+.timeline-step.completed .timeline-step-icon {
+    background: #10b981;
+    color: white;
+}
+
+.timeline-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-desc {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* Transaction Info Grid */
+.transaction-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.transaction-info-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.transaction-info-card h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.transaction-info-card h4 i {
+    color: #4361ee;
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: #1f2937;
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.info-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 0.5rem 0;
+}
+
+.total-row {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1f2937;
+}
+
+/* User Profile Info */
+.user-profile-info {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.user-avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.large-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.view-profile-btn {
+    padding: 0.5rem 1rem;
+    background: #4361ee;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.view-profile-btn:hover {
+    background: #3730a3;
+}
+
+.user-details {
+    flex: 1;
+}
+
+/* Notes Section */
+.notes-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.notes-section h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.system-notes {
+    background: #f9fafb;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.note-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.5rem 0;
+}
+
+.note-time {
+    font-size: 0.75rem;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.note-content {
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.add-note-section {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+}
+
+.note-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.note-input-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.add-note-btn {
+    padding: 0.5rem 1rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    transition: all 0.2s ease;
+}
+
+.add-note-btn:hover {
+    background: #059669;
+}
+
+/* Transaction Actions */
+.transaction-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-top: 1rem;
+}
+
+.action-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .transaction-type-banner {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .transaction-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .user-profile-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .transaction-actions {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .action-group {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .timeline {
+        gap: 1rem;
+    }
+    
+    .timeline-step {
+        gap: 0.75rem;
+    }
+    
+    .timeline-step-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 0.875rem;
+    }
+    
+    .timeline:before {
+        left: 20px;
+    }
+    
+    .timeline-step.completed:before {
+        left: 20px;
+    }
+} 
