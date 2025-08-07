@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết danh mục - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/categories.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+    <style type="text/css">
+        * {
+            box-sizing: border-box; /* Áp dụng cho toàn bộ để kiểm soát kích thước chính xác */
+        }
+        .form-container {
+            max-width: 1400px; /* Giữ kích thước lớn */
+            margin: 2rem auto;
+            padding: 0;
+            background: transparent;
+        }
+        .modal-container {
+            width: 100%;
+            max-width: 100%;
+        }
+        .detail-container {
+            max-width: 100%;
+            width: 100%; /* Đảm bảo khớp với form-container */
+            margin: 2rem auto;
+            padding: 2rem; /* Tăng padding để nội dung trông rộng rãi hơn */
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
+        .detail-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .detail-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        .detail-body {
+            display: grid;
+            gap: 1rem;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .detail-item label {
+            font-weight: 500;
+            color: #555;
+        }
+        .detail-item span {
+            color: #333;
+            text-align: right;
+        }
+        .detail-footer {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn-back {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+        .btn-edit {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+        }
+        .btn-edit:hover {
+            background: #0056b3;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .badge-success {
+            background: #28a745;
+            color: #fff;
+        }
+        .badge-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a th:href="@{/admin/index}" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm..." class="search-input" id="headerSearchInput">
+                    <button id="headerSearchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn Anh</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/index}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/users}">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/documents}">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item active">
+                        <a th:href="@{/admin/categories}">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/tags}">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/comments}">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/reports}">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/ip-bans}">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/statistics}">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a th:href="@{/admin/coin-packages}">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a th:href="@{/admin/transactions}">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a th:href="@{/admin/withdrawals}">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/admin/settings}">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a th:href="@{/logout}">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Chi tiết danh mục</h1>
+                <p class="admin-page-description">Thông tin chi tiết về danh mục trong hệ thống</p>
+                <div class="admin-breadcrumbs">
+                    <a th:href="@{/admin/index}">Admin</a>
+                    <span>/</span>
+                    <a th:href="@{/admin/categories}">Quản lý danh mục</a>
+                    <span>/</span>
+                    <span>Chi tiết</span>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <div class="modal-container">
+                    <div class="modal-header gradient-header">
+                        <h3 id="modalTitle" th:text="'Chi tiết danh mục: ' + ${category.name}"><i class="fas fa-folder-open"></i></h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="category-admin-card">
+                            <div class="category-admin-content">
+                                <h3 class="category-admin-title" th:text="${category.name}"></h3>
+                                <p class="category-admin-description" th:text="${category.description != null ? category.description : 'Không có mô tả'}"></p>
+                                <div class="category-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-folder"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Danh mục cha</span>
+                                            <span class="stat-value">
+                                                <th:block th:if="${category.parentId == 0}">
+                                                    Không có
+                                                </th:block>
+                                                <th:block th:unless="${category.parentId == 0}">
+                                                    <th:block th:each="parent : ${categories}" th:if="${parent.id == category.parentId}">
+                                                        <span th:text="${parent.name}"></span>
+                                                    </th:block>
+                                                </th:block>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-file-alt"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Số tài liệu</span>
+                                            <span class="stat-value" th:text="${category.documents}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-sitemap"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Số danh mục con</span>
+                                            <span class="stat-value" th:text="${category.subcategories}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-user"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Người tạo</span>
+                                             <span class="stat-value" th:text="${category.createdByName != null ? category.createdByName : 'Không có'}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Ngày tạo phân cấp</span>
+                                            <span class="stat-value" th:text="${category.hierarchyCreatedAt != null} ? ${#temporals.format(category.hierarchyCreatedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Mức độ phân cấp</span>
+                                            <span class="stat-value" th:text="${categoryHierarchyRepository.findByIdChildId(category.id).orElse(null)?.level ?: '0'}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Ngày tạo</span>
+                                            <span class="stat-value" th:text="${category.createdAt != null} ? ${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Ngày cập nhật</span>
+                                            <span class="stat-value" th:text="${category.updatedAt != null} ? ${#temporals.format(category.updatedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Ngày xóa</span>
+                                            <span class="stat-value" th:text="${category.deletedAt != null} ? ${#temporals.format(category.deletedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon"><i class="fas fa-check-circle"></i></span>
+                                        <div class="stat-content">
+                                            <span class="stat-label">Trạng thái</span>
+                                            <span th:class="'status-badge ' + ${category.status == 'active' ? 'badge-success' : 'badge-danger'}" th:text="${category.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a th:href="@{/admin/categories}" class="cancel-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
+                        <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-edit">Chỉnh sửa</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toast-container" id="toastContainer"></div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/categories.js}"></script>
+</body>
+</html>
