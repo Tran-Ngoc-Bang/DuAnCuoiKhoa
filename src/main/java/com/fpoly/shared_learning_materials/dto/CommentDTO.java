@@ -20,6 +20,7 @@ public class CommentDTO {
 	private Long userId;
 	private String userFullName;
 	private String content;
+	private String userName;
 	private String userAvatar;
 	private String status; // active, hidden...
 	private LocalDateTime createdAt;

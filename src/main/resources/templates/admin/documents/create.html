@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thêm tài liệu - EduShare Admin</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin_documents.css}" />
+    <style>
+      /* CSS từ modal trong list.html */
+      .content-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 24px;
+        margin: 20px auto;
+      }
+      .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+      }
+      .content-header h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #222;
+        margin: 0;
+      }
+      .modal-tabs .tab-nav {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .tab-btn {
+        padding: 10px 16px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #f9f9f9;
+        font-weight: 600;
+        color: #555;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+      }
+      .tab-btn.active {
+        background: #4f46e5;
+        color: #fff;
+        border-color: #4f46e5;
+      }
+      .tab-btn:hover {
+        background: #eee;
+      }
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+      .form-group {
+        flex: 1 1 48%;
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+      }
+      input,
+      select,
+      textarea {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #4f46e5;
+        outline: none;
+      }
+      .file-upload {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        border-radius: 6px;
+        transition: border-color 0.2s;
+      }
+      .file-upload:hover {
+        border-color: #4f46e5;
+      }
+      .file-upload-label i {
+        font-size: 2rem;
+        color: #aaa;
+      }
+      .file-upload-label span {
+        display: block;
+        font-weight: 500;
+        margin-top: 8px;
+      }
+      .thumbnail-preview img {
+        max-width: 100%;
+        border-radius: 6px;
+        margin-top: 10px;
+      }
+      .btn-remove {
+        background: none;
+        border: none;
+        color: #dc2626;
+        cursor: pointer;
+      }
+      .btn-remove:hover {
+        color: #991b1b;
+      }
+      .form-help {
+        font-size: 0.85rem;
+        color: #666;
+      }
+      .required {
+        color: #dc2626;
+      }
+      .category-checkboxes {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background: #fff;
+      }
+      .category-checkboxes.is-invalid {
+        border-color: #dc3545;
+      }
+      .form-section {
+        margin-bottom: 24px;
+      }
+      .form-section h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .form-help {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+      .form-check {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+      }
+      .form-check-input {
+        margin-right: 8px;
+        width: 16px;
+        height: 16px;
+      }
+      .form-check-label {
+        cursor: pointer;
+        margin-bottom: 0;
+      }
+      .content-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid #eee;
+      }
+    </style>
+  </head>
+
+  <body class="admin-page">
+    <!-- Admin Header (giữ nguyên từ list.html) -->
+    <header class="admin-header">
+      <div class="admin-header-content">
+        <div class="admin-logo">
+          <a href="index" class="logo">
+            <div class="logo-icon">E</div>
+            <div class="logo-text">EduShare</div>
+          </a>
+        </div>
+        <div class="admin-header-actions">
+          <div class="admin-search">
+            <input type="text" placeholder="Tìm kiếm..." />
+            <button><i class="fas fa-search"></i></button>
+          </div>
+          <div class="dark-mode-toggle" id="darkModeToggle"></div>
+          <div class="admin-notifications">
+            <button type="button" class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">5</span>
+            </button>
+          </div>
+          <div class="admin-profile">
+            <div class="admin-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                alt="Admin"
+              />
+            </div>
+            <div class="admin-info">
+              <span class="admin-name">Nguyễn Văn A</span>
+              <span class="admin-role">Quản trị viên</span>
+            </div>
+            <div class="admin-dropdown">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar (giữ nguyên từ list.html) -->
+      <aside class="admin-sidebar">
+        <nav class="admin-nav">
+          <ul class="admin-menu">
+            <li class="admin-menu-item">
+              <a href="index">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Bảng điều khiển</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="users">
+                <i class="fas fa-users"></i>
+                <span>Quản lý người dùng</span>
+              </a>
+            </li>
+            <li class="admin-menu-item active">
+              <a href="/admin/documents">
+                <i class="fas fa-file-alt"></i>
+                <span>Quản lý tài liệu</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="categories">
+                <i class="fas fa-folder"></i>
+                <span>Quản lý danh mục</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="tags">
+                <i class="fas fa-tags"></i>
+                <span>Quản lý tags</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="comments">
+                <i class="fas fa-comments"></i>
+                <span>Quản lý bình luận</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="reports">
+                <i class="fas fa-flag"></i>
+                <span>Báo cáo vi phạm</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="ip-bans">
+                <i class="fas fa-ban"></i>
+                <span>IP bị cấm</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="statistics">
+                <i class="fas fa-chart-bar"></i>
+                <span>Thống kê</span>
+              </a>
+            </li>
+            <li class="admin-menu-item has-submenu">
+              <a href="javascript:void(0)">
+                <i class="fas fa-coins"></i>
+                <span>Quản lý doanh thu</span>
+                <i class="fas fa-chevron-down submenu-icon"></i>
+              </a>
+              <ul class="submenu">
+                <li class="submenu-item">
+                  <a href="coin-packages">
+                    <i class="fas fa-box"></i>
+                    <span>Gói xu</span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a href="transactions">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Giao dịch</span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a href="withdrawals">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Yêu cầu rút tiền</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="admin-menu-item">
+              <a href="settings">
+                <i class="fas fa-cog"></i>
+                <span>Cài đặt</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a href="../index">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Đăng xuất</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Thêm tài liệu mới</h1>
+          <div class="admin-breadcrumbs">
+            <a href="/admin/documents">Admin</a>
+            <span>/</span>
+            <a href="/admin/documents">Tài liệu</a>
+            <span>/</span>
+            <span>Thêm mới</span>
+          </div>
+        </div>
+
+        <div class="content-container">
+          <div class="content-header">
+            <h3>Thêm tài liệu mới</h3>
+          </div>
+
+          <!-- Hiển thị thông báo -->
+          <div th:if="${success}" class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}"></span>
+          </div>
+          <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+          </div>
+
+          <div class="modal-body">
+            <div class="modal-tabs">
+              <div class="tab-nav">
+                <button type="button" class="tab-btn active" data-tab="basic">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Thông tin cơ bản</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="media">
+                  <i class="fas fa-file-upload"></i>
+                  <span>File & Media</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="advanced">
+                  <i class="fas fa-cogs"></i>
+                  <span>Cài đặt nâng cao</span>
+                </button>
+              </div>
+            </div>
+
+            <form
+              id="documentForm"
+              th:action="@{/admin/documents}"
+              th:object="${document}"
+              method="post"
+              enctype="multipart/form-data"
+              novalidate
+            >
+              <div class="tab-content">
+                <!-- Tab 1: Basic Information -->
+                <div class="tab-panel active" id="tabBasic">
+                  <div class="form-section">
+                    <h4><i class="fas fa-info-circle"></i> Thông tin cơ bản</h4>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="documentTitle"
+                          >Tiêu đề <span class="required">*</span></label
+                        >
+                        <input
+                          type="text"
+                          id="documentTitle"
+                          name="title"
+                          th:field="*{title}"
+                          required
+                          placeholder="Nhập tiêu đề tài liệu"
+                          class="form-control"
+                        />
+                        <div
+                          class="invalid-feedback"
+                          th:errors="*{title}"
+                        ></div>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="documentDescription">Mô tả</label>
+                        <textarea
+                          id="documentDescription"
+                          name="description"
+                          th:field="*{description}"
+                          rows="4"
+                          placeholder="Mô tả chi tiết về tài liệu..."
+                          class="form-control"
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="documentCategory"
+                          >Danh mục <span class="required">*</span></label
+                        >
+                        <div
+                          id="categoryCheckboxes"
+                          class="category-checkboxes"
+                        >
+                          <div
+                            th:each="category : ${categories}"
+                            class="form-check"
+                          >
+                            <input
+                              type="checkbox"
+                              th:id="'category_' + ${category.id}"
+                              th:value="${category.id}"
+                              class="form-check-input category-checkbox"
+                            />
+                            <label
+                              th:for="'category_' + ${category.id}"
+                              th:text="${category.name}"
+                              class="form-check-label"
+                            ></label>
+                          </div>
+                        </div>
+                        <div class="invalid-feedback">
+                          Vui lòng chọn ít nhất một danh mục (tối đa 3)
+                        </div>
+                        <small class="form-text text-muted"
+                          >Chọn tối đa 3 danh mục</small
+                        >
+                        <input type="hidden" id="selectedCategoryIds" name="categoryIdsString" value="" />
+                      </div>
+                      <div class="form-group">
+                        <label for="documentTags"
+                          >Tag (nhập tên tag, cách nhau bằng dấu phẩy)</label
+                        >
+                        <input
+                          type="text"
+                          id="documentTags"
+                          name="tagNames"
+                          th:value="${#strings.listJoin(document.tagNames, ', ')}"
+                          placeholder="tag1, tag2"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="documentPrice">Giá (coin)</label>
+                        <input
+                          type="number"
+                          id="documentPrice"
+                          name="price"
+                          th:field="*{price}"
+                          min="0"
+                          value="0"
+                          placeholder="0 = Miễn phí"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="documentStatus">Trạng thái</label>
+                        <select
+                          id="documentStatus"
+                          name="status"
+                          th:field="*{status}"
+                          class="form-control"
+                        >
+                          <option value="DRAFT">Bản nháp</option>
+                          <option value="PENDING">Chờ duyệt</option>
+                          <option value="PUBLISHED">Đã xuất bản</option>
+                          <option value="ARCHIVED">Đã lưu trữ</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Tab 2: File & Media -->
+                <div class="tab-panel" id="tabMedia">
+                  <div class="form-section">
+                    <h4><i class="fas fa-file-upload"></i> File và Media</h4>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="documentFile"
+                          >File tài liệu <span class="required">*</span></label
+                        >
+                        <div class="file-upload">
+                          <input
+                            type="file"
+                            id="documentFile"
+                            name="file"
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                            required
+                            class="form-control"
+                          />
+                          <div class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Chọn file hoặc kéo thả vào đây</span>
+                            <small
+                              >Hỗ trợ: PDF, Word, PowerPoint, Excel (tối đa
+                              100MB)</small
+                            >
+                          </div>
+                        </div>
+                        <div
+                          class="file-info"
+                          id="fileInfo"
+                          style="display: none"
+                        >
+                          <i class="fas fa-file"></i>
+                          <span class="file-name"></span>
+                          <span class="file-size"></span>
+                          <button
+                            type="button"
+                            class="btn-remove"
+                            title="Xóa file"
+                          >
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                        <div class="invalid-feedback">
+                          Vui lòng chọn file tài liệu
+                        </div>
+                      </div>
+                    </div>
+                    <!--           <div class="form-row">
+                                <div class="form-group">
+    <label for="documentThumbnail">Ảnh đại diện</label>
+    <div class="file-upload">
+       <input type="file" id="documentThumbnail" name="thumbnail" accept="image/jpeg,image/png" class="form-control">
+        <div class="file-upload-label">
+            <i class="fas fa-image"></i>
+            <span>Chọn ảnh đại diện</span>
+            <small>JPG, PNG (tối đa 5MB, kích thước khuyến nghị: 400x300px)</small>
+        </div>
+    </div>
+    <div class="thumbnail-preview" id="thumbnailPreview" style="display: none;">
+        <img src="" alt="Thumbnail preview">
+        <button type="button" class="btn-remove" title="Xóa ảnh">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+                            </div> -->
+                  </div>
+                </div>
+                <!-- Tab 3: Advanced Settings -->
+                <div class="tab-panel" id="tabAdvanced">
+                  <div class="form-section">
+                    <h4><i class="fas fa-cogs"></i> Cài đặt nâng cao</h4>
+                    <p class="text-muted">Các tính năng nâng cao sẽ được bổ sung trong phiên bản tương lai.</p>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="documentId" name="id" th:field="*{id}" />
+            </form>
+          </div>
+          <div class="content-footer">
+            <a th:href="@{/admin/documents}" class="btn btn-outline">Hủy</a>
+            <button type="button" class="btn btn-outline" id="saveDraftBtn">
+              <i class="fas fa-file-alt"></i>
+              <span>Lưu nháp</span>
+            </button>
+            <button type="submit" class="btn btn-primary" form="documentForm">
+              <i class="fas fa-save"></i>
+              <span>Lưu tài liệu</span>
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!--   <script th:src="@{/js/admin/documents.js}"></script>  -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("documentForm");
+        const documentFile = document.getElementById("documentFile");
+        const fileInfo = document.getElementById("fileInfo");
+        const documentCategory = document.getElementById("documentCategory");
+
+        // Kiểm tra categoryIds với checkboxes
+        const categoryCheckboxes =
+          document.querySelectorAll(".category-checkbox");
+        const categoryContainer = document.getElementById("categoryCheckboxes");
+        const hiddenCategoryIds = document.getElementById("selectedCategoryIds");
+
+        function updateHiddenField() {
+          const checkedBoxes = document.querySelectorAll(".category-checkbox:checked");
+          const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+          if (hiddenCategoryIds) {
+            hiddenCategoryIds.value = selectedIds.join(',');
+          }
+
+        }
+
+        if (categoryCheckboxes.length > 0) {
+          categoryCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", function () {
+              const checkedBoxes = document.querySelectorAll(
+                ".category-checkbox:checked"
+              );
+
+
+              // Kiểm tra số lượng danh mục
+              if (checkedBoxes.length > 3) {
+                alert("Bạn chỉ có thể chọn tối đa 3 danh mục!");
+                this.checked = false;
+                return;
+              }
+
+              // Cập nhật hidden field
+              updateHiddenField();
+
+              // Xóa class invalid nếu có ít nhất 1 danh mục
+              if (checkedBoxes.length > 0 && categoryContainer) {
+                categoryContainer.classList.remove("is-invalid");
+              }
+            });
+          });
+        }
+
+        // Kiểm tra trước khi submit form
+        form.addEventListener("submit", function (event) {
+          const checkedBoxes = document.querySelectorAll(
+            ".category-checkbox:checked"
+          );
+          const categoryContainer =
+            document.getElementById("categoryCheckboxes");
+
+          // Kiểm tra có ít nhất 1 danh mục
+          if (checkedBoxes.length === 0) {
+            event.preventDefault();
+            alert("Vui lòng chọn ít nhất một danh mục!");
+            if (categoryContainer)
+              categoryContainer.classList.add("is-invalid");
+            return false;
+          }
+
+          // Kiểm tra không quá 3 danh mục
+          if (checkedBoxes.length > 3) {
+            event.preventDefault();
+            alert("Bạn chỉ có thể chọn tối đa 3 danh mục!");
+            if (categoryContainer)
+              categoryContainer.classList.add("is-invalid");
+            return false;
+          }
+
+          // Kiểm tra tính hợp lệ của các giá trị
+          const invalidBoxes = Array.from(checkedBoxes).filter((cb) => {
+            const value = cb.value.trim();
+            return value === "" || isNaN(value) || parseInt(value) <= 0;
+          });
+
+          if (invalidBoxes.length > 0) {
+            event.preventDefault();
+            alert("Danh mục không hợp lệ, vui lòng chọn lại!");
+            if (categoryContainer)
+              categoryContainer.classList.add("is-invalid");
+            return false;
+          }
+
+
+
+          // Xóa class invalid nếu validation pass
+          if (categoryContainer)
+            categoryContainer.classList.remove("is-invalid");
+          return true;
+        });
+
+        // Xử lý file upload preview (giữ nguyên)
+        if (documentFile && fileInfo) {
+          documentFile.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+              const validTypes = [
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.ms-powerpoint",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "application/vnd.ms-excel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              ];
+              if (!validTypes.includes(file.type)) {
+                alert("Chỉ hỗ trợ PDF, Word, PowerPoint, Excel");
+                this.value = "";
+                fileInfo.style.display = "none";
+                return;
+              }
+              if (file.size > 100 * 1024 * 1024) {
+                alert("File vượt quá 100MB");
+                this.value = "";
+                fileInfo.style.display = "none";
+                return;
+              }
+              fileInfo.querySelector(".file-name").textContent = file.name;
+              fileInfo.querySelector(".file-size").textContent =
+                (file.size / 1024 / 1024).toFixed(2) + " MB";
+              fileInfo.style.display = "flex";
+            } else {
+              fileInfo.style.display = "none";
+            }
+          });
+        }
+
+        // Xử lý tab navigation (giữ nguyên)
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        const tabPanels = document.querySelectorAll(".tab-panel");
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const target = this.dataset.tab;
+            tabButtons.forEach((btn) => btn.classList.remove("active"));
+            tabPanels.forEach((panel) => panel.classList.remove("active"));
+            this.classList.add("active");
+            document
+              .getElementById(
+                `tab${target.charAt(0).toUpperCase() + target.slice(1)}`
+              )
+              .classList.add("active");
+          });
+        });
+
+
+      });
+    </script>
+  </body>
+</html>

@@ -26,4 +26,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
 	Page<Comment> findByDeletedAtIsNullAndStatusNot(String status, Pageable pageable);
 
 	Page<Comment> findByDeletedAtIsNullAndIdIn(List<Long> ids, Pageable pageable);
+
+	List<Comment> findByDocumentIdAndStatus(Long documentId, String status);
 }
