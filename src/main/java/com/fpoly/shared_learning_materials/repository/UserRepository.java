@@ -74,4 +74,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.createdAt BETWEEN :from AND :to")
     Long countUsersByDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    Optional<User> findByUsername(String username);
+
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findByUsernameOrEmail(String username, String email);
+
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
+
+    Page<User> findAllByDeletedAtIsNullOrderByCreatedAtDesc(Pageable pageable);
+
+    List<User> findByDeletedAtIsNull();
 }

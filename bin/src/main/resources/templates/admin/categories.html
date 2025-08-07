@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý danh mục - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/categories.css">
+    <link rel="stylesheet" href="css/toast.css">
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn Anh</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="admin-menu-item">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Quản lý danh mục</h1>
+                <p class="admin-page-description">Quản lý tất cả danh mục và phân loại nội dung trong hệ thống</p>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <span>Quản lý danh mục</span>
+                </div>
+            </div>
+
+            <!-- Category Management Tools -->
+            <div class="management-tools">
+                <div class="search-filters">
+                    <div class="tool-item">
+                        <input type="text" placeholder="Tìm kiếm danh mục..." class="search-input">
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="active">Hoạt động</option>
+                            <option value="inactive">Vô hiệu hóa</option>
+                        </select>
+                    </div>
+                    <div class="tool-item">
+                        <select class="filter-select">
+                            <option value="none">Sắp xếp theo</option>
+                            <option value="name_asc">Tên (A-Z)</option>
+                            <option value="name_desc">Tên (Z-A)</option>
+                            <option value="date_newest">Ngày tạo (Mới nhất)</option>
+                            <option value="date_oldest">Ngày tạo (Cũ nhất)</option>
+                            <option value="count_most">Số tài liệu (Nhiều nhất)</option>
+                            <option value="count_least">Số tài liệu (Ít nhất)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="add-new-btn" id="addCategoryBtn">
+                        <i class="fas fa-plus"></i> Thêm danh mục
+                    </button>
+                    <button id="deleteSelectedBtn" class="btn danger add-new-btn">Xóa mục đã chọn</button>
+                    <button class="export-btn">
+                        <i class="fas fa-download"></i> Xuất dữ liệu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categories Grid & Table -->
+            <div class="management-view-options">
+                <button class="view-option active" data-view="grid">
+                    <i class="fas fa-th-large"></i> Dạng lưới
+                </button>
+                <button class="view-option" data-view="table">
+                    <i class="fas fa-list"></i> Dạng bảng
+                </button>
+            </div>
+
+            <!-- Grid View -->
+            <div class="categories-grid-view" id="gridView">
+                <div class="categories-grid">
+                    <!-- Category Card 1 -->
+                    <div class="category-admin-card">
+                        <div class="category-admin-header">
+                            <div class="category-icon it-icon">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <div class="category-admin-actions">
+                                <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="category-admin-content">
+                            <h3 class="category-admin-title">Công nghệ thông tin</h3>
+                            <p class="category-admin-description">Tài liệu về lập trình, khoa học máy tính, trí tuệ nhân
+                                tạo, an ninh mạng và nhiều lĩnh vực công nghệ thông tin khác.</p>
+                            <div class="category-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Tài liệu</span>
+                                    <span class="stat-value">1,245</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt xem</span>
+                                    <span class="stat-value">25.8K</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt tải</span>
+                                    <span class="stat-value">12.4K</span>
+                                </div>
+                            </div>
+                            <div class="category-admin-status">
+                                <span class="status-badge approved">Hoạt động</span>
+                                <span class="category-date">Ngày tạo: 10/03/2023</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Card 2 -->
+                    <div class="category-admin-card">
+                        <div class="category-admin-header">
+                            <div class="category-icon business-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="category-admin-actions">
+                                <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="category-admin-content">
+                            <h3 class="category-admin-title">Kinh tế - Quản trị</h3>
+                            <p class="category-admin-description">Tài liệu về quản trị doanh nghiệp, kinh tế học, tài
+                                chính, marketing, quản trị nhân sự và các lĩnh vực kinh doanh.</p>
+                            <div class="category-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Tài liệu</span>
+                                    <span class="stat-value">985</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt xem</span>
+                                    <span class="stat-value">18.5K</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt tải</span>
+                                    <span class="stat-value">8.6K</span>
+                                </div>
+                            </div>
+                            <div class="category-admin-status">
+                                <span class="status-badge approved">Hoạt động</span>
+                                <span class="category-date">Ngày tạo: 12/03/2023</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Card 3 -->
+                    <div class="category-admin-card">
+                        <div class="category-admin-header">
+                            <div class="category-icon language-icon">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div class="category-admin-actions">
+                                <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="category-admin-content">
+                            <h3 class="category-admin-title">Ngoại ngữ</h3>
+                            <p class="category-admin-description">Tài liệu học tiếng Anh, tiếng Pháp, tiếng Đức, tiếng
+                                Nhật, tiếng Hàn, tiếng Trung và các ngoại ngữ khác.</p>
+                            <div class="category-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Tài liệu</span>
+                                    <span class="stat-value">756</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt xem</span>
+                                    <span class="stat-value">15.2K</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt tải</span>
+                                    <span class="stat-value">7.8K</span>
+                                </div>
+                            </div>
+                            <div class="category-admin-status">
+                                <span class="status-badge approved">Hoạt động</span>
+                                <span class="category-date">Ngày tạo: 15/03/2023</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Card 4 -->
+                    <div class="category-admin-card">
+                        <div class="category-admin-header">
+                            <div class="category-icon engineering-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="category-admin-actions">
+                                <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="category-admin-content">
+                            <h3 class="category-admin-title">Kỹ thuật - Công nghệ</h3>
+                            <p class="category-admin-description">Tài liệu về cơ khí, điện - điện tử, xây dựng, kiến
+                                trúc, vật liệu và các lĩnh vực kỹ thuật công nghệ khác.</p>
+                            <div class="category-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Tài liệu</span>
+                                    <span class="stat-value">654</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt xem</span>
+                                    <span class="stat-value">12.3K</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt tải</span>
+                                    <span class="stat-value">5.2K</span>
+                                </div>
+                            </div>
+                            <div class="category-admin-status">
+                                <span class="status-badge approved">Hoạt động</span>
+                                <span class="category-date">Ngày tạo: 18/03/2023</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Card 5 -->
+                    <div class="category-admin-card">
+                        <div class="category-admin-header">
+                            <div class="category-icon social-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="category-admin-actions">
+                                <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="category-admin-content">
+                            <h3 class="category-admin-title">Khoa học xã hội</h3>
+                            <p class="category-admin-description">Tài liệu về tâm lý học, xã hội học, nhân học, triết
+                                học, lịch sử, địa lý và các ngành khoa học xã hội khác.</p>
+                            <div class="category-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Tài liệu</span>
+                                    <span class="stat-value">543</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt xem</span>
+                                    <span class="stat-value">10.8K</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt tải</span>
+                                    <span class="stat-value">4.7K</span>
+                                </div>
+                            </div>
+                            <div class="category-admin-status">
+                                <span class="status-badge rejected">Vô hiệu hóa</span>
+                                <span class="category-date">Ngày tạo: 20/03/2023</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Card 6 -->
+                    <div class="category-admin-card">
+                        <div class="category-admin-header">
+                            <div class="category-icon it-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="category-admin-actions">
+                                <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="category-admin-content">
+                            <h3 class="category-admin-title">Khoa học tự nhiên</h3>
+                            <p class="category-admin-description">Tài liệu về toán học, vật lý, hóa học, sinh học, địa
+                                chất học và các ngành khoa học tự nhiên khác.</p>
+                            <div class="category-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Tài liệu</span>
+                                    <span class="stat-value">487</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt xem</span>
+                                    <span class="stat-value">9.5K</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lượt tải</span>
+                                    <span class="stat-value">4.2K</span>
+                                </div>
+                            </div>
+                            <div class="category-admin-status">
+                                <span class="status-badge approved">Hoạt động</span>
+                                <span class="category-date">Ngày tạo: 25/03/2023</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div class="data-container" id="tableView" style="display: none;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="selectAll">
+                                    <label for="selectAll"></label>
+                                </div>
+                            </th>
+                            <th>Danh mục</th>
+                            <th>Mô tả</th>
+                            <th>Số tài liệu</th>
+                            <th>Lượt xem</th>
+                            <th>Lượt tải</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="category-checkbox" data-category-id="1" id="category1">
+                                    <label for="category1"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon it-icon"
+                                        style="width: 2.5rem; height: 2.5rem; font-size: 1rem;">
+                                        <i class="fas fa-laptop-code"></i>
+                                    </div>
+                                    <div class="category-name">Công nghệ thông tin</div>
+                                </div>
+                            </td>
+                            <td>Tài liệu về lập trình, khoa học máy tính...</td>
+                            <td>1,245</td>
+                            <td>25.8K</td>
+                            <td>12.4K</td>
+                            <td>10/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="category-checkbox" data-category-id="2" id="category2">
+                                    <label for="category2"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon business-icon"
+                                        style="width: 2.5rem; height: 2.5rem; font-size: 1rem;">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="category-name">Kinh tế - Quản trị</div>
+                                </div>
+                            </td>
+                            <td>Tài liệu về quản trị doanh nghiệp, kinh tế...</td>
+                            <td>985</td>
+                            <td>18.5K</td>
+                            <td>8.6K</td>
+                            <td>12/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="category-checkbox" data-category-id="3" id="category3">
+                                    <label for="category3"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon language-icon"
+                                        style="width: 2.5rem; height: 2.5rem; font-size: 1rem;">
+                                        <i class="fas fa-language"></i>
+                                    </div>
+                                    <div class="category-name">Ngoại ngữ</div>
+                                </div>
+                            </td>
+                            <td>Tài liệu học tiếng Anh, tiếng Pháp, tiếng Đức...</td>
+                            <td>756</td>
+                            <td>15.2K</td>
+                            <td>7.8K</td>
+                            <td>15/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="category-checkbox" data-category-id="4" id="category4">
+                                    <label for="category4"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon engineering-icon"
+                                        style="width: 2.5rem; height: 2.5rem; font-size: 1rem;">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <div class="category-name">Kỹ thuật - Công nghệ</div>
+                                </div>
+                            </td>
+                            <td>Tài liệu về cơ khí, điện - điện tử, xây dựng...</td>
+                            <td>654</td>
+                            <td>12.3K</td>
+                            <td>5.2K</td>
+                            <td>18/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="category-checkbox" data-category-id="5" id="category5">
+                                    <label for="category5"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon social-icon"
+                                        style="width: 2.5rem; height: 2.5rem; font-size: 1rem;">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="category-name">Khoa học xã hội</div>
+                                </div>
+                            </td>
+                            <td>Tài liệu về tâm lý học, xã hội học, nhân học...</td>
+                            <td>543</td>
+                            <td>10.8K</td>
+                            <td>4.7K</td>
+                            <td>20/03/2023</td>
+                            <td><span class="status-badge rejected">Vô hiệu hóa</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="category-checkbox" data-category-id="6" id="category6">
+                                    <label for="category6"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon it-icon"
+                                        style="width: 2.5rem; height: 2.5rem; font-size: 1rem;">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <div class="category-name">Khoa học tự nhiên</div>
+                                </div>
+                            </td>
+                            <td>Tài liệu về toán học, vật lý, hóa học, sinh học...</td>
+                            <td>487</td>
+                            <td>9.5K</td>
+                            <td>4.2K</td>
+                            <td>25/03/2023</td>
+                            <td><span class="status-badge approved">Hoạt động</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn" title="Xóa"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn prev-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-pages">
+                    <button class="pagination-btn page-btn active">1</button>
+                    <button class="pagination-btn page-btn">2</button>
+                    <span class="pagination-ellipsis">...</span>
+                    <button class="pagination-btn page-btn">5</button>
+                </div>
+                <button class="pagination-btn next-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Add Category Modal -->
+            <div class="modal" id="addCategoryModal">
+                <div class="modal-overlay"></div>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h3>Thêm danh mục mới</h3>
+                        <button class="modal-close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="categoryName">Tên danh mục</label>
+                                <input type="text" id="categoryName" placeholder="Nhập tên danh mục">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="categoryDescription">Mô tả</label>
+                                <textarea id="categoryDescription" rows="4"
+                                    placeholder="Nhập mô tả danh mục"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoryIcon">Icon</label>
+                                <div class="icon-select">
+                                    <div class="selected-icon">
+                                        <i class="fas fa-folder"></i>
+                                    </div>
+                                    <button type="button" class="select-icon-btn">Chọn icon</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoryColor">Màu sắc</label>
+                                <div class="color-select">
+                                    <input type="color" id="categoryColor" value="#4361ee">
+                                    <span class="color-preview" style="background-color: #4361ee;"></span>
+                                    <span class="color-value">#4361ee</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoryParent">Danh mục cha</label>
+                                <select id="categoryParent">
+                                    <option value="0">Không có</option>
+                                    <option value="1">Công nghệ thông tin</option>
+                                    <option value="2">Kinh tế - Quản trị</option>
+                                    <option value="3">Ngoại ngữ</option>
+                                    <option value="4">Kỹ thuật - Công nghệ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoryStatus">Trạng thái</label>
+                                <select id="categoryStatus">
+                                    <option value="active">Hoạt động</option>
+                                    <option value="inactive">Vô hiệu hóa</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Icon cho danh mục</label>
+                                <div class="icon-grid">
+                                    <div class="icon-item selected">
+                                        <i class="fas fa-folder"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-laptop-code"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-language"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-flask"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-paint-brush"></i>
+                                    </div>
+                                    <div class="icon-item">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="cancel-btn">Hủy bỏ</button>
+                        <button class="save-btn">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/categories.js"></script>
+</body>
+
+</html>
