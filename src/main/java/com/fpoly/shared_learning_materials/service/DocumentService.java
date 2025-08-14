@@ -1,10 +1,10 @@
-
 package com.fpoly.shared_learning_materials.service;
 
 import com.fpoly.shared_learning_materials.domain.*;
 import com.fpoly.shared_learning_materials.dto.CommentDTO;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;
 import com.fpoly.shared_learning_materials.repository.*;
+import com.fpoly.shared_learning_materials.config.UploadConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,817 +52,1167 @@ public class DocumentService {
 
     @Autowired
     private DocumentOwnerRepository documentOwnerRepository;
+    
+    @Autowired
+    private UploadConfig uploadConfig;
 
     @Autowired
     private CommentRepository commentRepository;
 
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/Uploads/documents/";
-    private static final long MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+    @Autowired
+    private ReportRepository reportRepository;
 
-    @PostConstruct
-    public void initUploadDir() {
-        java.io.File dir = new java.io.File(UPLOAD_DIR);
-        if (!dir.exists() && !dir.mkdirs()) {
-            throw new RuntimeException("Failed to create directory: " + dir.getAbsolutePath());
-        }
-        if (!dir.canWrite()) {
-            throw new RuntimeException("No write permission for directory: " + dir.getAbsolutePath());
-        }
-        System.out.println("Upload dir: " + dir.getAbsolutePath() + ", Ready: " + dir.exists());
-    }
-
-    public File saveFile(MultipartFile file, Long userId) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File is null or empty");
-        }
-
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("File size exceeds limit: 100 MB");
-        }
-
-        String extension = getFileExtension(file.getOriginalFilename());
-        if (!extension.matches("pdf|doc|docx|ppt|pptx|xls|xlsx")) {
-            throw new IllegalArgumentException("File must be PDF, Word, PowerPoint, or Excel");
-        }
-
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        java.io.File targetFile = new java.io.File(UPLOAD_DIR + fileName);
-
-        try {
-            file.transferTo(targetFile);
-            if (!targetFile.exists()) {
-                throw new RuntimeException("File not saved to: " + targetFile.getAbsolutePath());
-            }
-            System.out.println("Saved file: " + file.getOriginalFilename() + " to " + targetFile.getAbsolutePath());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save file: " + e.getMessage(), e);
-        }
-
-        File fileEntity = new File();
-        fileEntity.setFileName(file.getOriginalFilename());
-        fileEntity.setFilePath("/Uploads/documents/" + fileName);
-        fileEntity.setFileType(extension);
-        fileEntity.setFileSize((long) (file.getSize() / 1024.0)); // KB
-        fileEntity.setMimeType(file.getContentType());
-        fileEntity.setStatus("active");
-        fileEntity.setUploadedBy(userId != null ? userRepository.findById(userId).orElse(null) : null);
-
-        return fileRepository.save(fileEntity);
-    }
-
-    private String getFileExtension(String fileName) {
-        if (fileName == null || !fileName.contains(".")) {
-            return "";
-        }
-        return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-    }
-
-    @Transactional
-    public DocumentDTO createDocument(DocumentDTO documentDTO, MultipartFile file, List<Long> categoryIds,
-            List<String> tagNames, Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (!user.isPresent()) {
-            throw new IllegalArgumentException("User with ID " + userId + " does not exist");
-        }
-
-        if (documentDTO.getTitle() == null || documentDTO.getTitle().trim().isEmpty()) {
-            throw new IllegalArgumentException("Title is required");
-        }
-
-        String slug = documentDTO.getSlug();
-        if (slug == null || slug.trim().isEmpty()) {
-            slug = generateSlug(documentDTO.getTitle());
-        }
-        slug = ensureUniqueSlug(slug);
-        if (slug == null) {
-            throw new IllegalStateException("Unable to generate a unique slug for the document");
-        }
-
-        Document document = new Document();
-        document.setTitle(documentDTO.getTitle());
-        document.setSlug(slug);
-        document.setDescription(documentDTO.getDescription());
-        document.setPrice(documentDTO.getPrice());
-        document.setStatus(documentDTO.getStatus() != null ? documentDTO.getStatus() : "DRAFT");
-        document.setVisibility(documentDTO.getVisibility() != null ? documentDTO.getVisibility() : "public");
-        document.setDownloadsCount(0L);
-        document.setViewsCount(0L);
-        document.setCreatedAt(LocalDateTime.now());
-        document.setUpdatedAt(LocalDateTime.now());
-
-        if (file != null && !file.isEmpty()) {
-            File savedFile = saveFile(file, userId);
-            document.setFile(savedFile);
-            documentDTO.setFileId(savedFile.getId());
-            documentDTO.setFileType(savedFile.getFileType());
-            documentDTO.setFileSize(savedFile.getFileSize() != null ? savedFile.getFileSize().doubleValue() : 0.0);
-        }
-
-        Document savedDocument;
-        try {
-            savedDocument = documentRepository.saveAndFlush(document);
-        } catch (Exception e) {
-            if (e.getMessage().contains("Violation of UNIQUE KEY constraint")) {
-                slug = ensureUniqueSlug(
-                        generateSlug(documentDTO.getTitle() + "-" + UUID.randomUUID().toString().substring(0, 8)));
-                if (slug == null) {
-                    throw new IllegalStateException("Unable to generate a unique slug after retry");
-                }
-                document.setSlug(slug);
-                savedDocument = documentRepository.saveAndFlush(document);
-            } else {
-                throw e;
-            }
-        }
-
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            for (Long categoryId : categoryIds) {
-                Optional<Category> category = categoryRepository.findById(categoryId);
-                if (!category.isPresent()) {
-                    throw new IllegalArgumentException("Category with ID " + categoryId + " does not exist");
-                }
-                DocumentCategory documentCategory = new DocumentCategory();
-                documentCategory.setId(new DocumentCategoryId(savedDocument.getId(), categoryId));
-                documentCategory.setDocument(savedDocument);
-                documentCategory.setCategory(category.get());
-                documentCategory.setCreatedAt(LocalDateTime.now());
-                documentCategoryRepository.save(documentCategory);
-            }
-        }
-
-        if (tagNames != null && !tagNames.isEmpty()) {
-            for (String tagName : tagNames) {
-                if (tagName == null || tagName.trim().isEmpty()) {
-                    continue;
-                }
-                Optional<Tag> existingTag = tagRepository.findByName(tagName.trim());
-                Tag tag;
-                if (existingTag.isPresent()) {
-                    tag = existingTag.get();
-                } else {
-                    tag = new Tag();
-                    tag.setName(tagName.trim());
-                    tag.setSlug(generateSlug(tagName.trim()));
-                    tag.setCreatedAt(LocalDateTime.now());
-                    tag = tagRepository.save(tag);
-                }
-                DocumentTagId tagId = new DocumentTagId(savedDocument.getId(), tag.getId());
-                Optional<DocumentTag> existingDocumentTag = documentTagRepository.findById(tagId);
-                if (!existingDocumentTag.isPresent()) {
-                    DocumentTag documentTag = new DocumentTag();
-                    documentTag.setId(tagId);
-                    documentTag.setDocument(savedDocument);
-                    documentTag.setTag(tag);
-                    documentTag.setCreatedBy(user.get());
-                    documentTag.setCreatedAt(LocalDateTime.now());
-                    documentTagRepository.save(documentTag);
-                }
-            }
-        }
-
-        DocumentOwner documentOwner = new DocumentOwner();
-        documentOwner.setId(new DocumentOwnerId(savedDocument.getId(), userId));
-        documentOwner.setDocument(savedDocument);
-        documentOwner.setUser(user.get());
-        documentOwner.setOwnershipType("owner");
-        documentOwner.setCreatedAt(LocalDateTime.now());
-        documentOwnerRepository.save(documentOwner);
-
-        DocumentDTO resultDTO = convertToDTO(savedDocument);
-        resultDTO.setCategoryIds(categoryIds);
-        resultDTO.setCategoryNames(categoryIds != null ? categoryIds.stream()
-                .map(id -> categoryRepository.findById(id).map(Category::getName).orElse(""))
-                .collect(Collectors.toList()) : new ArrayList<>());
-        resultDTO.setTagNames(tagNames != null ? tagNames : new ArrayList<>());
-        resultDTO.setUserId(userId);
-        resultDTO.setAuthorName(user.get().getFullName());
-        return resultDTO;
-    }
-
-    @Transactional
-    public DocumentDTO updateDocument(Long id, DocumentDTO documentDTO, MultipartFile file, List<Long> categoryIds,
-            List<String> tagNames) {
-        Optional<Document> optionalDocument = documentRepository.findById(id);
-        if (!optionalDocument.isPresent()) {
-            System.out.println("Document not found for id: " + id);
-            return null;
-        }
-
-        Document document = optionalDocument.get();
-        document.setTitle(documentDTO.getTitle());
-        String slug = documentDTO.getSlug();
-        if (slug == null || slug.trim().isEmpty()) {
-            slug = generateSlug(documentDTO.getTitle());
-        }
-        if (!slug.equals(document.getSlug())) {
-            slug = ensureUniqueSlug(slug);
-            if (slug == null) {
-                throw new IllegalStateException("Unable to generate a unique slug for the document");
-            }
-        }
-        document.setSlug(slug);
-        document.setDescription(documentDTO.getDescription());
-        document.setPrice(documentDTO.getPrice());
-        document.setStatus(documentDTO.getStatus() != null ? documentDTO.getStatus() : document.getStatus());
-        document.setVisibility(
-                documentDTO.getVisibility() != null ? documentDTO.getVisibility() : document.getVisibility());
-        document.setUpdatedAt(LocalDateTime.now());
-
-        if (file != null && !file.isEmpty()) {
-            File savedFile = saveFile(file, documentDTO.getUserId());
-            document.setFile(savedFile);
-            documentDTO.setFileId(savedFile.getId());
-            documentDTO.setFileType(savedFile.getFileType());
-            documentDTO.setFileSize(savedFile.getFileSize() != null ? savedFile.getFileSize().doubleValue() : 0.0);
-        }
-
-        // Xử lý danh mục
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            System.out.println("Processing categories: " + categoryIds);
-            documentCategoryRepository.deleteByDocumentId(id);
-            List<DocumentCategory> newCategories = new ArrayList<>();
-            for (Long categoryId : categoryIds) {
-                Optional<Category> category = categoryRepository.findById(categoryId);
-                if (!category.isPresent()) {
-                    throw new IllegalArgumentException("Category with ID " + categoryId + " does not exist");
-                }
-                DocumentCategory documentCategory = new DocumentCategory();
-                documentCategory.setId(new DocumentCategoryId(id, categoryId));
-                documentCategory.setDocument(document);
-                documentCategory.setCategory(category.get());
-                documentCategory.setCreatedAt(LocalDateTime.now());
-                newCategories.add(documentCategory);
-            }
-            documentCategoryRepository.saveAll(newCategories);
-        } else {
-            documentCategoryRepository.deleteByDocumentId(id);
-        }
-
-        // Xử lý tag
-        if (tagNames != null && !tagNames.isEmpty()) {
-            System.out.println("Processing tags: " + tagNames);
-            documentTagRepository.deleteByDocumentId(id);
-            List<DocumentTag> newTags = new ArrayList<>();
-            for (String tagName : tagNames) {
-                if (tagName == null || tagName.trim().isEmpty()) {
-                    continue;
-                }
-                Optional<Tag> existingTag = tagRepository.findByName(tagName.trim());
-                Tag tag;
-                if (existingTag.isPresent()) {
-                    tag = existingTag.get();
-                } else {
-                    tag = new Tag();
-                    tag.setName(tagName.trim());
-                    tag.setSlug(generateSlug(tagName.trim()));
-                    tag.setCreatedAt(LocalDateTime.now());
-                    tag = tagRepository.save(tag);
-                }
-                DocumentTagId tagId = new DocumentTagId(id, tag.getId());
-                Optional<DocumentTag> existingDocumentTag = documentTagRepository.findById(tagId);
-                if (!existingDocumentTag.isPresent()) {
-                    DocumentTag documentTag = new DocumentTag();
-                    documentTag.setId(tagId);
-                    documentTag.setDocument(document);
-                    documentTag.setTag(tag);
-                    documentTag.setCreatedBy(userRepository.findById(documentDTO.getUserId()).orElse(null));
-                    documentTag.setCreatedAt(LocalDateTime.now());
-                    newTags.add(documentTag);
-                }
-            }
-            documentTagRepository.saveAll(newTags);
-        } else {
-            documentTagRepository.deleteByDocumentId(id);
-        }
-
-        Document updatedDocument = documentRepository.saveAndFlush(document);
-        DocumentDTO resultDTO = convertToDTO(updatedDocument);
-        resultDTO.setCategoryIds(categoryIds);
-        resultDTO.setCategoryNames(categoryIds != null ? categoryIds.stream()
-                .map(catId -> categoryRepository.findById(catId).map(Category::getName).orElse(""))
-                .collect(Collectors.toList()) : new ArrayList<>());
-        resultDTO.setTagNames(tagNames != null ? tagNames : new ArrayList<>());
-        resultDTO.setUserId(documentDTO.getUserId());
-        resultDTO.setAuthorName(userRepository.findById(documentDTO.getUserId()).map(User::getFullName).orElse(null));
-        return resultDTO;
-    }
-
+    // Get document by ID
     public DocumentDTO getDocumentById(Long id) {
-        Optional<Document> document = documentRepository.findById(id);
-        if (!document.isPresent()) {
-            System.out.println("Document not found for id: " + id);
+        System.out.println("=== GET DOCUMENT BY ID SERVICE ===");
+        System.out.println("Getting document with ID: " + id);
+
+        Optional<Document> documentOpt = documentRepository.findById(id);
+        if (!documentOpt.isPresent()) {
+            System.out.println("Document not found with ID: " + id);
             return null;
         }
-        DocumentDTO dto = convertToDTO(document.get());
-        List<DocumentCategory> categories = documentCategoryRepository.findByDocumentId(id);
-        dto.setCategoryIds(categories.stream().map(dc -> dc.getCategory().getId()).collect(Collectors.toList()));
-        dto.setCategoryNames(categories.stream().map(dc -> dc.getCategory().getName()).collect(Collectors.toList()));
-        List<DocumentTag> tags = documentTagRepository.findByDocumentId(id);
-        dto.setTagNames(tags.stream().map(dt -> dt.getTag().getName()).collect(Collectors.toList()));
-        if (dto.getTagNames() == null) {
-            dto.setTagNames(new ArrayList<>());
-        }
-        List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(id);
+
+        Document document = documentOpt.get();
+        System.out.println("Found document: " + document.getTitle());
+        System.out.println("Document deletedAt: " + document.getDeletedAt());
+
+        // Convert to DTO
+        DocumentDTO dto = convertToDTO(document);
+
+        // Set additional fields - using DocumentOwner relationship
+        List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(document.getId());
         if (!owners.isEmpty()) {
-            dto.setUserId(owners.get(0).getUser().getId());
-            dto.setAuthorName(owners.get(0).getUser().getFullName());
-            dto.setAuthorAvatar(owners.get(0).getUser().getAvatarUrl());
+            dto.setAuthorName(owners.get(0).getUser().getFullName() != null ? owners.get(0).getUser().getFullName()
+                    : owners.get(0).getUser().getUsername());
         }
-        // Ánh xạ comments
-        List<Comment> comments = commentRepository.findByDocumentIdAndStatus(id, "active");
-        List<CommentDTO> commentDTOs = comments.stream().map(comment -> {
-            CommentDTO commentDTO = new CommentDTO();
-            commentDTO.setId(comment.getId());
-            commentDTO.setContent(comment.getContent());
-            commentDTO.setUserName(comment.getUser() != null ? comment.getUser().getFullName() : "Không xác định");
-            commentDTO.setUserAvatar(comment.getUser() != null && comment.getUser().getAvatarUrl() != null
-                    ? comment.getUser().getAvatarUrl()
-                    : "https://via.placeholder.com/40");
-            commentDTO.setStatus(comment.getStatus());
-            commentDTO.setCreatedAt(comment.getCreatedAt());
-            return commentDTO;
-        }).collect(Collectors.toList());
-        dto.setComments(commentDTOs);
+
+        // Get category names
+        List<DocumentCategory> documentCategories = documentCategoryRepository.findByDocumentId(id);
+        List<String> categoryNames = documentCategories.stream()
+                .map(dc -> dc.getCategory().getName())
+                .collect(Collectors.toList());
+        dto.setCategoryNames(categoryNames);
+
+        // Get category IDs
+        List<Long> categoryIds = documentCategories.stream()
+                .map(dc -> dc.getCategory().getId())
+                .collect(Collectors.toList());
+        dto.setCategoryIds(categoryIds);
+
+        // Get tag names
+        List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(id);
+        List<String> tagNames = documentTags.stream()
+                .map(dt -> dt.getTag().getName())
+                .collect(Collectors.toList());
+        dto.setTagNames(tagNames);
+
+        // Load comments for this document from database
+        try {
+            List<Comment> comments = commentRepository.findByDocumentIdAndStatus(id, "active");
+            List<CommentDTO> commentDTOs = new ArrayList<>();
+
+            for (Comment comment : comments) {
+                CommentDTO commentDTO = new CommentDTO();
+                commentDTO.setId(comment.getId());
+                commentDTO.setContent(comment.getContent());
+                commentDTO.setStatus(comment.getStatus());
+                commentDTO.setCreatedAt(comment.getCreatedAt());
+
+                // Set user info
+                if (comment.getUser() != null) {
+                    commentDTO.setUserName(comment.getUser().getFullName() != null ? comment.getUser().getFullName()
+                            : comment.getUser().getUsername());
+                    // Set avatar if available (placeholder for now)
+                    commentDTO.setUserAvatar("https://via.placeholder.com/40");
+                } else {
+                    commentDTO.setUserName("Người dùng ẩn danh");
+                    commentDTO.setUserAvatar("https://via.placeholder.com/40");
+                }
+
+                // Check if comment has been reported
+                try {
+                    List<Report> reports = reportRepository.findByCommentId(comment.getId());
+                    if (!reports.isEmpty()) {
+                        // Get the latest report status
+                        commentDTO.setReportStatus(reports.get(reports.size() - 1).getStatus());
+                    }
+                } catch (Exception e) {
+                    System.out.println(
+                            "Could not load report status for comment " + comment.getId() + ": " + e.getMessage());
+                }
+
+                commentDTOs.add(commentDTO);
+            }
+
+            dto.setComments(commentDTOs);
+            System.out.println("Comments loaded: " + commentDTOs.size() + " (from database)");
+        } catch (Exception e) {
+            System.out.println("Could not load comments: " + e.getMessage());
+            e.printStackTrace();
+            dto.setComments(new ArrayList<>());
+        }
+
+        System.out.println("Document DTO prepared with categories: " + categoryNames + ", tags: " + tagNames);
+        return dto;
+    }
+
+    // Convert Document entity to DTO
+    private DocumentDTO convertToDTO(Document document) {
+        DocumentDTO dto = new DocumentDTO();
+        dto.setId(document.getId());
+        dto.setTitle(document.getTitle());
+        dto.setSlug(document.getSlug());
+        dto.setDescription(document.getDescription());
+        dto.setPrice(document.getPrice());
+        dto.setStatus(document.getStatus());
+        dto.setVisibility(document.getVisibility());
+        dto.setDownloadsCount(document.getDownloadsCount());
+        dto.setViewsCount(document.getViewsCount());
+        dto.setCreatedAt(document.getCreatedAt());
+        dto.setUpdatedAt(document.getUpdatedAt());
+        dto.setPublishedAt(document.getPublishedAt());
+        dto.setDeletedAt(document.getDeletedAt()); // Thêm deletedAt
+
+        // Set file info if exists
+        if (document.getFile() != null) {
+            dto.setFileId(document.getFile().getId());
+            dto.setFileName(document.getFile().getFileName());
+            // Convert bytes to KB (divide by 1024)
+            double fileSizeInKB = document.getFile().getFileSize().doubleValue() / 1024.0;
+            dto.setFileSize(Math.round(fileSizeInKB * 10.0) / 10.0); // Round to 1 decimal place
+            dto.setFileType(document.getFile().getFileType());
+        }
 
         return dto;
     }
 
-    public Page<DocumentDTO> getAllDocuments(Pageable pageable) {
-        // Tạo Pageable với sắp xếp theo createdAt DESC để hiển thị mới nhất trước
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Document> documentPage = documentRepository.findAll(sortedPageable);
-        List<DocumentDTO> dtos = documentPage.getContent().stream().map(document -> {
-            DocumentDTO dto = convertToDTO(document);
-            List<DocumentCategory> categories = documentCategoryRepository.findByDocumentId(document.getId());
-            dto.setCategoryIds(categories.stream().map(dc -> dc.getCategory().getId()).collect(Collectors.toList()));
-            dto.setCategoryNames(
-                    categories.stream().map(dc -> dc.getCategory().getName()).collect(Collectors.toList()));
-            List<DocumentTag> tags = documentTagRepository.findByDocumentId(document.getId());
-            dto.setTagNames(tags.stream().map(dt -> dt.getTag().getName()).collect(Collectors.toList()));
-            if (dto.getTagNames() == null) {
-                dto.setTagNames(new ArrayList<>()); // Ensure tagNames is never null
+    // Soft delete document
+    @Transactional
+    public void deleteDocument(Long id) {
+        System.out.println("=== SOFT DELETE DOCUMENT SERVICE ===");
+        System.out.println("Soft deleting document with ID: " + id);
+
+        Optional<Document> documentOpt = documentRepository.findById(id);
+        if (!documentOpt.isPresent()) {
+            throw new IllegalArgumentException("Tài liệu không tồn tại với ID: " + id);
+        }
+
+        Document document = documentOpt.get();
+        System.out.println("Found document: " + document.getTitle());
+
+        // Check if document is already deleted
+        if (document.getDeletedAt() != null) {
+            System.out.println("Document is already deleted at: " + document.getDeletedAt());
+            throw new IllegalStateException("Tài liệu đã được xóa trước đó");
+        }
+
+        try {
+            // Soft delete: set deleted_at và status thành DELETED
+            LocalDateTime deleteTime = LocalDateTime.now();
+            System.out.println("Setting deletedAt to: " + deleteTime);
+
+            // Check current state
+            System.out.println("Current document state:");
+            System.out.println("- ID: " + document.getId());
+            System.out.println("- Title: " + document.getTitle());
+            System.out.println("- Current status: " + document.getStatus());
+            System.out.println("- Current deletedAt: " + document.getDeletedAt());
+
+            document.setDeletedAt(deleteTime);
+            document.setStatus("DELETED"); // Cập nhật status thành DELETED
+            System.out.println("Before save - deletedAt: " + document.getDeletedAt());
+            System.out.println("Before save - status: " + document.getStatus());
+
+            // Force flush to database
+            Document savedDocument = documentRepository.saveAndFlush(document);
+            System.out.println("After saveAndFlush - deletedAt: " + savedDocument.getDeletedAt());
+
+            // Verify in database with fresh query
+            documentRepository.flush();
+            Optional<Document> verifyDoc = documentRepository.findById(id);
+            if (verifyDoc.isPresent()) {
+                System.out.println("Verification - deletedAt in DB: " + verifyDoc.get().getDeletedAt());
+            } else {
+                System.out.println("ERROR: Document not found after save!");
             }
-            List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(document.getId());
-            if (!owners.isEmpty()) {
-                dto.setUserId(owners.get(0).getUser().getId());
-                dto.setAuthorName(owners.get(0).getUser().getFullName());
-                dto.setAuthorAvatar(owners.get(0).getUser().getAvatarUrl());
-            }
-            return dto;
-        }).collect(Collectors.toList());
-        return new PageImpl<>(dtos, pageable, documentPage.getTotalElements());
+
+            System.out.println("Document soft deleted successfully at: " + document.getDeletedAt());
+        } catch (Exception e) {
+            System.err.println("Error during document soft deletion: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi xóa tài liệu: " + e.getMessage(), e);
+        }
     }
 
-    public Page<DocumentDTO> getFilteredDocuments(Pageable pageable, String search, String status, Long categoryId,
-            String type, String price, String author, String tags, String dateFrom, String dateTo, String size,
-            String views) {
+    // Restore document
+    @Transactional
+    public void restoreDocument(Long id) {
+        System.out.println("=== RESTORE DOCUMENT SERVICE ===");
+        System.out.println("Restoring document with ID: " + id);
 
-        // Tạo Pageable với sắp xếp theo createdAt DESC
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "createdAt"));
+        Optional<Document> documentOpt = documentRepository.findById(id);
+        if (!documentOpt.isPresent()) {
+            throw new IllegalArgumentException("Tài liệu không tồn tại với ID: " + id);
+        }
 
-        // Lấy tất cả documents (không phân trang) để áp dụng filter
-        List<Document> allDocuments = documentRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
-        List<DocumentDTO> allDtos = allDocuments.stream().map(document -> {
-            DocumentDTO dto = convertToDTO(document);
-            List<DocumentCategory> categories = documentCategoryRepository.findByDocumentId(document.getId());
-            dto.setCategoryIds(categories.stream().map(dc -> dc.getCategory().getId()).collect(Collectors.toList()));
-            dto.setCategoryNames(
-                    categories.stream().map(dc -> dc.getCategory().getName()).collect(Collectors.toList()));
-            List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(document.getId());
-            dto.setTagNames(documentTags.stream().map(dt -> dt.getTag().getName()).collect(Collectors.toList()));
-            if (dto.getTagNames() == null) {
-                dto.setTagNames(new ArrayList<>());
+        Document document = documentOpt.get();
+        System.out.println("Found document: " + document.getTitle());
+
+        try {
+            // Restore: xóa deleted_at và khôi phục status về APPROVED
+            document.setDeletedAt(null);
+            document.setStatus("APPROVED"); // Khôi phục status về APPROVED
+            documentRepository.save(document);
+
+            System.out.println("Document restored successfully - Status: " + document.getStatus());
+        } catch (Exception e) {
+            System.err.println("Error during document restoration: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi khôi phục tài liệu: " + e.getMessage(), e);
+        }
+    }
+
+    // Get deleted documents
+    public Page<DocumentDTO> getDeletedDocuments(Pageable pageable) {
+        System.out.println("=== GET DELETED DOCUMENTS SERVICE ===");
+        System.out.println("Pageable - Page: " + pageable.getPageNumber() + ", Size: " + pageable.getPageSize());
+        System.out.println("Sort: " + pageable.getSort());
+
+        // Use the provided Pageable with its sort settings
+        Page<Document> deletedDocuments = documentRepository.findByDeletedAtIsNotNull(pageable);
+
+        List<DocumentDTO> dtoList = deletedDocuments.getContent().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        // Set additional fields for each DTO
+        for (DocumentDTO dto : dtoList) {
+            setAdditionalFields(dto);
+        }
+
+        System.out.println("Found " + dtoList.size() + " deleted documents on page " + pageable.getPageNumber() +
+                ", total: " + deletedDocuments.getTotalElements());
+        return new PageImpl<>(dtoList, pageable, deletedDocuments.getTotalElements());
+    }
+
+    // Get filtered deleted documents (with all filters)
+    public Page<DocumentDTO> getFilteredDeletedDocuments(
+            Pageable pageable, String search, String status, Long categoryId,
+            String type, String price, String author, String tags,
+            String dateFrom, String dateTo, String size, String views) {
+
+        System.out.println("=== GET FILTERED DELETED DOCUMENTS SERVICE ===");
+        System.out.println("Filters - Search: " + search + ", Status: " + status + ", CategoryId: " + categoryId);
+        System.out.println("Pageable - Page: " + pageable.getPageNumber() + ", Size: " + pageable.getPageSize());
+
+        // For deleted documents, always use in-memory filtering if there are filters or sorting
+        // This ensures all sort fields work properly
+        boolean hasFiltersOrSort = !isNoFiltersApplied(search, status, categoryId, type, price, author, tags, dateFrom, dateTo, size, views) 
+                                   || !pageable.getSort().isUnsorted();
+
+        if (!hasFiltersOrSort) {
+            System.out.println("No filters and no sorting applied, using direct database pagination for deleted documents");
+            return getDeletedDocuments(pageable);
+        }
+
+        // Nếu có filter, lấy tất cả deleted documents rồi filter
+        System.out.println("Filters applied, using in-memory filtering for deleted documents");
+        List<Document> allDeletedDocuments = documentRepository.findByDeletedAtIsNotNullOrderByDeletedAtDesc();
+
+        List<DocumentDTO> allDtoList = allDeletedDocuments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        // Set additional fields for each DTO
+        for (DocumentDTO dto : allDtoList) {
+            setAdditionalFields(dto);
+        }
+
+        // Apply filters to the list (sử dụng cùng logic filter như active documents)
+        List<DocumentDTO> filteredList = allDtoList.stream()
+                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,
+                        dateTo, size, views))
+                .collect(Collectors.toList());
+
+        System.out.println(
+                "Found " + allDtoList.size() + " deleted documents, " + filteredList.size() + " after filtering");
+
+        // Apply sorting (including author sort)
+        filteredList = applySortingFromPageable(filteredList, pageable);
+
+        // Create pageable result from filtered list
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+
+        // Handle case where start is beyond the filtered list size
+        if (start >= filteredList.size()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, filteredList.size());
+        }
+
+        List<DocumentDTO> pageContent = filteredList.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, filteredList.size());
+    }
+
+    // Get filtered documents (active only)
+    public Page<DocumentDTO> getFilteredDocuments(
+            Pageable pageable, String search, String status, Long categoryId,
+            String type, String price, String author, String tags,
+            String dateFrom, String dateTo, String size, String views) {
+
+        System.out.println("=== GET FILTERED DOCUMENTS SERVICE (ACTIVE ONLY) ===");
+        System.out.println("Filters - Search: " + search + ", Status: " + status + ", CategoryId: " + categoryId);
+        System.out.println("Pageable - Page: " + pageable.getPageNumber() + ", Size: " + pageable.getPageSize());
+
+        // Check if we need special handling for author sort
+        boolean needsAuthorSort = pageable.getSort().stream()
+                .anyMatch(order -> "author".equalsIgnoreCase(order.getProperty()));
+
+        // Nếu không có filter nào và không sort by author, sử dụng pagination trực tiếp từ database
+        if (isNoFiltersApplied(search, status, categoryId, type, price, author, tags, dateFrom, dateTo, size, views) && !needsAuthorSort) {
+            System.out.println("No filters applied and no author sort, using direct database pagination");
+            Page<Document> activeDocuments = documentRepository.findByDeletedAtIsNull(pageable);
+
+            List<DocumentDTO> dtoList = activeDocuments.getContent().stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+            // Set additional fields for each DTO
+            for (DocumentDTO dto : dtoList) {
+                setAdditionalFields(dto);
             }
-            List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(document.getId());
-            if (!owners.isEmpty()) {
-                dto.setUserId(owners.get(0).getUser().getId());
-                dto.setAuthorName(owners.get(0).getUser().getFullName());
-                dto.setAuthorAvatar(owners.get(0).getUser().getAvatarUrl());
-            }
-            return dto;
-        }).collect(Collectors.toList());
 
-        // Áp dụng filters
-        List<DocumentDTO> filteredDtos = allDtos.stream().filter(dto -> {
-            // Search filter
-            if (search != null && !search.trim().isEmpty()) {
-                String searchLower = search.toLowerCase();
-                if (!dto.getTitle().toLowerCase().contains(searchLower) &&
-                        (dto.getDescription() == null || !dto.getDescription().toLowerCase().contains(searchLower)) &&
-                        (dto.getAuthorName() == null || !dto.getAuthorName().toLowerCase().contains(searchLower))) {
+            System.out.println("Found " + dtoList.size() + " documents on page " + pageable.getPageNumber() +
+                    ", total: " + activeDocuments.getTotalElements());
+
+            return new PageImpl<>(dtoList, pageable, activeDocuments.getTotalElements());
+        }
+
+        // Nếu có filter, lấy tất cả rồi filter (tạm thời - cần optimize sau)
+        System.out.println("Filters applied, using in-memory filtering");
+        List<Document> allActiveDocuments = documentRepository.findByDeletedAtIsNullOrderByCreatedAtDesc();
+
+        List<DocumentDTO> allDtoList = allActiveDocuments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        // Set additional fields for each DTO
+        for (DocumentDTO dto : allDtoList) {
+            setAdditionalFields(dto);
+        }
+
+        // Apply filters to the list
+        List<DocumentDTO> filteredList = allDtoList.stream()
+                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,
+                        dateTo, size, views))
+                .collect(Collectors.toList());
+
+        System.out.println(
+                "Found " + allDtoList.size() + " active documents, " + filteredList.size() + " after filtering");
+
+        // Apply sorting (including author sort)
+        filteredList = applySortingFromPageable(filteredList, pageable);
+
+        // Create pageable result from filtered list
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+
+        // Handle case where start is beyond the filtered list size
+        if (start >= filteredList.size()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, filteredList.size());
+        }
+
+        List<DocumentDTO> pageContent = filteredList.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, filteredList.size());
+    }
+
+    // Helper method to check if no filters are applied
+    private boolean isNoFiltersApplied(String search, String status, Long categoryId,
+            String type, String price, String author, String tags,
+            String dateFrom, String dateTo, String size, String views) {
+        return (search == null || search.trim().isEmpty()) &&
+                (status == null || status.trim().isEmpty()) &&
+                categoryId == null &&
+                (type == null || type.trim().isEmpty()) &&
+                (price == null || price.trim().isEmpty()) &&
+                (author == null || author.trim().isEmpty()) &&
+                (tags == null || tags.trim().isEmpty()) &&
+                (dateFrom == null || dateFrom.trim().isEmpty()) &&
+                (dateTo == null || dateTo.trim().isEmpty()) &&
+                (size == null || size.trim().isEmpty()) &&
+                (views == null || views.trim().isEmpty());
+    }
+
+    // Helper method to set additional fields
+    private void setAdditionalFields(DocumentDTO dto) {
+        // Get author name from DocumentOwner relationship
+        List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(dto.getId());
+        if (!owners.isEmpty()) {
+            dto.setAuthorName(
+                    owners.get(0).getUser().getFullName() != null ? owners.get(0).getUser().getFullName()
+                            : owners.get(0).getUser().getUsername());
+        } else {
+            dto.setAuthorName("Admin"); // Fallback
+        }
+
+        // Get category names
+        List<DocumentCategory> documentCategories = documentCategoryRepository.findByDocumentId(dto.getId());
+        List<String> categoryNames = documentCategories.stream()
+                .map(dc -> dc.getCategory().getName())
+                .collect(Collectors.toList());
+        dto.setCategoryNames(categoryNames);
+
+        // Get category IDs
+        List<Long> categoryIds = documentCategories.stream()
+                .map(dc -> dc.getCategory().getId())
+                .collect(Collectors.toList());
+        dto.setCategoryIds(categoryIds);
+
+        // Get tag names
+        List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(dto.getId());
+        List<String> tagNames = documentTags.stream()
+                .map(dt -> dt.getTag().getName())
+                .collect(Collectors.toList());
+        dto.setTagNames(tagNames);
+    }
+
+    // Helper method to apply filters
+    private boolean applyFilters(DocumentDTO dto, String search, String status, Long categoryId,
+            String type, String price, String author, String tags,
+            String dateFrom, String dateTo, String size, String views) {
+
+        // Search filter (title, description, author)
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.toLowerCase().trim();
+            boolean matchesSearch = false;
+
+            if (dto.getTitle() != null && dto.getTitle().toLowerCase().contains(searchLower)) {
+                matchesSearch = true;
+            }
+            if (dto.getDescription() != null && dto.getDescription().toLowerCase().contains(searchLower)) {
+                matchesSearch = true;
+            }
+            if (dto.getAuthorName() != null && dto.getAuthorName().toLowerCase().contains(searchLower)) {
+                matchesSearch = true;
+            }
+
+            if (!matchesSearch)
+                return false;
+        }
+
+        // Status filter
+        if (status != null && !status.trim().isEmpty()) {
+            if (!status.equalsIgnoreCase(dto.getStatus())) {
+                return false;
+            }
+        }
+
+        // Category filter
+        if (categoryId != null) {
+            if (dto.getCategoryIds() == null || !dto.getCategoryIds().contains(categoryId)) {
+                return false;
+            }
+        }
+
+        // File type filter
+        if (type != null && !type.trim().isEmpty()) {
+            if (dto.getFileType() == null || !dto.getFileType().equalsIgnoreCase(type)) {
+                return false;
+            }
+        }
+
+        // Price filter - handle both free/paid and price ranges
+        if (price != null && !price.trim().isEmpty()) {
+            if ("free".equals(price)) {
+                if (dto.getPrice() == null || dto.getPrice().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                    return false;
+                }
+            } else if ("paid".equals(price)) {
+                if (dto.getPrice() == null || dto.getPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                    return false;
+                }
+            } else {
+                // Handle price ranges like "1-10", "11-50", "51-100", "101+"
+                if (!matchesPriceRange(dto.getPrice(), price)) {
                     return false;
                 }
             }
+        }
 
-            // Status filter
-            if (status != null && !status.trim().isEmpty()) {
-                if (!status.equals(dto.getStatus())) {
-                    return false;
-                }
+        // Author filter
+        if (author != null && !author.trim().isEmpty()) {
+            if (dto.getAuthorName() == null
+                    || !dto.getAuthorName().toLowerCase().contains(author.toLowerCase().trim())) {
+                return false;
             }
+        }
 
-            // Category filter
-            if (categoryId != null) {
-                if (dto.getCategoryIds() == null || !dto.getCategoryIds().contains(categoryId)) {
-                    return false;
-                }
-            }
-
-            // Type filter
-            if (type != null && !type.trim().isEmpty()) {
-                if (dto.getFileType() == null || !dto.getFileType().toUpperCase().contains(type.toUpperCase())) {
-                    return false;
-                }
-            }
-
-            // Price filter
-            if (price != null && !price.trim().isEmpty()) {
-                Double docPrice = dto.getPrice() != null ? dto.getPrice().doubleValue() : 0.0;
-                switch (price) {
-                    case "free":
-                        if (docPrice > 0)
-                            return false;
-                        break;
-                    case "paid":
-                        if (docPrice <= 0)
-                            return false;
-                        break;
-                    case "1-10":
-                        if (docPrice < 1 || docPrice > 10)
-                            return false;
-                        break;
-                    case "11-50":
-                        if (docPrice < 11 || docPrice > 50)
-                            return false;
-                        break;
-                    case "51-100":
-                        if (docPrice < 51 || docPrice > 100)
-                            return false;
-                        break;
-                    case "100+":
-                        if (docPrice <= 100)
-                            return false;
-                        break;
-                }
-            }
-
-            // Author filter
-            if (author != null && !author.trim().isEmpty()) {
-                if (dto.getAuthorName() == null || !dto.getAuthorName().toLowerCase().contains(author.toLowerCase())) {
-                    return false;
-                }
-            }
-
-            // Tags filter
-            if (tags != null && !tags.trim().isEmpty()) {
-                String tagsLower = tags.toLowerCase();
-                if (dto.getTagNames() == null || dto.getTagNames().stream()
-                        .noneMatch(tag -> tag.toLowerCase().contains(tagsLower))) {
-                    return false;
-                }
-            }
-
-            // Date filters
-            if (dateFrom != null && !dateFrom.trim().isEmpty()) {
-                try {
-                    LocalDateTime fromDate = LocalDateTime.parse(dateFrom + "T00:00:00");
-                    if (dto.getCreatedAt() == null || dto.getCreatedAt().isBefore(fromDate)) {
-                        return false;
+        // Tags filter
+        if (tags != null && !tags.trim().isEmpty()) {
+            String[] tagArray = tags.split(",");
+            boolean hasMatchingTag = false;
+            for (String tag : tagArray) {
+                String tagTrimmed = tag.trim().toLowerCase();
+                if (dto.getTagNames() != null) {
+                    for (String docTag : dto.getTagNames()) {
+                        if (docTag.toLowerCase().contains(tagTrimmed)) {
+                            hasMatchingTag = true;
+                            break;
+                        }
                     }
-                } catch (Exception e) {
-                    // Invalid date format, ignore filter
+                }
+                if (hasMatchingTag)
+                    break;
+            }
+            if (!hasMatchingTag)
+                return false;
+        }
+
+        // Date range filter
+        if ((dateFrom != null && !dateFrom.trim().isEmpty()) || (dateTo != null && !dateTo.trim().isEmpty())) {
+            if (!matchesDateRange(dto.getCreatedAt(), dateFrom, dateTo)) {
+                return false;
+            }
+        }
+
+        // File size filter
+        if (size != null && !size.trim().isEmpty()) {
+            if (!matchesFileSizeRange(dto.getFileSize(), size)) {
+                return false;
+            }
+        }
+
+        // Views filter
+        if (views != null && !views.trim().isEmpty()) {
+            if (!matchesViewsRange(dto.getViewsCount(), views)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Helper method to check price range
+    private boolean matchesPriceRange(java.math.BigDecimal price, String priceRange) {
+        if (price == null) {
+            price = java.math.BigDecimal.ZERO;
+        }
+
+        try {
+            if (priceRange.contains("-")) {
+                String[] parts = priceRange.split("-");
+                if (parts.length == 2) {
+                    double min = Double.parseDouble(parts[0].trim());
+                    double max = Double.parseDouble(parts[1].trim());
+                    double priceValue = price.doubleValue();
+                    return priceValue >= min && priceValue <= max;
+                }
+            } else if (priceRange.endsWith("+")) {
+                String minStr = priceRange.replace("+", "").trim();
+                double min = Double.parseDouble(minStr);
+                return price.doubleValue() >= min;
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid price range format: " + priceRange);
+        }
+        return false;
+    }
+
+    // Helper method to check date range
+    private boolean matchesDateRange(java.time.LocalDateTime createdAt, String dateFrom, String dateTo) {
+        if (createdAt == null) {
+            return false;
+        }
+
+        try {
+            java.time.LocalDate docDate = createdAt.toLocalDate();
+
+            if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+                java.time.LocalDate fromDate = java.time.LocalDate.parse(dateFrom.trim());
+                if (docDate.isBefore(fromDate)) {
+                    return false;
                 }
             }
 
             if (dateTo != null && !dateTo.trim().isEmpty()) {
-                try {
-                    LocalDateTime toDate = LocalDateTime.parse(dateTo + "T23:59:59");
-                    if (dto.getCreatedAt() == null || dto.getCreatedAt().isAfter(toDate)) {
-                        return false;
-                    }
-                } catch (Exception e) {
-                    // Invalid date format, ignore filter
-                }
-            }
-
-            // Size filter
-            if (size != null && !size.trim().isEmpty()) {
-                Double fileSize = dto.getFileSize() != null ? dto.getFileSize() / 1024.0 : 0.0; // Convert to MB
-                switch (size) {
-                    case "0-1":
-                        if (fileSize >= 1)
-                            return false;
-                        break;
-                    case "1-10":
-                        if (fileSize < 1 || fileSize > 10)
-                            return false;
-                        break;
-                    case "10-50":
-                        if (fileSize < 10 || fileSize > 50)
-                            return false;
-                        break;
-                    case "50-100":
-                        if (fileSize < 50 || fileSize > 100)
-                            return false;
-                        break;
-                    case "100+":
-                        if (fileSize <= 100)
-                            return false;
-                        break;
-                }
-            }
-
-            // Views filter
-            if (views != null && !views.trim().isEmpty()) {
-                Long viewCount = dto.getViewsCount() != null ? dto.getViewsCount() : 0L;
-                switch (views) {
-                    case "0-100":
-                        if (viewCount > 100)
-                            return false;
-                        break;
-                    case "101-500":
-                        if (viewCount < 101 || viewCount > 500)
-                            return false;
-                        break;
-                    case "501-1000":
-                        if (viewCount < 501 || viewCount > 1000)
-                            return false;
-                        break;
-                    case "1001-5000":
-                        if (viewCount < 1001 || viewCount > 5000)
-                            return false;
-                        break;
-                    case "5000+":
-                        if (viewCount <= 5000)
-                            return false;
-                        break;
+                java.time.LocalDate toDate = java.time.LocalDate.parse(dateTo.trim());
+                if (docDate.isAfter(toDate)) {
+                    return false;
                 }
             }
 
             return true;
-        }).collect(Collectors.toList());
-
-        // Tính toán phân trang cho kết quả đã filter
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), filteredDtos.size());
-        List<DocumentDTO> pageContent = start < filteredDtos.size() ? filteredDtos.subList(start, end)
-                : new ArrayList<>();
-
-        return new PageImpl<>(pageContent, pageable, filteredDtos.size());
-    }
-
-    @Transactional
-    public void deleteDocument(Long id) {
-        Optional<Document> document = documentRepository.findById(id);
-        if (!document.isPresent()) {
-            throw new RuntimeException("Document not found with id: " + id);
-        }
-        try {
-            documentOwnerRepository.deleteByDocumentId(id);
-            documentCategoryRepository.deleteByDocumentId(id);
-            documentTagRepository.deleteByDocumentId(id);
-            documentRepository.deleteById(id);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete document: " + e.getMessage(), e);
+            System.err.println("Error parsing date range: " + e.getMessage());
+            return false;
         }
     }
 
+    // Helper method to check file size range
+    private boolean matchesFileSizeRange(Double fileSize, String sizeRange) {
+        if (fileSize == null) {
+            return false;
+        }
+
+        try {
+            // Convert KB to MB for comparison
+            double fileSizeMB = fileSize / 1024.0;
+
+            if (sizeRange.contains("-")) {
+                String[] parts = sizeRange.split("-");
+                if (parts.length == 2) {
+                    double min = Double.parseDouble(parts[0].trim());
+                    double max = Double.parseDouble(parts[1].trim());
+                    return fileSizeMB >= min && fileSizeMB <= max;
+                }
+            } else if (sizeRange.endsWith("+")) {
+                String minStr = sizeRange.replace("+", "").trim();
+                double min = Double.parseDouble(minStr);
+                return fileSizeMB >= min;
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid file size range format: " + sizeRange);
+        }
+        return false;
+    }
+
+    // Helper method to check views range
+    private boolean matchesViewsRange(Long viewsCount, String viewsRange) {
+        if (viewsCount == null) {
+            viewsCount = 0L;
+        }
+
+        try {
+            if (viewsRange.contains("-")) {
+                String[] parts = viewsRange.split("-");
+                if (parts.length == 2) {
+                    long min = Long.parseLong(parts[0].trim());
+                    long max = Long.parseLong(parts[1].trim());
+                    return viewsCount >= min && viewsCount <= max;
+                }
+            } else if (viewsRange.endsWith("+")) {
+                String minStr = viewsRange.replace("+", "").trim();
+                long min = Long.parseLong(minStr);
+                return viewsCount >= min;
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid views range format: " + viewsRange);
+        }
+        return false;
+    }
+
+    // Get ALL documents for export (both active and deleted)
+    public List<DocumentDTO> getAllDocumentsForExport() {
+        System.out.println("=== GET ALL DOCUMENTS FOR EXPORT ===");
+
+        // Lấy TẤT CẢ documents (cả active và deleted)
+        List<Document> allDocuments = documentRepository.findAll();
+
+        List<DocumentDTO> dtoList = allDocuments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        // Set additional fields for each DTO
+        for (DocumentDTO dto : dtoList) {
+            // Get author name from DocumentOwner relationship
+            List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(dto.getId());
+            if (!owners.isEmpty()) {
+                dto.setAuthorName(
+                        owners.get(0).getUser().getFullName() != null ? owners.get(0).getUser().getFullName()
+                                : owners.get(0).getUser().getUsername());
+            } else {
+                dto.setAuthorName("Admin"); // Fallback
+            }
+
+            // Get category names
+            List<DocumentCategory> documentCategories = documentCategoryRepository.findByDocumentId(dto.getId());
+            List<String> categoryNames = documentCategories.stream()
+                    .map(dc -> dc.getCategory().getName())
+                    .collect(Collectors.toList());
+            dto.setCategoryNames(categoryNames);
+
+            // Get tag names
+            List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(dto.getId());
+            List<String> tagNames = documentTags.stream()
+                    .map(dt -> dt.getTag().getName())
+                    .collect(Collectors.toList());
+            dto.setTagNames(tagNames);
+        }
+
+        System.out.println("Found " + dtoList.size() + " total documents for export");
+        return dtoList;
+    }
+
+    // Get filtered statistics - TỔNG TẤT CẢ DOCUMENTS (cả đã xóa và chưa xóa)
+    public FilteredStatistics getFilteredStatistics(
+            String search, String status, Long categoryId, String type, String price,
+            String author, String tags, String dateFrom, String dateTo, String size, String views) {
+
+        System.out.println("=== GET FILTERED STATISTICS (TOTAL ALL) ===");
+
+        // Tính tổng TẤT CẢ documents (cả đã xóa và chưa xóa)
+        long totalAll = documentRepository.count();
+
+        // Tính tổng views và downloads của TẤT CẢ documents
+        List<Document> allDocuments = documentRepository.findAll();
+        long totalViews = allDocuments.stream()
+                .mapToLong(doc -> doc.getViewsCount() != null ? doc.getViewsCount() : 0)
+                .sum();
+        long totalDownloads = allDocuments.stream()
+                .mapToLong(doc -> doc.getDownloadsCount() != null ? doc.getDownloadsCount() : 0)
+                .sum();
+        long pendingDocuments = allDocuments.stream()
+                .filter(dto -> "PENDING".equalsIgnoreCase(dto.getStatus()))
+                .count();
+
+        System.out.println("Total documents (all): " + totalAll);
+        System.out.println("Total views (all): " + totalViews);
+        System.out.println("Total downloads (all): " + totalDownloads);
+
+        return new FilteredStatistics(totalAll, 0, 0, pendingDocuments, totalViews, totalDownloads);
+    }
+
+    // Create document
+    @Transactional
+    public DocumentDTO createDocument(DocumentDTO documentDTO, MultipartFile file, List<Long> categoryIds,
+            List<String> tagNames, Long userId) {
+        System.out.println("=== CREATE DOCUMENT SERVICE ===");
+        System.out.println("Creating document: " + documentDTO.getTitle());
+
+        try {
+            // Create Document entity
+            Document document = new Document();
+            document.setTitle(documentDTO.getTitle());
+            document.setDescription(documentDTO.getDescription());
+            if (documentDTO.getPrice() == null) {
+                document.setPrice(java.math.BigDecimal.ZERO); // Default price if not provided
+            } else {
+                document.setPrice(documentDTO.getPrice());
+            }
+            // document.setPrice(documentDTO.getPrice());
+            document.setStatus(documentDTO.getStatus() != null ? documentDTO.getStatus() : "draft");
+            document.setVisibility(documentDTO.getVisibility() != null ? documentDTO.getVisibility() : "public");
+            document.setViewsCount(0L);
+            document.setDownloadsCount(0L);
+
+            // Generate unique slug
+            String baseSlug = generateSlug(documentDTO.getTitle());
+            String uniqueSlug = ensureUniqueSlug(baseSlug);
+            document.setSlug(uniqueSlug);
+
+            // Handle file upload if provided
+            if (file != null && !file.isEmpty()) {
+                System.out.println("File uploaded: " + file.getOriginalFilename());
+                System.out.println("File size: " + file.getSize());
+                System.out.println("File content type: " + file.getContentType());
+
+                // Create File entity
+                File fileEntity = new File();
+                fileEntity.setFileName(file.getOriginalFilename());
+                fileEntity.setFileSize(file.getSize());
+                fileEntity.setFileType(getFileType(file.getOriginalFilename()));
+                fileEntity.setMimeType(file.getContentType());
+                // Generate unique file path
+                String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                String filePath = "uploads/documents/" + fileName;
+                fileEntity.setFilePath(filePath);
+
+                // Save file entity first
+                File savedFile = fileRepository.save(fileEntity);
+                System.out.println("File entity saved with ID: " + savedFile.getId());
+
+                // Set file reference to document
+                document.setFile(savedFile);
+
+                // Save actual file to disk
+                try {
+                    java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/uploads/documents");
+                    if (!java.nio.file.Files.exists(uploadPath)) {
+                        java.nio.file.Files.createDirectories(uploadPath);
+                        System.out.println("Created directory: " + uploadPath.toAbsolutePath());
+                    }
+
+                    java.nio.file.Path targetPath = uploadPath.resolve(fileName);
+                    java.nio.file.Files.copy(file.getInputStream(), targetPath,
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                    System.out.println("File saved successfully to: " + targetPath.toAbsolutePath());
+                } catch (IOException e) {
+                    System.err.println("Error saving file to disk: " + e.getMessage());
+                    e.printStackTrace();
+                    // File entity is already saved, but physical file failed
+                    // You might want to handle this case (delete file entity or mark as failed)
+                }
+
+                System.out.println("File metadata saved. Path: " + filePath);
+            }
+
+            // Save document
+            Document savedDocument = documentRepository.save(document);
+            System.out.println("Document saved with ID: " + savedDocument.getId());
+
+            // Create DocumentOwner relationship
+            if (userId != null) {
+                DocumentOwner owner = new DocumentOwner();
+                DocumentOwnerId ownerId = new DocumentOwnerId();
+                ownerId.setDocumentId(savedDocument.getId());
+                ownerId.setUserId(userId);
+                owner.setId(ownerId);
+
+                // Set references
+                owner.setDocument(savedDocument);
+                User user = userRepository.findById(userId).orElse(null);
+                if (user != null) {
+                    owner.setUser(user);
+                    documentOwnerRepository.save(owner);
+                    System.out.println("DocumentOwner created for user: " + userId);
+                }
+            }
+
+            // Handle categories
+            if (categoryIds != null && !categoryIds.isEmpty()) {
+                for (Long categoryId : categoryIds) {
+                    Category category = categoryRepository.findById(categoryId).orElse(null);
+                    if (category != null) {
+                        DocumentCategory docCategory = new DocumentCategory();
+                        DocumentCategoryId docCatId = new DocumentCategoryId();
+                        docCatId.setDocumentId(savedDocument.getId());
+                        docCatId.setCategoryId(categoryId);
+                        docCategory.setId(docCatId);
+                        docCategory.setDocument(savedDocument);
+                        docCategory.setCategory(category);
+                        documentCategoryRepository.save(docCategory);
+                    }
+                }
+                System.out.println("Categories assigned: " + categoryIds.size());
+            }
+
+            // Handle tags
+            if (tagNames != null && !tagNames.isEmpty()) {
+                for (String tagName : tagNames) {
+                    if (tagName != null && !tagName.trim().isEmpty()) {
+                        // Find or create tag
+                        Tag tag = tagRepository.findByName(tagName.trim()).orElse(null);
+                        if (tag == null) {
+                            tag = new Tag();
+                            tag.setName(tagName.trim());
+                            tag.setSlug(generateSlug(tagName.trim()));
+                            tag = tagRepository.save(tag);
+                        }
+
+                        // Create DocumentTag relationship
+                        DocumentTag docTag = new DocumentTag();
+                        DocumentTagId docTagId = new DocumentTagId();
+                        docTagId.setDocumentId(savedDocument.getId());
+                        docTagId.setTagId(tag.getId());
+                        docTag.setId(docTagId);
+                        docTag.setDocument(savedDocument);
+                        docTag.setTag(tag);
+                        documentTagRepository.save(docTag);
+                    }
+                }
+                System.out.println("Tags assigned: " + tagNames.size());
+            }
+
+            // Convert to DTO and return
+            DocumentDTO result = convertToDTO(savedDocument);
+            result.setCategoryIds(categoryIds);
+            result.setTagNames(tagNames);
+            result.setUserId(userId);
+
+            System.out.println("Document created successfully: " + result.getId());
+            return result;
+
+        } catch (Exception e) {
+            System.err.println("Error creating document: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tạo tài liệu: " + e.getMessage(), e);
+        }
+    }
+
+    // Generate slug from title
+    private String generateSlug(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            return "document-" + System.currentTimeMillis();
+        }
+
+        String slug = title.toLowerCase()
+                .replaceAll("[àáạảãâầấậẩẫăằắặẳẵ]", "a")
+                .replaceAll("[èéẹẻẽêềếệểễ]", "e")
+                .replaceAll("[ìíịỉĩ]", "i")
+                .replaceAll("[òóọỏõôồốộổỗơờớợởỡ]", "o")
+                .replaceAll("[ùúụủũưừứựửữ]", "u")
+                .replaceAll("[ỳýỵỷỹ]", "y")
+                .replaceAll("[đ]", "d")
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
+
+        return slug.isEmpty() ? "document-" + System.currentTimeMillis() : slug;
+    }
+
+    // Ensure unique slug
+    @Transactional
+    private String ensureUniqueSlug(String slug) {
+        String baseSlug = slug;
+        int counter = 1;
+        while (documentRepository.findBySlugWithLock(baseSlug).isPresent()) {
+            baseSlug = slug + "-" + counter++;
+            if (counter > 1000) {
+                throw new IllegalStateException("Không thể tạo slug duy nhất sau 1000 lần thử");
+            }
+        }
+        return baseSlug;
+    }
+
+    // Get file type from filename
+    private String getFileType(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return "UNKNOWN";
+        }
+
+        String extension = "";
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < filename.length() - 1) {
+            extension = filename.substring(lastDotIndex + 1).toLowerCase();
+        }
+
+        switch (extension) {
+            case "pdf":
+                return "PDF";
+            case "doc":
+            case "docx":
+                return "DOC";
+            case "ppt":
+            case "pptx":
+                return "PPT";
+            case "xls":
+            case "xlsx":
+                return "XLS";
+            case "txt":
+                return "TXT";
+            case "zip":
+                return "ZIP";
+            case "rar":
+                return "RAR";
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+                return "IMAGE";
+            default:
+                return "OTHER";
+        }
+    }
+
+    // Update document
+    @Transactional
+    public DocumentDTO updateDocument(Long id, DocumentDTO documentDTO, MultipartFile file, List<Long> categoryIds,
+            List<String> tagNames) {
+        System.out.println("=== UPDATE DOCUMENT SERVICE ===");
+        System.out.println("Updating document with ID: " + id);
+
+        try {
+            // Find existing document
+            Optional<Document> documentOpt = documentRepository.findById(id);
+            if (!documentOpt.isPresent()) {
+                throw new IllegalArgumentException("Tài liệu không tồn tại với ID: " + id);
+            }
+
+            Document document = documentOpt.get();
+            System.out.println("Found document: " + document.getTitle());
+
+            // Update basic fields
+            document.setTitle(documentDTO.getTitle());
+            document.setDescription(documentDTO.getDescription());
+            document.setPrice(documentDTO.getPrice());
+            document.setStatus(documentDTO.getStatus() != null ? documentDTO.getStatus() : document.getStatus());
+            document.setVisibility(
+                    documentDTO.getVisibility() != null ? documentDTO.getVisibility() : document.getVisibility());
+
+            // Update slug if title changed
+            if (!document.getTitle().equals(documentDTO.getTitle())) {
+                String baseSlug = generateSlug(documentDTO.getTitle());
+                String uniqueSlug = ensureUniqueSlug(baseSlug);
+                document.setSlug(uniqueSlug);
+            }
+
+            // Handle file upload if provided
+            if (file != null && !file.isEmpty()) {
+                System.out.println("New file uploaded: " + file.getOriginalFilename());
+
+                // Create new File entity
+                File fileEntity = new File();
+                fileEntity.setFileName(file.getOriginalFilename());
+                fileEntity.setFileSize(file.getSize());
+                fileEntity.setFileType(getFileType(file.getOriginalFilename()));
+                fileEntity.setMimeType(file.getContentType());
+
+                // Generate unique file path
+                String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                String filePath = "uploads/documents/" + fileName;
+                fileEntity.setFilePath(filePath);
+
+                // Save file entity
+                File savedFile = fileRepository.save(fileEntity);
+
+                // Update document file reference
+                document.setFile(savedFile);
+
+                // Save actual file to disk
+                try {
+                    java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/uploads/documents");
+                    if (!java.nio.file.Files.exists(uploadPath)) {
+                        java.nio.file.Files.createDirectories(uploadPath);
+                    }
+
+                    java.nio.file.Path targetPath = uploadPath.resolve(fileName);
+                    java.nio.file.Files.copy(file.getInputStream(), targetPath,
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                    System.out.println("New file saved to: " + targetPath.toAbsolutePath());
+                } catch (IOException e) {
+                    System.err.println("Error saving new file: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            // Save updated document
+            Document savedDocument = documentRepository.save(document);
+            System.out.println("Document updated with ID: " + savedDocument.getId());
+
+            // Update categories
+            if (categoryIds != null) {
+                // Remove existing categories
+                documentCategoryRepository.deleteByDocumentId(id);
+
+                // Add new categories
+                for (Long categoryId : categoryIds) {
+                    Category category = categoryRepository.findById(categoryId).orElse(null);
+                    if (category != null) {
+                        DocumentCategory docCategory = new DocumentCategory();
+                        DocumentCategoryId docCatId = new DocumentCategoryId();
+                        docCatId.setDocumentId(savedDocument.getId());
+                        docCatId.setCategoryId(categoryId);
+                        docCategory.setId(docCatId);
+                        docCategory.setDocument(savedDocument);
+                        docCategory.setCategory(category);
+                        documentCategoryRepository.save(docCategory);
+                    }
+                }
+                System.out.println("Categories updated: " + categoryIds.size());
+            }
+
+            // Update tags
+            if (tagNames != null) {
+                // Remove existing tags
+                documentTagRepository.deleteByDocumentId(id);
+
+                // Add new tags
+                for (String tagName : tagNames) {
+                    if (tagName != null && !tagName.trim().isEmpty()) {
+                        // Find or create tag
+                        Tag tag = tagRepository.findByName(tagName.trim()).orElse(null);
+                        if (tag == null) {
+                            tag = new Tag();
+                            tag.setName(tagName.trim());
+                            tag.setSlug(generateSlug(tagName.trim()));
+                            tag = tagRepository.save(tag);
+                        }
+
+                        // Create DocumentTag relationship
+                        DocumentTag docTag = new DocumentTag();
+                        DocumentTagId docTagId = new DocumentTagId();
+                        docTagId.setDocumentId(savedDocument.getId());
+                        docTagId.setTagId(tag.getId());
+                        docTag.setId(docTagId);
+                        docTag.setDocument(savedDocument);
+                        docTag.setTag(tag);
+                        documentTagRepository.save(docTag);
+                    }
+                }
+                System.out.println("Tags updated: " + tagNames.size());
+            }
+
+            // Convert to DTO and return
+            DocumentDTO result = convertToDTO(savedDocument);
+            result.setCategoryIds(categoryIds);
+            result.setTagNames(tagNames);
+
+            System.out.println("Document updated successfully: " + result.getId());
+            return result;
+
+        } catch (Exception e) {
+            System.err.println("Error updating document: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi cập nhật tài liệu: " + e.getMessage(), e);
+        }
+    }
+
+    // Count methods
     public long countAll() {
         return documentRepository.count();
     }
 
-    public long getTotalViews() {
-        return documentRepository.findAll().stream()
-                .mapToLong(doc -> doc.getViewsCount() != null ? doc.getViewsCount() : 0)
-                .sum();
+    public long countDeletedDocuments() {
+        return documentRepository.countByDeletedAtIsNotNull();
     }
 
-    public long getTotalDownloads() {
-        return documentRepository.findAll().stream()
-                .mapToLong(doc -> doc.getDownloadsCount() != null ? doc.getDownloadsCount() : 0)
-                .sum();
+    public long countActiveDocuments() {
+        return documentRepository.countByDeletedAtIsNull();
     }
 
-    public long countByStatus(String status) {
-        return documentRepository.countByStatus(status);
+    // Count methods for debugging
+    public long countAllDocuments() {
+        return documentRepository.count();
     }
 
-    // Method để tính thống kê từ danh sách đã lọc
-    public FilteredStatistics getFilteredStatistics(String search, String status, Long categoryId,
-            String type, String price, String author, String tags, String dateFrom, String dateTo, String size,
-            String views) {
-
-        // Lấy tất cả documents và áp dụng filter (tương tự như getFilteredDocuments)
-        List<Document> allDocuments = documentRepository.findAll();
-        List<DocumentDTO> allDtos = allDocuments.stream().map(document -> {
-            DocumentDTO dto = convertToDTO(document);
-            List<DocumentCategory> categories = documentCategoryRepository.findByDocumentId(document.getId());
-            dto.setCategoryIds(categories.stream().map(dc -> dc.getCategory().getId()).collect(Collectors.toList()));
-            dto.setCategoryNames(
-                    categories.stream().map(dc -> dc.getCategory().getName()).collect(Collectors.toList()));
-            List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(document.getId());
-            dto.setTagNames(documentTags.stream().map(dt -> dt.getTag().getName()).collect(Collectors.toList()));
-            if (dto.getTagNames() == null) {
-                dto.setTagNames(new ArrayList<>());
-            }
-            List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(document.getId());
-            if (!owners.isEmpty()) {
-                dto.setUserId(owners.get(0).getUser().getId());
-                dto.setAuthorName(owners.get(0).getUser().getFullName());
-                dto.setAuthorAvatar(owners.get(0).getUser().getAvatarUrl());
-            }
-            return dto;
-        }).collect(Collectors.toList());
-
-        // Áp dụng cùng logic filter như trong getFilteredDocuments
-        List<DocumentDTO> filteredDtos = allDtos.stream().filter(dto -> {
-            // Search filter
-            if (search != null && !search.trim().isEmpty()) {
-                String searchLower = search.toLowerCase();
-                if (!dto.getTitle().toLowerCase().contains(searchLower) &&
-                        (dto.getDescription() == null || !dto.getDescription().toLowerCase().contains(searchLower)) &&
-                        (dto.getAuthorName() == null || !dto.getAuthorName().toLowerCase().contains(searchLower))) {
-                    return false;
-                }
-            }
-
-            // Status filter
-            if (status != null && !status.trim().isEmpty()) {
-                if (!status.equals(dto.getStatus())) {
-                    return false;
-                }
-            }
-
-            // Category filter
-            if (categoryId != null) {
-                if (dto.getCategoryIds() == null || !dto.getCategoryIds().contains(categoryId)) {
-                    return false;
-                }
-            }
-
-            // Type filter
-            if (type != null && !type.trim().isEmpty()) {
-                if (dto.getFileType() == null || !dto.getFileType().toUpperCase().contains(type.toUpperCase())) {
-                    return false;
-                }
-            }
-
-            // Price filter
-            if (price != null && !price.trim().isEmpty()) {
-                Double docPrice = dto.getPrice() != null ? dto.getPrice().doubleValue() : 0.0;
-                switch (price) {
-                    case "free":
-                        if (docPrice > 0)
-                            return false;
-                        break;
-                    case "paid":
-                        if (docPrice <= 0)
-                            return false;
-                        break;
-                    case "1-10":
-                        if (docPrice < 1 || docPrice > 10)
-                            return false;
-                        break;
-                    case "11-50":
-                        if (docPrice < 11 || docPrice > 50)
-                            return false;
-                        break;
-                    case "51-100":
-                        if (docPrice < 51 || docPrice > 100)
-                            return false;
-                        break;
-                    case "100+":
-                        if (docPrice <= 100)
-                            return false;
-                        break;
-                }
-            }
-
-            // Author filter
-            if (author != null && !author.trim().isEmpty()) {
-                if (dto.getAuthorName() == null || !dto.getAuthorName().toLowerCase().contains(author.toLowerCase())) {
-                    return false;
-                }
-            }
-
-            // Tags filter
-            if (tags != null && !tags.trim().isEmpty()) {
-                String tagsLower = tags.toLowerCase();
-                if (dto.getTagNames() == null || dto.getTagNames().stream()
-                        .noneMatch(tag -> tag.toLowerCase().contains(tagsLower))) {
-                    return false;
-                }
-            }
-
-            // Date filters
-            if (dateFrom != null && !dateFrom.trim().isEmpty()) {
-                try {
-                    LocalDateTime fromDate = LocalDateTime.parse(dateFrom + "T00:00:00");
-                    if (dto.getCreatedAt() == null || dto.getCreatedAt().isBefore(fromDate)) {
-                        return false;
-                    }
-                } catch (Exception e) {
-                    // Invalid date format, ignore filter
-                }
-            }
-
-            if (dateTo != null && !dateTo.trim().isEmpty()) {
-                try {
-                    LocalDateTime toDate = LocalDateTime.parse(dateTo + "T23:59:59");
-                    if (dto.getCreatedAt() == null || dto.getCreatedAt().isAfter(toDate)) {
-                        return false;
-                    }
-                } catch (Exception e) {
-                    // Invalid date format, ignore filter
-                }
-            }
-
-            // Size filter
-            if (size != null && !size.trim().isEmpty()) {
-                Double fileSize = dto.getFileSize() != null ? dto.getFileSize() / 1024.0 : 0.0; // Convert to MB
-                switch (size) {
-                    case "0-1":
-                        if (fileSize >= 1)
-                            return false;
-                        break;
-                    case "1-10":
-                        if (fileSize < 1 || fileSize > 10)
-                            return false;
-                        break;
-                    case "10-50":
-                        if (fileSize < 10 || fileSize > 50)
-                            return false;
-                        break;
-                    case "50-100":
-                        if (fileSize < 50 || fileSize > 100)
-                            return false;
-                        break;
-                    case "100+":
-                        if (fileSize <= 100)
-                            return false;
-                        break;
-                }
-            }
-
-            // Views filter
-            if (views != null && !views.trim().isEmpty()) {
-                Long viewCount = dto.getViewsCount() != null ? dto.getViewsCount() : 0L;
-                switch (views) {
-                    case "0-100":
-                        if (viewCount > 100)
-                            return false;
-                        break;
-                    case "101-500":
-                        if (viewCount < 101 || viewCount > 500)
-                            return false;
-                        break;
-                    case "501-1000":
-                        if (viewCount < 501 || viewCount > 1000)
-                            return false;
-                        break;
-                    case "1001-5000":
-                        if (viewCount < 1001 || viewCount > 5000)
-                            return false;
-                        break;
-                    case "5000+":
-                        if (viewCount <= 5000)
-                            return false;
-                        break;
-                }
-            }
-
-            return true;
-        }).collect(Collectors.toList());
-
-        // Tính thống kê từ danh sách đã lọc
-        long totalDocuments = filteredDtos.size();
-        long totalViews = filteredDtos.stream().mapToLong(dto -> dto.getViewsCount() != null ? dto.getViewsCount() : 0)
-                .sum();
-        long totalDownloads = filteredDtos.stream()
-                .mapToLong(dto -> dto.getDownloadsCount() != null ? dto.getDownloadsCount() : 0).sum();
-        long pendingDocuments = filteredDtos.stream().filter(dto -> "PENDING".equals(dto.getStatus())).count();
-
-        return new FilteredStatistics(totalDocuments, totalViews, totalDownloads, pendingDocuments);
-    }
-
-    // Inner class để chứa thống kê
+    // Statistics class
     public static class FilteredStatistics {
         private final long totalDocuments;
+        private final long publishedDocuments;
+        private final long draftDocuments;
+        private final long pendingDocuments;
         private final long totalViews;
         private final long totalDownloads;
-        private final long pendingDocuments;
 
-        public FilteredStatistics(long totalDocuments, long totalViews, long totalDownloads, long pendingDocuments) {
+        public FilteredStatistics(long totalDocuments, long publishedDocuments, long draftDocuments,
+                long pendingDocuments) {
             this.totalDocuments = totalDocuments;
+            this.publishedDocuments = publishedDocuments;
+            this.draftDocuments = draftDocuments;
+            this.pendingDocuments = pendingDocuments;
+            this.totalViews = 0; // Default value
+            this.totalDownloads = 0; // Default value
+        }
+
+        public FilteredStatistics(long totalDocuments, long publishedDocuments, long draftDocuments,
+                long pendingDocuments, long totalViews, long totalDownloads) {
+            this.totalDocuments = totalDocuments;
+            this.publishedDocuments = publishedDocuments;
+            this.draftDocuments = draftDocuments;
+            this.pendingDocuments = pendingDocuments;
             this.totalViews = totalViews;
             this.totalDownloads = totalDownloads;
-            this.pendingDocuments = pendingDocuments;
         }
 
         public long getTotalDocuments() {
             return totalDocuments;
+        }
+
+        public long getPublishedDocuments() {
+            return publishedDocuments;
+        }
+
+        public long getDraftDocuments() {
+            return draftDocuments;
+        }
+
+        public long getPendingDocuments() {
+            return pendingDocuments;
         }
 
         public long getTotalViews() {
@@ -870,60 +1222,95 @@ public class DocumentService {
         public long getTotalDownloads() {
             return totalDownloads;
         }
-
-        public long getPendingDocuments() {
-            return pendingDocuments;
-        }
     }
 
-    private DocumentDTO convertToDTO(Document document) {
-        DocumentDTO dto = new DocumentDTO();
-        dto.setId(document.getId());
-        dto.setTitle(document.getTitle());
-        dto.setSlug(document.getSlug());
-        dto.setDescription(document.getDescription());
-        dto.setPrice(document.getPrice());
-        dto.setFileId(document.getFile() != null ? document.getFile().getId() : null);
-        dto.setFileName(document.getFile() != null ? document.getFile().getFileName() : null);
-        dto.setFileType(document.getFile() != null ? document.getFile().getFileType() : null);
-        dto.setFileSize(document.getFile() != null && document.getFile().getFileSize() != null
-                ? document.getFile().getFileSize()
-                : 0.0);
-        dto.setStatus(document.getStatus());
-        dto.setVisibility(document.getVisibility());
-        dto.setDownloadsCount(document.getDownloadsCount() != null ? document.getDownloadsCount() : 0L);
-        dto.setViewsCount(document.getViewsCount() != null ? document.getViewsCount() : 0L);
-        dto.setCreatedAt(document.getCreatedAt());
-        dto.setUpdatedAt(document.getUpdatedAt());
-        dto.setPublishedAt(document.getPublishedAt());
-        return dto;
-    }
-
-    private String generateSlug(String text) {
-        if (text == null) {
-            return UUID.randomUUID().toString().substring(0, 8);
+    // Helper method to apply sorting from Pageable (including author sort)
+    private List<DocumentDTO> applySortingFromPageable(List<DocumentDTO> documents, Pageable pageable) {
+        if (documents == null || documents.isEmpty() || pageable.getSort().isUnsorted()) {
+            return documents;
         }
-        String slug = text.toLowerCase()
-                .replaceAll("[^a-z0-9\\s-]", "")
-                .replaceAll("\\s+", "-")
-                .replaceAll("-+", "-")
-                .trim();
-        if (slug.isEmpty()) {
-            slug = UUID.randomUUID().toString().substring(0, 8);
-        }
-        return slug;
-    }
 
-    @Transactional
-    private String ensureUniqueSlug(String slug) {
-        String baseSlug = slug;
-        int counter = 1;
-        while (documentRepository.findBySlugWithLock(baseSlug).isPresent()) {
-            baseSlug = slug + "-" + counter++;
-            if (counter > 1000) {
-                throw new IllegalStateException("Unable to generate a unique slug after 1000 attempts");
+        Comparator<DocumentDTO> comparator = null;
+        
+        for (Sort.Order order : pageable.getSort()) {
+            Comparator<DocumentDTO> fieldComparator = null;
+            
+            switch (order.getProperty().toLowerCase()) {
+                case "title":
+                    fieldComparator = Comparator.comparing(doc -> doc.getTitle() != null ? doc.getTitle().toLowerCase() : "");
+                    break;
+                case "author":
+                    fieldComparator = Comparator.comparing(doc -> doc.getAuthorName() != null ? doc.getAuthorName().toLowerCase() : "");
+                    break;
+                case "price":
+                    fieldComparator = Comparator.comparing(doc -> doc.getPrice() != null ? doc.getPrice() : BigDecimal.ZERO);
+                    break;
+                case "status":
+                    fieldComparator = Comparator.comparing(doc -> doc.getStatus() != null ? doc.getStatus() : "");
+                    break;
+                case "viewscount":
+                    fieldComparator = Comparator.comparing(doc -> doc.getViewsCount() != null ? doc.getViewsCount() : 0L);
+                    break;
+                case "downloadscount":
+                    fieldComparator = Comparator.comparing(doc -> doc.getDownloadsCount() != null ? doc.getDownloadsCount() : 0L);
+                    break;
+                case "deletedat":
+                case "deleted_at":
+                    fieldComparator = Comparator.comparing(doc -> doc.getDeletedAt() != null ? doc.getDeletedAt() : LocalDateTime.MIN);
+                    break;
+                case "createdat":
+                case "created_at":
+                default:
+                    fieldComparator = Comparator.comparing(doc -> doc.getCreatedAt() != null ? doc.getCreatedAt() : LocalDateTime.MIN);
+                    break;
+            }
+
+            // Apply sort direction
+            if (order.getDirection() == Sort.Direction.DESC) {
+                fieldComparator = fieldComparator.reversed();
+            }
+
+            // Chain comparators if multiple sort fields
+            if (comparator == null) {
+                comparator = fieldComparator;
+            } else {
+                comparator = comparator.thenComparing(fieldComparator);
             }
         }
-        return baseSlug;
+
+        return documents.stream()
+                .sorted(comparator)
+                .collect(Collectors.toList());
+    }
+
+    // Update document status (for archive and suspend actions)
+    @Transactional
+    public void updateDocumentStatus(Long documentId, String newStatus) {
+        System.out.println("=== UPDATE DOCUMENT STATUS ===");
+        System.out.println("Document ID: " + documentId + ", New Status: " + newStatus);
+
+        try {
+            Optional<Document> documentOpt = documentRepository.findById(documentId);
+            if (!documentOpt.isPresent()) {
+                throw new IllegalArgumentException("Tài liệu không tồn tại với ID: " + documentId);
+            }
+
+            Document document = documentOpt.get();
+            String oldStatus = document.getStatus();
+            
+            // Update status
+            document.setStatus(newStatus);
+            document.setUpdatedAt(LocalDateTime.now());
+            
+            // Save document
+            documentRepository.save(document);
+            
+            System.out.println("Document status updated successfully: " + oldStatus + " -> " + newStatus);
+            
+        } catch (Exception e) {
+            System.err.println("Error updating document status: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi cập nhật trạng thái tài liệu: " + e.getMessage());
+        }
     }
 }

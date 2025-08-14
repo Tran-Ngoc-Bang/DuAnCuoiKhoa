@@ -31,8 +31,6 @@
         box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
         width: 100%;
         max-width: 900px;
-        max-height: 90vh;
-        overflow-y: auto;
         padding: 24px;
         margin: 20px auto;
       }
@@ -107,10 +105,50 @@
         padding: 20px;
         text-align: center;
         border-radius: 6px;
-        transition: border-color 0.2s;
+        transition: border-color 0.2s, background-color 0.2s;
+        cursor: pointer;
+        position: relative;
       }
       .file-upload:hover {
         border-color: #4f46e5;
+        background-color: #f8f9ff;
+      }
+      .file-upload.drag-over {
+        border-color: #4f46e5;
+        background-color: #f0f4ff;
+        border-style: solid;
+      }
+      .file-upload input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .file-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        margin-top: 8px;
+      }
+      .file-info i {
+        color: #6c757d;
+        font-size: 1.2rem;
+      }
+      .file-info .file-name {
+        flex: 1;
+        font-weight: 500;
+        color: #333;
+      }
+      .file-info .file-size {
+        color: #6c757d;
+        font-size: 0.9rem;
       }
       .file-upload-label i {
         font-size: 2rem;
@@ -183,12 +221,130 @@
         cursor: pointer;
         margin-bottom: 0;
       }
+      
+      /* Styling cho danh mục con */
+      .form-check-label .text-muted {
+        font-size: 0.85em;
+        font-style: italic;
+      }
+      
+      /* Container cho 2 phần danh mục ngang hàng */
+      .categories-container {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      
+      /* Responsive cho mobile */
+      @media (max-width: 768px) {
+        .categories-container {
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+      
+      /* Styling cho phân chia danh mục */
+      .category-section {
+        flex: 1;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
+      }
+      
+      .category-section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #dee2e6;
+      }
+      
+      .category-section-title i {
+        margin-right: 8px;
+        width: 16px;
+      }
+      
+      .category-group {
+        background: white;
+        border-radius: 6px;
+        padding: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+      
+      .category-group .form-check {
+        margin-bottom: 8px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .category-group .form-check:hover {
+        background-color: #f1f3f4;
+      }
+      
+      .category-group .form-check-label i {
+        margin-right: 8px;
+        width: 16px;
+      }
+      
+      .general-category:checked + label {
+        font-weight: 600;
+        color: #0d6efd;
+      }
+      
+      .specific-category:checked + label {
+        font-weight: 600;
+        color: #198754;
+      }
+      
+      /* Styling cho error messages */
+      .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+      }
+      
+      .invalid-feedback.show {
+        display: block;
+      }
+      
+      .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+      }
+      
+      .categories-container.is-invalid {
+        border: 2px solid #dc3545;
+        border-radius: 8px;
+      }
       .content-footer {
         display: flex;
         justify-content: flex-end;
         gap: 12px;
         padding-top: 16px;
         border-top: 1px solid #eee;
+      }
+      
+      /* Tab panel smooth transitions */
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+      
+      /* Remove scroll behavior that causes jumping */
+      html {
+        scroll-behavior: auto;
       }
     </style>
   </head>
@@ -410,10 +566,10 @@
                           placeholder="Nhập tiêu đề tài liệu"
                           class="form-control"
                         />
-                        <div
-                          class="invalid-feedback"
-                          th:errors="*{title}"
-                        ></div>
+                        <div class="invalid-feedback" id="titleError" style="display: none;">
+                          Vui lòng nhập tiêu đề tài liệu
+                        </div>
+                        <div class="invalid-feedback" th:errors="*{title}"></div>
                       </div>
                     </div>
                     <div class="form-row">
@@ -429,52 +585,107 @@
                         ></textarea>
                       </div>
                     </div>
+                    <!-- Phân loại tài liệu -->
                     <div class="form-row">
-                      <div class="form-group">
+                      <div class="form-group" style="flex: 1 1 100%;">
                         <label for="documentCategory"
-                          >Danh mục <span class="required">*</span></label
+                          >Phân loại tài liệu <span class="required">*</span></label
                         >
-                        <div
-                          id="categoryCheckboxes"
-                          class="category-checkboxes"
-                        >
-                          <div
-                            th:each="category : ${categories}"
-                            class="form-check"
-                          >
-                            <input
-                              type="checkbox"
-                              th:id="'category_' + ${category.id}"
-                              th:value="${category.id}"
-                              class="form-check-input category-checkbox"
-                            />
-                            <label
-                              th:for="'category_' + ${category.id}"
-                              th:text="${category.name}"
-                              class="form-check-label"
-                            ></label>
+                        
+                        <div class="categories-container">
+                          <!-- Danh mục Tổng quát -->
+                          <div class="category-section">
+                            <h6 class="category-section-title">
+                              <i class="fas fa-folder"></i> Danh mục Tổng quát
+                            </h6>
+                            <div class="category-group" id="generalCategories">
+                              <div
+                                th:each="category : ${categories}"
+                                th:if="${category.parentId == null}"
+                                class="form-check"
+                              >
+                                <input
+                                  type="checkbox"
+                                  th:id="'general_' + ${category.id}"
+                                  th:value="${category.id}"
+                                  th:data-parent-id="${category.parentId}"
+                                  th:data-level="0"
+                                  class="form-check-input category-checkbox general-category"
+                                />
+                                <label
+                                  th:for="'general_' + ${category.id}"
+                                  class="form-check-label"
+                                >
+                                  <i class="fas fa-folder-open text-primary"></i>
+                                  <span th:text="${category.name}"></span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Chuyên mục -->
+                          <div class="category-section">
+                            <h6 class="category-section-title">
+                              <i class="fas fa-tags"></i> Chuyên mục
+                            </h6>
+                            <div class="category-group" id="specificCategories">
+                              <div
+                                th:each="category : ${categories}"
+                                th:if="${category.parentId != null}"
+                                class="form-check"
+                              >
+                                <input
+                                  type="checkbox"
+                                  th:id="'specific_' + ${category.id}"
+                                  th:value="${category.id}"
+                                  th:data-parent-id="${category.parentId}"
+                                  th:data-level="1"
+                                  class="form-check-input category-checkbox specific-category"
+                                />
+                                <label
+                                  th:for="'specific_' + ${category.id}"
+                                  class="form-check-label"
+                                >
+                                  <i class="fas fa-tag text-success"></i>
+                                  <span th:text="${category.name}"></span>
+                                  <span th:if="${category.parentName != null}" class="text-muted small">
+                                    (thuộc: <span th:text="${category.parentName}"></span>)
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div class="invalid-feedback">
-                          Vui lòng chọn ít nhất một danh mục (tối đa 3)
+                        <div class="invalid-feedback" id="categoryError" style="display: none;">
+                          Vui lòng chọn ít nhất một danh mục để phân loại tài liệu
                         </div>
-                        <small class="form-text text-muted"
-                          >Chọn tối đa 3 danh mục</small
-                        >
+                        <small class="form-text text-muted">
+                          <i class="fas fa-info-circle"></i>
+                          Chọn từ 1-3 mục. <strong>Danh mục Tổng quát</strong> (1 mục) + <strong>Chuyên mục</strong> (có thể nhiều mục) để phân loại chi tiết.
+                        </small>
                         <input type="hidden" id="selectedCategoryIds" name="categoryIdsString" value="" />
                       </div>
+                    </div>
+                    
+                    <!-- Tag - Xuống dưới riêng -->
+                    <div class="form-row">
                       <div class="form-group">
-                        <label for="documentTags"
-                          >Tag (nhập tên tag, cách nhau bằng dấu phẩy)</label
-                        >
+                        <label for="documentTags">
+                          <i class="fas fa-hashtag"></i>
+                          Tag (nhập tên tag, cách nhau bằng dấu phẩy)
+                        </label>
                         <input
                           type="text"
                           id="documentTags"
                           name="tagNames"
                           th:value="${#strings.listJoin(document.tagNames, ', ')}"
-                          placeholder="tag1, tag2"
+                          placeholder="java, spring-boot, tutorial, backend"
                           class="form-control"
                         />
+                        <small class="form-text text-muted">
+                          <i class="fas fa-lightbulb"></i>
+                          Ví dụ: java, spring-boot, tutorial, backend (giúp tìm kiếm dễ dàng hơn)
+                        </small>
                       </div>
                     </div>
                     <div class="form-row">
@@ -551,7 +762,7 @@
                             <i class="fas fa-times"></i>
                           </button>
                         </div>
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback" id="fileError" style="display: none;">
                           Vui lòng chọn file tài liệu
                         </div>
                       </div>
@@ -590,10 +801,7 @@
           </div>
           <div class="content-footer">
             <a th:href="@{/admin/documents}" class="btn btn-outline">Hủy</a>
-            <button type="button" class="btn btn-outline" id="saveDraftBtn">
-              <i class="fas fa-file-alt"></i>
-              <span>Lưu nháp</span>
-            </button>
+
             <button type="submit" class="btn btn-primary" form="documentForm">
               <i class="fas fa-save"></i>
               <span>Lưu tài liệu</span>
@@ -628,30 +836,141 @@
           if (hiddenCategoryIds) {
             hiddenCategoryIds.value = selectedIds.join(',');
           }
-
+          
+          // Cập nhật counter hiển thị
+          updateCategoryCounter();
+        }
+        
+        function updateCategoryCounter() {
+          const generalCount = document.querySelectorAll(".general-category:checked").length;
+          const specificCount = document.querySelectorAll(".specific-category:checked").length;
+          const total = generalCount + specificCount;
+          
+          // Cập nhật title với số lượng đã chọn
+          const generalTitle = document.querySelector('#generalCategories').previousElementSibling;
+          const specificTitle = document.querySelector('#specificCategories').previousElementSibling;
+          
+          if (generalTitle) {
+            generalTitle.innerHTML = `<i class="fas fa-folder"></i> Danh mục Tổng quát ${generalCount > 0 ? `(${generalCount})` : ''}`;
+          }
+          if (specificTitle) {
+            specificTitle.innerHTML = `<i class="fas fa-tags"></i> Chuyên mục ${specificCount > 0 ? `(${specificCount})` : ''}`;
+          }
+        }
+        
+        // Function để hiển thị lỗi inline
+        function showInlineError(errorId, message) {
+          const errorDiv = document.getElementById(errorId);
+          if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            // Tự động ẩn sau 3 giây
+            setTimeout(() => {
+              errorDiv.style.display = 'none';
+            }, 3000);
+          }
+        }
+        
+        // Function để ẩn lỗi inline
+        function hideInlineError(errorId) {
+          const errorDiv = document.getElementById(errorId);
+          if (errorDiv) {
+            errorDiv.style.display = 'none';
+          }
+        }
+        
+        // Function validation form
+        function validateForm() {
+          let isValid = true;
+          
+          // Validate title
+          const title = document.getElementById('documentTitle');
+          if (!title.value.trim()) {
+            title.classList.add('is-invalid');
+            showInlineError('titleError', 'Vui lòng nhập tiêu đề tài liệu');
+            isValid = false;
+          } else {
+            title.classList.remove('is-invalid');
+            hideInlineError('titleError');
+          }
+          
+          // Validate categories
+          const checkedCategories = document.querySelectorAll('.category-checkbox:checked');
+          if (checkedCategories.length === 0) {
+            const categoryContainer = document.getElementById('generalCategories').closest('.categories-container');
+            if (categoryContainer) {
+              categoryContainer.classList.add('is-invalid');
+            }
+            showInlineError('categoryError', 'Vui lòng chọn ít nhất một danh mục');
+            isValid = false;
+          } else {
+            const categoryContainer = document.getElementById('generalCategories').closest('.categories-container');
+            if (categoryContainer) {
+              categoryContainer.classList.remove('is-invalid');
+            }
+            hideInlineError('categoryError');
+          }
+          
+          // Validate file
+          const fileInput = document.getElementById('documentFile');
+          if (!fileInput.files || fileInput.files.length === 0) {
+            fileInput.classList.add('is-invalid');
+            showInlineError('fileError', 'Vui lòng chọn file tài liệu');
+            isValid = false;
+          } else {
+            fileInput.classList.remove('is-invalid');
+            hideInlineError('fileError');
+          }
+          
+          return isValid;
         }
 
         if (categoryCheckboxes.length > 0) {
           categoryCheckboxes.forEach((checkbox) => {
             checkbox.addEventListener("change", function () {
-              const checkedBoxes = document.querySelectorAll(
-                ".category-checkbox:checked"
-              );
+              const currentId = this.value;
+              const isChecked = this.checked;
+              
+              if (isChecked) {
+                const checkedBoxes = document.querySelectorAll(".category-checkbox:checked");
+                
+                // Kiểm tra số lượng danh mục tổng cộng
+                if (checkedBoxes.length > 3) {
+                  // Thay alert bằng thông báo inline
+                  this.checked = false;
+                  showInlineError('categoryError', 'Bạn chỉ có thể chọn tối đa 3 danh mục!');
+                  return;
+                }
 
-
-              // Kiểm tra số lượng danh mục
-              if (checkedBoxes.length > 3) {
-                alert("Bạn chỉ có thể chọn tối đa 3 danh mục!");
-                this.checked = false;
-                return;
+                // Logic đặc biệt: Chỉ cho phép chọn 1 danh mục tổng quát
+                if (this.classList.contains('general-category')) {
+                  const otherGeneralChecked = document.querySelectorAll(".general-category:checked");
+                  if (otherGeneralChecked.length > 1) {
+                    // Bỏ chọn các danh mục tổng quát khác
+                    otherGeneralChecked.forEach(cb => {
+                      if (cb !== this) {
+                        cb.checked = false;
+                      }
+                    });
+                  }
+                }
+                
+                // Chuyên mục: Cho phép chọn nhiều (trong giới hạn tổng 3)
               }
 
               // Cập nhật hidden field
               updateHiddenField();
 
-              // Xóa class invalid nếu có ít nhất 1 danh mục
-              if (checkedBoxes.length > 0 && categoryContainer) {
-                categoryContainer.classList.remove("is-invalid");
+              // Xóa class invalid và ẩn thông báo lỗi khi đã chọn danh mục
+              const checkedBoxesAfter = document.querySelectorAll(".category-checkbox:checked");
+              if (categoryContainer) {
+                if (checkedBoxesAfter.length > 0) {
+                  categoryContainer.classList.remove("is-invalid");
+                  const errorDiv = categoryContainer.parentElement.querySelector('.invalid-feedback');
+                  if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                  }
+                }
               }
             });
           });
@@ -659,27 +978,19 @@
 
         // Kiểm tra trước khi submit form
         form.addEventListener("submit", function (event) {
-          const checkedBoxes = document.querySelectorAll(
-            ".category-checkbox:checked"
-          );
-          const categoryContainer =
-            document.getElementById("categoryCheckboxes");
-
-          // Kiểm tra có ít nhất 1 danh mục
-          if (checkedBoxes.length === 0) {
+          // Sử dụng function validation mới
+          if (!validateForm()) {
             event.preventDefault();
-            alert("Vui lòng chọn ít nhất một danh mục!");
-            if (categoryContainer)
-              categoryContainer.classList.add("is-invalid");
             return false;
           }
-
+          
+          // Kiểm tra thêm logic danh mục
+          const checkedBoxes = document.querySelectorAll(".category-checkbox:checked");
+          
           // Kiểm tra không quá 3 danh mục
           if (checkedBoxes.length > 3) {
             event.preventDefault();
-            alert("Bạn chỉ có thể chọn tối đa 3 danh mục!");
-            if (categoryContainer)
-              categoryContainer.classList.add("is-invalid");
+            showInlineError('categoryError', 'Bạn chỉ có thể chọn tối đa 3 danh mục!');
             return false;
           }
 
@@ -691,54 +1002,122 @@
 
           if (invalidBoxes.length > 0) {
             event.preventDefault();
-            alert("Danh mục không hợp lệ, vui lòng chọn lại!");
-            if (categoryContainer)
-              categoryContainer.classList.add("is-invalid");
+            showInlineError('categoryError', 'Danh mục không hợp lệ, vui lòng chọn lại!');
             return false;
           }
 
-
-
-          // Xóa class invalid nếu validation pass
-          if (categoryContainer)
-            categoryContainer.classList.remove("is-invalid");
           return true;
         });
 
-        // Xử lý file upload preview (giữ nguyên)
-        if (documentFile && fileInfo) {
-          documentFile.addEventListener("change", function () {
-            const file = this.files[0];
-            if (file) {
-              const validTypes = [
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "application/vnd.ms-powerpoint",
-                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                "application/vnd.ms-excel",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              ];
-              if (!validTypes.includes(file.type)) {
-                alert("Chỉ hỗ trợ PDF, Word, PowerPoint, Excel");
-                this.value = "";
-                fileInfo.style.display = "none";
-                return;
-              }
-              if (file.size > 100 * 1024 * 1024) {
-                alert("File vượt quá 100MB");
-                this.value = "";
-                fileInfo.style.display = "none";
-                return;
-              }
-              fileInfo.querySelector(".file-name").textContent = file.name;
-              fileInfo.querySelector(".file-size").textContent =
-                (file.size / 1024 / 1024).toFixed(2) + " MB";
-              fileInfo.style.display = "flex";
-            } else {
-              fileInfo.style.display = "none";
+        // Validation real-time cho title
+        const titleInput = document.getElementById('documentTitle');
+        if (titleInput) {
+          titleInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+              this.classList.remove('is-invalid');
+              hideInlineError('titleError');
             }
           });
+          
+          titleInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+              this.classList.add('is-invalid');
+              showInlineError('titleError', 'Vui lòng nhập tiêu đề tài liệu');
+            }
+          });
+        }
+
+        // Xử lý file upload với drag & drop
+        if (documentFile && fileInfo) {
+          const fileUploadArea = documentFile.parentElement;
+          const removeBtn = fileInfo.querySelector('.btn-remove');
+
+          // Function để xử lý file được chọn
+          function handleFileSelection(file) {
+            if (!file) {
+              fileInfo.style.display = "none";
+              return;
+            }
+
+            const validTypes = [
+              "application/pdf",
+              "application/msword",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "application/vnd.ms-powerpoint",
+              "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+              "application/vnd.ms-excel",
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ];
+
+            if (!validTypes.includes(file.type)) {
+              alert("Chỉ hỗ trợ PDF, Word, PowerPoint, Excel");
+              documentFile.value = "";
+              fileInfo.style.display = "none";
+              return;
+            }
+
+            if (file.size > 100 * 1024 * 1024) {
+              alert("File vượt quá 100MB");
+              documentFile.value = "";
+              fileInfo.style.display = "none";
+              return;
+            }
+
+            // Hiển thị thông tin file
+            const fileName = fileInfo.querySelector(".file-name");
+            const fileSize = fileInfo.querySelector(".file-size");
+            
+            if (fileName) fileName.textContent = file.name;
+            if (fileSize) fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+            
+            fileInfo.style.display = "flex";
+          }
+
+          // Xử lý khi chọn file thông thường
+          documentFile.addEventListener("change", function () {
+            handleFileSelection(this.files[0]);
+          });
+
+          // Xử lý drag & drop
+          if (fileUploadArea) {
+            fileUploadArea.addEventListener('dragover', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              this.classList.add('drag-over');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              this.classList.remove('drag-over');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              this.classList.remove('drag-over');
+              
+              const files = e.dataTransfer.files;
+              if (files.length > 0) {
+                // Gán file vào input để form có thể submit
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                documentFile.files = dt.files;
+                
+                // Hiển thị thông tin file
+                handleFileSelection(files[0]);
+              }
+            });
+          }
+
+          // Xử lý nút xóa file
+          if (removeBtn) {
+            removeBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              documentFile.value = "";
+              fileInfo.style.display = "none";
+            });
+          }
         }
 
         // Xử lý tab navigation (giữ nguyên)

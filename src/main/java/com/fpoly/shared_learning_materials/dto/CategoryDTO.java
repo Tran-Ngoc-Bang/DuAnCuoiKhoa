@@ -22,6 +22,8 @@ public class CategoryDTO {
     private int subcategories;
     private LocalDateTime hierarchyCreatedAt;
     private LocalDateTime deletedAt;
+    private int level; // Cấp độ phân cấp (0 = root, 1 = level 1, etc.)
+    private String parentName; // Tên danh mục cha
     
     
     
@@ -132,6 +134,22 @@ public class CategoryDTO {
 	}
 	public void setHierarchyCreatedAt(LocalDateTime hierarchyCreatedAt) {
 		this.hierarchyCreatedAt = hierarchyCreatedAt;
+	}
+	
+	public int getLevel() {
+		return level;
+	}
+	
+	public void setLevel(int level) {
+		this.level = level;
+	}
+	
+	public String getParentName() {
+		return parentName;
+	}
+	
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
 	}
 
     

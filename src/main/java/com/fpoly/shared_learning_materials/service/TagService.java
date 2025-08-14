@@ -1,4 +1,3 @@
-
 package com.fpoly.shared_learning_materials.service;
 
 import com.fpoly.shared_learning_materials.domain.Tag;
@@ -45,7 +44,11 @@ public class TagService {
     }
 
     public Page<TagDTO> getAllTags(int page, int size, String sort) {
-        System.out.println("Fetching tags with page: " + page + ", size: " + size + ", sort: " + sort);
+        return getAllTags(page, size, sort, null);
+    }
+
+    public Page<TagDTO> getAllTags(int page, int size, String sort, String search) {
+        System.out.println("Fetching tags with page: " + page + ", size: " + size + ", sort: " + sort + ", search: " + search);
         Pageable pageable;
         switch (sort) {
             case "name_asc":
@@ -67,7 +70,17 @@ public class TagService {
                 pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
                 break;
         }
-        Page<Tag> tagPage = tagRepository.findAllTags(pageable);
+        
+        Page<Tag> tagPage;
+        if (search != null && !search.trim().isEmpty()) {
+            // Nếu có search, tìm kiếm theo tên tag
+            tagPage = tagRepository.findByNameContainingIgnoreCase(search.trim(), pageable);
+            System.out.println("Search tags with keyword: '" + search + "', found: " + tagPage.getTotalElements());
+        } else {
+            // Nếu không có search, lấy tất cả
+            tagPage = tagRepository.findAllTags(pageable);
+        }
+        
         System.out.println("Tags count: " + tagPage.getContent().size() + ", total: " + tagPage.getTotalElements());
         return tagPage.map(this::convertToDTO);
     }
@@ -87,6 +100,16 @@ public class TagService {
         return tagRepository.countByCreatedAtAfter(firstDayOfMonth);
     }
 
+    public Long countTotalDocumentsTagged() {
+        return documentTagRepository.countTotalDocumentsTagged();
+    }
+    
+    public Long countUnusedTags() {
+        Long totalTags = tagRepository.count();
+        Long usedTags = documentTagRepository.countUsedTags();
+        return totalTags - usedTags;
+    }
+
     public Optional<TagDTO> getTagById(Long id) {
         return tagRepository.findById(id).map(this::convertToDTO);
     }
@@ -100,13 +123,7 @@ public class TagService {
         }
         Tag tag = new Tag();
         tag.setName(tagDTO.getName().trim());
-        String slug = tagDTO.getSlug() != null && !tagDTO.getSlug().trim().isEmpty() 
-            ? tagDTO.getSlug().trim() 
-            : generateSlug(tagDTO.getName());
-        if (tagRepository.existsBySlug(slug)) {
-            throw new IllegalArgumentException("Slug đã tồn tại");
-        }
-        tag.setSlug(slug);
+        tag.setSlug(tagDTO.getName().trim()); // Bỏ slug, luôn set null
         tag.setDescription(tagDTO.getDescription() != null ? tagDTO.getDescription().trim() : null);
         
         // Gán createdBy
@@ -134,16 +151,8 @@ public class TagService {
             throw new IllegalArgumentException("Tên tag đã tồn tại");
         }
 
-        String slug = tagDTO.getSlug() != null && !tagDTO.getSlug().trim().isEmpty()
-                ? tagDTO.getSlug().trim()
-                : generateSlug(tagDTO.getName());
-
-        if (!existingTag.getSlug().equals(slug) && tagRepository.existsBySlug(slug)) {
-            throw new IllegalArgumentException("Slug đã tồn tại");
-        }
-
         existingTag.setName(tagDTO.getName().trim());
-        existingTag.setSlug(slug);
+        existingTag.setSlug(tagDTO.getName().trim()); // Bỏ slug, luôn set null
         existingTag.setDescription(tagDTO.getDescription() != null ? tagDTO.getDescription().trim() : null);
         existingTag.setUpdatedAt(LocalDateTime.now());
 
@@ -174,10 +183,11 @@ public class TagService {
         TagDTO dto = new TagDTO();
         dto.setId(tag.getId());
         dto.setName(tag.getName());
-        dto.setSlug(tag.getSlug());
+        dto.setSlug(null); // Bỏ slug, luôn set null
         dto.setDescription(tag.getDescription());
         dto.setStatus(tag.getDeletedAt() != null ? "inactive" : "active");
         dto.setCreatedById(tag.getCreatedBy() != null ? tag.getCreatedBy().getId() : null);
+        dto.setCreatedByName(tag.getCreatedBy() != null ? tag.getCreatedBy().getFullName() : "Không xác định");
         dto.setCreatedAt(tag.getCreatedAt());
         dto.setUpdatedAt(tag.getUpdatedAt());
         dto.setDeletedAt(tag.getDeletedAt());
@@ -200,12 +210,6 @@ public class TagService {
         }
     }
 
-    private String generateSlug(String name) {
-        if (name == null) return "";
-        return name.toLowerCase()
-                .replaceAll("[^a-z0-9\\s]", "")
-                .replaceAll("\\s+", "-")
-                .trim();
-    }
+
 }
 

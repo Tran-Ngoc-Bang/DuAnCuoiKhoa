@@ -28,7 +28,7 @@ import com.fpoly.shared_learning_materials.repository.UserRepository;
 @Service
 public class CategoryService {
 
-	@Autowired
+    @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
     private CategoryHierarchyRepository categoryHierarchyRepository;
@@ -38,27 +38,62 @@ public class CategoryService {
     private UserRepository userRepository;
 
     public List<CategoryDTO> getAllCategories() {
-        // Sắp xếp theo thời gian tạo mới nhất trước
-        List<Category> categories = categoryRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        return getCategoriesByDeletedStatus(null); // Lấy tất cả
+    }
+
+    public List<CategoryDTO> getActiveCategories() {
+        return getCategoriesByDeletedStatus(false); // Chỉ lấy chưa xóa
+    }
+
+    public List<CategoryDTO> getDeletedCategories() {
+        return getCategoriesByDeletedStatus(true); // Chỉ lấy đã xóa
+    }
+
+    private List<CategoryDTO> getCategoriesByDeletedStatus(Boolean isDeleted) {
+        List<Category> categories;
+
+        if (isDeleted == null) {
+            // Lấy tất cả
+            categories = categoryRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        } else if (isDeleted) {
+            // Chỉ lấy đã xóa (deletedAt != null)
+            System.out.println("=== GETTING DELETED CATEGORIES ===");
+            long totalDeletedCount = categoryRepository.countByDeletedAtIsNotNull();
+            System.out.println("Total deleted categories in DB: " + totalDeletedCount);
+            
+            categories = categoryRepository.findByDeletedAtIsNotNull(Sort.by(Sort.Direction.DESC, "deletedAt"));
+            System.out.println("Retrieved deleted categories from query: " + categories.size());
+        } else {
+            // Chỉ lấy chưa xóa (deletedAt == null)
+            categories = categoryRepository.findByDeletedAtIsNull(Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+
         List<CategoryHierarchy> hierarchies = categoryHierarchyRepository.findAll();
         System.out.println("Hierarchies loaded: " + hierarchies.size());
-        hierarchies.forEach(h -> System.out.println("Hierarchy: parentId=" + h.getId().getParentId() + ", childId=" + h.getId().getChildId() + ", level=" + h.getLevel()));
-        
+        hierarchies.forEach(h -> System.out.println("Hierarchy: parentId=" + h.getId().getParentId() + ", childId="
+                + h.getId().getChildId() + ", level=" + h.getLevel()));
+
         // Tính số danh mục con
         Map<Long, Long> subcategoryCount = hierarchies.stream()
-            .collect(Collectors.groupingBy(h -> h.getId().getParentId(), Collectors.counting()));
+                .collect(Collectors.groupingBy(h -> h.getId().getParentId(), Collectors.counting()));
 
         // Lấy ngày tạo từ CategoryHierarchy
         Map<Long, LocalDateTime> hierarchyCreatedAtMap = hierarchies.stream()
-            .collect(Collectors.toMap(h -> h.getId().getChildId(), CategoryHierarchy::getCreatedAt, (a, b) -> a));
-        
+                .collect(Collectors.toMap(h -> h.getId().getChildId(), CategoryHierarchy::getCreatedAt, (a, b) -> a));
+
         Map<Long, Long> parentIdMap = hierarchies.stream()
                 .collect(Collectors.toMap(h -> h.getId().getChildId(), h -> h.getId().getParentId(), (a, b) -> {
-                
+
                     return a;
                 }));
 
-        return categories.stream().map(cat -> {
+        // Tạo map để lấy tên danh mục cha
+        Map<Long, String> categoryNameMap = categories.stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        System.out.println("Converting " + categories.size() + " categories to DTOs");
+        
+        List<CategoryDTO> result = categories.stream().map(cat -> {
             CategoryDTO dto = new CategoryDTO();
             dto.setId(cat.getId());
             dto.setName(cat.getName());
@@ -67,8 +102,9 @@ public class CategoryService {
             dto.setStatus(cat.getStatus());
             dto.setSortOrder(cat.getSortOrder());
             dto.setCreatedById(cat.getCreatedBy() != null ? cat.getCreatedBy().getId() : null);
-            dto.setCreatedByName(cat.getCreatedBy() != null ? 
-                    userRepository.findById(cat.getCreatedBy().getId()).map(User::getFullName).orElse("Không có") : "Không có");
+            dto.setCreatedByName(cat.getCreatedBy() != null
+                    ? userRepository.findById(cat.getCreatedBy().getId()).map(User::getFullName).orElse("Không có")
+                    : "Không có");
             dto.setCreatedAt(cat.getCreatedAt());
             dto.setUpdatedAt(cat.getUpdatedAt());
             dto.setDeletedAt(cat.getDeletedAt());
@@ -76,49 +112,65 @@ public class CategoryService {
             dto.setSubcategories(subcategoryCount.getOrDefault(cat.getId(), 0L).intValue());
             dto.setHierarchyCreatedAt(hierarchyCreatedAtMap.get(cat.getId()));
             dto.setParentId(parentIdMap.get(cat.getId()));
+
+            // Set parent name nếu có parent
+            Long parentId = parentIdMap.get(cat.getId());
+            if (parentId != null) {
+                dto.setParentName(categoryNameMap.get(parentId));
+            }
+
             return dto;
         }).collect(Collectors.toList());
+        
+        System.out.println("Converted to " + result.size() + " DTOs");
+        return result;
     }
-    
+
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
-   
+
         if (categoryDTO.getName() == null || categoryDTO.getName().isEmpty()) {
-            throw new IllegalArgumentException("Category name is required");
+            throw new IllegalArgumentException("Tên danh mục không được để trống");
         }
 
-  
+        // Kiểm tra tên danh mục đã tồn tại chưa
+        if (categoryRepository.existsByNameAndDeletedAtIsNull(categoryDTO.getName().trim())) {
+            throw new IllegalArgumentException("Tên danh mục '" + categoryDTO.getName() + "' đã tồn tại");
+        }
+
         Category category = new Category();
         category.setName(categoryDTO.getName());
         category.setSlug(generateSlug(categoryDTO.getName())); // Implement slug generation
         category.setDescription(categoryDTO.getDescription());
         category.setStatus(categoryDTO.getStatus() != null ? categoryDTO.getStatus() : "active");
         category.setSortOrder(categoryDTO.getSortOrder() != null ? categoryDTO.getSortOrder() : 0);
-//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//        if (username != null && !username.equals("anonymousUser")) {
-//            User createdBy = new User(); // Giả định có UserService để lấy User
-//            createdBy.setId(categoryDTO.getCreatedById()); // Cần inject UserService để lấy User thực tế
-//            category.setCreatedBy(createdBy);
-//        }
+        // String username =
+        // SecurityContextHolder.getContext().getAuthentication().getName();
+        // if (username != null && !username.equals("anonymousUser")) {
+        // User createdBy = new User(); // Giả định có UserService để lấy User
+        // createdBy.setId(categoryDTO.getCreatedById()); // Cần inject UserService để
+        // lấy User thực tế
+        // category.setCreatedBy(createdBy);
+        // }
         if (categoryDTO.getCreatedById() != null) {
             User createdBy = userRepository.findById(categoryDTO.getCreatedById())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + categoryDTO.getCreatedById()));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "User not found with id: " + categoryDTO.getCreatedById()));
             category.setCreatedBy(createdBy);
         }
-      
+
         category = categoryRepository.save(category);
 
-   
         if (categoryDTO.getParentId() != null && categoryDTO.getParentId() > 0) {
             CategoryHierarchy hierarchy = new CategoryHierarchy();
             hierarchy.setId(new CategoryHierarchyId(categoryDTO.getParentId(), category.getId()));
             hierarchy.setParent(categoryRepository.findById(categoryDTO.getParentId())
-                .orElseThrow(() -> new IllegalArgumentException("Parent category not found")));
+                    .orElseThrow(() -> new IllegalArgumentException("Parent category not found")));
             hierarchy.setChild(category);
             int parentLevel = categoryHierarchyRepository.findByIdChildId(categoryDTO.getParentId())
                     .map(CategoryHierarchy::getLevel)
                     .orElse(0);
-                hierarchy.setLevel(parentLevel + 1);
-//            hierarchy.setLevel(1); 
+            hierarchy.setLevel(parentLevel + 1);
+            // hierarchy.setLevel(1);
             hierarchy.setCreatedAt(LocalDateTime.now());
             categoryHierarchyRepository.save(hierarchy);
         }
@@ -143,36 +195,43 @@ public class CategoryService {
     @Transactional
     public CategoryDTO updateCategory(Long id, CategoryDTO categoryDTO) {
         if (categoryDTO.getName() == null || categoryDTO.getName().isEmpty()) {
-            throw new IllegalArgumentException("Category name is required");
+            throw new IllegalArgumentException("Tên danh mục không được để trống");
         }
 
         Category category = categoryRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục"));
+
+        // Kiểm tra tên danh mục đã tồn tại chưa (trừ chính nó)
+        if (categoryRepository.existsByNameAndDeletedAtIsNullAndIdNot(categoryDTO.getName().trim(), id)) {
+            throw new IllegalArgumentException("Tên danh mục '" + categoryDTO.getName() + "' đã tồn tại");
+        }
 
         category.setName(categoryDTO.getName());
         category.setSlug(generateSlug(categoryDTO.getName()));
         category.setDescription(categoryDTO.getDescription());
         category.setStatus(categoryDTO.getStatus() != null ? categoryDTO.getStatus() : "active");
-        category.setSortOrder(categoryDTO.getSortOrder() != null ? categoryDTO.getSortOrder() : category.getSortOrder());
+        category.setSortOrder(
+                categoryDTO.getSortOrder() != null ? categoryDTO.getSortOrder() : category.getSortOrder());
         category.setUpdatedAt(LocalDateTime.now());
 
         category = categoryRepository.save(category);
 
         // Update hierarchy
         categoryHierarchyRepository.deleteByIdChildId(id); // Remove old hierarchy
-        
+
         Long parentId = categoryDTO.getParentId();
-        if (categoryDTO.getParentId() != null && categoryDTO.getParentId() > 0 && !categoryDTO.getParentId().equals(id)) {
+        if (categoryDTO.getParentId() != null && categoryDTO.getParentId() > 0
+                && !categoryDTO.getParentId().equals(id)) {
             CategoryHierarchy hierarchy = new CategoryHierarchy();
             hierarchy.setId(new CategoryHierarchyId(categoryDTO.getParentId(), category.getId()));
             hierarchy.setParent(categoryRepository.findById(categoryDTO.getParentId())
-                .orElseThrow(() -> new IllegalArgumentException("Parent category not found")));
+                    .orElseThrow(() -> new IllegalArgumentException("Parent category not found")));
             hierarchy.setChild(category);
             int parentLevel = categoryHierarchyRepository.findByIdChildId(categoryDTO.getParentId())
                     .map(CategoryHierarchy::getLevel)
                     .orElse(0);
-                hierarchy.setLevel(parentLevel + 1);
-//            hierarchy.setLevel(1);
+            hierarchy.setLevel(parentLevel + 1);
+            // hierarchy.setLevel(1);
             hierarchy.setCreatedAt(LocalDateTime.now());
             categoryHierarchyRepository.save(hierarchy);
         }
@@ -191,12 +250,71 @@ public class CategoryService {
         resultDTO.setParentId(categoryDTO.getParentId());
         return resultDTO;
     }
-    
- // Xóa một danh mục
+
+    // Soft delete một danh mục
     @Transactional
     public void deleteCategory(Long categoryId) {
-        if (!categoryRepository.existsById(categoryId)) {
-            throw new IllegalArgumentException("Category not found with id: " + categoryId);
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with id: " + categoryId));
+
+        if (category.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Category is already deleted");
+        }
+
+        // Soft delete: chỉ set deletedAt
+        category.setDeletedAt(LocalDateTime.now());
+        categoryRepository.save(category);
+
+        // Soft delete các danh mục con
+        softDeleteChildCategories(categoryId);
+    }
+
+    // Soft delete các danh mục con
+    private void softDeleteChildCategories(Long parentId) {
+        List<CategoryHierarchy> children = categoryHierarchyRepository.findByIdParentId(parentId);
+        for (CategoryHierarchy child : children) {
+            Long childId = child.getId().getChildId();
+            Category childCategory = categoryRepository.findById(childId).orElse(null);
+            if (childCategory != null && childCategory.getDeletedAt() == null) {
+                childCategory.setDeletedAt(LocalDateTime.now());
+                categoryRepository.save(childCategory);
+                // Đệ quy xóa các danh mục con của danh mục con này
+                softDeleteChildCategories(childId);
+            }
+        }
+    }
+
+    // Soft delete hàng loạt danh mục
+    @Transactional
+    public void deleteCategories(List<Long> categoryIds) {
+        for (Long categoryId : categoryIds) {
+            deleteCategory(categoryId); // Sử dụng soft delete cho từng danh mục
+        }
+    }
+
+    // Khôi phục danh mục đã xóa
+    @Transactional
+    public void restoreCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with id: " + categoryId));
+
+        if (category.getDeletedAt() == null) {
+            throw new IllegalArgumentException("Category is not deleted");
+        }
+
+        category.setDeletedAt(null);
+        category.setUpdatedAt(LocalDateTime.now());
+        categoryRepository.save(category);
+    }
+
+    // Xóa vĩnh viễn danh mục (hard delete)
+    @Transactional
+    public void permanentDeleteCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with id: " + categoryId));
+
+        if (category.getDeletedAt() == null) {
+            throw new IllegalArgumentException("Category must be soft deleted first");
         }
 
         // Xóa các quan hệ trong CategoryHierarchy (cha hoặc con)
@@ -205,29 +323,10 @@ public class CategoryService {
         // Xóa các quan hệ trong DocumentCategory
         documentCategoryRepository.deleteByCategoryId(categoryId);
 
-        // Xóa danh mục
+        // Xóa danh mục vĩnh viễn
         categoryRepository.deleteById(categoryId);
     }
 
-    // Xóa hàng loạt danh mục
-    @Transactional
-    public void deleteCategories(List<Long> categoryIds) {
-        for (Long categoryId : categoryIds) {
-            if (!categoryRepository.existsById(categoryId)) {
-                throw new IllegalArgumentException("Category not found with id: " + categoryId);
-            }
-        }
-
-        // Xóa các quan hệ trong CategoryHierarchy
-        categoryHierarchyRepository.deleteByParentIdInOrChildIdIn(categoryIds, categoryIds);
-
-        // Xóa các quan hệ trong DocumentCategory
-        documentCategoryRepository.deleteByCategoryIdIn(categoryIds);
-
-        // Xóa các danh mục
-        categoryRepository.deleteAllById(categoryIds);
-    }
-    
     // Helper method to generate slug
     private String generateSlug(String name) {
         return name.toLowerCase().replaceAll("[^a-z0-9]", "-").replaceAll("-+", "-");

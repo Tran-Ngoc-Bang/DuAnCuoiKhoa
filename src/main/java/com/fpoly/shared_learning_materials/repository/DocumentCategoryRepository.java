@@ -24,7 +24,7 @@ public interface DocumentCategoryRepository extends JpaRepository<DocumentCatego
 	
 	    @Modifying
 	    @Query("DELETE FROM DocumentCategory dc WHERE dc.id.documentId = :documentId")
-	    void deleteByDocumentId(Long documentId);
+	    void deleteByDocumentId(@Param("documentId") Long documentId);
 	    
 	    List<DocumentCategory> findByDocumentId(Long documentId);
 	    

@@ -25,4 +25,10 @@ public interface DocumentTagRepository extends JpaRepository<DocumentTag, Docume
     
     @Query("SELECT COUNT(DISTINCT dt.document) FROM DocumentTag dt")
     Long countDistinctDocumentsWithTags();
+    
+    @Query("SELECT COUNT(dt) FROM DocumentTag dt")
+    Long countTotalDocumentsTagged();
+    
+    @Query("SELECT COUNT(DISTINCT dt.id.tagId) FROM DocumentTag dt")
+    Long countUsedTags();
 }

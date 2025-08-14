@@ -117,4 +117,25 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     Optional<Report> findFirstByCommentIdAndStatusOrderByCreatedAtAsc(Long commentId, String status);
 
     Optional<Report> findFirstByCommentIdAndStatusOrderByCreatedAtDesc(Long commentId, String status);
+
+     // Find reports by comment
+    List<Report> findByCommentId(Long commentId);
+    
+    // Find reports by document
+    List<Report> findByDocumentId(Long documentId);
+    
+    // Find reports by reporter
+    List<Report> findByReporterId(Long reporterId);
+    
+    // Check if user already reported a comment
+    @Query("SELECT r FROM Report r WHERE r.reporter.id = :reporterId AND r.comment.id = :commentId")
+    Optional<Report> findByReporterIdAndCommentId(@Param("reporterId") Long reporterId, @Param("commentId") Long commentId);
+    
+    // Check if user already reported a document
+    @Query("SELECT r FROM Report r WHERE r.reporter.id = :reporterId AND r.document.id = :documentId")
+    Optional<Report> findByReporterIdAndDocumentId(@Param("reporterId") Long reporterId, @Param("documentId") Long documentId);
+    
+    
+    // Count reports by comment
+    long countByCommentId(Long commentId);
 }

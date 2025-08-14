@@ -13,7 +13,6 @@
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
     <link rel="stylesheet" th:href="@{/css/admin/tags.css}">
     <style>
-        /* Fallback style nếu tags.css chưa có .data-container */
         .data-container {
             background-color: var(--white);
             border: 1px solid var(--border-color);
@@ -22,7 +21,100 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
         }
-        .
+        .required {
+            color: #dc2626;
+        }
+        /* Error and Success Messages */
+        .error-message {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .error-message i {
+            color: #dc2626;
+            font-size: 1.1rem;
+        }
+        .success-message {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .success-message i {
+            color: #16a34a;
+            font-size: 1.1rem;
+        }
+        /* Compact form styling */
+        .data-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .save-btn, .cancel-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+        }
+        .save-btn {
+            background: #4361ee;
+            color: white;
+        }
+        .save-btn:hover {
+            background: #3651d4;
+        }
+        .cancel-btn {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+        }
+        .cancel-btn:hover {
+            background: #e9ecef;
+        }
     </style>
 </head>
 <body class="admin-body">
@@ -188,11 +280,7 @@
                         <input type="text" id="tagName" name="name" th:field="*{name}" class="form-input" placeholder="Nhập tên tag" th:value="${tagDTO?.name ?: ''}">
                         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="tagSlug">Slug</label>
-                        <input type="text" id="tagSlug" name="slug" th:field="*{slug}" class="form-input" placeholder="Tự động tạo từ tên tag" th:value="${tagDTO?.slug ?: ''}">
-                        <div th:if="${#fields.hasErrors('slug')}" th:errors="*{slug}" class="error-message"></div>
-                    </div>
+
                     <div class="form-group">
                         <label for="tagStatus">Trạng thái</label>
                         <select id="tagStatus" name="status" th:field="*{status}" class="form-input">
@@ -203,7 +291,7 @@
                     </div>
                     <div class="form-group full-width">
                         <label for="tagDescription">Mô tả</label>
-                        <textarea id="tagDescription" name="description" th:field="*{description}" class="form-textarea" rows="4" placeholder="Nhập mô tả cho tag (không bắt buộc)" th:text="${tagDTO?.description ?: ''}"></textarea>
+                        <textarea id="tagDescription" name="description" th:field="*{description}" class="form-textarea" rows="3" placeholder="Nhập mô tả cho tag (không bắt buộc)" th:text="${tagDTO?.description ?: ''}"></textarea>
                         <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></div>
                     </div>
                   <!--    <div class="form-group">
@@ -217,14 +305,7 @@
                         </div>
                         <div th:if="${#fields.hasErrors('color')}" th:errors="*{color}" class="error-message"></div>
                     </div>-->
-                    <div class="form-group full-width">
-                        <label>Tag Preview</label>
-                        <div class="tag-preview-container">
-                            <div class="tag-preview-item">
-                                <span class="tag-preview-label" th:style="|background-color: ${tagDTO?.color != null ? tagDTO.color + '1a' : '#4361ee1a'}; color: ${tagDTO?.color ?: '#4361ee'}|" th:text="${tagDTO?.name ?: 'Tag Name'}"></span>
-                            </div>
-                        </div>
-                    </div>
+
                     <div class="form-group full-width">
                         <div class="modal-footer">
                             <a th:href="@{/admin/tags}" class="cancel-btn">Hủy bỏ</a>

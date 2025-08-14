@@ -28,6 +28,7 @@ public class DocumentDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime publishedAt;
+    private LocalDateTime deletedAt;
     private String fileType;
     private List<Long> categoryIds;
     private List<String> tagNames;
@@ -150,6 +151,12 @@ public class DocumentDTO {
 	}
 	public void setPublishedAt(LocalDateTime publishedAt) {
 		this.publishedAt = publishedAt;
+	}
+	public LocalDateTime getDeletedAt() {
+		return deletedAt;
+	}
+	public void setDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
 	}
 	public String getFileType() {
 		return fileType;

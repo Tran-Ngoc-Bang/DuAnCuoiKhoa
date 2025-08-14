@@ -161,6 +161,113 @@
             font-size: 1rem;
             color: #666;
         }
+        .action-btn.delete-btn {
+            color: #dc3545;
+        }
+        .action-btn.delete-btn:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        /* Success and Error Messages */
+        .success-message {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .success-message i {
+            color: #16a34a;
+            font-size: 1.1rem;
+        }
+        .error-message {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .error-message i {
+            color: #dc2626;
+            font-size: 1.1rem;
+        }
+        
+        /* Search form styling */
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .search-input-container .search-input {
+            border: none;
+            outline: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            min-width: 250px;
+            background: transparent;
+        }
+        
+        .search-input-container .search-input:focus {
+            box-shadow: none;
+        }
+        
+        .search-input-container:focus-within {
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        .clear-search-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        
+        .clear-search-btn:hover {
+            color: #dc2626;
+        }
+        
+        .search-btn {
+            background: #4361ee;
+            border: none;
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .search-btn:hover {
+            background: #3651d4;
+        }
         
     </style>
 </head>
@@ -313,17 +420,45 @@
                     <span>Quản lý Tags</span>
                 </div>
             </div>
+            
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success success-message">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span th:text="${error}"></span>
+            </div>
             <!-- Tag Management Tools -->
             <div class="management-tools">
                 <div class="search-filters">
                     <div class="tool-item">
-                        <input type="text" placeholder="Tìm kiếm tag..." class="search-input">
+                        <form th:action="@{/admin/tags}" method="get" class="search-form">
+                            <div class="search-input-container">
+                                <input type="text" name="search" placeholder="Tìm kiếm tag..." class="search-input" 
+                                       th:value="${param.search}" id="tagSearchInput">
+                                <button type="button" class="clear-search-btn" id="clearSearchBtn" 
+                                        th:if="${param.search != null and !param.search.isEmpty()}"
+                                        onclick="clearSearch()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button type="submit" class="search-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <input type="hidden" name="page" value="0">
+                            <input type="hidden" name="size" th:value="${pageSize}">
+                            <input type="hidden" name="filter" th:value="${filter}">
+                            <input type="hidden" name="sort" th:value="${sort}">
+                        </form>
                     </div>
                     <div class="tool-item">
                         <form id="sortForm" th:action="@{/admin/tags}" method="get">
                             <input type="hidden" name="page" th:value="${currentPage}">
                             <input type="hidden" name="size" th:value="${pageSize}">
                             <input type="hidden" name="filter" th:value="${filter}">
+                            <input type="hidden" name="search" th:value="${param.search}">
                             <select class="filter-select" name="sort" onchange="this.form.submit()">
                                 <option value="none" th:selected="${sort == 'none' or sort == null}">Sắp xếp theo</option>
                                 <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên (A-Z)</option>
@@ -338,8 +473,9 @@
                     <a th:href="@{/admin/tags/create}" class="add-new-btn" id="addTagBtn">
                         <i class="fas fa-plus"></i> Thêm tag mới
                     </a>
-                    <button class="export-btn">
-                        <i class="fas fa-download"></i> Xuất dữ liệu
+                    <button type="button" class="btn btn-outline" id="exportTagsBtn"
+                            style="background: transparent; color: #4b5563; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-download"></i><span>Export</span>
                     </button>
                 </div>
             </div>
@@ -365,11 +501,11 @@
                 </div>
                 <div class="overview-card">
                     <div class="overview-icon">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-chart-line"></i>
                     </div>
                     <div class="overview-info">
-                        <h3>Lượt tìm kiếm theo tag</h3>
-                        <div class="overview-number">32.5K</div>
+                        <h3>Tags không sử dụng</h3>
+                        <div class="overview-number" th:text="${unusedTags ?: 0}">0</div>
                     </div>
                 </div>
                 <div class="overview-card">
@@ -382,44 +518,30 @@
                     </div>
                 </div>
             </div>
-            <!-- Tag Cloud -->
-            <div class="tag-cloud-container">
-                <div class="section-header">
-                    <h3>Tag Cloud</h3>
-                    <div class="section-actions">
-                        <form id="filterForm" th:action="@{/admin/tags}" method="get">
-                            <input type="hidden" name="page" th:value="${currentPage}">
-                            <input type="hidden" name="size" th:value="${pageSize}">
-                            <input type="hidden" name="sort" th:value="${sort}">
-                            <select class="time-filter" id="timeFilter" name="filter" onchange="this.form.submit()">
-                                <option value="all" th:selected="${filter == 'all'}">Mọi thời điểm</option>
-                                <option value="week" th:selected="${filter == 'week'}">Tuần này</option>
-                                <option value="month" th:selected="${filter == 'month'}">Tháng này</option>
-                                <option value="year" th:selected="${filter == 'year'}">Năm nay</option>
-                            </select>
-                        </form>
-                    </div>
-                </div>
-                <div class="tag-cloud" th:if="${filteredTags != null and not #lists.isEmpty(filteredTags)}">
-                    <a th:each="tag : ${filteredTags}" th:href="@{/admin/tags/{id}/details(id=${tag.id})}" 
-                       class="tag-item" th:text="${tag.name}"
-                       th:style="|font-size: ${tag.documentCount != null and tag.documentCount > 100} ? '1.8em' : ${tag.documentCount != null and tag.documentCount > 50} ? '1.6em' : '1.4em'; --tag-color: var(--primary);|"></a>
-                </div>
-                <div class="tag-cloud" th:if="${filteredTags == null or #lists.isEmpty(filteredTags)}">
-                    <p>Không có tag nào để hiển thị.</p>
-                </div>
-            </div>
+
+            <!-- Search Result Message 
+            <div th:if="${param.search != null and !param.search.isEmpty()}" 
+                 class="alert alert-info" style="margin-bottom: 20px;">
+                <i class="fas fa-search"></i>
+                Kết quả tìm kiếm cho "<strong th:text="${param.search}"></strong>": 
+                <span th:text="${totalItems}"></span> tag(s) được tìm thấy
+                <a th:href="@{/admin/tags(page=0, size=${pageSize}, filter=${filter}, sort=${sort})}" 
+                   class="btn btn-sm btn-outline-secondary ms-2">
+                    <i class="fas fa-times"></i> Xóa tìm kiếm
+                </a>
+            </div>-->
+
             <!-- Tags Table -->
             <div class="data-container">
                 <table class="data-table" th:if="${tags != null and not #lists.isEmpty(tags.content)}">
     <thead>
         <tr>
-            <th>
+         <!--    <th>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="selectAll">
                     <label for="selectAll"></label>
                 </div>
-            </th>
+            </th>-->
             <th>STT</th>
             <th>Tag</th>
             <th>Số tài liệu</th>
@@ -430,12 +552,12 @@
     </thead>
     <tbody>
        <tr th:each="tag, iterStat : ${tags.content}">
-                        <td>
+                    <!--   <td>
                             <div class="checkbox-wrapper">
                                 <input type="checkbox" th:id="'tag' + ${iterStat.count}">
                                 <label th:for="'tag' + ${iterStat.count}"></label>
                             </div>
-                        </td>
+                        </td>--> 
                         <td th:text="${iterStat.count + (currentPage * pageSize)}"></td>
                         <td>
                             <div class="tag-preview">
@@ -450,28 +572,41 @@
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <a th:href="@{/admin/tags/{id}/edit(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort})}" class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
-                                <a th:href="@{/admin/tags/{id}/details(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort})}" class="action-btn" title="Xem chi tiết"><i class="fas fa-file-alt"></i></a>
-                               <form th:action="@{/admin/tags/{id}/delete(id=${tag.id})}" method="post" style="display:inline;">
-    <button type="submit" class="action-btn delete-btn" th:attr="data-id=${tag.id}" th:title="${tag.status == 'active' ? 'Vô hiệu hóa' : 'Kích hoạt'}">
-        <i th:class="${tag.status == 'active' ? 'fas fa-ban' : 'fas fa-check'}"></i>
-    </button>
-</form>
+                                <a th:href="@{/admin/tags/{id}/edit(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
+                                <a th:href="@{/admin/tags/{id}/details(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Xem chi tiết"><i class="fas fa-file-alt"></i></a>
+                             <!--  <a th:href="@{/admin/tags/{id}/toggle-status(id=${tag.id})}" class="action-btn" th:title="${tag.status == 'active' ? 'Vô hiệu hóa' : 'Kích hoạt'}">
+                                    <i th:class="${tag.status == 'active' ? 'fas fa-ban' : 'fas fa-check'}"></i>
+                                </a>--> 
+                                <!-- Chỉ hiển thị delete button cho tag chưa bị xóa vĩnh vin -->
+                                <a th:if="${tag.deletedAt == null}" th:href="@{/admin/tags/{id}/delete(id=${tag.id})}" class="action-btn delete-btn" title="Xóa tag vĩnh viễn">
+                                    <i class="fas fa-trash"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
                 </tbody>
     </tbody>
 </table>
-                <div class="data-container" th:if="${tags == null or #lists.isEmpty(tags)}">
-                    <p>Không có tag nào để hiển thị trong bảng.</p>
+                <div class="data-container" th:if="${tags == null or #lists.isEmpty(tags.content)}">
+                    <div class="text-center py-4">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <p th:if="${param.search != null and !param.search.isEmpty()}" class="text-muted">
+                            Không tìm thấy tag nào với từ khóa "<strong th:text="${param.search}"></strong>"
+                        </p>
+                        <p th:if="${param.search == null or param.search.isEmpty()}" class="text-muted">
+                            Không có tag nào để hiển thị
+                        </p>
+                        <a th:href="@{/admin/tags}" class="btn btn-primary mt-2" th:if="${param.search != null and !param.search.isEmpty()}">
+                            <i class="fas fa-list"></i> Xem tất cả tags
+                        </a>
+                    </div>
                 </div>
             </div>
             <!-- Pagination -->
            <div class="pagination" th:if="${totalPages > 0}">
     <!-- Nút Prev -->
     <a th:if="${currentPage > 0}"
-       th:href="@{/admin/tags(page=${currentPage - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''})}"
+       th:href="@{/admin/tags(page=${currentPage - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
        class="pagination-btn prev-btn">
         <i class="fas fa-chevron-left"></i>
     </a>
@@ -482,7 +617,7 @@
     <!-- Danh sách trang -->
     <div class="pagination-pages">
         <!-- Trang đầu -->
-        <a th:href="@{/admin/tags(page=0, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''})}"
+        <a th:href="@{/admin/tags(page=0, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
            th:class="${currentPage == 0 ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}">1</a>
 
         <!-- Dấu chấm lửng nếu có hơn 4 trang và currentPage >= 3 -->
@@ -491,7 +626,7 @@
         <!-- Các trang giữa (hiển thị 2 trang gần currentPage) -->
         <a th:each="i : ${#numbers.sequence(currentPage - 1, currentPage + 1)}"
            th:if="${i > 0 and i < totalPages - 1}"
-           th:href="@{/admin/tags(page=${i}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''})}"
+           th:href="@{/admin/tags(page=${i}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
            th:class="${i == currentPage ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
            th:text="${i + 1}"></a>
 
@@ -500,14 +635,14 @@
 
         <!-- Trang cuối (hiển thị nếu totalPages > 1) -->
         <a th:if="${totalPages > 1}"
-           th:href="@{/admin/tags(page=${totalPages - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''})}"
+           th:href="@{/admin/tags(page=${totalPages - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
            th:class="${currentPage == totalPages - 1 ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
            th:text="${totalPages}"></a>
     </div>
 
     <!-- Nút Next -->
     <a th:if="${currentPage < totalPages - 1}"
-       th:href="@{/admin/tags(page=${currentPage + 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''})}"
+       th:href="@{/admin/tags(page=${currentPage + 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
        class="pagination-btn next-btn">
         <i class="fas fa-chevron-right"></i>
     </a>
@@ -555,5 +690,30 @@
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/admin/admin.js}"></script>
     <script th:src="@{/js/admin/tags.js}"></script>
+    
+    <script>
+        function clearSearch() {
+            const searchInput = document.getElementById('tagSearchInput');
+            searchInput.value = '';
+            
+            // Submit form to clear search
+            const form = searchInput.closest('form');
+            form.submit();
+        }
+        
+        // Show/hide clear button based on input value
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('tagSearchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (clearBtn) {
+                        clearBtn.style.display = this.value.trim() ? 'flex' : 'none';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

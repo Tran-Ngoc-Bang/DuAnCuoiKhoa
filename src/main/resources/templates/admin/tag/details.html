@@ -14,109 +14,103 @@
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
     <link rel="stylesheet" th:href="@{/css/admin/tags.css}">
        <style type="text/css">
-    .tag-detail-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f9fbfd 100%);
-    border: 1px solid #e0e4e8;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-
-.tag-detail-header {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.tag-icon {
-    font-size: 2rem;
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    margin-right: 15px;
-}
-
-.tag-detail-content {
-    padding: 10px 0;
-}
-
-.tag-stats, .tag-detail-info {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 20px;
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 8px;
-}
-
-.stat-item, .info-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-}
-
-.stat-label, .info-label {
-    font-weight: 500;
-    color: #64748b;
-}
-
-.stat-value, .info-value {
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.tag-action-buttons {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-    margin-top: 15px;
-}
-
-.btn {
-    padding: 8px 18px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: transform 0.2s, background 0.3s;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #4b6cb7 0%, #8e44ad 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #405d9d 0%, #7b38a1 100%);
-    transform: translateY(-2px);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #e63946 0%, #d81e2e 100%);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: linear-gradient(135deg, #c72b38 0%, #b81c28 100%);
-    transform: translateY(-2px);
-}
-
-.tag-detail-title {
-    color: #2d3748;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-
-.tag-detail-description {
-    color: #718096;
-    margin-bottom: 15px;
-}
+        /* Compact tag details */
+        .data-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .tag-detail-card {
+            background: #ffffff;
+            border: 1px solid #e0e4e8;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .tag-detail-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .tag-icon {
+            font-size: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 12px;
+            background: #f8fafc;
+            color: #4361ee;
+        }
+        .tag-detail-title {
+            color: #2d3748;
+            font-size: 1.25rem;
+            margin: 0;
+        }
+        .tag-detail-description {
+            color: #718096;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+        .tag-stats, .tag-detail-info {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .stat-item, .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.9rem;
+        }
+        .stat-label, .info-label {
+            font-weight: 500;
+            color: #64748b;
+        }
+        .stat-value, .info-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .tag-action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #4361ee;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #3651d4;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
     </style>
 </head>
 
@@ -301,17 +295,21 @@
                         </div>
                         <div class="tag-detail-info">
                             <div class="info-item">
-                                <span class="info-label">Slug</span>
-                                <span class="info-value" th:text="${tag.slug}">tag-slug</span>
+                                <span class="info-label">Tạo bởi</span>
+                                <span class="info-value" th:text="${tag.createdByName ?: 'Không xác định'}">Không xác định</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Ngày tạo</span>
-                                <span class="info-value" th:text="${#temporals.format(tag.createdAt, 'dd/MM/yyyy')}">27/07/2025</span>
+                                <span class="info-value" th:text="${#temporals.format(tag.createdAt, 'dd/MM/yyyy HH:mm')}">27/07/2025 10:30</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Ngày cập nhật</span>
                                 <span class="info-value" th:text="${#temporals.format(tag.updatedAt, 'dd/MM/yyyy HH:mm')}" th:if="${tag.updatedAt != null}">12:29 27/07/2025</span>
                                 <span class="info-value" th:unless="${tag.updatedAt != null}">Chưa cập nhật</span>
+                            </div>
+                            <div class="info-item" th:if="${tag.deletedAt != null}">
+                                <span class="info-label">Thời gian xóa</span>
+                                <span class="info-value" th:text="${#temporals.format(tag.deletedAt, 'dd/MM/yyyy HH:mm')}" style="color: #dc2626;">15/08/2025 14:30</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Trạng thái</span>
@@ -323,7 +321,9 @@
                     </div>
                     <div class="tag-action-buttons">
                         <a th:href="'/admin/tags/' + ${tag.id} + '/edit'" class="btn btn-primary">Chỉnh sửa</a>
-                  <!--      <button class="btn btn-danger" onclick="confirmDelete()">Xóa</button> --> 
+                        <!-- Chỉ hiển thị button xóa nếu tag chưa bị xóa vĩnh viễn -->
+                        <a th:if="${tag.deletedAt == null}" th:href="'/admin/tags/' + ${tag.id} + '/delete'" class="btn btn-danger">Xóa vĩnh viễn</a>
+                        <span th:if="${tag.deletedAt != null}" class="btn btn-secondary" style="cursor: not-allowed; opacity: 0.6;">Đã xóa</span>
                     </div>
                 </div>
             </div>

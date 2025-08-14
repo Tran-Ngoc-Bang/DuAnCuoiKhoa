@@ -1,341 +1,655 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chi tiết tài liệu - EduShare Admin</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/main.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/admin_documents.css}">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin_documents.css}" />
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <style>
-        /* 🌟 Modal Wrapper */
-.modal-content.large {
-  margin-left: 200px;
-}
+      /* 🌟 Modal Wrapper */
+      .modal-content.large {
+        margin-left: 200px;
+      }
 
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
 
-/* Header */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
-}
-.modal-header h3 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #222;
-  margin: 0;
-}
-.modal-close {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  color: #999;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.modal-close:hover { color: #333; }
+      /* Header */
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+      }
+      .modal-header h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #222;
+        margin: 0;
+      }
+      .modal-close {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .modal-close:hover {
+        color: #333;
+      }
 
-/* Footer */
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
-}
+      /* Footer */
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid #eee;
+      }
 
-/* Tabs */
-.modal-tabs .tab-nav {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.tab-btn {
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #f9f9f9;
-  font-weight: 600;
-  color: #555;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-.tab-btn.active {
-  background: #4f46e5;
-  color: #fff;
-  border-color: #4f46e5;
-}
-.tab-btn:hover { background: #eee; }
+      /* Tabs */
+      .modal-tabs .tab-nav {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .tab-btn {
+        padding: 10px 16px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #f9f9f9;
+        font-weight: 600;
+        color: #555;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+      }
+      .tab-btn.active {
+        background: #4f46e5;
+        color: #fff;
+        border-color: #4f46e5;
+      }
+      .tab-btn:hover {
+        background: #eee;
+      }
 
-/* Form */
-.form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-.form-group {
-  flex: 1 1 48%;
-  display: flex;
-  flex-direction: column;
-}
-.form-group label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #333;
-}
-input, select, textarea {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: #4f46e5;
-  outline: none;
-}
+      /* Form */
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+      .form-group {
+        flex: 1 1 48%;
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+      }
+      input,
+      select,
+      textarea {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #4f46e5;
+        outline: none;
+      }
 
-/* Upload */
-.file-upload {
-  border: 2px dashed #ccc;
-  padding: 20px;
-  text-align: center;
-  border-radius: 6px;
-  transition: border-color 0.2s;
-}
-.file-upload:hover { border-color: #4f46e5; }
+      /* Upload */
+      .file-upload {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        border-radius: 6px;
+        transition: border-color 0.2s;
+      }
+      .file-upload:hover {
+        border-color: #4f46e5;
+      }
 
-.file-upload-label i { font-size: 2rem; color: #aaa; }
-.file-upload-label span { display: block; font-weight: 500; margin-top: 8px; }
+      .file-upload-label i {
+        font-size: 2rem;
+        color: #aaa;
+      }
+      .file-upload-label span {
+        display: block;
+        font-weight: 500;
+        margin-top: 8px;
+      }
 
-.thumbnail-preview img {
-  max-width: 100%;
-  border-radius: 6px;
-  margin-top: 10px;
-}
+      .thumbnail-preview img {
+        max-width: 100%;
+        border-radius: 6px;
+        margin-top: 10px;
+      }
 
-.btn-remove {
-  background: none;
-  border: none;
-  color: #dc2626;
-  cursor: pointer;
-}
-.btn-remove:hover { color: #991b1b; }
+      .btn-remove {
+        background: none;
+        border: none;
+        color: #dc2626;
+        cursor: pointer;
+      }
+      .btn-remove:hover {
+        color: #991b1b;
+      }
 
-/* Helper text */
-.form-help {
-  font-size: 0.85rem;
-  color: #666;
-}
+      /* Helper text */
+      .form-help {
+        font-size: 0.85rem;
+        color: #666;
+      }
 
-.required { color: #dc2626; }
+      .required {
+        color: #dc2626;
+      }
+
+      /* Comment Management Styles */
+      .comment-stats {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .report-badge {
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .report-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+
+      .report-resolved {
+        background-color: #d1fae5;
+        color: #065f46;
+      }
+
+      .report-rejected {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      .reply-form {
+        border-left: 3px solid #e5e7eb;
+        padding-left: 16px;
+      }
+
+      /* Report Modal Styles */
+      #reportCommentModal .modal-header {
+        background-color: #fef2f2;
+        border-bottom: 1px solid #fecaca;
+      }
+
+      #reportCommentModal .modal-title {
+        color: #dc2626;
+        font-weight: 600;
+      }
+
+      #reportCommentModal .form-label {
+        font-weight: 600;
+        color: #374151;
+      }
+
+      #reportCommentModal .form-select,
+      #reportCommentModal .form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      #reportCommentModal .form-select:focus,
+      #reportCommentModal .form-control:focus {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25);
+      }
+
+      #reportCommentModal .alert-info {
+        background-color: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1e40af;
+      }
+
+      #reportCommentModal .btn-danger {
+        background-color: #dc2626;
+        border-color: #dc2626;
+        transition: all 0.2s;
+      }
+
+      #reportCommentModal .btn-danger:hover {
+        background-color: #b91c1c;
+        border-color: #b91c1c;
+        transform: translateY(-1px);
+      }
+
+      #reportCommentModal .btn-secondary {
+        transition: all 0.2s;
+      }
+
+      #reportCommentModal .btn-secondary:hover {
+        transform: translateY(-1px);
+      }
+
+      /* Force modal styles to override Bootstrap */
+      /* Let Bootstrap handle modal display, just style the content */
+      #reportCommentModal .modal-dialog {
+        max-width: 500px;
+      }
+
+      #reportCommentModal .modal-content {
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .review-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        background: #fff;
+        transition: box-shadow 0.2s;
+      }
+
+      .review-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+
+      .reviewer-info {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .reviewer-details {
+        flex: 1;
+      }
+
+      .reviewer-name {
+        font-size: 1rem;
+        color: #374151;
+        margin-bottom: 4px;
+      }
+
+      .metadata {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #6b7280;
+      }
+
+      .timestamp {
+        color: #9ca3af;
+      }
+
+      .review-content {
+        margin-left: 52px;
+        color: #374151;
+        line-height: 1.6;
+      }
+
+      #commentContent {
+        resize: vertical;
+        min-height: 80px;
+      }
     </style>
-</head>
-<body class="admin-page">
+  </head>
+  <body class="admin-page">
     <!-- Admin Header -->
     <header class="admin-header">
-        <div class="admin-header-content">
-            <div class="admin-logo">
-                <a href="/admin" class="logo">
-                    <div class="logo-icon">E</div>
-                    <div class="logo-text">EduShare</div>
-                </a>
-            </div>
-            <div class="admin-header-actions">
-                <div class="admin-search">
-                    <input type="text" placeholder="Tìm kiếm...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-                <div class="dark-mode-toggle" id="darkModeToggle"></div>
-                <div class="admin-notifications">
-                    <button type="button" class="notification-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">5</span>
-                    </button>
-                </div>
-                <div class="admin-profile">
-                    <div class="admin-avatar">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
-                    </div>
-                    <div class="admin-info">
-                        <span class="admin-name">Nguyễn Văn A</span>
-                        <span>Quản trị viên</span>
-                    </div>
-                    <div class="admin-dropdown">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </div>
+      <div class="admin-header-content">
+        <div class="admin-logo">
+          <a href="/admin" class="logo">
+            <div class="logo-icon">E</div>
+            <div class="logo-text">EduShare</div>
+          </a>
         </div>
+        <div class="admin-header-actions">
+          <div class="admin-search">
+            <input type="text" placeholder="Tìm kiếm..." />
+            <button><i class="fas fa-search"></i></button>
+          </div>
+          <div class="dark-mode-toggle" id="darkModeToggle"></div>
+          <div class="admin-notifications">
+            <button type="button" class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">5</span>
+            </button>
+          </div>
+          <div class="admin-profile">
+            <div class="admin-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                alt="Admin"
+              />
+            </div>
+            <div class="admin-info">
+              <span class="admin-name">Nguyễn Văn A</span>
+              <span>Quản trị viên</span>
+            </div>
+            <div class="admin-dropdown">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
     <!-- Admin Container -->
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
-            <nav class="admin-nav">
-                <ul class="admin-menu">
-                    <li class="admin-menu-item">
-                        <a href="/admin"><i class="fas fa-tachometer-alt"></i><span>Bảng điều khiển</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/users"><i class="fas fa-users"></i><span>Quản lý người dùng</span></a>
-                    </li>
-                    <li class="admin-menu-item active">
-                        <a href="/admin/documents"><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/categories"><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/tags"><i class="fas fa-tags"></i><span>Quản lý tags</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/comments"><i class="fas fa-comments"></i><span>Quản lý bình luận</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/reports"><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/ip-bans"><i class="fas fa-ban"></i><span>IP bị cấm</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/statistics"><i class="fas fa-chart-bar"></i><span>Thống kê</span></a>
-                    </li>
-                    <li class="admin-menu-item has-submenu">
-                        <a href="javascript:void(0)">
-                            <i class="fas fa-coins"></i><span>Quản lý doanh thu</span>
-                            <i class="fas fa-chevron-down submenu-icon"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li class="submenu-item"><a href="/admin/coin-packages"><i class="fas fa-box"></i><span>Gói xu</span></a></li>
-                            <li class="submenu-item"><a href="/admin/transactions"><i class="fas fa-exchange-alt"></i><span>Giao dịch</span></a></li>
-                            <li class="submenu-item"><a href="/admin/withdrawals"><i class="fas fa-money-bill-wave"></i><span>Yêu cầu rút tiền</span></a></li>
-                        </ul>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/admin/settings"><i class="fas fa-cog"></i><span>Cài đặt</span></a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a href="/logout"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-        <!-- Main Content -->
-        <main class="admin-content">
-            <div class="admin-content-header">
-                <h1 class="admin-page-title">Chi tiết tài liệu</h1>
-                <div class="admin-breadcrumbs">
-                    <a href="/admin/documents">Admin</a>
-                    <span>/</span>
-                    <a href="/admin/documents">Tài liệu</a>
-                    <span>/</span>
-                    <span>Chi tiết</span>
-                </div>
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <nav class="admin-nav">
+          <ul class="admin-menu">
+            <li class="admin-menu-item">
+              <a href="/admin"
+                ><i class="fas fa-tachometer-alt"></i
+                ><span>Bảng điều khiển</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/users"
+                ><i class="fas fa-users"></i><span>Quản lý người dùng</span></a
+              >
+            </li>
+            <li class="admin-menu-item active">
+              <a href="/admin/documents"
+                ><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/categories"
+                ><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/tags"
+                ><i class="fas fa-tags"></i><span>Quản lý tags</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/comments"
+                ><i class="fas fa-comments"></i
+                ><span>Quản lý bình luận</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/reports"
+                ><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/ip-bans"
+                ><i class="fas fa-ban"></i><span>IP bị cấm</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/statistics"
+                ><i class="fas fa-chart-bar"></i><span>Thống kê</span></a
+              >
+            </li>
+            <li class="admin-menu-item has-submenu">
+              <a href="javascript:void(0)">
+                <i class="fas fa-coins"></i><span>Quản lý doanh thu</span>
+                <i class="fas fa-chevron-down submenu-icon"></i>
+              </a>
+              <ul class="submenu">
+                <li class="submenu-item">
+                  <a href="/admin/coin-packages"
+                    ><i class="fas fa-box"></i><span>Gói xu</span></a
+                  >
+                </li>
+                <li class="submenu-item">
+                  <a href="/admin/transactions"
+                    ><i class="fas fa-exchange-alt"></i
+                    ><span>Giao dịch</span></a
+                  >
+                </li>
+                <li class="submenu-item">
+                  <a href="/admin/withdrawals"
+                    ><i class="fas fa-money-bill-wave"></i
+                    ><span>Yêu cầu rút tiền</span></a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="admin-menu-item">
+              <a href="/admin/settings"
+                ><i class="fas fa-cog"></i><span>Cài đặt</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="/logout"
+                ><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      <!-- Main Content -->
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Chi tiết tài liệu</h1>
+          <div class="admin-breadcrumbs">
+            <a href="/admin/documents">Admin</a>
+            <span>/</span>
+            <a href="/admin/documents">Tài liệu</a>
+            <span>/</span>
+            <span>Chi tiết</span>
+          </div>
+        </div>
+        <div th:if="${success}" class="alert alert-success" role="alert">
+          <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:text="${error}"></span>
+        </div>
+        <div class="modal-content large">
+          <div class="modal-header">
+            <h3 th:text="${document.title} ?: 'Chi tiết tài liệu'"></h3>
+            <a th:href="@{/admin/documents}" class="modal-close">
+              <i class="fas fa-times"></i>
+            </a>
+          </div>
+          <div class="modal-body">
+            <!-- Tab Navigation -->
+            <div class="modal-tabs">
+              <div class="tab-nav">
+                <button type="button" class="tab-btn active" data-tab="general">
+                  <i class="fas fa-info-circle"></i><span>Thông tin chung</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="versions">
+                  <i class="fas fa-history"></i><span>Lịch sử phiên bản</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="analytics">
+                  <i class="fas fa-chart-bar"></i
+                  ><span>Thống kê & Phân tích</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="reviews">
+                  <i class="fas fa-comments"></i><span>Bình luận</span>
+                </button>
+              </div>
             </div>
-            <div th:if="${success}" class="alert alert-success" role="alert">
-                <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
-            </div>
-            <div th:if="${error}" class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
-            </div>
-            <div class="modal-content large">
-                <div class="modal-header">
-                    <h3 th:text="${document.title} ?: 'Chi tiết tài liệu'"></h3>
-                    <a th:href="@{/admin/documents}" class="modal-close">
-                        <i class="fas fa-times"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <!-- Tab Navigation -->
-                    <div class="modal-tabs">
-                        <div class="tab-nav">
-                            <button type="button" class="tab-btn active" data-tab="general">
-                                <i class="fas fa-info-circle"></i><span>Thông tin chung</span>
-                            </button>
-                            <button type="button" class="tab-btn" data-tab="versions">
-                                <i class="fas fa-history"></i><span>Lịch sử phiên bản</span>
-                            </button>
-                            <button type="button" class="tab-btn" data-tab="analytics">
-                                <i class="fas fa-chart-bar"></i><span>Thống kê & Phân tích</span>
-                            </button>
-                            <button type="button" class="tab-btn" data-tab="reviews">
-                                <i class="fas fa-comments"></i><span>Bình luận</span>
-                            </button>
-                        </div>
+            <!-- Tab Content Panels -->
+            <div class="tab-content">
+              <!-- Tab 1: General Information -->
+              <div class="tab-panel active" id="tab-general">
+                <div class="row" id="documentDetailsContent">
+                  <!--<div class="col-md-4">
+                    <img
+                      th:src="${document.thumbnail != null ? document.thumbnail : 'https://via.placeholder.com/400x300'}"
+                      class="img-fluid rounded"
+                      alt="Thumbnail"
+                    />
+                  </div>-->
+                  <div class="col-md-16">
+                    <h4 th:text="${document.title} ?: 'Không có tiêu đề'"></h4>
+                    <p
+                      class="text-muted"
+                      th:text="${document.description != null and !document.description.trim().isEmpty()} ? ${document.description} : 'Không có mô tả'"
+                    ></p>
+                    <div class="row mb-3">
+                      <div class="col-sm-6">
+                        <strong>Tác giả:</strong>
+                        <span
+                          th:text="${document.authorName != null ? document.authorName : 'Không xác định'}"
+                        ></span
+                        ><br />
+                        <strong>Danh mục:</strong>
+                        <span
+                          th:text="${document.categoryNames != null and !document.categoryNames.isEmpty()} ? ${#strings.listJoin(document.categoryNames, ', ')} : 'Không có danh mục'"
+                        ></span
+                        ><br />
+                        <strong>Loại file:</strong>
+                        <span
+                          th:text="${document.fileType != null ? document.fileType : 'Không xác định'}"
+                        ></span
+                        ><br />
+                        <strong>Giá:</strong>
+                        <span
+                          th:text="${document.price != null and document.price.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? (${#numbers.formatDecimal(document.price, 0, 0)} + ' coin') : 'Miễn phí'"
+                        ></span>
+                      </div>
+                      <div class="col-sm-6">
+                        <strong>Lượt xem:</strong>
+                        <span
+                          th:text="${document.viewsCount != null ? document.viewsCount : '0'}"
+                        ></span
+                        ><br />
+                        <strong>Lượt tải:</strong>
+                        <span
+                          th:text="${document.downloadsCount != null ? document.downloadsCount : '0'}"
+                        ></span
+                        ><br />
+                        <strong>Đánh giá:</strong> <span>Chưa có đánh giá</span
+                        ><br />
+                        <strong>Kích thước:</strong>
+                        <span
+                          th:text="${document.fileSize != null ? (#numbers.formatDecimal(document.fileSize / 1024, 1, 2) + ' MB') : '0.00 MB'}"
+                        ></span>
+                      </div>
                     </div>
-                    <!-- Tab Content Panels -->
-                    <div class="tab-content">
-                        <!-- Tab 1: General Information -->
-                        <div class="tab-panel active" id="tab-general">
-                            <div class="row" id="documentDetailsContent">
-                                <div class="col-md-4">
-                                    <img th:src="${document.thumbnail != null ? document.thumbnail : 'https://via.placeholder.com/400x300'}" class="img-fluid rounded" alt="Thumbnail">
-                                </div>
-                                <div class="col-md-8">
-                                    <h4 th:text="${document.title} ?: 'Không có tiêu đề'"></h4>
-                                    <p class="text-muted" th:text="${document.description != null and !document.description.trim().isEmpty()} ? ${document.description} : 'Không có mô tả'"></p>
-                                    <div class="row mb-3">
-                                        <div class="col-sm-6">
-                                            <strong>Tác giả:</strong> <span th:text="${document.authorName != null ? document.authorName : 'Không xác định'}"></span><br>
-                                            <strong>Danh mục:</strong> <span th:text="${document.categoryNames != null and !document.categoryNames.isEmpty()} ? ${#strings.listJoin(document.categoryNames, ', ')} : 'Không có danh mục'"></span><br>
-                                            <strong>Loại file:</strong> <span th:text="${document.fileType != null ? document.fileType : 'Không xác định'}"></span><br>
-                                            <strong>Giá:</strong> <span th:text="${document.price != null and document.price.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? (${#numbers.formatDecimal(document.price, 0, 0)} + ' coin') : 'Miễn phí'"></span>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <strong>Lượt xem:</strong> <span th:text="${document.viewsCount != null ? document.viewsCount : '0'}"></span><br>
-                                            <strong>Lượt tải:</strong> <span th:text="${document.downloadsCount != null ? document.downloadsCount : '0'}"></span><br>
-                                            <strong>Đánh giá:</strong> <span>Chưa có đánh giá</span><br>
-                                            <strong>Kích thước:</strong> <span th:text="${document.fileSize != null ? (#numbers.formatDecimal(document.fileSize, 1, 2) + ' MB') : '0.00 MB'}"></span>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Tags:</strong><br>
-                                        <div th:text="${document.tagNames != null and !document.tagNames.isEmpty()} ? ${#strings.listJoin(document.tagNames, ', ')} : 'Không có tag'"></div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Trạng thái:</strong>
-                                        <span th:class="|status-badge ${document.status != null ? document.status : 'DRAFT'}|" th:text="${document.status != null ? document.status : 'DRAFT'}"></span>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <strong>Ngày tạo:</strong> <span th:text="${document.createdAt != null} ? ${#temporals.format(document.createdAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"></span>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <strong>Ngày cập nhật:</strong> <span th:text="${document.updatedAt != null} ? ${#temporals.format(document.updatedAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Tab 2: Version History -->
-                        <div class="tab-panel" id="tab-versions">
-                            <div class="versions-container">
-                                <div class="versions-header">
-                                    <h5>Lịch sử phiên bản</h5>
-                                    <button type="button" class="btn btn-sm btn-outline">
-                                        <i class="fas fa-plus"></i><span>Tạo phiên bản mới</span>
-                                    </button>
-                                </div>
-                                <div class="versions-timeline" id="versionsTimeline">
-                                    <!-- Sample version item, replace with actual data -->
-                                   <!--  <div class="version-item" th:each="version : ${document.versions}">
+                    <div class="mb-3">
+                      <strong>Tags:</strong><br />
+                      <div
+                        th:text="${document.tagNames != null and !document.tagNames.isEmpty()} ? ${#strings.listJoin(document.tagNames, ', ')} : 'Không có tag'"
+                      ></div>
+                    </div>
+                    <div class="mb-3">
+                      <strong>Trạng thái:</strong>
+                      <span
+                        th:class="|status-badge ${document.status != null ? document.status : 'DRAFT'}|"
+                        th:text="${document.status == 'DRAFT' ? 'Bản nháp' : 
+                                                        document.status == 'PENDING' ? 'Chờ duyệt' : 
+                                                        document.status == 'PUBLISHED' ? 'Đã xuất bản' : 
+                                                        document.status == 'ARCHIVED' ? 'Đã lưu trữ' : 
+                                                        document.status == 'REJECTED' ? 'Bị từ chối' : 
+                                                        document.status == 'SUSPENDED' ? 'Đã tạm ngưng' : 
+                                                        document.status != null ? document.status : 'Bản nháp'}"
+                      ></span>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <strong>Ngày tạo:</strong>
+                        <span
+                          th:text="${document.createdAt != null} ? ${#temporals.format(document.createdAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"
+                        ></span>
+                      </div>
+                      <div class="col-sm-6">
+                        <strong>Ngày cập nhật:</strong>
+                        <span
+                          th:text="${document.updatedAt != null} ? ${#temporals.format(document.updatedAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="row" th:if="${document.deletedAt != null}">
+                      <div class="col-sm-12">
+                        <strong style="color: #dc3545">Ngày xóa:</strong>
+                        <span
+                          style="color: #dc3545"
+                          th:text="${#temporals.format(document.deletedAt, 'dd/MM/yyyy HH:mm')}"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Tab 2: Version History -->
+              <div class="tab-panel" id="tab-versions">
+                <div class="versions-container">
+                  <div class="versions-header">
+                    <h5>Lịch sử phiên bản</h5>
+                    <button type="button" class="btn btn-sm btn-outline">
+                      <i class="fas fa-plus"></i><span>Tạo phiên bản mới</span>
+                    </button>
+                  </div>
+                  <div class="versions-timeline" id="versionsTimeline">
+                    <!-- Sample version item, replace with actual data -->
+                    <!--  <div class="version-item" th:each="version : ${document.versions}">
                                         <div class="version-badge" th:text="${version.versionNumber} ?: 'v1.0'"></div>
                                         <div class="version-content">
                                             <div class="version-header">
@@ -352,8 +666,8 @@ input:focus, select:focus, textarea:focus {
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>--> 
-                                   <!--   <div class="version-item" th:unless="${document.versions}">
+                                    </div>-->
+                    <!--   <div class="version-item" th:unless="${document.versions}">
                                         <div class="version-badge">v1.0</div>
                                         <div class="version-content">
                                             <div class="version-header">
@@ -370,233 +684,974 @@ input:focus, select:focus, textarea:focus {
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>--> 
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Tab 3: Analytics & Statistics -->
-                        <div class="tab-panel" id="tab-analytics">
-                            <div class="analytics-container">
-                                <div class="analytics-header">
-                                    <h5>Thống kê & Phân tích</h5>
-                                    <div class="date-range-selector">
-                                        <select class="form-select form-select-sm" id="dateRangeSelector">
-                                            <option value="7d">7 ngày qua</option>
-                                            <option value="30d">30 ngày qua</option>
-                                            <option value="90d">3 tháng qua</option>
-                                            <option value="1y">1 năm qua</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row mb-4">
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <div class="stats-icon"><i class="fas fa-eye"></i></div>
-                                            <div class="stats-content">
-                                                <h6>Lượt xem</h6>
-                                                <div class="stats-number" th:text="${document.viewsCount != null ? document.viewsCount : '0'}"></div>
-                                                <div class="stats-change positive">+12% từ tuần trước</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <div class="stats-icon"><i class="fas fa-download"></i></div>
-                                            <div class="stats-content">
-                                                <h6>Lượt tải</h6>
-                                                <div class="stats-number" th:text="${document.downloadsCount != null ? document.downloadsCount : '0'}"></div>
-                                                <div class="stats-change positive">+8% từ tuần trước</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <div class="stats-icon"><i class="fas fa-share"></i></div>
-                                            <div class="stats-content">
-                                                <h6>Lượt chia sẻ</h6>
-                                           <!--     <div class="stats-number" th:text="${document.sharesCount != null ? document.sharesCount : '0'}"></div> --> 
-                                                <div class="stats-change negative">-3% từ tuần trước</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <div class="stats-icon"><i class="fas fa-star"></i></div>
-                                            <div class="stats-content">
-                                                <h6>Đánh giá TB</h6>
-                                                <div class="stats-number">0.0</div>
-                                                <div class="stats-change positive">+0.1 từ tuần trước</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="chart-container">
-                                    <canvas id="analyticsChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Tab 4: Reviews & Comments -->
-                    <div class="tab-panel" id="tab-reviews">
-    <div class="reviews-container">
-        <div class="reviews-header">
-            <h5>Bình luận</h5>
-        </div>
-        <div class="reviews-list" id="reviewsList">
-            <div class="review-item" th:each="comment : ${document.comments}">
-                <div class="review-header">
-                    <div class="reviewer-info">
-                        <img th:src="${comment.userAvatar != null ? comment.userAvatar : 'https://via.placeholder.com/40'}" class="avatar" alt="avatar">
-                        <div class="reviewer-details">
-                            <strong class="reviewer-name" th:text="${comment.userName} ?: 'Không xác định'"></strong>
-                            <div class="metadata">
-                                <span class="timestamp" th:text="${comment.createdAt != null} ? ${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')} : '2 ngày trước'"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="review-actions">
-                        <button type="button" class="btn btn-sm btn-outline">
-                            <i class="fas fa-reply"></i> Trả lời
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline text-danger">
-                            <i class="fas fa-flag"></i> Báo cáo
-                        </button>
-                    </div>
+                                    </div>-->
+                  </div>
                 </div>
-                <div class="review-content">
-                    <p th:text="${comment.content} ?: 'Tài liệu rất hữu ích và chi tiết. Cảm ơn tác giả!'"></p>
+              </div>
+              <!-- Tab 3: Analytics & Statistics -->
+              <div class="tab-panel" id="tab-analytics">
+                <div class="analytics-container">
+                  <div class="analytics-header">
+                    <h5>Thống kê & Phân tích</h5>
+                    <div class="chart-info">
+                      <small class="text-muted"
+                        >Biểu đồ phân bố tương tác</small
+                      >
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col-md-3">
+                      <div class="stats-card">
+                        <div class="stats-icon"><i class="fas fa-eye"></i></div>
+                        <div class="stats-content">
+                          <h6>Lượt xem</h6>
+                          <div
+                            class="stats-number"
+                            th:text="${document.viewsCount != null ? document.viewsCount : '0'}"
+                          ></div>
+                          <div class="stats-change positive">
+                            +12% từ tuần trước
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="stats-card">
+                        <div class="stats-icon">
+                          <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stats-content">
+                          <h6>Lượt tải</h6>
+                          <div
+                            class="stats-number"
+                            th:text="${document.downloadsCount != null ? document.downloadsCount : '0'}"
+                          ></div>
+                          <div class="stats-change positive">
+                            +8% từ tuần trước
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="stats-card">
+                        <div class="stats-icon">
+                          <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stats-content">
+                          <h6>Bình luận</h6>
+                          <div
+                            class="stats-number"
+                            th:text="${document.comments != null ? document.comments.size() : '0'}"
+                          ></div>
+                          <div class="stats-change positive">
+                            +5% từ tuần trước
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="stats-card">
+                        <div class="stats-icon">
+                          <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stats-content">
+                          <h6>Kích thước</h6>
+                          <div
+                            class="stats-number"
+                            th:text="${document.fileSize != null ? (#numbers.formatDecimal(document.fileSize / 1024, 1, 1) + ' MB') : '0.0 MB'}"
+                          ></div>
+                          <div class="stats-change neutral">Không đổi</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="chart-container"
+                    style="height: 400px; position: relative"
+                  >
+                    <canvas id="analyticsChart"></canvas>
+                  </div>
                 </div>
+              </div>
+              <!-- Tab 4: Reviews & Comments -->
+              <div class="tab-panel" id="tab-reviews">
+                <div class="reviews-container">
+                  <div class="reviews-header">
+                    <h5>Bình luận</h5>
+                    <div class="comment-stats">
+                      <span class="stat-item">
+                        <i class="fas fa-comments text-primary"></i>
+                        <span
+                          th:text="${document.comments != null ? document.comments.size() : 0}"
+                          >0</span
+                        >
+                        bình luận
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Comments list -->
+                  <div class="reviews-list" id="reviewsList">
+                    <!-- Comments list -->
+                    <div id="commentsContainer">
+                      <!-- Comments from server -->
+                      <div
+                        class="review-item"
+                        th:each="comment : ${document.comments}"
+                        th:if="${document.comments != null and !document.comments.isEmpty()}"
+                      >
+                        <div class="review-header">
+                          <div class="reviewer-info">
+                            <img
+                              th:src="${comment.userAvatar != null ? comment.userAvatar : 'https://via.placeholder.com/40'}"
+                              class="avatar"
+                              alt="avatar"
+                            />
+                            <div class="reviewer-details">
+                              <strong
+                                class="reviewer-name"
+                                th:text="${comment.userName} ?: 'Không xác định'"
+                              ></strong>
+                              <div class="metadata">
+                                <span
+                                  class="timestamp"
+                                  th:text="${comment.createdAt != null} ? ${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')} : 'Không xác định'"
+                                ></span>
+                                <!-- Show report status if comment has been reported -->
+                                <span
+                                  th:if="${comment.reportStatus != null}"
+                                  class="report-badge"
+                                  th:class="|report-${comment.reportStatus}|"
+                                  th:text="${comment.reportStatus == 'pending' ? 'Đã báo cáo' : 
+                                               comment.reportStatus == 'resolved' ? 'Đã xử lý' : 
+                                               comment.reportStatus == 'rejected' ? 'Báo cáo bị từ chối' : ''}"
+                                >
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="review-actions">
+                         <!--   <button
+                              type="button"
+                              class="btn btn-sm btn-outline-primary"
+                              th:onclick="|replyToComment(${comment.id})|"
+                            >
+                              <i class="fas fa-reply"></i> Trả lời
+                            </button>-->
+                            <a
+                              th:href="@{/admin/reportcomment(commentId=${comment.id}, documentId=${document.id}, returnUrl='/admin/documents/' + ${document.id} + '/details')}"
+                              class="btn btn-sm btn-outline-danger"
+                              th:if="${comment.reportStatus == null}"
+                            >
+                              <i class="fas fa-flag"></i>
+                              <span>Báo cáo vi phạm</span>
+                            </a>
+                            <span
+                              th:if="${comment.reportStatus != null}"
+                              class="btn btn-sm btn-outline-secondary disabled"
+                            >
+                              <i class="fas fa-flag"></i>
+                              <span>Đã báo cáo</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="review-content">
+                          <p
+                            th:text="${comment.content} ?: '[Nội dung bình luận trống]'"
+                          ></p>
+                        </div>
+
+                        <!-- Reply form (hidden by default) -->
+                        <div
+                          class="reply-form"
+                          th:id="|replyForm-${comment.id}|"
+                          style="display: none"
+                        >
+                          <div class="mt-3 ms-5">
+                            <div class="card">
+                              <div class="card-body">
+                                <form
+                                  th:onsubmit="|submitReply(event, ${comment.id})|"
+                                >
+                                  <div class="mb-3">
+                                    <textarea
+                                      class="form-control"
+                                      rows="2"
+                                      placeholder="Nhập phản hồi..."
+                                      required
+                                    ></textarea>
+                                  </div>
+                                  <div class="d-flex justify-content-end gap-2">
+                                    <button
+                                      type="button"
+                                      class="btn btn-sm btn-secondary"
+                                      th:onclick="|cancelReply(${comment.id})|"
+                                    >
+                                      Hủy
+                                    </button>
+                                    <button
+                                      type="submit"
+                                      class="btn btn-sm btn-primary"
+                                    >
+                                      <i class="fas fa-paper-plane"></i> Gửi
+                                    </button>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Empty state when no comments -->
+                      <div
+                        th:if="${document.comments == null or document.comments.isEmpty()}"
+                        class="empty-comments-state"
+                        id="emptyCommentsState"
+                        style="
+                          text-align: center;
+                          padding: 40px 20px;
+                          color: #6b7280;
+                        "
+                      >
+                        <div
+                          style="
+                            font-size: 48px;
+                            margin-bottom: 16px;
+                            color: #d1d5db;
+                          "
+                        >
+                          <i class="fas fa-comments"></i>
+                        </div>
+                        <h4 style="color: #374151; margin-bottom: 8px">
+                          Chưa có bình luận nào
+                        </h4>
+                        <p style="margin: 0">
+                          Tài liệu này chưa có bình luận từ người dùng.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="review-item" th:unless="${document.comments}">
-                <div class="review-header">
-                    <div class="reviewer-info">
-                        <img src="https://via.placeholder.com/40" class="avatar" alt="avatar">
-                        <div class="reviewer-details">
-                            <strong class="reviewer-name">Nguyễn Văn A</strong>
-                            <div class="metadata">
-                                <span class="timestamp">2 ngày trước</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="review-actions">
-                        <button type="button" class="btn btn-sm btn-outline">
-                            <i class="fas fa-reply"></i> Trả lời
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline text-danger">
-                            <i class="fas fa-flag"></i> Báo cáo
-                        </button>
-                    </div>
-                </div>
-                <div class="review-content">
-                    <p>Tài liệu rất hữu ích và chi tiết. Cảm ơn tác giả!</p>
-                </div>
-            </div>
+          </div>
+          <div class="modal-footer">
+            <a th:href="@{/admin/documents}" class="btn btn-outline">Đóng</a>
+            <a
+              th:if="${document.deletedAt == null}"
+              th:href="@{/admin/documents/{id}/edit(id=${document.id})}"
+              class="btn btn-primary"
+            >
+              <i class="fas fa-edit"></i><span>Chỉnh sửa</span>
+            </a>
+            <button
+              th:if="${document.deletedAt != null}"
+              class="btn btn-secondary"
+              disabled
+              title="Không thể chỉnh sửa tài liệu đã xóa"
+            >
+              <i class="fas fa-edit"></i><span>Chỉnh sửa</span>
+            </button>
+          </div>
         </div>
-        <div class="reviews-actions">
-        <!--     <button type="button" class="btn btn-outline">Xem thêm bình luận</button> -->
-        </div>
+      </main>
     </div>
-</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <a th:href="@{/admin/documents}" class="btn btn-outline">Đóng</a>
-                    <a th:href="@{/admin/documents/{id}/edit(id=${document.id})}" class="btn btn-primary">
-                        <i class="fas fa-edit"></i><span>Chỉnh sửa</span>
-                    </a>
-                </div>
-            </div>
-        </main>
+    <!-- Report Comment Modal -->
+    <div
+      class="modal fade"
+      id="reportCommentModal"
+      tabindex="-1"
+      aria-labelledby="reportCommentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="reportCommentModalLabel">
+              <i class="fas fa-flag text-danger"></i> Báo cáo vi phạm
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              onclick="hideReportModal()"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="reportCommentForm">
+              <div class="mb-3">
+                <label for="reportReason" class="form-label"
+                  >Lý do báo cáo <span class="text-danger">*</span></label
+                >
+                <select class="form-select" id="reportReason" required>
+                  <option value="">Chọn lý do báo cáo</option>
+                  <option value="spam">Spam hoặc quảng cáo</option>
+                  <option value="harassment">Quấy rối hoặc bắt nạt</option>
+                  <option value="hate_speech">Ngôn từ thù địch</option>
+                  <option value="inappropriate">Nội dung không phù hợp</option>
+                  <option value="misinformation">Thông tin sai lệch</option>
+                  <option value="copyright">Vi phạm bản quyền</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+              <div class="mb-3" id="customReasonGroup" style="display: none">
+                <label for="customReason" class="form-label"
+                  >Mô tả chi tiết</label
+                >
+                <textarea
+                  class="form-control"
+                  id="customReason"
+                  rows="3"
+                  placeholder="Vui lòng mô tả chi tiết lý do báo cáo..."
+                ></textarea>
+              </div>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Lưu ý:</strong> Báo cáo của bạn sẽ được xem xét và xử lý
+                trong vòng 24-48 giờ. Chúng tôi sẽ thông báo kết quả qua email.
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="hideReportModal()"
+            >
+              <i class="fas fa-times"></i> Hủy
+            </button>
+            <button type="button" class="btn btn-danger" id="submitReportBtn">
+              <i class="fas fa-flag"></i> Gửi báo cáo
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Tab switching
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabPanels = document.querySelectorAll('.tab-panel');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const target = this.dataset.tab;
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabPanels.forEach(panel => panel.classList.remove('active'));
-                    this.classList.add('active');
-                    document.getElementById(`tab-${target}`).classList.add('active');
+      document.addEventListener("DOMContentLoaded", function () {
+        // Tab switching
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        const tabPanels = document.querySelectorAll(".tab-panel");
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const target = this.dataset.tab;
+            tabButtons.forEach((btn) => btn.classList.remove("active"));
+            tabPanels.forEach((panel) => panel.classList.remove("active"));
+            this.classList.add("active");
+            document.getElementById(`tab-${target}`).classList.add("active");
+          });
+        });
+        // Hover effects for buttons
+        const buttons = document.querySelectorAll(
+          ".btn.btn-outline, .btn.btn-primary"
+        );
+        if (buttons.length > 0) {
+          buttons.forEach((button) => {
+            button.addEventListener("mouseenter", function () {
+              this.style.transform = "translateY(-3px)";
+              if (this.classList.contains("btn-primary")) {
+                this.style.boxShadow = "0 5px 15px rgba(79, 70, 229, 0.3)";
+              } else {
+                this.style.backgroundColor = "rgba(79, 70, 229, 0.1)";
+              }
+            });
+            button.addEventListener("mouseleave", function () {
+              this.style.transform = "";
+              this.style.boxShadow = "";
+              this.style.backgroundColor = "";
+            });
+          });
+        }
+        // Comment Management
+        initializeCommentManagement();
+
+        // Initialize modal event listeners
+        initializeReportModal();
+
+        // Analytics chart
+        const ctx = document.getElementById("analyticsChart");
+        if (ctx) {
+          // Lấy dữ liệu thực từ Thymeleaf
+          const viewsCount = [[${document.viewsCount != null ? document.viewsCount : 0}]];
+          const downloadsCount = [[${document.downloadsCount != null ? document.downloadsCount : 0}]];
+          const commentsCount = [[${document.comments != null ? document.comments.size() : 0}]];
+
+          // Tính tổng để tạo biểu đồ tỷ lệ
+          const total = viewsCount + downloadsCount + commentsCount;
+
+          const chart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              labels: ["Lượt xem", "Lượt tải", "Bình luận"],
+              datasets: [
+                {
+                  data:
+                    total > 0
+                      ? [viewsCount, downloadsCount, commentsCount]
+                      : [1, 1, 1],
+                  backgroundColor: ["#4f46e5", "#10b981", "#f59e0b"],
+                  borderColor: ["#4f46e5", "#10b981", "#f59e0b"],
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                  },
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const label = context.label || "";
+                      const value = context.parsed;
+                      const percentage =
+                        total > 0 ? ((value / total) * 100).toFixed(1) : "0.0";
+                      return label + ": " + value + " (" + percentage + "%)";
+                    },
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        // Comment Management Functions
+        function initializeCommentManagement() {
+          // Global functions for comment actions
+          window.replyToComment = function (commentId) {
+            const replyForm = document.getElementById(`replyForm-${commentId}`);
+            if (replyForm) {
+              replyForm.style.display =
+                replyForm.style.display === "none" ? "block" : "none";
+            }
+          };
+
+          window.cancelReply = function (commentId) {
+            const replyForm = document.getElementById(`replyForm-${commentId}`);
+            if (replyForm) {
+              replyForm.style.display = "none";
+              replyForm.querySelector("textarea").value = "";
+            }
+          };
+
+          window.submitReply = function (event, commentId) {
+            event.preventDefault();
+            const textarea = event.target.querySelector("textarea");
+            const content = textarea.value.trim();
+
+            if (!content) {
+              showToast("error", "Vui lòng nhập nội dung phản hồi");
+              return;
+            }
+
+            // Here you would typically send the reply to the server
+            showToast("success", "Phản hồi đã được gửi thành công");
+            cancelReply(commentId);
+          };
+
+          window.reportComment = function (commentId) {
+            console.log("reportComment called with ID:", commentId);
+            console.log("Bootstrap available:", typeof bootstrap !== 'undefined');
+
+            // Store comment ID for later use
+            window.currentReportCommentId = commentId;
+
+            // Try existing modal first
+            const existingModal = document.getElementById("reportCommentModal");
+            if (existingModal) {
+              console.log("Trying existing modal");
+              // Reset modal content first
+              const reasonSelect = existingModal.querySelector('#reportReason');
+              const descriptionTextarea = existingModal.querySelector('#reportDescription');
+              if (reasonSelect) reasonSelect.value = '';
+              if (descriptionTextarea) descriptionTextarea.value = '';
+
+              // Use Bootstrap modal API
+              try {
+                const bsModal = new bootstrap.Modal(existingModal, {
+                  backdrop: true,
+                  keyboard: true,
+                  focus: true
+                });
+                bsModal.show();
+                console.log("Bootstrap modal shown successfully");
+              } catch (error) {
+                console.error("Error showing Bootstrap modal:", error);
+                // Simple fallback without custom CSS conflicts
+                existingModal.style.display = 'block';
+                existingModal.classList.add('show');
+                document.body.classList.add('modal-open');
+                console.log("Fallback modal shown");
+              }
+            } else {
+              console.log("No existing modal, creating new one");
+              createDynamicModal(commentId);
+            }
+          };
+
+          // Create modal dynamically
+          function createDynamicModal(commentId) {
+            // Remove any existing dynamic modal
+            const existingDynamic = document.getElementById("dynamicReportModal");
+            if (existingDynamic) {
+              existingDynamic.remove();
+            }
+
+            // Create modal HTML
+            const modalHTML = `
+              <div id="dynamicReportModal" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+              ">
+                <div style="
+                  background: white;
+                  border-radius: 8px;
+                  padding: 20px;
+                  max-width: 500px;
+                  width: 90%;
+                  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                ">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h5 style="margin: 0; color: #dc2626;">
+                      <i class="fas fa-flag"></i> Báo cáo vi phạm
+                    </h5>
+                    <button onclick="closeDynamicModal()" style="
+                      background: none;
+                      border: none;
+                      font-size: 20px;
+                      cursor: pointer;
+                      color: #999;
+                    ">&times;</button>
+                  </div>
+
+                  <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">
+                      Lý do báo cáo <span style="color: #dc2626;">*</span>
+                    </label>
+                    <select id="dynamicReportReason" style="
+                      width: 100%;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                    ">
+                      <option value="">Chọn lý do báo cáo</option>
+                      <option value="spam">Spam hoặc quảng cáo</option>
+                      <option value="harassment">Quấy rối hoặc bắt nạt</option>
+                      <option value="hate_speech">Ngôn từ thù địch</option>
+                      <option value="inappropriate">Nội dung không phù hợp</option>
+                      <option value="misinformation">Thông tin sai lệch</option>
+                      <option value="copyright">Vi phạm bản quyền</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+
+                  <div id="dynamicCustomReason" style="display: none; margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">
+                      Mô tả chi tiết
+                    </label>
+                    <textarea id="dynamicCustomText" rows="3" style="
+                      width: 100%;
+                      padding: 8px;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                      resize: vertical;
+                    " placeholder="Vui lòng mô tả chi tiết lý do báo cáo..."></textarea>
+                  </div>
+
+                  <div style="
+                    background: #eff6ff;
+                    border: 1px solid #bfdbfe;
+                    color: #1e40af;
+                    padding: 10px;
+                    border-radius: 4px;
+                    margin-bottom: 20px;
+                    font-size: 14px;
+                  ">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Lưu ý:</strong> Báo cáo của bạn sẽ được xem xét và xử lý trong vòng 24-48 giờ.
+                  </div>
+
+                  <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button onclick="closeDynamicModal()" style="
+                      padding: 8px 16px;
+                      border: 1px solid #ddd;
+                      background: #f8f9fa;
+                      border-radius: 4px;
+                      cursor: pointer;
+                    ">
+                      <i class="fas fa-times"></i> Hủy
+                    </button>
+                    <button onclick="submitDynamicReport(${commentId})" style="
+                      padding: 8px 16px;
+                      border: 1px solid #dc2626;
+                      background: #dc2626;
+                      color: white;
+                      border-radius: 4px;
+                      cursor: pointer;
+                    ">
+                      <i class="fas fa-flag"></i> Gửi báo cáo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+
+            // Add to body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+            // Add event listeners
+            const reasonSelect = document.getElementById('dynamicReportReason');
+            reasonSelect.addEventListener('change', function() {
+              const customDiv = document.getElementById('dynamicCustomReason');
+              if (this.value === 'other') {
+                customDiv.style.display = 'block';
+              } else {
+                customDiv.style.display = 'none';
+              }
+            });
+
+            // Close on backdrop click
+            document.getElementById('dynamicReportModal').addEventListener('click', function(e) {
+              if (e.target === this) {
+                closeDynamicModal();
+              }
+            });
+
+            console.log("Dynamic modal created and shown");
+          }
+
+          // Close dynamic modal
+          window.closeDynamicModal = function() {
+            const modal = document.getElementById('dynamicReportModal');
+            if (modal) {
+              modal.remove();
+            }
+          };
+
+          // Submit dynamic report
+          window.submitDynamicReport = function(commentId) {
+            const reasonSelect = document.getElementById('dynamicReportReason');
+            const customText = document.getElementById('dynamicCustomText');
+
+            if (!reasonSelect.value) {
+              alert('Vui lòng chọn lý do báo cáo');
+              return;
+            }
+
+            if (reasonSelect.value === 'other' && !customText.value.trim()) {
+              alert('Vui lòng mô tả chi tiết lý do báo cáo');
+              return;
+            }
+
+            let reason = reasonSelect.options[reasonSelect.selectedIndex].text;
+            if (reasonSelect.value === 'other') {
+              reason = customText.value.trim();
+            }
+
+            // Submit report
+            const formData = new FormData();
+            formData.append('reason', reason);
+
+            fetch(`/admin/comments/${commentId}/report`, {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.error) {
+                alert('Lỗi: ' + data.error);
+                return;
+              }
+
+              alert('Thành công: ' + data.message);
+              closeDynamicModal();
+              setTimeout(() => {
+                location.reload();
+              }, 1000);
+            })
+            .catch(error => {
+              console.error('Error reporting comment:', error);
+              alert('Không thể gửi báo cáo');
+            });
+          };
+
+          // Helper function to submit report
+          window.submitReport = function (commentId, reason) {
+            const formData = new FormData();
+            formData.append("reason", reason);
+
+            fetch(`/admin/comments/${commentId}/report`, {
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.error) {
+                  alert("Lỗi: " + data.error);
+                  return;
+                }
+
+                alert("Thành công: " + data.message);
+                location.reload();
+              })
+              .catch((error) => {
+                console.error("Error reporting comment:", error);
+                alert("Không thể gửi báo cáo");
+              });
+          };
+
+          // Helper function to hide modal
+          window.hideReportModal = function () {
+            const modal = document.getElementById("reportCommentModal");
+            if (modal) {
+              try {
+                // Use Bootstrap modal API
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                  bsModal.hide();
+                } else {
+                  // If no instance, create one and hide
+                  const newModal = new bootstrap.Modal(modal);
+                  newModal.hide();
+                }
+                console.log("Bootstrap modal hidden");
+              } catch (error) {
+                console.error("Error hiding Bootstrap modal:", error);
+                // Fallback
+                modal.classList.remove("show");
+                modal.style.display = "none";
+                document.body.classList.remove("modal-open");
+
+                // Remove backdrop
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                  backdrop.remove();
+                }
+              }
+
+              // Reset form
+              const form = document.getElementById("reportCommentForm");
+              if (form) {
+                form.reset();
+              }
+
+              const customGroup = document.getElementById("customReasonGroup");
+              if (customGroup) {
+                customGroup.style.display = "none";
+              }
+
+              console.log("Modal hidden successfully");
+            }
+          };
+
+          function showToast(type, message) {
+            // Simple toast implementation
+            const toast = document.createElement("div");
+            toast.className = `alert alert-${
+              type === "success" ? "success" : "danger"
+            } position-fixed`;
+            toast.style.cssText =
+              "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+            toast.innerHTML = `
+              <i class="fas fa-${
+                type === "success" ? "check-circle" : "exclamation-circle"
+              }"></i>
+              ${message}
+              <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+              if (toast.parentElement) {
+                toast.remove();
+              }
+            }, 5000);
+          }
+        }
+
+        // Initialize Report Modal
+        function initializeReportModal() {
+          // Handle ESC key to close modal
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+              const modal = document.getElementById("reportCommentModal");
+              if (modal && modal.style.display === "flex") {
+                hideReportModal();
+              }
+            }
+          });
+
+          // Handle click outside modal to close
+          const modal = document.getElementById("reportCommentModal");
+          if (modal) {
+            modal.addEventListener("click", function (event) {
+              if (event.target === modal) {
+                hideReportModal();
+              }
+            });
+          }
+          // Handle report reason change
+          const reportReason = document.getElementById("reportReason");
+          if (reportReason) {
+            reportReason.addEventListener("change", function () {
+              const customReasonGroup =
+                document.getElementById("customReasonGroup");
+              if (this.value === "other") {
+                customReasonGroup.style.display = "block";
+                document.getElementById("customReason").required = true;
+              } else {
+                customReasonGroup.style.display = "none";
+                document.getElementById("customReason").required = false;
+              }
+            });
+          }
+
+          // Reset modal when closed (both Bootstrap and manual)
+          const reportModal = document.getElementById("reportCommentModal");
+          if (reportModal) {
+            // Bootstrap event
+            reportModal.addEventListener("hidden.bs.modal", resetReportModal);
+
+            // Manual close event
+            window.resetReportModal = function () {
+              document.getElementById("reportCommentForm").reset();
+              document.getElementById("customReasonGroup").style.display =
+                "none";
+              document.getElementById("customReason").required = false;
+
+              // Reset submit button
+              const submitBtn = document.getElementById("submitReportBtn");
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-flag"></i> Gửi báo cáo';
+            };
+          }
+
+          function resetReportModal() {
+            document.getElementById("reportCommentForm").reset();
+            document.getElementById("customReasonGroup").style.display = "none";
+            document.getElementById("customReason").required = false;
+
+            // Reset submit button
+            const submitBtn = document.getElementById("submitReportBtn");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-flag"></i> Gửi báo cáo';
+          }
+
+          // Handle submit report
+          const submitReportBtn = document.getElementById("submitReportBtn");
+          if (submitReportBtn) {
+            submitReportBtn.addEventListener("click", function () {
+              const reasonSelect = document.getElementById("reportReason");
+              const customReason = document.getElementById("customReason");
+
+              if (!reasonSelect.value) {
+                alert("Vui lòng chọn lý do báo cáo");
+                return;
+              }
+
+              if (
+                reasonSelect.value === "other" &&
+                !customReason.value.trim()
+              ) {
+                alert("Vui lòng mô tả chi tiết lý do báo cáo");
+                return;
+              }
+
+              let reason =
+                reasonSelect.options[reasonSelect.selectedIndex].text;
+              if (reasonSelect.value === "other") {
+                reason = customReason.value.trim();
+              }
+
+              // Disable button to prevent double submission
+              this.disabled = true;
+              this.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+
+              const formData = new FormData();
+              formData.append("reason", reason);
+
+              fetch(`/admin/comments/${window.currentReportCommentId}/report`, {
+                method: "POST",
+                body: formData,
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.error) {
+                    alert("Lỗi: " + data.error);
+                    return;
+                  }
+
+                  alert("Thành công: " + data.message);
+
+                  // Close modal
+                  hideReportModal();
+
+                  // Reload page to show updated report status
+                  setTimeout(() => {
+                    location.reload();
+                  }, 1500);
+                })
+                .catch((error) => {
+                  console.error("Error reporting comment:", error);
+                  alert("Không thể gửi báo cáo");
+                })
+                .finally(() => {
+                  // Re-enable button
+                  this.disabled = false;
+                  this.innerHTML = '<i class="fas fa-flag"></i> Gửi báo cáo';
                 });
             });
-            // Hover effects for buttons
-            const buttons = document.querySelectorAll('.btn.btn-outline, .btn.btn-primary');
-            if (buttons.length > 0) {
-                buttons.forEach(button => {
-                    button.addEventListener('mouseenter', function() {
-                        this.style.transform = 'translateY(-3px)';
-                        if (this.classList.contains('btn-primary')) {
-                            this.style.boxShadow = '0 5px 15px rgba(79, 70, 229, 0.3)';
-                        } else {
-                            this.style.backgroundColor = 'rgba(79, 70, 229, 0.1)';
-                        }
-                    });
-                    button.addEventListener('mouseleave', function() {
-                        this.style.transform = '';
-                        this.style.boxShadow = '';
-                        this.style.backgroundColor = '';
-                    });
-                });
-            }
-            // Analytics chart
-            const ctx = document.getElementById('analyticsChart');
-            if (ctx) {
-                const chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Ngày 1', 'Ngày 2', 'Ngày 3', 'Ngày 4', 'Ngày 5', 'Ngày 6', 'Ngày 7'],
-                        datasets: [
-                            {
-                                label: 'Lượt xem',
-                                data: [100, 120, 150, 130, 170, 160, 180], // Thay bằng dữ liệu động nếu có
-                                borderColor: '#4f46e5',
-                                backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                                fill: true
-                            },
-                            {
-                                label: 'Lượt tải',
-                                data: [20, 30, 25, 40, 35, 50, 45], // Thay bằng dữ liệu động nếu có
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                                fill: true
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' }
-                        },
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
-                });
-                // Update chart based on date range
-                const dateRangeSelector = document.getElementById('dateRangeSelector');
-                if (dateRangeSelector) {
-                    dateRangeSelector.addEventListener('change', function() {
-                        const range = this.value;
-                        // Cập nhật dữ liệu biểu đồ dựa trên range (gọi API hoặc dữ liệu tĩnh)
-                        chart.data.datasets[0].data = range === '7d' ? [100, 120, 150, 130, 170, 160, 180] :
-                                                     range === '30d' ? [400, 450, 500, 480, 520, 510, 550] :
-                                                     range === '90d' ? [1200, 1300, 1400, 1350, 1450, 1500, 1600] :
-                                                     [5000, 5200, 5300, 5100, 5400, 5500, 5600];
-                        chart.data.datasets[1].data = range === '7d' ? [20, 30, 25, 40, 35, 50, 45] :
-                                                     range === '30d' ? [80, 90, 100, 95, 110, 120, 130] :
-                                                     range === '90d' ? [200, 220, 250, 230, 260, 270, 280] :
-                                                     [800, 850, 900, 880, 920, 950, 1000];
-                        chart.update();
-                    });
-                }
-            }
-        });
+          }
+
+          // Global showToast function for modal
+          window.showToast = function (type, message) {
+            const toast = document.createElement("div");
+            toast.className = `alert alert-${
+              type === "success" ? "success" : "danger"
+            } position-fixed`;
+            toast.style.cssText =
+              "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+            toast.innerHTML = `
+              <i class="fas fa-${
+                type === "success" ? "check-circle" : "exclamation-circle"
+              }"></i>
+              ${message}
+              <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+              if (toast.parentElement) {
+                toast.remove();
+              }
+            }, 5000);
+          };
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

@@ -30,6 +30,7 @@ public class CommentDTO {
 	private String reporterName;
 	private String reportReason;
 	private LocalDateTime reportTime;
+    private String reportStatus;
 
 	public CommentDTO(Long id, Long documentId, String documentTitle, Long userId, String userFullName, String content,
 			String userAvatar, String status, LocalDateTime createdAt) {

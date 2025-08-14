@@ -54,4 +54,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query("SELECT COUNT(t) FROM Tag t WHERE t.createdAt >= :startDate")
     Long countByCreatedAtAfter(@Param("startDate") LocalDateTime startDate);
 
+    // Search tags by name (case insensitive)
+    Page<Tag> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
 }
