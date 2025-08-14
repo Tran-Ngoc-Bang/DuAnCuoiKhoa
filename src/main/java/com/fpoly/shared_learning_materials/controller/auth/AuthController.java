@@ -1,4 +1,4 @@
-package com.fpoly.shared_learning_materials.controller;
+package com.fpoly.shared_learning_materials.controller.auth;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

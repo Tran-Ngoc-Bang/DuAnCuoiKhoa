@@ -1,4 +1,4 @@
-package com.fpoly.shared_learning_materials.controller;
+package com.fpoly.shared_learning_materials.controller.admin;
 
 import java.io.IOException;
 import java.util.List;
