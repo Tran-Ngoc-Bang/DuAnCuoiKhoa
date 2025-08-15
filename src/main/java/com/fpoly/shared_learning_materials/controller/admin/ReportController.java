@@ -1,4 +1,4 @@
-package com.fpoly.shared_learning_materials.controller;
+package com.fpoly.shared_learning_materials.controller.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;

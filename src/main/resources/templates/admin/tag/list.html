@@ -168,6 +168,13 @@
             background-color: #dc3545;
             color: white;
         }
+        .action-btn.restore-btn {
+            color: #28a745;
+        }
+        .action-btn.restore-btn:hover {
+            background-color: #28a745;
+            color: white;
+        }
         
         /* Success and Error Messages */
         .success-message {
@@ -574,10 +581,13 @@
                             <div class="action-buttons">
                                 <a th:href="@{/admin/tags/{id}/edit(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
                                 <a th:href="@{/admin/tags/{id}/details(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Xem chi tiết"><i class="fas fa-file-alt"></i></a>
-                             <!--  <a th:href="@{/admin/tags/{id}/toggle-status(id=${tag.id})}" class="action-btn" th:title="${tag.status == 'active' ? 'Vô hiệu hóa' : 'Kích hoạt'}">
-                                    <i th:class="${tag.status == 'active' ? 'fas fa-ban' : 'fas fa-check'}"></i>
-                                </a>--> 
-                                <!-- Chỉ hiển thị delete button cho tag chưa bị xóa vĩnh vin -->
+                                
+                                <!-- Nút khôi phục cho tags bị vô hiệu hóa -->
+                                <a th:if="${tag.status == 'inactive'}" th:href="@{/admin/tags/{id}/restore(id=${tag.id})}" class="action-btn restore-btn" title="Khôi phục tag">
+                                    <i class="fas fa-undo"></i>
+                                </a>
+                                
+                                <!-- Chỉ hiển thị delete button cho tag chưa bị xóa vĩnh viễn -->
                                 <a th:if="${tag.deletedAt == null}" th:href="@{/admin/tags/{id}/delete(id=${tag.id})}" class="action-btn delete-btn" title="Xóa tag vĩnh viễn">
                                     <i class="fas fa-trash"></i>
                                 </a>

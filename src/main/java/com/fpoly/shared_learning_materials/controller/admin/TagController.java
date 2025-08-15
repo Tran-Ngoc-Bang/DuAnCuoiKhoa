@@ -1,6 +1,7 @@
-package com.fpoly.shared_learning_materials.controller;
+package com.fpoly.shared_learning_materials.controller.admin;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -214,6 +215,27 @@ public class TagController {
 			return "redirect:/admin/tags?success=Trạng thái tag đã được cập nhật";
 		} catch (Exception e) {
 			return "redirect:/admin/tags?error=Lỗi khi cập nhật trạng thái tag";
+		}
+	}
+
+	@GetMapping("/{id}/restore")
+	public String restoreTag(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+		try {
+			Optional<TagDTO> tagOpt = tagService.getTagById(id);
+			if (!tagOpt.isPresent()) {
+				redirectAttributes.addFlashAttribute("error", "Tag không tồn tại");
+				return "redirect:/admin/tags";
+			}
+
+			TagDTO tag = tagOpt.get();
+
+			// Khôi phục tag bằng cách set status = 'active'
+			tagService.restoreTag(id);
+			redirectAttributes.addFlashAttribute("success", "Tag '" + tag.getName() + "' đã được khôi phục thành công");
+			return "redirect:/admin/tags";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("error", "Lỗi khi khôi phục tag: " + e.getMessage());
+			return "redirect:/admin/tags";
 		}
 	}
 }

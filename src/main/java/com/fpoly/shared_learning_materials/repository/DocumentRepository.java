@@ -39,6 +39,8 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     List<Document> findByDeletedAtIsNullOrderByCreatedAtDesc();
 
+    List<Document> findByDeletedAtIsNotNull();
+    
     List<Document> findByDeletedAtIsNotNullOrderByDeletedAtDesc();
 
     // Đếm documents chưa xóa

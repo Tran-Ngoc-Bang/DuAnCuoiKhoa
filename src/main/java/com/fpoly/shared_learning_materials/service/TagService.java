@@ -11,8 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,7 +36,8 @@ public class TagService {
             System.out.println("Filter: all, Total tags: " + tags.size());
         } else {
             tags = tagRepository.findByCreatedAtAfter(startDate);
-            System.out.println("Filter: " + filter + ", Start date: " + startDate + ", Filtered tags count: " + tags.size());
+            System.out.println(
+                    "Filter: " + filter + ", Start date: " + startDate + ", Filtered tags count: " + tags.size());
         }
         return tags.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
@@ -48,7 +47,8 @@ public class TagService {
     }
 
     public Page<TagDTO> getAllTags(int page, int size, String sort, String search) {
-        System.out.println("Fetching tags with page: " + page + ", size: " + size + ", sort: " + sort + ", search: " + search);
+        System.out.println(
+                "Fetching tags with page: " + page + ", size: " + size + ", sort: " + sort + ", search: " + search);
         Pageable pageable;
         switch (sort) {
             case "name_asc":
@@ -60,7 +60,8 @@ public class TagService {
             case "popular":
                 pageable = PageRequest.of(page, size);
                 Page<Tag> popularTags = tagRepository.findPopularTags(pageable);
-                System.out.println("Popular tags count: " + popularTags.getContent().size() + ", total: " + popularTags.getTotalElements());
+                System.out.println("Popular tags count: " + popularTags.getContent().size() + ", total: "
+                        + popularTags.getTotalElements());
                 return popularTags.map(this::convertToDTO);
             case "recent":
                 pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -70,7 +71,7 @@ public class TagService {
                 pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
                 break;
         }
-        
+
         Page<Tag> tagPage;
         if (search != null && !search.trim().isEmpty()) {
             // Nếu có search, tìm kiếm theo tên tag
@@ -80,7 +81,7 @@ public class TagService {
             // Nếu không có search, lấy tất cả
             tagPage = tagRepository.findAllTags(pageable);
         }
-        
+
         System.out.println("Tags count: " + tagPage.getContent().size() + ", total: " + tagPage.getTotalElements());
         return tagPage.map(this::convertToDTO);
     }
@@ -103,7 +104,7 @@ public class TagService {
     public Long countTotalDocumentsTagged() {
         return documentTagRepository.countTotalDocumentsTagged();
     }
-    
+
     public Long countUnusedTags() {
         Long totalTags = tagRepository.count();
         Long usedTags = documentTagRepository.countUsedTags();
@@ -125,7 +126,7 @@ public class TagService {
         tag.setName(tagDTO.getName().trim());
         tag.setSlug(tagDTO.getName().trim()); // Bỏ slug, luôn set null
         tag.setDescription(tagDTO.getDescription() != null ? tagDTO.getDescription().trim() : null);
-        
+
         // Gán createdBy
         if (tagDTO.getCreatedById() != null) {
             User user = new User();
@@ -134,7 +135,7 @@ public class TagService {
         } else {
             throw new IllegalArgumentException("Không thể tạo tag: Không có thông tin người tạo");
         }
-        
+
         tag.setDeletedAt("active".equals(tagDTO.getStatus()) ? null : LocalDateTime.now());
         tagRepository.save(tag);
     }
@@ -147,7 +148,8 @@ public class TagService {
         Tag existingTag = tagRepository.findById(tagDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tag not found with id: " + tagDTO.getId()));
 
-        if (!existingTag.getName().equals(tagDTO.getName().trim()) && tagRepository.existsByName(tagDTO.getName().trim())) {
+        if (!existingTag.getName().equals(tagDTO.getName().trim())
+                && tagRepository.existsByName(tagDTO.getName().trim())) {
             throw new IllegalArgumentException("Tên tag đã tồn tại");
         }
 
@@ -210,6 +212,37 @@ public class TagService {
         }
     }
 
+    // Restore tag by setting deletedAt to null
+    public void restoreTag(Long id) {
+        System.out.println("=== RESTORE TAG ===");
+        System.out.println("Tag ID: " + id);
+
+        try {
+            Optional<Tag> tagOpt = tagRepository.findById(id);
+            if (!tagOpt.isPresent()) {
+                throw new ResourceNotFoundException("Tag không tồn tại với ID: " + id);
+            }
+
+            Tag tag = tagOpt.get();
+
+            if (tag.getDeletedAt() == null) {
+                System.out.println("Tag đã ở trạng thái active, không cần khôi phục");
+                return;
+            }
+
+            // Restore tag by setting deletedAt to null
+            tag.setDeletedAt(null);
+            tag.setUpdatedAt(LocalDateTime.now());
+
+            tagRepository.save(tag);
+
+            System.out.println("Tag restored successfully: " + tag.getName());
+
+        } catch (Exception e) {
+            System.err.println("Error restoring tag: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi khôi phục tag: " + e.getMessage());
+        }
+    }
 
 }
-

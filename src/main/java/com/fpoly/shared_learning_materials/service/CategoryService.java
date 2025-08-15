@@ -3,26 +3,21 @@ package com.fpoly.shared_learning_materials.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fpoly.shared_learning_materials.domain.Category;
 import com.fpoly.shared_learning_materials.domain.CategoryHierarchy;
 import com.fpoly.shared_learning_materials.domain.CategoryHierarchyId;
-import com.fpoly.shared_learning_materials.domain.Document;
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.CategoryDTO;
-import com.fpoly.shared_learning_materials.dto.SubcategoryDTO;
 import com.fpoly.shared_learning_materials.repository.CategoryHierarchyRepository;
 import com.fpoly.shared_learning_materials.repository.CategoryRepository;
 import com.fpoly.shared_learning_materials.repository.DocumentCategoryRepository;
-import com.fpoly.shared_learning_materials.repository.DocumentRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
 
 @Service
@@ -143,14 +138,7 @@ public class CategoryService {
         category.setDescription(categoryDTO.getDescription());
         category.setStatus(categoryDTO.getStatus() != null ? categoryDTO.getStatus() : "active");
         category.setSortOrder(categoryDTO.getSortOrder() != null ? categoryDTO.getSortOrder() : 0);
-        // String username =
-        // SecurityContextHolder.getContext().getAuthentication().getName();
-        // if (username != null && !username.equals("anonymousUser")) {
-        // User createdBy = new User(); // Giả định có UserService để lấy User
-        // createdBy.setId(categoryDTO.getCreatedById()); // Cần inject UserService để
-        // lấy User thực tế
-        // category.setCreatedBy(createdBy);
-        // }
+      
         if (categoryDTO.getCreatedById() != null) {
             User createdBy = userRepository.findById(categoryDTO.getCreatedById())
                     .orElseThrow(() -> new IllegalArgumentException(

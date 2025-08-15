@@ -5,12 +5,10 @@ import com.fpoly.shared_learning_materials.dto.CommentDTO;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;
 import com.fpoly.shared_learning_materials.repository.*;
 import com.fpoly.shared_learning_materials.config.UploadConfig;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -23,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -318,7 +315,14 @@ public class DocumentService {
 
         // Nếu có filter, lấy tất cả deleted documents rồi filter
         System.out.println("Filters applied, using in-memory filtering for deleted documents");
-        List<Document> allDeletedDocuments = documentRepository.findByDeletedAtIsNotNullOrderByDeletedAtDesc();
+        
+        // Debug: Check total count first
+        long totalDeletedCount = documentRepository.countByDeletedAtIsNotNull();
+        System.out.println("Total deleted documents in DB: " + totalDeletedCount);
+        
+        // Use query without hardcoded sort to avoid conflict with Pageable sort
+        List<Document> allDeletedDocuments = documentRepository.findByDeletedAtIsNotNull();
+        System.out.println("Retrieved deleted documents from query: " + allDeletedDocuments.size());
 
         List<DocumentDTO> allDtoList = allDeletedDocuments.stream()
                 .map(this::convertToDTO)

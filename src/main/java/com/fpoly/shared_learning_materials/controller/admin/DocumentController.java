@@ -1,4 +1,4 @@
-package com.fpoly.shared_learning_materials.controller;
+package com.fpoly.shared_learning_materials.controller.admin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,9 +82,17 @@ public class DocumentController {
         // Create custom Pageable with sort parameters
         Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
 
+        // Set default sort field based on tab
+        String effectiveSortBy = sortBy;
+        if ("deleted".equals(tab) && "created_at".equals(sortBy)) {
+            // For deleted tab, default sort by deletedAt instead of createdAt
+            effectiveSortBy = "deleted_at";
+            System.out.println("Deleted tab: Using deletedAt sort instead of createdAt");
+        }
+
         // For author sort, we need to use the original sortBy to trigger in-memory
         // filtering
-        String sortFieldForPageable = "author".equalsIgnoreCase(sortBy) ? "author" : mapSortField(sortBy);
+        String sortFieldForPageable = "author".equalsIgnoreCase(effectiveSortBy) ? "author" : mapSortField(effectiveSortBy);
         Sort sort = Sort.by(direction, sortFieldForPageable);
         Pageable customPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
