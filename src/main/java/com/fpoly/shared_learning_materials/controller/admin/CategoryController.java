@@ -328,16 +328,23 @@ public class CategoryController {
     @PostMapping("/{id}/restore")
     public String restoreCategory(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
+            System.out.println("=== CONTROLLER RESTORE DEBUG ===");
+            System.out.println("Restore request for category ID: " + id);
+            
             CategoryDTO category = categoryService.getAllCategories().stream()
                     .filter(c -> c.getId().equals(id))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
 
+            System.out.println("Found category: " + category.getName());
+            
             categoryService.restoreCategory(id);
             redirectAttributes.addFlashAttribute("success",
                     "Danh mục '" + category.getName() + "' đã được khôi phục thành công");
             return "redirect:/admin/categories?tab=active";
         } catch (Exception e) {
+            System.err.println("Error in restore controller: " + e.getMessage());
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Lỗi khi khôi phục danh mục: " + e.getMessage());
             return "redirect:/admin/categories?tab=deleted";
         }

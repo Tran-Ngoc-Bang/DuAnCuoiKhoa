@@ -1832,12 +1832,12 @@ body.dark-mode .user-tab-btn.active {
     color: var(--primary);
 }
 
-.status-badge.active {
+.status-badge.approved {
     background: #d4edda;
     color: #155724;
 }
 
-.status-badge.inactive {
+.status-badge.rejected {
     background: #f8d7da;
     color: #721c24;
 }
@@ -2083,12 +2083,12 @@ body.dark-mode .user-tab-btn.active {
     font-size: 0.75rem;
 }
 
-.status-badge.active {
+.status-badge.approved {
     background: #dcfce7;
     color: #16a34a;
 }
 
-.status-badge.inactive {
+.status-badge.rejected {
     background: #fee2e2;
     color: #b91c1c;
 }
@@ -2332,12 +2332,12 @@ body.dark-mode .user-tab-btn.active {
     color: #fff;
 }
 
-.modal-content .status-badge.active {
+.modal-content .status-badge.approved {
     background: #28a745;
     color: #fff;
 }
 
-.modal-content .status-badge.inactive {
+.modal-content .status-badge.rejected {
     background: #dc3545;
     color: #fff;
 }
@@ -2723,9 +2723,9 @@ body.dark-mode #addUserModal .cancel-btn:hover {
 /* Admin Users Management Styles */
 
 .admin-container {
-    display: flex;
-    padding-top: var(--admin-header-height);
-    min-height: calc(100vh - var(--admin-header-height));
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .admin-header {
@@ -2984,31 +2984,3 @@ body.dark-mode #addUserModal .cancel-btn:hover {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-/* Container chung cho flash messages */
-.flash-messages {
-  margin: 1rem 0;
-}
-
-/* Alert base */
-.flash-messages .alert {
-  padding: 0.75rem 1rem;
-  border-radius: 0.25rem;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin-bottom: 1rem;
-}
-
-/* Alert Success */
-.flash-messages .alert-success {
-  background-color: #e6f4ea;
-  color: #276738;
-  border-left: 4px solid #4caf50;
-}
-
-/* Alert Danger */
-.flash-messages .alert-danger {
-  background-color: #fde8e8;
-  color: #721c24;
-  border-left: 4px solid #dc3545;
-}
-

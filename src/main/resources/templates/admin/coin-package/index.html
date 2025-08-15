@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý gói xu - Admin</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
+  </head>
+
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <!-- Admin Content Header -->
+        <div class="admin-content-header">
+          <div>
+            <h1 class="admin-page-title">Quản lý gói xu</h1>
+            <div class="admin-breadcrumbs">
+              <a th:href="@{/admin}">Admin</a>
+              <span class="breadcrumb-separator">/</span>
+              <span>Quản lý gói xu</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coin Package Management -->
+        <div class="section-header">
+          <h2>Quản lý gói xu</h2>
+          <div class="section-actions">
+            <a
+              th:href="@{/admin/coin-packages/create}"
+              class="add-package-btn"
+              onclick="console.log('Add package button clicked (section)')"
+            >
+              <i class="fas fa-plus"></i> Thêm gói xu mới
+            </a>
+          </div>
+        </div>
+
+        <div class="coin-packages">
+          <!-- Filters for package management -->
+          <div class="management-tools">
+            <div class="search-filters">
+              <div class="tool-item">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm gói xu..."
+                  class="search-input"
+                  id="searchInput"
+                />
+              </div>
+              <div class="tool-item">
+                <select class="filter-select" id="statusFilter">
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="active">Đang hoạt động</option>
+                  <option value="inactive">Tạm ngưng</option>
+                  <option value="promotion">Khuyến mãi</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Table -->
+          <table class="packages-table">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    class="select-all-checkbox"
+                    id="selectAll"
+                  />
+                </th>
+                <th>Mã gói</th>
+                <th>Tên gói</th>
+                <th>Số xu</th>
+                <th>Giá gốc (₫)</th>
+                <th>Giá bán (₫)</th>
+                <th>Khuyến mãi</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="packagesTableBody">
+              <!-- Hiển thị dữ liệu từ server -->
+              <tr
+                th:if="${packages != null and !packages.isEmpty()}"
+                th:each="package : ${packages}"
+                th:data-package-id="${package.id}"
+                th:with="packageId=${package.id}, packageCode=${package.code}, packageName=${package.name}"
+                th:title="${'Package: ' + package.name + ' (' + package.code + ')'}"
+              >
+                <td>
+                  <input
+                    type="checkbox"
+                    class="row-checkbox"
+                    th:value="${package.id}"
+                  />
+                </td>
+                <td
+                  th:text="${package.code}"
+                  th:title="${'Package ID: ' + package.id}"
+                >
+                  COIN-S
+                </td>
+                <td th:text="${package.name}">Gói Starter</td>
+                <td th:text="${package.coinAmount}">100</td>
+                <td
+                  th:text="${#numbers.formatDecimal(package.originalPrice, 0, 'COMMA', 0, 'POINT')}"
+                >
+                  100.000
+                </td>
+                <td
+                  th:text="${#numbers.formatDecimal(package.salePrice, 0, 'COMMA', 0, 'POINT')}"
+                >
+                  90.000
+                </td>
+                <td th:text="${package.discountPercent + '%'}">10%</td>
+                <td>
+                  <span class="status-badge" th:classappend="${package.status}">
+                    <span th:text="${package.statusText}">Hoạt động</span>
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a
+                      th:href="@{/admin/coin-packages/{id}/detail(id=${package.id})}"
+                      class="action-btn view-package"
+                      title="Xem chi tiết"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <a
+                      th:href="@{/admin/coin-packages/{id}/edit(id=${package.id})}"
+                      class="action-btn edit-package"
+                      title="Chỉnh sửa"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <button
+                      class="action-btn delete-package"
+                      title="Xóa"
+                      th:data-package-id="${package.id}"
+                      th:data-package-name="${package.name}"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${packages == null or packages.isEmpty()}">
+                <td colspan="9" class="no-data">
+                  <div class="no-data-content">
+                    <i class="fas fa-box-open"></i>
+                    <p>Không có gói xu nào</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Table Actions -->
+          <div class="table-actions">
+            <div class="bulk-actions">
+              <form
+                id="bulkActionForm"
+                method="POST"
+                action="/admin/coin-packages/bulk-action"
+              >
+                <select
+                  class="bulk-action-select"
+                  id="bulkActionSelect"
+                  name="action"
+                >
+                  <option value="">Chọn hành động</option>
+                  <option value="activate">Kích hoạt</option>
+                  <option value="deactivate">Tắt kích hoạt</option>
+                  <option value="promotion">Đánh dấu khuyến mãi</option>
+                  <option value="delete">Xóa</option>
+                </select>
+                <button
+                  type="submit"
+                  class="apply-action"
+                  id="applyBulkAction"
+                  disabled
+                >
+                  Áp dụng
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Confirm Delete Package Modal -->
+    <div class="modal" id="deletePackageModal">
+      <div class="modal-overlay"></div>
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Xác nhận xóa gói xu</h3>
+          <button class="modal-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="refund-confirmation">
+            <div class="warning-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <p class="confirmation-text">
+              Bạn chắc chắn muốn xóa gói xu
+              <strong id="deletePackageName">Starter</strong> (<strong
+                id="deletePackageId"
+                >COIN-S</strong
+              >)?
+            </p>
+            <p>Hành động này không thể hoàn tác.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="secondary-btn cancel-btn">Hủy bỏ</button>
+          <button class="danger-btn" id="confirmDeleteBtn">Xác nhận xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
+    <script th:src="@{/js/admin/coin-packages-index.js}"></script>
+  </body>
+</html>

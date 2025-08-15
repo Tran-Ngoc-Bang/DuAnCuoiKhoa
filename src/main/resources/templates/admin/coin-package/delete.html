@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xóa gói xu - Admin</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
+  </head>
+
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="fragments/admin/layout :: header"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="fragments/admin/sidebar :: admin-sidebar"></div>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <!-- Error Message -->
+        <div th:if="${error}" class="error-message">
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}">Lỗi</span>
+          </div>
+        </div>
+
+        <!-- Admin Content Header -->
+        <div class="admin-content-header">
+          <div>
+            <h1 class="admin-page-title">Xóa gói xu</h1>
+            <div class="admin-breadcrumbs">
+              <a th:href="@{/admin}">Admin</a>
+              <span class="breadcrumb-separator">/</span>
+              <a th:href="@{/admin/coin-packages}">Quản lý gói xu</a>
+              <span class="breadcrumb-separator">/</span>
+              <span th:text="${coinPackage != null ? coinPackage.name : 'Xóa'}"
+                >Gói Starter</span
+              >
+              <span class="breadcrumb-separator">/</span>
+              <span>Xóa</span>
+            </div>
+          </div>
+          <div class="dashboard-actions">
+            <a th:href="@{/admin/coin-packages}" class="secondary-btn">
+              <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation -->
+        <div
+          class="delete-container"
+          th:if="${coinPackage != null}"
+          th:with="packageId=${coinPackage.id}"
+        >
+          <input type="hidden" id="packageId" th:value="${packageId}" />
+          <input
+            type="hidden"
+            id="packageName"
+            th:value="${coinPackage.name}"
+          />
+          <div class="delete-card">
+            <div class="delete-header">
+              <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <h2>Xác nhận xóa gói xu</h2>
+              <p>
+                Bạn sắp xóa gói xu
+                <strong th:text="${coinPackage.name}">Gói Starter</strong>
+                (<strong th:text="${coinPackage.code}">COIN-S</strong>)
+              </p>
+            </div>
+
+            <!-- Package Information -->
+            <div class="package-info-section">
+              <h3>Thông tin gói xu sẽ bị xóa:</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Mã gói:</span>
+                  <span class="info-value" th:text="${coinPackage.code}"
+                    >COIN-S</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Tên gói:</span>
+                  <span class="info-value" th:text="${coinPackage.name}"
+                    >Gói Starter</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Số xu:</span>
+                  <span class="info-value" th:text="${coinPackage.coinAmount}"
+                    >100</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Giá bán:</span>
+                  <span
+                    class="info-value"
+                    th:text="${#numbers.formatDecimal(coinPackage.salePrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}"
+                    >90.000 ₫</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Trạng thái:</span>
+                  <span
+                    class="status-badge"
+                    th:classappend="${coinPackage.status}"
+                  >
+                    <span th:text="${coinPackage.statusText}">Hoạt động</span>
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Ngày tạo:</span>
+                  <span
+                    class="info-value"
+                    th:text="${#temporals.format(coinPackage.createdAt, 'dd/MM/yyyy HH:mm')}"
+                    >01/01/2024 10:30</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Warning Messages -->
+            <div class="warning-section">
+              <div class="warning-message">
+                <h3>
+                  <i class="fas fa-exclamation-circle"></i> Cảnh báo quan trọng
+                </h3>
+                <ul>
+                  <li>
+                    Hành động này sẽ xóa vĩnh viễn gói xu và không thể hoàn tác
+                  </li>
+                  <li>Người dùng đang sử dụng gói này sẽ bị ảnh hưởng</li>
+                  <li>
+                    Dữ liệu giao dịch liên quan sẽ được lưu trữ nhưng không hiển
+                    thị
+                  </li>
+                  <li>Báo cáo thống kê có thể bị ảnh hưởng</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Alternative Actions -->
+            <div class="alternatives-section">
+              <h3>Hành động thay thế:</h3>
+              <div class="alternatives-grid">
+                <div class="alternative-item">
+                  <h4><i class="fas fa-pause"></i> Tạm ngưng</h4>
+                  <p>Tạm ngưng gói xu thay vì xóa vĩnh viễn</p>
+                  <a
+                    th:href="@{/admin/coin-packages/{id}/deactivate(id=${coinPackage.id})}"
+                    class="secondary-btn"
+                    >Tạm ngưng</a
+                  >
+                </div>
+                <div class="alternative-item">
+                  <h4><i class="fas fa-archive"></i> Lưu trữ</h4>
+                  <p>Lưu trữ gói xu để tham khảo sau này</p>
+                  <a
+                    th:href="@{/admin/coin-packages/{id}/archive(id=${coinPackage.id})}"
+                    class="secondary-btn"
+                    >Lưu trữ</a
+                  >
+                </div>
+                <div class="alternative-item">
+                  <h4><i class="fas fa-edit"></i> Chỉnh sửa</h4>
+                  <p>Chỉnh sửa thông tin gói xu thay vì xóa</p>
+                  <a
+                    th:href="@{/admin/coin-packages/{id}/edit(id=${coinPackage.id})}"
+                    class="secondary-btn"
+                    >Chỉnh sửa</a
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Delete Form -->
+            <form
+              th:action="@{/admin/coin-packages/{id}/delete(id=${coinPackage.id})}"
+              method="post"
+              id="deletePackageForm"
+            >
+              <div class="form-section">
+                <h3>Xác nhận xóa</h3>
+                <div class="form-group">
+                  <label for="reason"
+                    >Lý do xóa <span class="required">*</span></label
+                  >
+                  <textarea
+                    id="reason"
+                    name="reason"
+                    class="form-textarea"
+                    placeholder="Nhập lý do xóa gói xu..."
+                    rows="3"
+                    required
+                  ></textarea>
+                  <div class="form-help">
+                    Lý do xóa sẽ được ghi lại trong lịch sử
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="confirmDelete" required />
+                    <span class="checkmark"></span>
+                    Tôi hiểu rằng hành động này không thể hoàn tác và đồng ý xóa
+                    gói xu
+                  </label>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="secondary-btn" id="cancelBtn">
+                  <i class="fas fa-times"></i> Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  class="danger-btn"
+                  id="confirmDeleteBtn"
+                  disabled
+                >
+                  <i class="fas fa-trash"></i> Xác nhận xóa
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="fragments/admin/layout :: scripts"></div>
+    <script th:src="@{/js/admin/coin-packages-delete.js}"></script>
+  </body>
+</html>

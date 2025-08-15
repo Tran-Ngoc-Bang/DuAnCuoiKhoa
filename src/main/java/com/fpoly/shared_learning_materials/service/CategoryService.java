@@ -55,7 +55,7 @@ public class CategoryService {
             System.out.println("=== GETTING DELETED CATEGORIES ===");
             long totalDeletedCount = categoryRepository.countByDeletedAtIsNotNull();
             System.out.println("Total deleted categories in DB: " + totalDeletedCount);
-            
+
             categories = categoryRepository.findByDeletedAtIsNotNull(Sort.by(Sort.Direction.DESC, "deletedAt"));
             System.out.println("Retrieved deleted categories from query: " + categories.size());
         } else {
@@ -82,12 +82,14 @@ public class CategoryService {
                     return a;
                 }));
 
-        // Tạo map để lấy tên danh mục cha
-        Map<Long, String> categoryNameMap = categories.stream()
+        // Tạo map để lấy tên danh mục cha - cần lấy TẤT CẢ categories để có thể lấy tên
+        // parent
+        List<Category> allCategories = categoryRepository.findAll();
+        Map<Long, String> categoryNameMap = allCategories.stream()
                 .collect(Collectors.toMap(Category::getId, Category::getName));
 
         System.out.println("Converting " + categories.size() + " categories to DTOs");
-        
+
         List<CategoryDTO> result = categories.stream().map(cat -> {
             CategoryDTO dto = new CategoryDTO();
             dto.setId(cat.getId());
@@ -116,7 +118,7 @@ public class CategoryService {
 
             return dto;
         }).collect(Collectors.toList());
-        
+
         System.out.println("Converted to " + result.size() + " DTOs");
         return result;
     }
@@ -138,7 +140,7 @@ public class CategoryService {
         category.setDescription(categoryDTO.getDescription());
         category.setStatus(categoryDTO.getStatus() != null ? categoryDTO.getStatus() : "active");
         category.setSortOrder(categoryDTO.getSortOrder() != null ? categoryDTO.getSortOrder() : 0);
-      
+
         if (categoryDTO.getCreatedById() != null) {
             User createdBy = userRepository.findById(categoryDTO.getCreatedById())
                     .orElseThrow(() -> new IllegalArgumentException(
@@ -280,21 +282,6 @@ public class CategoryService {
         }
     }
 
-    // Khôi phục danh mục đã xóa
-    @Transactional
-    public void restoreCategory(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found with id: " + categoryId));
-
-        if (category.getDeletedAt() == null) {
-            throw new IllegalArgumentException("Category is not deleted");
-        }
-
-        category.setDeletedAt(null);
-        category.setUpdatedAt(LocalDateTime.now());
-        categoryRepository.save(category);
-    }
-
     // Xóa vĩnh viễn danh mục (hard delete)
     @Transactional
     public void permanentDeleteCategory(Long categoryId) {
@@ -313,6 +300,59 @@ public class CategoryService {
 
         // Xóa danh mục vĩnh viễn
         categoryRepository.deleteById(categoryId);
+    }
+
+    @Transactional
+    public void restoreCategory(Long categoryId) {
+        System.out.println("=== RESTORE CATEGORY DEBUG ===");
+        System.out.println("Attempting to restore category ID: " + categoryId);
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục với ID: " + categoryId));
+
+        System.out.println("Found category: " + category.getName() + ", deletedAt: " + category.getDeletedAt());
+
+        if (category.getDeletedAt() == null) {
+            throw new IllegalArgumentException("Danh mục này chưa bị xóa");
+        }
+
+        // Kiểm tra xem danh mục này có phải là danh mục con không
+        CategoryHierarchy hierarchy = categoryHierarchyRepository.findByIdChildId(categoryId).orElse(null);
+        System.out.println("Found hierarchy for child ID " + categoryId + ": " + (hierarchy != null ? "YES" : "NO"));
+
+        if (hierarchy != null) {
+            // Đây là danh mục con, kiểm tra xem danh mục cha đã được khôi phục chưa
+            Long parentId = hierarchy.getId().getParentId();
+            System.out.println("Parent ID: " + parentId);
+
+            Category parentCategory = categoryRepository.findById(parentId).orElse(null);
+
+            if (parentCategory != null) {
+                System.out.println("Parent category: " + parentCategory.getName() + ", deletedAt: "
+                        + parentCategory.getDeletedAt());
+
+                if (parentCategory.getDeletedAt() != null) {
+                    // Danh mục cha vẫn bị xóa
+                    System.out.println("VALIDATION FAILED: Parent category is still deleted");
+                    throw new IllegalArgumentException(
+                            "Không thể khôi phục danh mục con. Bạn cần khôi phục danh mục cha '"
+                                    + parentCategory.getName() + "' trước.");
+                } else {
+                    System.out.println("Parent category is active, can restore child");
+                }
+            } else {
+                System.out.println("Parent category not found!");
+            }
+        } else {
+            System.out.println("This is a root category (no parent)");
+        }
+
+        // Khôi phục danh mục
+        category.setDeletedAt(null);
+        category.setUpdatedAt(LocalDateTime.now());
+        categoryRepository.save(category);
+
+        System.out.println("Successfully restored category: " + category.getName() + " (ID: " + categoryId + ")");
     }
 
     // Helper method to generate slug

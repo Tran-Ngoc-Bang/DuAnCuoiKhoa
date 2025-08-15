@@ -1,8 +1,11 @@
 package com.fpoly.shared_learning_materials.config;
 
-import com.fpoly.shared_learning_materials.domain.*;
-import com.fpoly.shared_learning_materials.repository.*;
-import com.fpoly.shared_learning_materials.util.SlugUtils;
+import com.fpoly.shared_learning_materials.domain.CoinPackage;
+import com.fpoly.shared_learning_materials.domain.Transaction;
+import com.fpoly.shared_learning_materials.domain.User;
+import com.fpoly.shared_learning_materials.repository.CoinPackageRepository;
+import com.fpoly.shared_learning_materials.repository.TransactionRepository;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -23,33 +26,6 @@ public class DataInitializer implements CommandLineRunner {
 
         @Autowired
         private TransactionRepository transactionRepository;
-
-        @Autowired
-        private CategoryRepository categoryRepository;
-
-        @Autowired
-        private CategoryHierarchyRepository categoryHierarchyRepository;
-
-        @Autowired
-        private TagRepository tagRepository;
-
-        @Autowired
-        private DocumentRepository documentRepository;
-
-        @Autowired
-        private FileRepository fileRepository;
-
-        @Autowired
-        private DocumentCategoryRepository documentCategoryRepository;
-
-        @Autowired
-        private DocumentTagRepository documentTagRepository;
-
-        @Autowired
-        private DocumentOwnerRepository documentOwnerRepository;
-
-        @Autowired
-        private CommentRepository commentRepository;
 
         @Autowired
         private PasswordEncoder passwordEncoder;
@@ -76,34 +52,6 @@ public class DataInitializer implements CommandLineRunner {
                         System.out.println("Sample transactions created successfully!");
                 } else {
                         System.out.println("Sample transactions already exist, skipping transaction initialization.");
-                }
-
-                if (!categoryRepository.existsByNameAndDeletedAtIsNull("Công nghệ")) {
-                        createSampleCategories();
-                        System.out.println("Sample categories created successfully!");
-                } else {
-                        System.out.println("Sample categories already exist, skipping category initialization.");
-                }
-
-                if (!tagRepository.existsByName("beginner")) {
-                        createSampleTags();
-                        System.out.println("Sample tags created successfully!");
-                } else {
-                        System.out.println("Sample tags already exist, skipping tag initialization.");
-                }
-
-                if (!documentRepository.existsBySlug("java-programming-guide")) {
-                        createSampleDocuments();
-                        System.out.println("Sample documents created successfully!");
-                } else {
-                        System.out.println("Sample documents already exist, skipping document initialization.");
-                }
-
-                if (commentRepository.count() == 0) {
-                        createSampleComments();
-                        System.out.println("Sample comments created successfully!");
-                } else {
-                        System.out.println("Sample comments already exist, skipping comment initialization.");
                 }
         }
 
@@ -183,7 +131,32 @@ public class DataInitializer implements CommandLineRunner {
                                 createCoinPackage("CP005", "Gói Mega", "Gói xu lớn cho doanh nghiệp",
                                                 2500, new BigDecimal("800000.00"), new BigDecimal("720000.00"),
                                                 new BigDecimal("10.00"), 250,
-                                                CoinPackage.PackageStatus.ACTIVE, 5, admin)
+                                                CoinPackage.PackageStatus.ACTIVE, 5, admin),
+
+                                createCoinPackage("CP006", "Gói Test", "Gói xu test - tạm ngưng",
+                                                50, new BigDecimal("25000.00"), new BigDecimal("25000.00"),
+                                                BigDecimal.ZERO, 0,
+                                                CoinPackage.PackageStatus.INACTIVE, 6, admin),
+
+                                createCoinPackage("CP007", "Gói Flash Sale", "Gói xu khuyến mãi đặc biệt",
+                                                300, new BigDecimal("150000.00"), new BigDecimal("99000.00"),
+                                                new BigDecimal("34.00"), 50,
+                                                CoinPackage.PackageStatus.PROMOTION, 7, admin),
+
+                                createCoinPackage("CP008", "Gói Student", "Gói xu dành cho sinh viên",
+                                                150, new BigDecimal("60000.00"), new BigDecimal("54000.00"),
+                                                new BigDecimal("10.00"), 15,
+                                                CoinPackage.PackageStatus.ACTIVE, 8, admin),
+
+                                createCoinPackage("CP009", "Gói Teacher", "Gói xu dành cho giáo viên",
+                                                400, new BigDecimal("160000.00"), new BigDecimal("144000.00"),
+                                                new BigDecimal("10.00"), 40,
+                                                CoinPackage.PackageStatus.ACTIVE, 9, admin),
+
+                                createCoinPackage("CP010", "Gói Enterprise", "Gói xu dành cho doanh nghiệp lớn",
+                                                5000, new BigDecimal("1800000.00"), new BigDecimal("1620000.00"),
+                                                new BigDecimal("10.00"), 500,
+                                                CoinPackage.PackageStatus.ACTIVE, 10, admin)
                 };
 
                 for (CoinPackage pkg : packages) {
@@ -255,479 +228,5 @@ public class DataInitializer implements CommandLineRunner {
                 transaction.setNotes(notes);
                 transaction.setCreatedAt(LocalDateTime.now());
                 transactionRepository.save(transaction);
-        }
-
-        private void createSampleCategories() {
-                User admin = userRepository.findByUsernameAndDeletedAtIsNull("admin").orElse(null);
-
-                // Tạo danh mục gốc
-                Category tech = createCategory("Công nghệ", "Các tài liệu về công nghệ thông tin", admin);
-                Category education = createCategory("Giáo dục", "Tài liệu giáo dục và học tập", admin);
-                Category business = createCategory("Kinh doanh", "Tài liệu về kinh doanh và quản lý", admin);
-                createCategory("Khoa học", "Tài liệu khoa học và nghiên cứu", admin);
-                createCategory("Nghệ thuật", "Tài liệu về nghệ thuật và sáng tạo", admin);
-
-                // Tạo danh mục con cho Công nghệ
-                Category programming = createCategory("Lập trình", "Tài liệu về lập trình", admin);
-                Category webDev = createCategory("Phát triển Web", "Tài liệu về phát triển web", admin);
-                Category mobile = createCategory("Ứng dụng di động", "Tài liệu về phát triển mobile", admin);
-                Category database = createCategory("Cơ sở dữ liệu", "Tài liệu về database", admin);
-                Category ai = createCategory("Trí tuệ nhân tạo", "Tài liệu về AI và Machine Learning", admin);
-
-                // Tạo hierarchy cho Công nghệ
-                createHierarchy(tech, programming, 1);
-                createHierarchy(tech, webDev, 1);
-                createHierarchy(tech, mobile, 1);
-                createHierarchy(tech, database, 1);
-                createHierarchy(tech, ai, 1);
-
-                // Tạo danh mục con cho Lập trình
-                Category java = createCategory("Java", "Tài liệu về ngôn ngữ Java", admin);
-                Category python = createCategory("Python", "Tài liệu về ngôn ngữ Python", admin);
-                Category javascript = createCategory("JavaScript", "Tài liệu về JavaScript", admin);
-                Category csharp = createCategory("C#", "Tài liệu về C#", admin);
-
-                createHierarchy(programming, java, 2);
-                createHierarchy(programming, python, 2);
-                createHierarchy(programming, javascript, 2);
-                createHierarchy(programming, csharp, 2);
-
-                // Tạo danh mục con cho Giáo dục
-                Category math = createCategory("Toán học", "Tài liệu toán học", admin);
-                Category physics = createCategory("Vật lý", "Tài liệu vật lý", admin);
-                Category chemistry = createCategory("Hóa học", "Tài liệu hóa học", admin);
-                Category literature = createCategory("Văn học", "Tài liệu văn học", admin);
-
-                createHierarchy(education, math, 1);
-                createHierarchy(education, physics, 1);
-                createHierarchy(education, chemistry, 1);
-                createHierarchy(education, literature, 1);
-
-                // Tạo danh mục con cho Kinh doanh
-                Category marketing = createCategory("Marketing", "Tài liệu marketing", admin);
-                Category finance = createCategory("Tài chính", "Tài liệu tài chính", admin);
-                Category management = createCategory("Quản lý", "Tài liệu quản lý", admin);
-
-                createHierarchy(business, marketing, 1);
-                createHierarchy(business, finance, 1);
-                createHierarchy(business, management, 1);
-        }
-
-        private Category createCategory(String name, String description, User createdBy) {
-                Category category = new Category();
-                category.setName(name);
-                category.setSlug(SlugUtils.generateSlug(name));
-                category.setDescription(description);
-                category.setStatus("active");
-                category.setSortOrder(0);
-                category.setCreatedBy(createdBy);
-                category.setCreatedAt(LocalDateTime.now());
-                category.setUpdatedAt(LocalDateTime.now());
-                return categoryRepository.save(category);
-        }
-
-        private void createHierarchy(Category parent, Category child, int level) {
-                CategoryHierarchy hierarchy = new CategoryHierarchy();
-                CategoryHierarchyId id = new CategoryHierarchyId();
-                id.setParentId(parent.getId());
-                id.setChildId(child.getId());
-                hierarchy.setId(id);
-                hierarchy.setParent(parent);
-                hierarchy.setChild(child);
-                hierarchy.setLevel(level);
-                hierarchy.setCreatedAt(LocalDateTime.now());
-                categoryHierarchyRepository.save(hierarchy);
-        }
-
-        private void createSampleTags() {
-                User admin = userRepository.findByUsernameAndDeletedAtIsNull("admin").orElse(null);
-
-                // Tạo tags theo chủ đề
-                String[] tagData = {
-                                "beginner:Dành cho người mới bắt đầu",
-                                "intermediate:Trình độ trung cấp",
-                                "advanced:Trình độ nâng cao",
-                                "tutorial:Hướng dẫn chi tiết",
-                                "guide:Hướng dẫn tổng quan",
-                                "example:Ví dụ thực tế",
-                                "java:Ngôn ngữ lập trình Java",
-                                "python:Ngôn ngữ lập trình Python",
-                                "javascript:Ngôn ngữ lập trình JavaScript",
-                                "web:Phát triển web",
-                                "mobile:Phát triển ứng dụng di động",
-                                "database:Cơ sở dữ liệu",
-                                "ai:Trí tuệ nhân tạo",
-                                "machine-learning:Học máy",
-                                "data-science:Khoa học dữ liệu",
-                                "algorithm:Thuật toán",
-                                "design-pattern:Mẫu thiết kế",
-                                "spring-boot:Framework Spring Boot",
-                                "react:Thư viện React",
-                                "angular:Framework Angular",
-                                "vue:Framework Vue.js",
-                                "nodejs:Môi trường Node.js",
-                                "express:Framework Express.js",
-                                "mysql:Cơ sở dữ liệu MySQL",
-                                "postgresql:Cơ sở dữ liệu PostgreSQL",
-                                "mongodb:Cơ sở dữ liệu MongoDB",
-                                "redis:Cơ sở dữ liệu Redis",
-                                "docker:Containerization với Docker",
-                                "kubernetes:Orchestration với Kubernetes",
-                                "aws:Amazon Web Services",
-                                "azure:Microsoft Azure",
-                                "gcp:Google Cloud Platform",
-                                "devops:DevOps practices",
-                                "ci-cd:Continuous Integration/Deployment",
-                                "testing:Kiểm thử phần mềm",
-                                "security:Bảo mật thông tin",
-                                "performance:Tối ưu hiệu suất",
-                                "optimization:Tối ưu hóa",
-                                "best-practices:Thực hành tốt nhất",
-                                "free:Tài liệu miễn phí"
-                };
-
-                for (String tagInfo : tagData) {
-                        String[] parts = tagInfo.split(":");
-                        String tagName = parts[0];
-                        String description = parts.length > 1 ? parts[1] : "Tag về " + tagName;
-
-                        Tag tag = new Tag();
-                        tag.setName(tagName);
-                        tag.setSlug(SlugUtils.generateSlug(tagName));
-                        tag.setDescription(description);
-                        tag.setCreatedBy(admin);
-                        tag.setCreatedAt(LocalDateTime.now());
-                        tagRepository.save(tag);
-                }
-        }
-
-        private void createSampleDocuments() {
-                User admin = userRepository.findByUsernameAndDeletedAtIsNull("admin").orElse(null);
-                User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
-                User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
-
-                // Tạo documents với thông tin chi tiết
-                String[][] documentData = {
-                                { "Java Programming Guide", "java-programming-guide",
-                                                "Hướng dẫn lập trình Java từ cơ bản đến nâng cao", "50", "APPROVED",
-                                                "user1" },
-                                { "Python for Beginners", "python-for-beginners",
-                                                "Khóa học Python dành cho người mới bắt đầu", "0", "APPROVED",
-                                                "user1" },
-                                { "JavaScript ES6 Features", "javascript-es6-features",
-                                                "Tìm hiểu các tính năng mới của JavaScript ES6", "30", "APPROVED",
-                                                "user2" },
-                                { "Web Development Roadmap", "web-development-roadmap",
-                                                "Lộ trình học phát triển web 2024", "0", "APPROVED", "admin" },
-                                { "Spring Boot Tutorial", "spring-boot-tutorial", "Hướng dẫn Spring Boot từ A đến Z",
-                                                "75", "PENDING", "user1" },
-                                { "React Hooks Guide", "react-hooks-guide", "Hướng dẫn sử dụng React Hooks hiệu quả",
-                                                "40", "APPROVED", "user2" },
-                                { "Database Design Principles", "database-design-principles",
-                                                "Nguyên tắc thiết kế cơ sở dữ liệu", "60", "APPROVED", "admin" },
-                                { "Machine Learning Basics", "machine-learning-basics",
-                                                "Cơ bản về Machine Learning và AI", "100", "PENDING", "user1" },
-                                { "Docker for Developers", "docker-for-developers", "Docker dành cho lập trình viên",
-                                                "45", "APPROVED", "user2" },
-                                { "Git Version Control", "git-version-control", "Quản lý phiên bản với Git", "0",
-                                                "APPROVED", "admin" },
-                                { "Node.js Backend Development", "nodejs-backend-development",
-                                                "Phát triển backend với Node.js", "80", "APPROVED", "user1" },
-                                { "CSS Grid Layout", "css-grid-layout", "Hướng dẫn CSS Grid Layout", "25", "DRAFT",
-                                                "user2" },
-                                { "Algorithm and Data Structures", "algorithm-data-structures",
-                                                "Thuật toán và cấu trúc dữ liệu", "90", "APPROVED", "admin" },
-                                { "REST API Design", "rest-api-design", "Thiết kế REST API chuẩn", "55", "PENDING",
-                                                "user1" },
-                                { "MongoDB Tutorial", "mongodb-tutorial", "Hướng dẫn MongoDB từ cơ bản", "35",
-                                                "APPROVED", "user2" },
-                                { "Vue.js Complete Guide", "vuejs-complete-guide", "Hướng dẫn Vue.js đầy đủ", "70",
-                                                "APPROVED", "admin" },
-                                { "Microservices Architecture", "microservices-architecture", "Kiến trúc Microservices",
-                                                "120", "APPROVED", "user1" },
-                                { "AWS Cloud Fundamentals", "aws-cloud-fundamentals", "Cơ bản về AWS Cloud", "85",
-                                                "REJECTED", "user2" },
-                                { "Cybersecurity Essentials", "cybersecurity-essentials", "Bảo mật thông tin cơ bản",
-                                                "95", "APPROVED", "admin" },
-                                { "Mobile App Development", "mobile-app-development", "Phát triển ứng dụng di động",
-                                                "110", "DRAFT", "user1" }
-                };
-
-                for (int i = 0; i < documentData.length; i++) {
-                        String[] data = documentData[i];
-                        String title = data[0];
-                        String slug = data[1];
-                        String description = data[2];
-                        BigDecimal price = new BigDecimal(data[3]);
-                        String status = data[4];
-                        String ownerUsername = data[5];
-
-                        User owner = "admin".equals(ownerUsername) ? admin
-                                        : "user1".equals(ownerUsername) ? user1 : user2;
-
-                        // Tạo document
-                        Document document = createDocument(title, slug, description, price, status);
-
-                        // Tạo file giả
-                        File file = createSampleFile(title + ".pdf", (i + 1) * 1024 * 1024L, owner); // 1MB, 2MB, 3MB...
-                        document.setFile(file);
-
-                        // Cập nhật views và downloads ngẫu nhiên
-                        document.setViewsCount((long) (Math.random() * 1000));
-                        document.setDownloadsCount((long) (Math.random() * 100));
-                        document = documentRepository.save(document);
-
-                        // Tạo DocumentOwner
-                        createDocumentOwner(document, owner);
-
-                        // Gán categories và tags dựa trên nội dung
-                        assignCategoriesAndTags(document, i);
-                }
-        }
-
-        private Document createDocument(String title, String slug, String description,
-                        BigDecimal price, String status) {
-                Document document = new Document();
-                document.setTitle(title);
-                document.setSlug(slug);
-                document.setDescription(description);
-                document.setPrice(price);
-                document.setStatus(status);
-                document.setVisibility("public");
-                document.setViewsCount(0L);
-                document.setDownloadsCount(0L);
-                document.setCreatedAt(LocalDateTime.now());
-                document.setUpdatedAt(LocalDateTime.now());
-                if ("APPROVED".equals(status)) {
-                        document.setPublishedAt(LocalDateTime.now());
-                }
-                return document;
-        }
-
-        private File createSampleFile(String fileName, Long fileSize, User uploadedBy) {
-                File file = new File();
-                file.setFileName(fileName);
-                file.setFileSize(fileSize);
-                file.setFileType(getFileTypeFromName(fileName));
-                file.setMimeType("application/pdf");
-                file.setFilePath("uploads/documents/" + fileName);
-                file.setUploadedBy(uploadedBy);
-                file.setStatus("active");
-                file.setCreatedAt(LocalDateTime.now());
-                return fileRepository.save(file);
-        }
-
-        private String getFileTypeFromName(String fileName) {
-                if (fileName.endsWith(".pdf"))
-                        return "PDF";
-                if (fileName.endsWith(".doc") || fileName.endsWith(".docx"))
-                        return "DOC";
-                if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx"))
-                        return "PPT";
-                return "OTHER";
-        }
-
-        private void createDocumentOwner(Document document, User user) {
-                DocumentOwner owner = new DocumentOwner();
-                DocumentOwnerId ownerId = new DocumentOwnerId();
-                ownerId.setDocumentId(document.getId());
-                ownerId.setUserId(user.getId());
-                owner.setId(ownerId);
-                owner.setDocument(document);
-                owner.setUser(user);
-                documentOwnerRepository.save(owner);
-        }
-
-        private void assignCategoriesAndTags(Document document, int index) {
-                // Gán categories dựa trên index và tên document
-                Category category = null;
-                String title = document.getTitle().toLowerCase();
-
-                if (title.contains("java")) {
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("Java").orElse(null);
-                } else if (title.contains("python")) {
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("Python").orElse(null);
-                } else if (title.contains("javascript") || title.contains("react") || title.contains("vue")
-                                || title.contains("css")) {
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("JavaScript").orElse(null);
-                } else if (title.contains("web") || title.contains("node")) {
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("Phát triển Web").orElse(null);
-                } else if (title.contains("database") || title.contains("mongodb")) {
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("Cơ sở dữ liệu").orElse(null);
-                } else if (title.contains("machine learning") || title.contains("ai")) {
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("Trí tuệ nhân tạo").orElse(null);
-                } else if (title.contains("mobile")) {
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("Ứng dụng di động").orElse(null);
-                } else {
-                        // Default to programming
-                        category = categoryRepository.findByNameAndDeletedAtIsNull("Lập trình").orElse(null);
-                }
-
-                if (category != null) {
-                        DocumentCategory docCategory = new DocumentCategory();
-                        DocumentCategoryId docCatId = new DocumentCategoryId();
-                        docCatId.setDocumentId(document.getId());
-                        docCatId.setCategoryId(category.getId());
-                        docCategory.setId(docCatId);
-                        docCategory.setDocument(document);
-                        docCategory.setCategory(category);
-                        documentCategoryRepository.save(docCategory);
-                }
-
-                // Gán tags dựa trên nội dung
-                String[] possibleTags = determineTags(document.getTitle(), document.getDescription(),
-                                document.getPrice());
-
-                for (String tagName : possibleTags) {
-                        Tag tag = tagRepository.findByName(tagName).orElse(null);
-                        if (tag != null) {
-                                DocumentTag docTag = new DocumentTag();
-                                DocumentTagId docTagId = new DocumentTagId();
-                                docTagId.setDocumentId(document.getId());
-                                docTagId.setTagId(tag.getId());
-                                docTag.setId(docTagId);
-                                docTag.setDocument(document);
-                                docTag.setTag(tag);
-                                documentTagRepository.save(docTag);
-                        }
-                }
-        }
-
-        private String[] determineTags(String title, String description, BigDecimal price) {
-                String content = (title + " " + description).toLowerCase();
-                java.util.List<String> tags = new java.util.ArrayList<>();
-
-                // Level tags
-                if (content.contains("beginner") || content.contains("basic") || content.contains("cơ bản")) {
-                        tags.add("beginner");
-                } else if (content.contains("advanced") || content.contains("nâng cao")) {
-                        tags.add("advanced");
-                } else {
-                        tags.add("intermediate");
-                }
-
-                // Content type tags
-                if (content.contains("tutorial") || content.contains("hướng dẫn")) {
-                        tags.add("tutorial");
-                }
-                if (content.contains("guide") || content.contains("roadmap")) {
-                        tags.add("guide");
-                }
-
-                // Technology tags
-                if (content.contains("java"))
-                        tags.add("java");
-                if (content.contains("python"))
-                        tags.add("python");
-                if (content.contains("javascript"))
-                        tags.add("javascript");
-                if (content.contains("react"))
-                        tags.add("react");
-                if (content.contains("vue"))
-                        tags.add("vue");
-                if (content.contains("node"))
-                        tags.add("nodejs");
-                if (content.contains("spring"))
-                        tags.add("spring-boot");
-                if (content.contains("docker"))
-                        tags.add("docker");
-                if (content.contains("aws"))
-                        tags.add("aws");
-                if (content.contains("database") || content.contains("mongodb"))
-                        tags.add("database");
-                if (content.contains("machine learning") || content.contains("ai"))
-                        tags.add("ai");
-                if (content.contains("web"))
-                        tags.add("web");
-                if (content.contains("mobile"))
-                        tags.add("mobile");
-                if (content.contains("security"))
-                        tags.add("security");
-                if (content.contains("algorithm"))
-                        tags.add("algorithm");
-
-                // Price tag
-                if (price.compareTo(BigDecimal.ZERO) == 0) {
-                        tags.add("free");
-                }
-
-                // Always add best-practices for some documents
-                if (content.contains("design") || content.contains("architecture") || content.contains("principles")) {
-                        tags.add("best-practices");
-                }
-
-                return tags.toArray(new String[0]);
-        }
-
-        private void createSampleComments() {
-                User admin = userRepository.findByUsernameAndDeletedAtIsNull("admin").orElse(null);
-                User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
-                User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
-
-                // Lấy một số documents để comment
-                java.util.List<Document> documents = documentRepository.findAll();
-                if (documents.isEmpty())
-                        return;
-
-                // Tạo comments cho các documents
-                String[][] commentData = {
-                                { "Tài liệu rất hữu ích, cảm ơn tác giả!", "active", "user1" },
-                                { "Nội dung chi tiết và dễ hiểu, 5 sao!", "active", "user2" },
-                                { "Có thể bổ sung thêm ví dụ thực tế không?", "active", "user1" },
-                                { "Đây là tài liệu tốt nhất về chủ đề này mà tôi từng đọc", "active", "user2" },
-                                { "Cảm ơn bạn đã chia sẻ kiến thức quý báu", "active", "admin" },
-                                { "Rất bổ ích cho người mới bắt đầu như tôi", "active", "user1" },
-                                { "Có thể cập nhật thêm phần về best practices không?", "active", "user2" },
-                                { "Tài liệu viết rất chuyên nghiệp và dễ theo dõi", "active", "admin" },
-                                { "Mình đã áp dụng thành công theo hướng dẫn này", "active", "user1" },
-                                { "Chất lượng tuyệt vời, đáng giá từng xu!", "active", "user2" },
-                                { "Có thể làm thêm video hướng dẫn không?", "active", "user1" },
-                                { "Phần code example rất hay và thực tế", "active", "admin" },
-                                { "Tài liệu này giúp tôi hiểu rõ hơn về chủ đề", "active", "user2" },
-                                { "Cảm ơn tác giả, mong có thêm nhiều tài liệu hay", "active", "user1" },
-                                { "Nội dung cập nhật và theo kịp xu hướng", "active", "admin" },
-                                { "Giải thích rất rõ ràng, dễ hiểu", "active", "user2" },
-                                { "Tôi sẽ recommend tài liệu này cho bạn bè", "active", "user1" },
-                                { "Phần troubleshooting rất hữu ích", "active", "admin" },
-                                { "Đây là investment tốt cho việc học", "active", "user2" },
-                                { "Cảm ơn vì đã chia sẻ kinh nghiệm thực tế", "active", "user1" },
-                                { "Tài liệu được tổ chức rất logic và khoa học", "active", "admin" },
-                                { "Mình đã bookmark để tham khảo lại", "active", "user2" },
-                                { "Có thể thêm phần FAQ không?", "active", "user1" },
-                                { "Chất lượng nội dung rất cao", "active", "admin" },
-                                { "Đọc xong cảm thấy tự tin hơn nhiều", "active", "user2" },
-                                { "Tác giả có kinh nghiệm thực tế rất tốt", "active", "user1" },
-                                { "Tài liệu này đáng để đầu tư", "active", "admin" },
-                                { "Nội dung được cập nhật thường xuyên", "active", "user2" },
-                                { "Rất chi tiết và đầy đủ thông tin", "active", "user1" },
-                                { "Cảm ơn vì tài liệu miễn phí chất lượng cao", "active", "admin" }
-                };
-
-                // Tạo comments ngẫu nhiên cho các documents
-                for (int i = 0; i < commentData.length && i < documents.size() * 3; i++) {
-                        Document document = documents.get(i % documents.size());
-                        String[] data = commentData[i % commentData.length];
-                        String content = data[0];
-                        String status = data[1];
-                        String username = data[2];
-
-                        User commenter = "admin".equals(username) ? admin : "user1".equals(username) ? user1 : user2;
-
-                        if (commenter != null) {
-                                createComment(document, commenter, content, status);
-                        }
-                }
-        }
-
-        private void createComment(Document document, User user, String content, String status) {
-                Comment comment = new Comment();
-                comment.setDocument(document);
-                comment.setUser(user);
-                comment.setContent(content);
-                comment.setStatus(status);
-                comment.setCreatedAt(LocalDateTime.now().minusDays((long) (Math.random() * 30))); // Random date within
-                                                                                                  // last 30 days
-                comment.setUpdatedAt(comment.getCreatedAt());
-                commentRepository.save(comment);
         }
 }
