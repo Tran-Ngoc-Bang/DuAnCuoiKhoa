@@ -93,7 +93,17 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.2.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.3</version>
+		</dependency>
 		<!-- JWT Dependencies -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

@@ -52,4 +52,86 @@ public class Report {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public User getReporter() {
+		return reporter;
+	}
+
+	public void setReporter(User reporter) {
+		this.reporter = reporter;
+	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public Comment getComment() {
+		return comment;
+	}
+
+	public void setComment(Comment comment) {
+		this.comment = comment;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getReviewedAt() {
+		return reviewedAt;
+	}
+
+	public void setReviewedAt(LocalDateTime reviewedAt) {
+		this.reviewedAt = reviewedAt;
+	}
+
+	public User getReviewer() {
+		return reviewer;
+	}
+
+	public void setReviewer(User reviewer) {
+		this.reviewer = reviewer;
+	}
+    
+    
 }

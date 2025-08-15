@@ -62,7 +62,7 @@ public class SecurityConfig {
                                 // Configure authorization
                                 .authorizeHttpRequests(authz -> authz
                                                 // Public resources
-                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico")
+                                                .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**", "/favicon.ico")
                                                 .permitAll()
                                                 .requestMatchers("/", "/home", "/login", "/register").permitAll()
                                                 .requestMatchers("/coin-packages", "/coin-packages/**").permitAll()

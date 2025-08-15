@@ -1,30 +1,29 @@
 package com.fpoly.shared_learning_materials.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "comments")
+@Table(name = "replies")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comment {
+public class Reply {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id")
-    private Document document;
+    @JoinColumn(name = "comment_id", nullable = false)
+    private Comment comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "content", columnDefinition = "nvarchar(max)", nullable = false)
@@ -41,12 +40,6 @@ public class Comment {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-    
-    @Column(name = "reported")
-    private Boolean reported;
-
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reply> replies = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -67,12 +60,12 @@ public class Comment {
 		this.id = id;
 	}
 
-	public Document getDocument() {
-		return document;
+	public Comment getComment() {
+		return comment;
 	}
 
-	public void setDocument(Document document) {
-		this.document = document;
+	public void setComment(Comment comment) {
+		this.comment = comment;
 	}
 
 	public User getUser() {
@@ -122,21 +115,6 @@ public class Comment {
 	public void setDeletedAt(LocalDateTime deletedAt) {
 		this.deletedAt = deletedAt;
 	}
-
-	public List<Reply> getReplies() {
-		return replies;
-	}
-
-	public void setReplies(List<Reply> replies) {
-		this.replies = replies;
-	}
-
-	public Boolean getReported() {
-		return reported;
-	}
-
-	public void setReported(Boolean reported) {
-		this.reported = reported;
-	}
+    
     
 }
