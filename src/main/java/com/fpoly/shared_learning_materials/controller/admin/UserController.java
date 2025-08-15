@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -45,10 +47,13 @@ public class UserController {
 	    @RequestParam(required = false) String dir,       
 	    Model model) {
 
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String currentUsername = auth.getName();
+
 	    String sortBy = (sort != null) ? sort : "createdAt";
 	    Sort.Direction direction = ("desc".equalsIgnoreCase(dir)) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
-	    Page<User> usersPage = userService.searchUsers(keyword, role, status, page, size, sortBy, direction);
+	    Page<User> usersPage = userService.searchUsers(keyword, role, status, page, size, sortBy, direction, currentUsername);
 
 	    model.addAttribute("usersPage", usersPage);
 	    model.addAttribute("currentPage", page);

@@ -31,7 +31,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Page<User> searchUsers(String keyword, String role, String status, int page, int size, String sortBy, Sort.Direction direction) {
+    public Page<User> searchUsers(String keyword, String role, String status, int page, int size, String sortBy, Sort.Direction direction, String username) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         Specification<User> spec = Specification.where((root, query, cb) -> cb.isNull(root.get("deletedAt")));
@@ -47,6 +47,10 @@ public class UserService {
 
         if (status != null && !status.equals("all")) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+        
+        if (username != null && !username.isBlank()) {
+            spec = spec.and((root, query, cb) -> cb.notEqual(root.get("username"), username));
         }
 
         return userRepository.findAll(spec, pageable);
