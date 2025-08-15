@@ -56,7 +56,7 @@ public class UserController {
 	    Page<User> usersPage = userService.searchUsers(keyword, role, status, page, size, sortBy, direction, currentUsername);
 
 	    model.addAttribute("usersPage", usersPage);
-	    model.addAttribute("currentPage", page);
+	    model.addAttribute("currentPage", "users");
 	    model.addAttribute("totalPages", usersPage.getTotalPages());
 
 	    model.addAttribute("keyword", keyword);
@@ -65,7 +65,7 @@ public class UserController {
 
 	    model.addAttribute("sort", sortBy);     
 	    model.addAttribute("dir", direction.toString().toLowerCase()); 
-	    model.addAttribute("current", "users");
+	    model.addAttribute("current", page);
 
 	    return "admin/users/index";
 	}
@@ -232,6 +232,7 @@ public class UserController {
 		}
 
 		model.addAttribute("userDTO", optDto.get());
+		model.addAttribute("currentPage", "users");
 		return "admin/users/delete";
 	}
 	

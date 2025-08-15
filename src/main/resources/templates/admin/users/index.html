@@ -203,9 +203,6 @@
                      <a th:href="@{/admin/users/create}" class="add-new-btn">
 					    <i class="fas fa-plus"></i> Thêm người dùng
 					  </a>
-					  <a th:href="@{/admin/users/export}" class="export-btn">
-						    <i class="fas fa-download"></i> Xuất dữ liệu
-					  </a>
                 </div>
             </div>
             <!-- Users Table -->
@@ -402,7 +399,7 @@
 			<div class="pagination">
 			  <button type="button" class="pagination-btn prev-btn"
 			          th:disabled="${usersPage.first}"
-			          th:attr="data-url='?page=' + (${currentPage} - 1) + '&size=' + ${usersPage.size}"
+			          th:attr="data-url='?page=' + (${current} - 1) + '&size=' + ${usersPage.size}"
 			          onclick="window.location.href=this.dataset.url">
 			    <i class="fas fa-chevron-left"></i>
 			  </button>
@@ -410,7 +407,7 @@
 			  <div class="pagination-pages">
 			    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
 			      <button type="button" class="pagination-btn page-btn"
-			              th:classappend="${i} == ${currentPage} ? ' active' : ''"
+			              th:classappend="${i} == ${current} ? ' active' : ''"
 			              th:text="${i + 1}"
 			              th:attr="data-url='?page=' + ${i} + '&size=' + ${usersPage.size}"
 			              onclick="window.location.href=this.dataset.url">
@@ -420,7 +417,7 @@
 
 			  <button type="button" class="pagination-btn next-btn"
 			          th:disabled="${usersPage.last}"
-			          th:attr="data-url='?page=' + (${currentPage} + 1) + '&size=' + ${usersPage.size}"
+			          th:attr="data-url='?page=' + (${current} + 1) + '&size=' + ${usersPage.size}"
 			          onclick="window.location.href=this.dataset.url">
 			    <i class="fas fa-chevron-right"></i>
 			  </button>
