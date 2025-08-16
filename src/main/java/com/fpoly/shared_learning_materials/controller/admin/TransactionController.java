@@ -1,7 +1,7 @@
 package com.fpoly.shared_learning_materials.controller.admin;
 
 import com.fpoly.shared_learning_materials.domain.Transaction;
-import com.fpoly.shared_learning_materials.domain.User;
+// import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.service.TransactionService;
 import com.fpoly.shared_learning_materials.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

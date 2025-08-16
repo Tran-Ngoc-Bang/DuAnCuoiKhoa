@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+// import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,17 +31,18 @@ import com.fpoly.shared_learning_materials.repository.UserRepository;
 @RequestMapping("/admin")
 public class AdminController {
 
-	@Autowired
-	private DocumentRepository documentRepository;
-	
-	@Autowired
-	private UserRepository userRepository;
-	
-	@Autowired
-	private DocumentCategoryRepository documentCategoryRepository;
-	
-	@Autowired
-	private TransactionRepository transactionRepository;
+    @Autowired
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private DocumentCategoryRepository documentCategoryRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
     /**
      * Trang chủ admin dashboard
      */
@@ -59,15 +60,14 @@ public class AdminController {
     public String dashboard(Model model) {
         return index(model);
     }
-    
-    
+
     @GetMapping("/statistics")
     public String statistics(Model model) {
-    	model.addAttribute("documents", documentRepository.findTop5ByDeletedAtIsNullOrderByCreatedAtDesc());
-    	model.addAttribute("currentPage", "statistics");
+        model.addAttribute("documents", documentRepository.findTop5ByDeletedAtIsNullOrderByCreatedAtDesc());
+        model.addAttribute("currentPage", "statistics");
         return "admin/statistics";
     }
-    
+
     @GetMapping("/statistics/user-growth")
     public ResponseEntity<Map<String, Integer>> getUserGrowthThisYear() {
         Year currentYear = Year.now();
@@ -86,7 +86,7 @@ public class AdminController {
 
         return ResponseEntity.ok(monthlyCounts);
     }
-    
+
     @GetMapping("/statistics/category-distribution")
     public ResponseEntity<Map<String, Long>> getCategoryDistribution() {
         List<Object[]> results = documentCategoryRepository.countDocumentsByCategory();
@@ -100,7 +100,7 @@ public class AdminController {
 
         return ResponseEntity.ok(data);
     }
-    
+
     @GetMapping("/statistics/summary")
     public ResponseEntity<Map<String, Object>> getStatisticsSummary(
             @RequestParam String start,
@@ -115,9 +115,9 @@ public class AdminController {
         BigDecimal revenue = transactionRepository.sumAmountByTypeAndStatusAndCreatedAtBetween(
                 Transaction.TransactionType.PURCHASE,
                 Transaction.TransactionStatus.COMPLETED,
-                startDate, endDate
-        );
-        if (revenue == null) revenue = BigDecimal.ZERO;
+                startDate, endDate);
+        if (revenue == null)
+            revenue = BigDecimal.ZERO;
 
         Map<String, Object> result = new HashMap<>();
         result.put("userCount", userCount);
@@ -150,15 +150,14 @@ public class AdminController {
     @GetMapping("/statistics/revenue-monthly")
     public ResponseEntity<Map<String, Object>> getMonthlyRevenue() {
         LocalDate now = LocalDate.now();
-        LocalDate start = now.minusMonths(5).withDayOfMonth(1); 
+        LocalDate start = now.minusMonths(5).withDayOfMonth(1);
         LocalDate end = now.withDayOfMonth(now.lengthOfMonth());
 
         List<Object[]> revenueByMonth = transactionRepository.getMonthlyRevenueSummary(
                 Transaction.TransactionType.PURCHASE,
                 Transaction.TransactionStatus.COMPLETED,
                 start.atStartOfDay(),
-                end.atTime(23, 59, 59)
-        );
+                end.atTime(23, 59, 59));
 
         List<String> labels = new ArrayList<>();
         List<BigDecimal> data = new ArrayList<>();
@@ -182,7 +181,8 @@ public class AdminController {
             }
         }
 
-        BigDecimal avg = data.isEmpty() ? BigDecimal.ZERO : total.divide(new BigDecimal(data.size()), 0, RoundingMode.HALF_UP);
+        BigDecimal avg = data.isEmpty() ? BigDecimal.ZERO
+                : total.divide(new BigDecimal(data.size()), 0, RoundingMode.HALF_UP);
 
         Map<String, Object> result = new HashMap<>();
         result.put("labels", labels);
@@ -194,6 +194,5 @@ public class AdminController {
 
         return ResponseEntity.ok(result);
     }
-
 
 }

@@ -28,12 +28,12 @@
 
   <body class="admin-body">
     <!-- Admin Header -->
-    <div th:replace="fragments/admin/layout :: header"></div>
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
 
     <!-- Admin Container -->
     <div class="admin-container">
       <!-- Sidebar -->
-      <div th:replace="fragments/admin/sidebar :: admin-sidebar"></div>
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
 
       <!-- Main Content -->
       <main class="admin-content">
@@ -252,7 +252,7 @@
     </div>
 
     <!-- Scripts -->
-    <div th:replace="fragments/admin/layout :: scripts"></div>
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
     <script th:src="@{/js/admin/coin-packages-delete.js}"></script>
   </body>
 </html>

@@ -1,9 +1,9 @@
 package com.fpoly.shared_learning_materials.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+// import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+// import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -12,51 +12,49 @@ import java.time.LocalDateTime;
 @Data
 public class Category {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "name", length = 255, nullable = false, columnDefinition = "nvarchar(max)")
-    private String name;
+	@Column(name = "name", length = 255, nullable = false, columnDefinition = "nvarchar(max)")
+	private String name;
 
-    @Column(name = "slug", length = 255, nullable = false, unique = true)
-    private String slug;
+	@Column(name = "slug", length = 255, nullable = false, unique = true)
+	private String slug;
 
-    @Column(name = "description", columnDefinition = "nvarchar(max)")
-    private String description;
+	@Column(name = "description", columnDefinition = "nvarchar(max)")
+	private String description;
 
-    @Column(name = "status", length = 20)
-    private String status = "active";
+	@Column(name = "status", length = 20)
+	private String status = "active";
 
-    @Column(name = "sort_order")
-    private Integer sortOrder = 0;
+	@Column(name = "sort_order")
+	private Integer sortOrder = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "created_by")
+	private User createdBy;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+	@PrePersist
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
+	}
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
 
-    
-    
 	public Category() {
 		super();
 	}
@@ -155,6 +153,5 @@ public class Category {
 	public void setDeletedAt(LocalDateTime deletedAt) {
 		this.deletedAt = deletedAt;
 	}
-    
-    
+
 }

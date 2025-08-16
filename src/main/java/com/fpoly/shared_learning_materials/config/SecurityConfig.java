@@ -62,7 +62,8 @@ public class SecurityConfig {
                                 // Configure authorization
                                 .authorizeHttpRequests(authz -> authz
                                                 // Public resources
-                                                .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**", "/favicon.ico")
+                                                .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**",
+                                                                "/favicon.ico")
                                                 .permitAll()
                                                 .requestMatchers("/", "/home", "/login", "/register").permitAll()
                                                 .requestMatchers("/coin-packages", "/coin-packages/**").permitAll()
@@ -105,7 +106,7 @@ public class SecurityConfig {
 
                                 // Configure session management
                                 .sessionManagement(session -> session
-                                                .maximumSessions(1)
+                                                .maximumSessions(5) // Allow multiple sessions
                                                 .maxSessionsPreventsLogin(false)
                                                 .expiredUrl("/login?expired=true"))
 
