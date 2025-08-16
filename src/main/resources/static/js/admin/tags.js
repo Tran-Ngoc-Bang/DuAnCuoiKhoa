@@ -138,5 +138,167 @@
                 }
             });
         });
+        
+        // Export functionality
+        const exportBtn = document.getElementById('exportTagsBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', exportTagsToCSV);
+        }
     });
 
+    // Export Tags to CSV - Fetch all data from server
+    async function exportTagsToCSV() {
+        console.log('Export tags button clicked'); // Debug
+        
+        try {
+            // Removed loading notification as requested
+            
+            // Fetch all tags from server (without pagination)
+            const response = await fetch('/admin/tags?size=1000&export=true');
+            
+            if (!response.ok) {
+                throw new Error('Không thể tải dữ liệu từ server');
+            }
+            
+            // Parse HTML response to extract data
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const data = [];
+            
+            // Header
+            data.push([
+                'STT', 'Tên tag', 'Số tài liệu', 'Ngày tạo', 'Trạng thái'
+            ]);
+            
+            // Get all rows from the fetched HTML
+            const rows = doc.querySelectorAll('tbody tr');
+            console.log('Found total rows:', rows.length); // Debug
+            
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                
+                if (cells.length >= 6) {
+                    const stt = (index + 1).toString(); // Sequential number
+                    const tagName = cells[2]?.querySelector('.tag-label')?.textContent?.trim() || '';
+                    const docCount = cells[3]?.textContent?.trim() || '0';
+                    const createdDate = cells[4]?.textContent?.trim() || '';
+                    const status = cells[5]?.querySelector('.status-badge')?.textContent?.trim() || '';
+                    
+                    const rowData = [
+                        stt,
+                        tagName,
+                        docCount,
+                        createdDate,
+                        status
+                    ];
+                    
+                    data.push(rowData);
+                }
+            });
+            
+            console.log('Total data rows:', data.length); // Debug
+            
+            if (data.length <= 1) {
+                showNotification('Không có dữ liệu để xuất!', 'error');
+                return;
+            }
+            
+            // Create CSV content
+            const csvContent = data.map(row => 
+                row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(',')
+            ).join('\n');
+            
+            // Download file
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `tags_export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification(`Đã xuất ${data.length - 1} tag thành công!`, 'success');
+            
+        } catch (error) {
+            console.error('Export error:', error);
+            showNotification('Lỗi khi xuất dữ liệu: ' + error.message, 'error');
+        }
+    }
+
+    // Helper function for notifications - with inline CSS for Tags page
+    function showNotification(message, type = 'info') {
+        // Tạo toast notification với inline CSS
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+        
+        // Inline CSS để đảm bảo hiển thị đúng
+        const bgColor = type === 'success' ? '#d1e7dd' : '#f8d7da';
+        const borderColor = type === 'success' ? '#badbcc' : '#f5c2c7';
+        const textColor = type === 'success' ? '#0f5132' : '#842029';
+        
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            padding: 12px 16px;
+            margin-bottom: 1rem;
+            border: 1px solid ${borderColor};
+            border-radius: 8px;
+            background-color: ${bgColor};
+            color: ${textColor};
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        // Thêm keyframe animation
+        if (!document.getElementById('toast-animations')) {
+            const style = document.createElement('style');
+            style.id = 'toast-animations';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" 
+               style="color: ${type === 'success' ? '#0f5132' : '#842029'}; margin-right: 8px;"></i>
+            <span style="flex: 1;">${message}</span>
+            <button type="button" 
+                    style="background: none; border: none; font-size: 18px; color: ${textColor}; cursor: pointer; padding: 0; margin-left: 8px;"
+                    onclick="this.parentElement.remove()">&times;</button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Tự động xóa sau 3 giây với animation
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }, 3000);
+    }
