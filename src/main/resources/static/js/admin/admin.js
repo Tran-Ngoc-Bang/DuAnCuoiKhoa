@@ -24,11 +24,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Submenu toggle
   const submenuItems = document.querySelectorAll(".has-submenu > a");
+
   submenuItems.forEach((item) => {
     item.addEventListener("click", function (e) {
       e.preventDefault();
+
       const parent = this.parentElement;
-      parent.classList.toggle("active");
+
+      // Close other open submenus
+      document.querySelectorAll(".has-submenu.open").forEach((openItem) => {
+        if (openItem !== parent) {
+          openItem.classList.remove("open");
+        }
+      });
+
+      // Toggle current submenu
+      parent.classList.toggle("open");
     });
   });
 });

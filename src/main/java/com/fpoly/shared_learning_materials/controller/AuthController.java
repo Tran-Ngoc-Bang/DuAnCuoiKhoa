@@ -3,6 +3,7 @@ package com.fpoly.shared_learning_materials.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -28,6 +29,25 @@ public class AuthController {
         }
 
         return "client/login";
+    }
+
+    @GetMapping("/register")
+    public String showRegisterForm(Model model) {
+        return "client/register";
+    }
+
+    @PostMapping("/register")
+    public String processRegister(
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            Model model) {
+
+        // TODO: Implement user registration logic
+        // For now, just redirect to login with success message
+        model.addAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
+        return "redirect:/login?registered=true";
     }
 
     @GetMapping("/access-denied")

@@ -74,122 +74,23 @@
 
     <div class="admin-container">
       <!-- Sidebar -->
-      <aside class="admin-sidebar">
-        <nav class="admin-nav">
-          <ul class="admin-menu">
-            <li class="admin-menu-item">
-              <a href="../index.html">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Bảng điều khiển</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../users.html">
-                <i class="fas fa-users"></i>
-                <span>Quản lý người dùng</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../documents.html">
-                <i class="fas fa-file-alt"></i>
-                <span>Quản lý tài liệu</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../categories.html">
-                <i class="fas fa-folder"></i>
-                <span>Quản lý danh mục</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../tags.html">
-                <i class="fas fa-tags"></i>
-                <span>Quản lý tags</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../comments.html">
-                <i class="fas fa-comments"></i>
-                <span>Quản lý bình luận</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../reports.html">
-                <i class="fas fa-flag"></i>
-                <span>Báo cáo vi phạm</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../ip-bans.html">
-                <i class="fas fa-ban"></i>
-                <span>IP bị cấm</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../statistics.html">
-                <i class="fas fa-chart-bar"></i>
-                <span>Thống kê</span>
-              </a>
-            </li>
-            <!-- Revenue Management Dropdown -->
-            <li class="admin-menu-item has-submenu open">
-              <a href="javascript:void(0)">
-                <i class="fas fa-coins"></i>
-                <span>Quản lý doanh thu</span>
-                <i class="fas fa-chevron-down submenu-icon"></i>
-              </a>
-              <ul class="submenu visible">
-                <li class="submenu-item">
-                  <a href="../coin-packages.html">
-                    <i class="fas fa-box"></i>
-                    <span>Gói xu</span>
-                  </a>
-                </li>
-                <li class="submenu-item active">
-                  <a href="index.html">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Giao dịch</span>
-                  </a>
-                </li>
-                <li class="submenu-item">
-                  <a href="../withdrawals.html">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <span>Yêu cầu rút tiền</span>
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../settings.html">
-                <i class="fas fa-cog"></i>
-                <span>Cài đặt</span>
-              </a>
-            </li>
-            <li class="admin-menu-item">
-              <a href="../../index.html">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Đăng xuất</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
 
       <!-- Nội dung chính - Quản lý giao dịch -->
       <main class="admin-content">
-        <div class="admin-content-header">
+        <div>
           <h1 class="admin-page-title">Quản lý giao dịch</h1>
           <div class="admin-breadcrumbs">
-            <a href="../index.html">Admin</a>
-            <span>/</span>
+            <a th:href="@{/admin}">Admin</a>
+            <span class="breadcrumb-separator">/</span>
             <a href="index.html">Quản lý doanh thu</a>
-            <span>/</span>
+            <span class="breadcrumb-separator">/</span>
             <span>Giao dịch</span>
           </div>
         </div>
 
         <!-- Thống kê tổng quan -->
-        <div class="stats-overview" th:if="${totalTransactions != null}">
+        <!-- <div class="stats-overview" th:if="${totalTransactions != null}">
           <div class="stat-card">
             <div class="stat-icon">
               <i class="fas fa-exchange-alt"></i>
@@ -232,10 +133,10 @@
               <p>Đang chờ xử lý</p>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Date Range Picker -->
-        <div class="date-range-selector">
+        <!-- <div class="date-range-selector">
           <div class="date-preset-btns">
             <button class="date-btn active" data-range="today">Hôm nay</button>
             <button class="date-btn" data-range="week">Tuần này</button>
@@ -252,7 +153,7 @@
             </div>
             <button class="apply-date-btn">Áp dụng</button>
           </div>
-        </div>
+        </div> -->
 
         <!-- Transaction Management -->
         <div class="section-header">
@@ -267,107 +168,112 @@
           </div>
         </div>
 
-        <!-- Transaction Filters -->
-        <form
-          th:action="@{/admin/transactions}"
-          method="get"
-          class="management-tools"
-        >
-          <div class="search-filters">
-            <div class="tool-item">
-              <input
-                type="text"
-                name="keyword"
-                th:value="${keyword}"
-                placeholder="Tìm theo ID/Người dùng..."
-                class="search-input"
-              />
-            </div>
-            <div class="tool-item">
-              <select name="type" class="filter-select">
-                <option value="all">Tất cả loại giao dịch</option>
-                <option value="PURCHASE" th:selected="${type == 'PURCHASE'}">
-                  Mua xu
-                </option>
-                <option
-                  value="WITHDRAWAL"
-                  th:selected="${type == 'WITHDRAWAL'}"
-                >
-                  Rút tiền
-                </option>
-                <option value="REFUND" th:selected="${type == 'REFUND'}">
-                  Hoàn tiền
-                </option>
-              </select>
-            </div>
-            <div class="tool-item">
-              <select name="status" class="filter-select">
-                <option value="all">Tất cả trạng thái</option>
-                <option value="PENDING" th:selected="${status == 'PENDING'}">
-                  Chờ xử lý
-                </option>
-                <option
-                  value="COMPLETED"
-                  th:selected="${status == 'COMPLETED'}"
-                >
-                  Hoàn thành
-                </option>
-                <option value="FAILED" th:selected="${status == 'FAILED'}">
-                  Thất bại
-                </option>
-                <option
-                  value="CANCELLED"
-                  th:selected="${status == 'CANCELLED'}"
-                >
-                  Đã hủy
-                </option>
-              </select>
-            </div>
-            <div class="tool-item">
-              <select name="amountRange" class="filter-currency">
-                <option value="all">Tất cả khoảng tiền</option>
-                <option
-                  value="0-100000"
-                  th:selected="${amountRange == '0-100000'}"
-                >
-                  0 - 100.000 ₫
-                </option>
-                <option
-                  value="100000-500000"
-                  th:selected="${amountRange == '100000-500000'}"
-                >
-                  100.000 - 500.000 ₫
-                </option>
-                <option
-                  value="500000-1000000"
-                  th:selected="${amountRange == '500000-1000000'}"
-                >
-                  500.000 - 1.000.000 ₫
-                </option>
-                <option
-                  value="1000000+"
-                  th:selected="${amountRange == '1000000+'}"
-                >
-                  Trên 1.000.000 ₫
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="action-buttons">
-            <button type="submit" class="secondary-btn">
-              <i class="fas fa-filter"></i> Lọc
-            </button>
-            <a th:href="@{/admin/transactions}" class="secondary-btn"
-              ><i class="fas fa-times"></i> Xóa bộ lọc</a
-            >
-          </div>
-        </form>
-
         <!-- Transactions Table -->
         <div class="data-container">
+          <!-- Transaction Filters -->
+          <form
+            th:action="@{/admin/transactions}"
+            method="get"
+            class="management-tools"
+          >
+            <div class="search-filters">
+              <div class="tool-item">
+                <input
+                  type="text"
+                  name="keyword"
+                  th:value="${keyword}"
+                  placeholder="Tìm theo ID/Người dùng..."
+                  class="search-input"
+                />
+              </div>
+              <div class="tool-item">
+                <select name="type" class="filter-select">
+                  <option value="all">Tất cả loại giao dịch</option>
+                  <option value="PURCHASE" th:selected="${type == 'PURCHASE'}">
+                    Mua xu
+                  </option>
+                  <option
+                    value="WITHDRAWAL"
+                    th:selected="${type == 'WITHDRAWAL'}"
+                  >
+                    Rút tiền
+                  </option>
+                  <option value="REFUND" th:selected="${type == 'REFUND'}">
+                    Hoàn tiền
+                  </option>
+                </select>
+              </div>
+              <div class="tool-item">
+                <select name="status" class="filter-select">
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="PENDING" th:selected="${status == 'PENDING'}">
+                    Chờ xử lý
+                  </option>
+                  <option
+                    value="COMPLETED"
+                    th:selected="${status == 'COMPLETED'}"
+                  >
+                    Hoàn thành
+                  </option>
+                  <option value="FAILED" th:selected="${status == 'FAILED'}">
+                    Thất bại
+                  </option>
+                  <option
+                    value="CANCELLED"
+                    th:selected="${status == 'CANCELLED'}"
+                  >
+                    Đã hủy
+                  </option>
+                </select>
+              </div>
+              <div class="tool-item">
+                <select name="amountRange" class="filter-select">
+                  <option value="all">Tất cả khoảng tiền</option>
+                  <option
+                    value="0-100000"
+                    th:selected="${amountRange == '0-100000'}"
+                  >
+                    0 - 100.000 ₫
+                  </option>
+                  <option
+                    value="100000-500000"
+                    th:selected="${amountRange == '100000-500000'}"
+                  >
+                    100.000 - 500.000 ₫
+                  </option>
+                  <option
+                    value="500000-1000000"
+                    th:selected="${amountRange == '500000-1000000'}"
+                  >
+                    500.000 - 1.000.000 ₫
+                  </option>
+                  <option
+                    value="1000000+"
+                    th:selected="${amountRange == '1000000+'}"
+                  >
+                    Trên 1.000.000 ₫
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button type="submit" class="secondary-btn">
+                <i class="fas fa-filter"></i> Lọc
+              </button>
+              <a th:href="@{/admin/transactions}" class="secondary-btn"
+                ><i class="fas fa-times"></i> Xóa bộ lọc</a
+              >
+            </div>
+          </form>
           <table class="data-table transactions-table">
             <thead>
               <tr>
+                <th>
+                  <label class="checkbox-container">
+                    <input type="checkbox" id="selectAll" />
+                    <span class="checkmark"></span>
+                  </label>
+                </th>
                 <th>ID Giao dịch</th>
                 <th>Người dùng</th>
                 <th>Loại</th>
@@ -380,11 +286,22 @@
             </thead>
             <tbody>
               <tr th:each="transaction : ${transactions}">
+                <td>
+                  <label class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      name="transactionIds"
+                      th:value="${transaction.id}"
+                      class="row-checkbox"
+                    />
+                    <span class="checkmark"></span>
+                  </label>
+                </td>
                 <td th:text="${transaction.code}">TRX-2025060301</td>
                 <td>
                   <div class="user-info">
                     <img
-                      th:src="${transaction.user.avatar != null ? transaction.user.avatar : 'https://randomuser.me/api/portraits/men/32.jpg'}"
+                      th:src="${transaction.user.avatarUrl != null ? transaction.user.avatarUrl : 'https://randomuser.me/api/portraits/men/32.jpg'}"
                       alt="User"
                       class="user-avatar large"
                     />
@@ -450,10 +367,40 @@
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(transactions)}">
-                <td colspan="8" class="text-center">Không có giao dịch nào</td>
+                <td colspan="9" class="text-center">Không có giao dịch nào</td>
               </tr>
             </tbody>
           </table>
+                  <!-- Table Actions -->
+        <div class="table-actions">
+          <div class="bulk-actions">
+            <form
+              id="bulkActionForm"
+              method="POST"
+              th:action="@{/admin/transactions/bulk-action}"
+            >
+              <select
+                class="bulk-action-select"
+                id="bulkActionSelect"
+                name="action"
+              >
+                <option value="">Chọn hành động</option>
+                <option value="status_completed">Đánh dấu hoàn thành</option>
+                <option value="status_failed">Đánh dấu thất bại</option>
+                <option value="status_cancelled">Đánh dấu hủy</option>
+                <option value="delete">Xóa</option>
+              </select>
+              <button
+                type="submit"
+                class="apply-action"
+                id="applyBulkAction"
+                disabled
+              >
+                Áp dụng
+              </button>
+            </form>
+          </div>
+        </div>
         </div>
 
         <!-- Pagination -->
@@ -483,36 +430,17 @@
           </a>
         </div>
 
-        <!-- Bulk Actions -->
-        <form
-          th:action="@{/admin/transactions/bulk-action}"
-          method="post"
-          class="bulk-actions"
-        >
-          <div class="bulk-actions-header">
-            <label class="checkbox-container">
-              <input type="checkbox" id="selectAll" />
-              <span class="checkmark"></span>
-              Chọn tất cả
-            </label>
-            <select name="action" class="bulk-action-select">
-              <option value="">-- Chọn hành động --</option>
-              <option value="delete">Xóa</option>
-              <option value="status_completed">Đánh dấu hoàn thành</option>
-              <option value="status_failed">Đánh dấu thất bại</option>
-              <option value="status_cancelled">Đánh dấu hủy</option>
-            </select>
-            <button type="submit" class="bulk-action-btn">Áp dụng</button>
-          </div>
-        </form>
+
+        </div>
       </main>
     </div>
 
     <script src="../../js/main.js"></script>
-    <script src="../js/admin.js"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
     <script src="../js/transactions.js"></script>
     <script>
       // Bulk actions
+      // Select all functionality
       document
         .getElementById("selectAll")
         .addEventListener("change", function () {
@@ -522,7 +450,62 @@
           checkboxes.forEach((checkbox) => {
             checkbox.checked = this.checked;
           });
+          updateBulkActionButton();
         });
+
+      // Individual checkbox change
+      document
+        .querySelectorAll('input[name="transactionIds"]')
+        .forEach((checkbox) => {
+          checkbox.addEventListener("change", function () {
+            updateSelectAllState();
+            updateBulkActionButton();
+          });
+        });
+
+      // Update select all state
+      function updateSelectAllState() {
+        const checkboxes = document.querySelectorAll(
+          'input[name="transactionIds"]'
+        );
+        const checkedBoxes = document.querySelectorAll(
+          'input[name="transactionIds"]:checked'
+        );
+        const selectAll = document.getElementById("selectAll");
+
+        if (checkedBoxes.length === 0) {
+          selectAll.checked = false;
+          selectAll.indeterminate = false;
+        } else if (checkedBoxes.length === checkboxes.length) {
+          selectAll.checked = true;
+          selectAll.indeterminate = false;
+        } else {
+          selectAll.checked = false;
+          selectAll.indeterminate = true;
+        }
+      }
+
+      // Update bulk action button state
+      function updateBulkActionButton() {
+        const checkedBoxes = document.querySelectorAll(
+          'input[name="transactionIds"]:checked'
+        );
+        const bulkActionButton = document.getElementById("applyBulkAction");
+        const bulkActionSelect = document.getElementById("bulkActionSelect");
+
+        if (bulkActionButton) {
+          bulkActionButton.disabled =
+            checkedBoxes.length === 0 || !bulkActionSelect.value;
+        }
+      }
+
+      // Bulk action select change
+      const bulkActionSelect = document.getElementById("bulkActionSelect");
+      if (bulkActionSelect) {
+        bulkActionSelect.addEventListener("change", function () {
+          updateBulkActionButton();
+        });
+      }
 
       // Date range picker
       flatpickr("#startDate, #endDate", {

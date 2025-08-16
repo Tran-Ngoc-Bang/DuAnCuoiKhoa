@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
       rel="stylesheet"
     />
-       <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/transactions.css}" />
@@ -383,7 +383,7 @@
                 <div class="user-profile-info">
                   <div class="user-avatar-container">
                     <img
-                      th:src="${transaction.user.avatar != null ? transaction.user.avatar : 'https://randomuser.me/api/portraits/men/32.jpg'}"
+                      th:src="${transaction.user.avatarUrl != null ? transaction.user.avatarUrl : 'https://randomuser.me/api/portraits/men/32.jpg'}"
                       alt="Avatar"
                       class="large-avatar"
                     />
@@ -415,12 +415,12 @@
                     </div>
                     <div
                       class="info-row"
-                      th:if="${transaction.user.phone != null}"
+                      th:if="${transaction.user.phoneNumber != null}"
                     >
                       <div class="info-label">SĐT:</div>
                       <div
                         class="info-value"
-                        th:text="${transaction.user.phone}"
+                        th:text="${transaction.user.phoneNumber}"
                       >
                         0912345678
                       </div>
@@ -439,8 +439,8 @@
                       <div class="info-value">
                         <span
                           class="role-badge"
-                          th:classappend="${transaction.user.role != null ? transaction.user.role.name.toLowerCase() : 'user'}"
-                          th:text="${transaction.user.role != null ? transaction.user.role.displayName : 'Thành viên'}"
+                          th:classappend="${transaction.user.role != null ? transaction.user.role.toLowerCase() : 'user'}"
+                          th:text="${transaction.user.role != null ? transaction.user.role : 'Thành viên'}"
                           >Thành viên</span
                         >
                       </div>

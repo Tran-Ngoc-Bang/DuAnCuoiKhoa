@@ -25,9 +25,9 @@
     <header th:fragment="header" class="admin-header">
       <div class="admin-header-content">
         <div class="admin-logo">
-          <a th:href="@{/admin}">
-            <div class="logo-icon">A</div>
-            <span class="logo-text">Admin Panel</span>
+          <a th:href="@{/admin}" class="logo">
+            <div class="logo-icon">E</div>
+            <div class="logo-text">EduShare</div>
           </a>
         </div>
         <div class="admin-header-actions">
@@ -120,14 +120,14 @@
               </a>
             </li>
             <li class="admin-menu-item has-submenu">
-              <a href="javascript:void(0)">
+              <a href="javascript:void(0)" class="submenu-toggle">
                 <i class="fas fa-coins"></i>
                 <span>Quản lý doanh thu</span>
                 <i class="fas fa-chevron-down submenu-icon"></i>
               </a>
-              <ul class="submenu">
-                <li class="admin-nav-item">
-                  <a th:href="@{/admin/coin-packages}" class="admin-nav-link">
+              <ul class="admin-submenu">
+                <li class="submenu-item">
+                  <a th:href="@{/admin/coin-packages}">
                     <i class="fas fa-coins"></i>
                     <span>Quản lý gói xu</span>
                   </a>
@@ -169,7 +169,9 @@
 
     <!-- Scripts Fragment -->
     <div th:fragment="scripts">
-      <script th:src="@{/js/admin/admin.js}"></script>
+      <script
+        th:src="@{/js/admin/admin.js(v=${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')})}"
+      ></script>
       <script th:src="@{/js/admin/toast.js}"></script>
     </div>
   </body>
