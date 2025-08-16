@@ -59,7 +59,7 @@ public class DocumentController {
 
     @GetMapping
     public String listDocuments(
-            Model model, 
+            Model model,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "status", required = false) String status,
@@ -72,17 +72,17 @@ public class DocumentController {
             @RequestParam(value = "dateTo", required = false) String dateTo,
             @RequestParam(value = "size", required = false) String size,
             @RequestParam(value = "views", required = false) String views) {
-        
+
         Page<DocumentDTO> documentPage = documentService.getFilteredDocuments(
                 pageable, search, status, categoryId, type, price, author, tags, dateFrom, dateTo, size, views);
-        
+
         // Lấy thống kê từ kết quả đã lọc
         DocumentService.FilteredStatistics stats = documentService.getFilteredStatistics(
                 search, status, categoryId, type, price, author, tags, dateFrom, dateTo, size, views);
-        
+
         System.out.println("Page: " + pageable.getPageNumber() + ", Size: " + pageable.getPageSize() + ", Total: "
                 + documentPage.getTotalElements());
-        
+
         model.addAttribute("documents", documentPage.getContent());
         model.addAttribute("page", documentPage);
         model.addAttribute("totalDocuments", stats.getTotalDocuments());
@@ -240,11 +240,13 @@ public class DocumentController {
             @RequestParam(value = "categoryIdsString", required = false) String categoryIdsString,
             @RequestParam(value = "tagNames", required = false) String tagNames,
             RedirectAttributes redirectAttributes) {
-        
+
         System.out.println("=== UPDATE DOCUMENT REQUEST ===");
         System.out.println("ID: " + id);
         System.out.println("Title: " + documentDTO.getTitle());
-        System.out.println("File: " + (file != null && !file.isEmpty() ? file.getOriginalFilename() + " (" + file.getSize() / 1024 + " KB)" : "null"));
+        System.out.println("File: "
+                + (file != null && !file.isEmpty() ? file.getOriginalFilename() + " (" + file.getSize() / 1024 + " KB)"
+                        : "null"));
         System.out.println("CategoryIdsString: " + categoryIdsString);
         System.out.println("TagNames: " + tagNames);
         System.out.println("==============================");
@@ -276,14 +278,14 @@ public class DocumentController {
             redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
             return "redirect:/admin/documents/" + id + "/edit";
         }
-        
+
         if (categoryIds.size() > 3) {
             redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 3 danh mục");
             redirectAttributes.addFlashAttribute("document", documentDTO);
             redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
             return "redirect:/admin/documents/" + id + "/edit";
         }
-        
+
         // Validate categoryIds are valid numbers
         for (Long categoryId : categoryIds) {
             if (categoryId == null || categoryId <= 0) {

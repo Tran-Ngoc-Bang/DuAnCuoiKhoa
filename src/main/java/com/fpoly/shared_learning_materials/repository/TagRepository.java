@@ -17,6 +17,7 @@ import com.fpoly.shared_learning_materials.domain.Tag;
 public interface TagRepository extends JpaRepository<Tag, Long> {
     boolean existsByName(String name);
     boolean existsBySlug(String slug);
+    boolean existsBySlugAndDeletedAtIsNull(String slug);
     Page<Tag> findByDeletedAtIsNull(Pageable pageable);
     Optional<Tag> findByName(String name);
     

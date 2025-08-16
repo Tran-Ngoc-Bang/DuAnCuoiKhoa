@@ -1,6 +1,8 @@
 
 package com.fpoly.shared_learning_materials.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.fpoly.shared_learning_materials.domain.*;
 import com.fpoly.shared_learning_materials.dto.CommentDTO;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;

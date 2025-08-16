@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý báo cáo vi phạm - EduShare Admin</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/reports.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+  </head>
+  <body class="admin-body">
+    <header class="admin-header">
+      <div class="admin-header-content">
+        <div class="admin-logo">
+          <a th:href="@{/admin/index}" class="logo">
+            <div class="logo-icon">E</div>
+            <div class="logo-text">EduShare</div>
+          </a>
+        </div>
+        <div class="admin-header-actions">
+          <div class="admin-search">
+            <input
+              type="text"
+              placeholder="Tìm kiếm..."
+              class="search-input"
+              id="headerSearchInput"
+            />
+            <button id="headerSearchBtn"><i class="fas fa-search"></i></button>
+          </div>
+          <div class="dark-mode-toggle" id="darkModeToggle"></div>
+          <div class="admin-notifications">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">5</span>
+            </button>
+          </div>
+          <div class="admin-profile">
+            <div class="admin-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                alt="Admin"
+              />
+            </div>
+            <div class="admin-info">
+              <span class="admin-name">Nguyễn Văn Anh</span>
+              <span class="admin-role">Quản trị viên</span>
+            </div>
+            <div class="admin-dropdown">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-container">
+      <aside class="admin-sidebar">
+        <nav class="admin-nav">
+          <ul class="admin-menu">
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/index}"
+                ><i class="fas fa-tachometer-alt"></i
+                ><span>Bảng điều khiển</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/users}"
+                ><i class="fas fa-users"></i><span>Quản lý người dùng</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/documents}"
+                ><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/categories}"
+                ><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/tags}"
+                ><i class="fas fa-tags"></i><span>Quản lý tags</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/comments}"
+                ><i class="fas fa-comments"></i
+                ><span>Quản lý bình luận</span></a
+              >
+            </li>
+            <li class="admin-menu-item active">
+              <a th:href="@{/admin/reports}"
+                ><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/ip-bans}"
+                ><i class="fas fa-ban"></i><span>IP bị cấm</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/statistics}"
+                ><i class="fas fa-chart-bar"></i><span>Thống kê</span></a
+              >
+            </li>
+            <li class="admin-menu-item has-submenu">
+              <a href="javascript:void(0)">
+                <i class="fas fa-coins"></i>
+                <span>Quản lý doanh thu</span>
+                <i class="fas fa-chevron-down submenu-icon"></i>
+              </a>
+              <ul class="submenu">
+                <li class="submenu-item">
+                  <a th:href="@{/admin/coin-packages}"
+                    ><i class="fas fa-box"></i><span>Gói xu</span></a
+                  >
+                </li>
+                <li class="submenu-item">
+                  <a th:href="@{/admin/transactions}"
+                    ><i class="fas fa-exchange-alt"></i
+                    ><span>Giao dịch</span></a
+                  >
+                </li>
+                <li class="submenu-item">
+                  <a th:href="@{/admin/withdrawals}"
+                    ><i class="fas fa-money-bill-wave"></i
+                    ><span>Yêu cầu rút tiền</span></a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/settings}"
+                ><i class="fas fa-cog"></i><span>Cài đặt</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/logout}"
+                ><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="admin-content">
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success">
+          <i class="fas fa-check-circle"></i>
+          <span th:text="${success}">Thông báo thành công</span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:text="${error}">Thông báo lỗi</span>
+        </div>
+
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Quản lý báo cáo vi phạm</h1>
+          
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin/index}">Admin</a>
+            <span>/</span>
+            <span>Báo cáo vi phạm</span>
+          </div>
+        </div>
+
+
+        
+
+        <!-- Reports Summary Cards -->
+        <div class="reports-summary">
+          <div class="report-summary-card">
+            <div class="summary-icon new-icon">
+              <i class="fas fa-flag"></i>
+            </div>
+            <div class="summary-content">
+              <div class="summary-number" th:text="${newReportsCount}">0</div>
+              <div class="summary-label">Báo cáo mới</div>
+            </div>
+          </div>
+          <div class="report-summary-card">
+            <div class="summary-icon processing-icon">
+              <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="summary-content">
+              <div class="summary-number" th:text="${processingReportsCount}">
+                0
+              </div>
+              <div class="summary-label">Chưa giải quyết</div>
+            </div>
+          </div>
+          <div class="report-summary-card">
+            <div class="summary-icon resolved-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="summary-content">
+              <div class="summary-number" th:text="${resolvedReportsCount}">
+                0
+              </div>
+              <div class="summary-label">Đã giải quyết</div>
+            </div>
+          </div>
+          <div class="report-summary-card">
+            <div class="summary-icon rejected-icon">
+              <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="summary-content">
+              <div class="summary-number" th:text="${rejectedReportsCount}">
+                0
+              </div>
+              <div class="summary-label">Đã từ chối</div>
+            </div>
+          </div>
+        </div>
+
+       
+        <!-- Management Tools -->
+        <form
+          th:action="@{/admin/reports}"
+          method="get"
+          class="management-tools"
+        >
+          <div class="search-filters">
+            <div class="tool-item">
+              <input
+                type="text"
+                name="keyword"
+                placeholder="Tìm kiếm báo cáo..."
+                class="search-input"
+                th:value="${keyword}"
+              />
+            </div>
+          <!-- Lọc theo loại vi phạm -->
+        <div class="tool-item">
+          <select name="violationType" class="filter-select">
+              <option value="">Tất cả loại vi phạm</option>
+              <option value="copyright" th:selected="${violationType == 'copyright'}">Vi phạm bản quyền</option>
+              <option value="inappropriate" th:selected="${violationType == 'inappropriate'}">Nội dung không phù hợp</option>
+              <option value="spam" th:selected="${violationType == 'spam'}">Spam/Quảng cáo</option>
+              <option value="fake" th:selected="${violationType == 'fake'}">Tài liệu giả mạo</option>
+              <option value="other" th:selected="${violationType == 'other'}">Vi phạm khác</option>
+          </select>
+      </div>
+            <div class="tool-item">
+              <select
+                name="status"
+                class="filter-select"
+                th:attr="data-current-value=${status}"
+              >
+                <option value="">Tất cả trạng thái</option>
+                <option
+                  value="pending"
+                  th:selected="${status != null and status.equals('pending')}"
+                >
+                  Đang chờ xử lý
+                </option>
+                <option
+                  value="resolved"
+                  th:selected="${status != null and status.equals('resolved')}"
+                >
+                  Đã duyệt
+                </option>
+                <option
+                  value="rejected"
+                  th:selected="${status != null and status.equals('rejected')}"
+                >
+                  Đã từ chối
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <a th:href="@{/admin/reports/create}" class="add-new-btn">
+              <i class="fas fa-plus"></i> Thêm báo cáo
+            </a>
+            <button type="button" class="export-btn" onclick="exportReports()">
+              <i class="fas fa-download"></i> Xuất dữ liệu
+            </button>
+          </div>
+        </form>
+
+        <!-- Hidden form for tab filtering -->
+        <form id="tabFilterForm" method="get" th:action="@{/admin/reports}">
+          <input type="hidden" name="status" id="tabStatusInput" />
+          <input
+            type="hidden"
+            name="keyword"
+            id="tabKeywordInput"
+            th:value="${keyword}"
+          />
+          <input
+            type="hidden"
+            name="type"
+            id="tabTypeInput"
+            th:value="${type}"
+          />
+        </form>
+
+        <!-- Tabs
+        <div class="reports-tabs">
+          <button
+            class="tab-button"
+            data-status=""
+            th:classappend="${status} == null ? 'active' : ''"
+          >
+            Tất cả (<span th:text="${totalReports}">0</span>)
+          </button>
+          <button
+            class="tab-button"
+            data-status="pending"
+            th:classappend="${status} == 'pending' ? 'active' : ''"
+          >
+            Đang chờ xử lý (<span th:text="${processingReportsCount}">0</span>)
+          </button>
+          <button
+            class="tab-button"
+            data-status="resolved"
+            th:classappend="${status} == 'resolved' ? 'active' : ''"
+          >
+            Đã duyệt (<span th:text="${resolvedReportsCount}">0</span>)
+          </button>
+          <button
+            class="tab-button"
+            data-status="rejected"
+            th:classappend="${status} == 'rejected' ? 'active' : ''"
+          >
+            Đã từ chối (<span th:text="${rejectedReportsCount}">0</span>)
+          </button>
+        </div> -->
+
+        <!-- Reports Table -->
+        <div class="data-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="selectAll" />
+                    <label for="selectAll"></label>
+                  </div>
+                </th>
+                <th>ID</th>
+                <th>Tài liệu báo cáo</th>
+                <th>Người báo cáo</th>
+                <th>Loại vi phạm</th>
+                <th>Ngày báo cáo</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="report : ${reports}">
+                <td>
+                  <div class="checkbox-wrapper">
+                    <input
+                      type="checkbox"
+                      class="report-checkbox"
+                      th:attr="data-id=${report['id']}"
+                      th:id="'report' + ${report['id']}"
+                    />
+                    <label th:for="'report' + ${report['id']}"></label>
+                  </div>
+                </td>
+                <td th:text="'#RPT' + ${report['id']}"></td>
+                <td>
+                  <div class="report-document">
+                    <div class="document-icon">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="document-info">
+                      <div
+                        class="document-title"
+                        th:text="${report['documentTitle']}"
+                      >
+                        Tên tài liệu
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="reporter-info">
+                    <span th:text="${report['reporterName']}"
+                      >Người báo cáo</span
+                    >
+                  </div>
+                </td>
+                <td>
+                  <span class="violation-type" th:text="${report['violationType']}">
+                    Loại vi phạm
+                  </span>
+                </td>
+                <td>
+                  <span
+                    th:if="${report['reportDate'] != null}"
+                    th:text="${#dates.format(report['reportDate'], 'dd/MM/yyyy')}"
+                    >Ngày</span
+                  >
+                  <span th:unless="${report['reportDate'] != null}"
+                    >Không có</span
+                  >
+                </td>
+                <td>
+                  <span class="status-badge" th:switch="${report['status']}">
+                    <span th:case="'Đang chờ xử lý'" class="status-badge pending"
+                      >Đang chờ xử lý</span
+                    >
+                    <span th:case="'Đã xử lý'" class="status-badge resolved"
+                      >Đã xử lý</span
+                    >
+                    <span th:case="'Đã từ chối'" class="status-badge rejected"
+                      >Đã từ chối</span
+                    >
+                    <span th:case="'Mới'" class="status-badge new"
+                      >Mới</span
+                    >
+                    <span th:case="*" class="status-badge"
+                      th:text="${report['status']}">Không rõ</span
+                    >
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a
+                      class="action-btn view"
+                      th:href="@{/admin/reports/details/{id}(id=${report['id']})}"
+                      title="Xem chi tiết"
+                      ><i class="fas fa-eye"></i
+                    ></a>
+                    <a
+                      class="action-btn edit"
+                      th:href="@{/admin/reports/edit/{id}(id=${report['id']})}"
+                      title="Chỉnh sửa"
+                      ><i class="fas fa-edit"></i
+                    ></a>
+                    <a
+                      class="action-btn delete"
+                      th:href="@{/admin/reports/delete/{id}(id=${report['id']})}"
+                      title="Xóa"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${reports.isEmpty()}">
+                <td colspan="8">Không có báo cáo nào.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" th:if="${totalPages > 0}">
+          <a
+            th:if="${currentPage > 1}"
+            th:href="@{/admin/reports(page=${currentPage - 1}, size=${pageSize})}"
+            class="pagination-btn prev-btn"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </a>
+          <a
+            th:if="${currentPage == 1}"
+            class="pagination-btn prev-btn disabled"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </a>
+          <div class="pagination-pages">
+            <a
+              th:each="i : ${#numbers.sequence(1, totalPages)}"
+              th:href="@{/admin/reports(page=${i}, size=${pageSize})}"
+              th:class="${i == currentPage ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
+              th:text="${i}"
+            ></a>
+          </div>
+          <a
+            th:if="${currentPage < totalPages}"
+            th:href="@{/admin/reports(page=${currentPage + 1}, size=${pageSize})}"
+            class="pagination-btn next-btn"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </a>
+          <a
+            th:if="${currentPage == totalPages}"
+            class="pagination-btn next-btn disabled"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+      </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/reports.js}"></script>
+    
+    <script>
+        // Auto-hide alerts after 5 seconds and setup auto-submit
+        function setupAutoSubmit() {
+            console.log('Setting up auto-submit functionality');
+            
+            // Try jQuery first
+            if (typeof $ !== 'undefined') {
+                console.log('Using jQuery approach');
+                setupWithJQuery();
+            } else {
+                console.log('Using vanilla JavaScript approach');
+                setupWithVanillaJS();
+            }
+        }
+
+        function setupWithJQuery() {
+            console.log('Document ready - setting up auto-submit');
+            
+            // Auto-hide alerts
+            $('.alert').each(function() {
+                const alert = $(this);
+                setTimeout(() => {
+                    alert.css({
+                        'transition': 'opacity 0.5s ease, transform 0.5s ease',
+                        'opacity': '0',
+                        'transform': 'translateY(-10px)'
+                    });
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 500);
+                }, 5000);
+            });
+
+            // Get form and elements
+            const $filterForm = $('form.management-tools');
+            const $violationTypeSelect = $('select[name="violationType"]');
+            const $statusSelect = $('select[name="status"]');
+            const $searchInput = $('input[name="keyword"]');
+
+            console.log('Filter form found:', $filterForm.length);
+            console.log('Violation type select found:', $violationTypeSelect.length);
+            console.log('Status select found:', $statusSelect.length);
+            console.log('Search input found:', $searchInput.length);
+
+            // Function to submit form with loading state
+            function submitFilterForm() {
+                console.log('Submitting filter form...');
+                if ($filterForm.length) {
+                    // Add loading state
+                    $filterForm.addClass('loading');
+                    $violationTypeSelect.addClass('loading');
+                    $statusSelect.addClass('loading');
+                    
+                    // Submit form
+                    $filterForm[0].submit();
+                }
+            }
+
+            // Auto-submit when violation type changes
+            $violationTypeSelect.on('change', function() {
+                console.log('Violation type changed to:', $(this).val());
+                submitFilterForm();
+            });
+
+            // Auto-submit when status changes
+            $statusSelect.on('change', function() {
+                console.log('Status changed to:', $(this).val());
+                submitFilterForm();
+            });
+
+            // Auto-submit when search input changes (with debounce)
+            let searchTimeout;
+            $searchInput.on('input', function() {
+                clearTimeout(searchTimeout);
+                const value = $(this).val();
+                searchTimeout = setTimeout(() => {
+                    console.log('Search keyword changed to:', value);
+                    submitFilterForm();
+                }, 500);
+            });
+
+            // Also submit on Enter key
+            $searchInput.on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    clearTimeout(searchTimeout);
+                    submitFilterForm();
+                }
+            });
+        }
+
+        function setupWithVanillaJS() {
+            // Get form and elements
+            const filterForm = document.querySelector('form.management-tools');
+            const violationTypeSelect = document.querySelector('select[name="violationType"]');
+            const statusSelect = document.querySelector('select[name="status"]');
+            const searchInput = document.querySelector('input[name="keyword"]');
+
+            console.log('Vanilla JS - Filter form found:', !!filterForm);
+            console.log('Vanilla JS - Violation type select found:', !!violationTypeSelect);
+            console.log('Vanilla JS - Status select found:', !!statusSelect);
+
+            // Function to submit form
+            function submitFilterForm() {
+                console.log('Vanilla JS - Submitting filter form...');
+                if (filterForm) {
+                    filterForm.submit();
+                }
+            }
+
+            // Auto-submit when violation type changes
+            if (violationTypeSelect) {
+                violationTypeSelect.addEventListener('change', function() {
+                    console.log('Vanilla JS - Violation type changed to:', this.value);
+                    submitFilterForm();
+                });
+            }
+
+            // Auto-submit when status changes
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function() {
+                    console.log('Vanilla JS - Status changed to:', this.value);
+                    submitFilterForm();
+                });
+            }
+
+            // Auto-submit when search input changes (with debounce)
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    const value = this.value;
+                    searchTimeout = setTimeout(() => {
+                        console.log('Vanilla JS - Search keyword changed to:', value);
+                        submitFilterForm();
+                    }, 500);
+                });
+
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        clearTimeout(searchTimeout);
+                        submitFilterForm();
+                    }
+                });
+            }
+        }
+
+        // Setup when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupAutoSubmit);
+        } else {
+            setupAutoSubmit();
+        }
+
+        // Also try with jQuery when it's ready
+        $(document).ready(function() {
+            setupAutoSubmit();
+        });
+
+        // Export reports function
+        function exportReports() {
+            // Get current filter values
+            const keyword = document.querySelector('input[name="keyword"]')?.value || '';
+            const violationType = document.querySelector('select[name="violationType"]')?.value || '';
+            const status = document.querySelector('select[name="status"]')?.value || '';
+            
+            // Build export URL with current filters
+            const params = new URLSearchParams();
+            if (keyword) params.append('keyword', keyword);
+            if (violationType) params.append('violationType', violationType);
+            if (status) params.append('status', status);
+            params.append('export', 'true');
+            
+            // Create export URL
+            const exportUrl = '/admin/reports/export?' + params.toString();
+            
+            // Show loading state
+            const exportBtn = document.querySelector('.export-btn');
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xuất...';
+            exportBtn.disabled = true;
+            
+            // Create temporary link to download
+            const link = document.createElement('a');
+            link.href = exportUrl;
+            link.download = 'reports_' + new Date().toISOString().split('T')[0] + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Restore button state after a short delay
+            setTimeout(() => {
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            }, 2000);
+        }
+    </script>
+  </body>
+</html>

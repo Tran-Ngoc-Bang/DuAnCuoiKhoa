@@ -1,6 +1,8 @@
 package com.fpoly.shared_learning_materials.repository;
 
 import com.fpoly.shared_learning_materials.domain.Report;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -53,31 +55,51 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     @Query(value = """
             SELECT
-                r.id AS report_id,
-                d.title AS document_title,
-                u.full_name AS reporter_name,
-                r.type AS violation_type,
-                r.created_at AS report_date,
-                r.status AS report_status
+                r.id,
+                d.title,
+                u.full_name,
+                r.type,
+                r.created_at,
+                r.status
             FROM reports r
-            LEFT JOIN documents d ON r.document_id = d.id
-            LEFT JOIN users u ON r.reporter_id = u.id
+            LEFT JOIN documents d ON r.document_id = d.id AND d.deleted_at IS NULL
+            LEFT JOIN users u ON r.reporter_id = u.id AND u.deleted_at IS NULL
             ORDER BY r.created_at DESC
             """, nativeQuery = true)
     List<Object[]> findAllReportsWithDetails();
 
     @Query(value = """
-                        SELECT r.id, d.title AS documentTitle, u.full_name AS reporterName,
-                            r.type AS violationType, r.created_at AS reportDate,
-                            r.status
-                        FROM Reports r
-                        JOIN Documents d ON r.document_id = d.id
-                        JOIN Users u ON r.reporter_id = u.id
-                        WHERE (:keyword IS NULL OR d.title LIKE CONCAT('%', :keyword, '%') OR u.full_name LIKE CONCAT('%', :keyword, '%'))
-                        AND (:violationType IS NULL OR r.type = :violationType)
+            SELECT
+                r.id,
+                d.title,
+                u.full_name,
+                r.type,
+                r.created_at,
+                r.status
+            FROM reports r
+            LEFT JOIN documents d ON r.document_id = d.id AND d.deleted_at IS NULL
+            LEFT JOIN users u ON r.reporter_id = u.id AND u.deleted_at IS NULL
+            ORDER BY r.created_at DESC
+            """, nativeQuery = true)
+    Page<Object[]> findAllReportsWithDetails(Pageable pageable);
+
+    @Query(value = """
+            SELECT
+                r.id,
+                d.title,
+                u.full_name,
+                r.type,
+                r.created_at,
+                r.status
+            FROM reports r
+            LEFT JOIN documents d ON r.document_id = d.id AND d.deleted_at IS NULL
+            LEFT JOIN users u ON r.reporter_id = u.id AND u.deleted_at IS NULL
+            WHERE (:keyword IS NULL OR d.title LIKE CONCAT('%', :keyword, '%') OR u.full_name LIKE CONCAT('%', :keyword, '%'))
+            AND (:violationType IS NULL OR r.type = :violationType)
             AND (:status IS NULL OR r.status = :status)
-                        """, nativeQuery = true)
-    List<Map<String, Object>> searchReportsWithFilters(
+            ORDER BY r.created_at DESC
+            """, nativeQuery = true)
+    List<Object[]> searchReportsWithFilters(
             @Param("keyword") String keyword,
             @Param("violationType") String violationType,
             @Param("status") String status);
