@@ -17,6 +17,7 @@ import lombok.Setter;
 public class UserDTO {
 	private Long id;
 	
+
 	@NotBlank(message = "Họ và tên không được để trống")
     private String fullName;
 
@@ -33,6 +34,7 @@ public class UserDTO {
 	private String role;
 
 	private String status; 
+
 
 	private MultipartFile file;
 
@@ -124,4 +126,5 @@ public class UserDTO {
         return email != null && email.contains("@") && email.contains(".");
     }
 	
+
 }

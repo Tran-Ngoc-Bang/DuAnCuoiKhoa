@@ -1,5 +1,13 @@
+console.log('jQuery loaded:', typeof $);
 
-// ===== Category Management Data & Functions =====
+// Cấu hình toastr
+toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    positionClass: 'toast-top-right',
+    timeOut: 2000 // Hiển thị thông báo trong 2 giây
+};
+
 let categories = [
     {
         id: 1,
@@ -65,6 +73,75 @@ let categories = [
 
 let filteredCategories = [...categories];
 let selectedCategories = new Set();
+let currentCatPage = 1;
+const categoriesPerPage = 10; // Increased from 6 to 10 to match server pagination
+let editingCategoryId = null;
+
+// Global functions - định nghĩa trước để có thể truy cập từ mọi nơi
+function updateBulkActionButtons() {
+    const hasSelection = selectedCategories.size > 0;
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const restoreBtn = document.getElementById('restoreSelectedBtn');
+    // permanentDeleteBtn removed
+    
+    // Update delete button state
+    if (deleteBtn) {
+        if (hasSelection) {
+            deleteBtn.classList.remove('disabled');
+            deleteBtn.disabled = false;
+        } else {
+            deleteBtn.classList.add('disabled');
+            deleteBtn.disabled = true;
+        }
+    }
+    
+    // Update restore and permanent delete buttons
+    if (restoreBtn) {
+        if (hasSelection) {
+            restoreBtn.style.display = 'inline-flex';
+            restoreBtn.classList.remove('disabled');
+            restoreBtn.disabled = false;
+        } else {
+            restoreBtn.style.display = 'inline-flex';
+            restoreBtn.classList.add('disabled');
+            restoreBtn.disabled = true;
+        }
+    }
+    // permanentDeleteBtn logic removed
+}
+
+function showConfirmModal(title, message, onConfirm, isDanger = false) {
+    const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmTitle');
+    const messageEl = document.getElementById('confirmMessage');
+    const confirmBtn = document.getElementById('confirmOk');
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Set button style based on action type
+    confirmBtn.className = isDanger ? 'modal-btn confirm-btn danger' : 'modal-btn confirm-btn';
+    
+    // Remove previous event listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    // Add new event listener
+    newConfirmBtn.addEventListener('click', function() {
+        hideConfirmModal();
+        onConfirm();
+    });
+    
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function hideConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
 function updateSelectAllState() {
     const selectAll = document.getElementById('selectAll');
     const checkboxes = document.querySelectorAll('.category-checkbox:not(#selectAll)');
@@ -74,21 +151,74 @@ function updateSelectAllState() {
     selectAll.checked = allChecked;
     selectAll.indeterminate = someChecked && !allChecked;
 }
+
 function deleteSelectedCategories() {
     if (selectedCategories.size === 0) {
-        alert('Bạn chưa chọn danh mục nào.');
-        return;
+        return; // Không làm gì cả, không hiển thị thông báo
     }
-    if (!confirm(`Bạn có chắc muốn xóa ${selectedCategories.size} danh mục đã chọn?`)) return;
-    categories = categories.filter(c => !selectedCategories.has(c.id));
-    selectedCategories.clear();
-    filterCategories();
-    updateSelectAllState();
+    
+    showConfirmModal(
+        'Xác nhận xóa',
+        `Bạn có chắc muốn xóa ${selectedCategories.size} danh mục đã chọn?`,
+        function() {
+            performDeleteSelected();
+        },
+        true // isDanger = true
+    );
 }
-let currentCatPage = 1;
-const categoriesPerPage = 6;
-// ID của danh mục đang chỉnh sửa; null nếu ở chế độ thêm mới
-let editingCategoryId = null;
+
+function performDeleteSelected() {
+    
+    console.log('Deleting categories:', Array.from(selectedCategories));
+    
+    // Tạo form để submit với MVC
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/categories/delete-multiple';
+    form.style.display = 'none';
+    
+    // Thêm CSRF token
+    const csrfToken = document.querySelector('meta[name="_csrf"]');
+    console.log('CSRF Token found:', csrfToken ? csrfToken.getAttribute('content') : 'Not found');
+    
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_csrf';
+        csrfInput.value = csrfToken.getAttribute('content');
+        form.appendChild(csrfInput);
+    }
+    
+    // Thêm các category IDs
+    let count = 0;
+    selectedCategories.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'categoryIds';
+        input.value = id;
+        form.appendChild(input);
+        count++;
+        console.log(`Added categoryId[${count}]: ${id}`);
+    });
+    
+    console.log('Form HTML:', form.innerHTML);
+    document.body.appendChild(form);
+    
+    // Debug: log form data before submit
+    const formData = new FormData(form);
+    console.log('Form data:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+    
+    form.submit();
+}
+
+function deleteCategory(id) {
+    console.log('Chuyển hướng đến trang xóa danh mục với ID:', id);
+    // Chuyển hướng đến trang delete MVC
+    window.location.href = '/admin/categories/' + id + '/delete';
+}
 
 function setupCategoryEventListeners() {
     const searchInput = document.querySelector('.search-input');
@@ -115,8 +245,82 @@ function setupCategoryEventListeners() {
         if (e.target.matches('.category-checkbox')) {
             const id = Number(e.target.dataset.categoryId);
             toggleCategorySelection(id, e.target.checked);
+            updateSelectAllState();
         }
     });
+
+    // Xử lý nút xóa đơn
+    $(document).on('click', '.action-btn.delete', function() {
+        console.log('Nút xóa đơn được nhấp');
+        let categoryId = $(this).attr('data-category-id');
+        console.log('Category ID:', categoryId);
+        if (categoryId) {
+            deleteCategory(Number(categoryId));
+        } else {
+            console.error('Không tìm thấy data-category-id');
+            toastr.error('Không tìm thấy ID danh mục.');
+        }
+    });
+
+    // Xử lý nút xóa hàng loạt
+    $('#deleteSelectedBtn').on('click', deleteSelectedCategories);
+    
+    // Xử lý nút khôi phục hàng loạt
+    $('#restoreSelectedBtn').on('click', function() {
+        if (selectedCategories.size === 0) {
+            return; // Không làm gì cả
+        }
+        
+        showConfirmModal(
+            'Xác nhận khôi phục',
+            `Bạn có chắc muốn khôi phục ${selectedCategories.size} danh mục đã chọn?`,
+            function() {
+                // Create form and submit for bulk restore
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/admin/categories/restore-multiple';
+                
+                // Add CSRF token
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+                
+                // Add selected category IDs
+                selectedCategories.forEach(categoryId => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'categoryIds';
+                    input.value = categoryId;
+                    form.appendChild(input);
+                });
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        );
+    });
+    
+    // Xử lý nút xóa vĩnh viễn hàng loạt
+    $('#permanentDeleteSelectedBtn').on('click', function() {
+        if (selectedCategories.size === 0) {
+            return; // Không làm gì cả
+        }
+        
+        showConfirmModal(
+            'Xác nhận xóa vĩnh viễn',
+            `Bạn có chắc muốn xóa vĩnh viễn ${selectedCategories.size} danh mục đã chọn? Hành động này không thể hoàn tác!`,
+            function() {
+                // Implement permanent delete logic here
+                toastr.info('Tính năng xóa vĩnh viễn hàng loạt đang được phát triển.');
+            },
+            true // isDanger = true
+        );
+    });
+    
+    // Function đã được định nghĩa ở global scope
 }
 
 function filterCategories() {
@@ -155,107 +359,69 @@ function filterCategories() {
     }
 
     currentCatPage = 1;
-    renderCategories();
-    updateCatPagination();
+    // Categories are rendered server-side, no need for client-side rendering
+    if (typeof updateCatPagination === 'function') {
+        updateCatPagination();
+    }
 }
-
-// function renderCategories() {
-//     const gridContainer = document.querySelector('.categories-grid');
-//     const tableBody = document.querySelector('#tableView tbody');
-//     if (!gridContainer || !tableBody) return;
-
-//     const start = (currentCatPage - 1) * categoriesPerPage;
-//     const end = start + categoriesPerPage;
-//     const paginated = filteredCategories.slice(start, end);
-
-//     gridContainer.innerHTML = paginated.map(cat => `
-//         <div class="category-admin-card ${selectedCategories.has(cat.id) ? 'selected' : ''}" style="--cat-color: ${cat.color}">
-//             <div class="category-admin-header">
-//                 <div class="category-icon" style="background:${cat.color};">
-//                     <i class="${cat.iconClass}"></i>
-//                 </div>
-//                 <div class="category-admin-actions">
-//                     <button class="action-btn" title="Chỉnh sửa" onclick="editCategory(${cat.id})"><i class="fas fa-edit"></i></button>
-//                     <button class="action-btn" title="Xóa" onclick="deleteCategory(${cat.id})"><i class="fas fa-trash"></i></button>
-//                 </div>
-//             </div>
-//             <div class="category-admin-content">
-//                 <h3 class="category-admin-title">${cat.name}</h3>
-//                 <p class="category-admin-description">${cat.description}</p>
-//                 <div class="category-stats">
-//                     <div class="stat-item"><span class="stat-label">Tài liệu</span><span class="stat-value">${cat.documents.toLocaleString()}</span></div>
-//                     <div class="stat-item"><span class="stat-label">Lượt xem</span><span class="stat-value">${cat.views.toLocaleString()}</span></div>
-//                     <div class="stat-item"><span class="stat-label">Lượt tải</span><span class="stat-value">${cat.downloads.toLocaleString()}</span></div>
-//                 </div>
-//                 <div class="category-admin-status">
-//                     ${getStatusBadge(cat.status)}
-//                     <span class="category-date">Ngày tạo: ${formatDate(cat.created)}</span>
-//                 </div>
-//             </div>
-//         </div>
-//     `).join('');
-
-//     tableBody.innerHTML = paginated.map(cat => `
-//         <tr>
-//             <td><div class="checkbox-wrapper"><input type="checkbox" class="category-checkbox" data-category-id="${cat.id}" ${selectedCategories.has(cat.id) ? 'checked' : ''}><label></label></div></td>
-//             <td><div class="category-info"><div class="category-icon" style="background:${cat.color}; width:2.5rem; height:2.5rem; font-size:1rem;"><i class="${cat.iconClass}"></i></div><div class="category-name">${cat.name}</div></div></td>
-//             <td>${cat.description.slice(0, 60)}...</td>
-//             <td>${cat.documents.toLocaleString()}</td>
-//             <td>${cat.views.toLocaleString()}</td>
-//             <td>${cat.downloads.toLocaleString()}</td>
-//             <td>${formatDate(cat.created)}</td>
-//             <td>${getStatusBadge(cat.status)}</td>
-//             <td><div class="action-buttons"><button class="action-btn" title="Chỉnh sửa" onclick="editCategory(${cat.id})"><i class="fas fa-edit"></i></button><button class="action-btn" title="Xóa" onclick="deleteCategory(${cat.id})"><i class="fas fa-trash"></i></button></div></td>
-//         </tr>
-//     `).join('');
-// }
 
 function getStatusBadge(status) {
     return status === 'active' ? '<span class="status-badge approved">Hoạt động</span>' : '<span class="status-badge rejected">Vô hiệu hóa</span>';
 }
+
 function formatDate(dateStr) {
     return new Date(dateStr).toLocaleDateString('vi-VN');
 }
+
 function updateCatPagination() {
-    const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
-    const pagesContainer = document.querySelector('.pagination-pages');
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
-    if (!pagesContainer) return;
-
-    let pagesHTML = '';
-    for (let i = 1; i <= totalPages; i++) {
-        pagesHTML += `<button class="pagination-btn page-btn ${i === currentCatPage ? 'active' : ''}">${i}</button>`;
-    }
-    pagesContainer.innerHTML = pagesHTML;
-
-    prevBtn.disabled = currentCatPage === 1;
-    nextBtn.disabled = currentCatPage === totalPages || totalPages === 0;
+    // Categories use server-side pagination, not client-side
+    // The pagination is handled by Thymeleaf templates
+    console.log('Categories pagination is handled server-side');
+    
+    // Don't override server-side pagination
+    return;
 }
+
 function goToCatPage(page) {
     currentCatPage = page;
-    renderCategories();
-    updateCatPagination();
-}
-function previousCatPage() {
-    if (currentCatPage > 1) {
-        currentCatPage--;
-        renderCategories();
+    // Categories are rendered server-side, no need for client-side rendering
+    if (typeof updateCatPagination === 'function') {
         updateCatPagination();
     }
 }
+
+function previousCatPage() {
+    if (currentCatPage > 1) {
+        currentCatPage--;
+        // Categories are rendered server-side, no need for client-side rendering
+        if (typeof updateCatPagination === 'function') {
+            updateCatPagination();
+        }
+    }
+}
+
 function nextCatPage() {
     const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
     if (currentCatPage < totalPages) {
         currentCatPage++;
-        renderCategories();
-        updateCatPagination();
+        // Categories are rendered server-side, no need for client-side rendering
+        if (typeof updateCatPagination === 'function') {
+            updateCatPagination();
+        }
     }
 }
+
 function toggleCategorySelection(id, isChecked) {
     if (Number.isNaN(id)) return;
-    if (isChecked) selectedCategories.add(id); else selectedCategories.delete(id);
+    if (isChecked) {
+        selectedCategories.add(id);
+    } else {
+        selectedCategories.delete(id);
+    }
+    updateBulkActionButtons();
+    console.log('Selected categories:', Array.from(selectedCategories));
 }
+
 function editCategory(id) {
     const cat = categories.find(c => c.id === id);
     if (!cat) return;
@@ -263,6 +429,7 @@ function editCategory(id) {
     populateCategoryForm(cat);
     openCategoryModal();
 }
+
 function openCategoryModal() {
     const modal = document.getElementById('addCategoryModal');
     if (modal) {
@@ -274,14 +441,11 @@ function openCategoryModal() {
 function clearCategoryForm() {
     document.getElementById('categoryName').value = '';
     document.getElementById('categoryDescription').value = '';
-    // Icon: reset selection to first
     const iconItems = document.querySelectorAll('.icon-item');
     iconItems.forEach(i => i.classList.remove('selected'));
     if (iconItems[0]) iconItems[0].classList.add('selected');
     const selectedIcon = document.querySelector('.selected-icon i');
     if (selectedIcon) selectedIcon.className = iconItems[0]?.querySelector('i').className || 'fas fa-folder';
-
-    // Color reset
     const colorPicker = document.getElementById('categoryColor');
     const colorPreview = document.querySelector('.color-preview');
     const colorValue = document.querySelector('.color-value');
@@ -295,7 +459,6 @@ function clearCategoryForm() {
 function populateCategoryForm(cat) {
     document.getElementById('categoryName').value = cat.name;
     document.getElementById('categoryDescription').value = cat.description;
-    // icon
     const iconItems = document.querySelectorAll('.icon-item');
     iconItems.forEach(i => i.classList.remove('selected'));
     iconItems.forEach(i => {
@@ -303,7 +466,6 @@ function populateCategoryForm(cat) {
     });
     const selectedIcon = document.querySelector('.selected-icon i');
     if (selectedIcon) selectedIcon.className = cat.iconClass;
-    // color
     const colorPicker = document.getElementById('categoryColor');
     const colorPreview = document.querySelector('.color-preview');
     const colorValue = document.querySelector('.color-value');
@@ -321,7 +483,7 @@ function closeAddCategoryModal() {
         document.body.style.overflow = '';
     }
 }
-// Backward compatibility for existing code using closeModal
+
 function closeModal() {
     closeAddCategoryModal();
 }
@@ -336,20 +498,18 @@ function handleSaveCategory() {
 
     const name = nameInput.value.trim();
     if (!name) {
-        alert('Vui lòng nhập tên danh mục');
+        toastr.error('Vui lòng nhập tên danh mục');
         return;
     }
 
     let catObj;
     if (editingCategoryId) {
-        // update existing
         catObj = categories.find(c => c.id === editingCategoryId);
         if (!catObj) return;
         catObj.name = name;
         catObj.description = descInput.value.trim();
         catObj.iconClass = selectedIconEl.className || 'fas fa-folder';
         catObj.color = colorInput.value;
-        // giữ statistics & created
     } else {
         const newId = categories.length ? Math.max(...categories.map(c => c.id)) + 1 : 1;
         catObj = {
@@ -367,31 +527,28 @@ function handleSaveCategory() {
         categories.push(catObj);
     }
 
-    // reset trạng thái
     editingCategoryId = null;
     clearCategoryForm();
-
     filterCategories();
     closeAddCategoryModal();
-    alert('Đã thêm danh mục mới!');
+    toastr.success('Đã thêm/cập nhật danh mục thành công!');
 }
-
-function deleteCategory(id) {
-    if (confirm('Bạn có chắc muốn xóa danh mục này?')) {
-        categories = categories.filter(c => c.id !== id);
-        filterCategories();
-    }
-}
-
-// Bulk delete button
-const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-if (deleteSelectedBtn) {
-    deleteSelectedBtn.addEventListener('click', deleteSelectedCategories);
-}
-
-// ===== End Category Management =====
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Kiểm tra và hiển thị thông báo từ sessionStorage
+    const toastMessage = sessionStorage.getItem('toastMessage');
+    const toastType = sessionStorage.getItem('toastType');
+    if (toastMessage && toastType) {
+        if (toastType === 'success') {
+            toastr.success(toastMessage);
+        } else if (toastType === 'error') {
+            toastr.error(toastMessage);
+        }
+        // Xóa thông báo sau khi hiển thị
+        sessionStorage.removeItem('toastMessage');
+        sessionStorage.removeItem('toastType');
+    }
+
     // Admin dropdown toggle
     const adminProfile = document.querySelector('.admin-profile');
     if (adminProfile) {
@@ -423,8 +580,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Select all checkboxes
     const selectAll = document.getElementById('selectAll');
-    const checkboxes = document.querySelectorAll('.category-checkbox:not(#selectAll)');
-
     if (selectAll) {
         selectAll.addEventListener('change', function () {
             const visibleCheckboxes = document.querySelectorAll('.category-checkbox:not(#selectAll)');
@@ -439,38 +594,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // delegate change on individual checkboxes (already handled in body listener) -> just updateSelectAllState
-    document.body.addEventListener('change', (e) => {
-        if (e.target.matches('.category-checkbox') && e.target.id !== 'selectAll') {
-            const cb = e.target;
-            const idVal = Number(cb.dataset.categoryId);
-            if (!Number.isNaN(idVal)) {
-                toggleCategorySelection(idVal, cb.checked);
-            }
-            updateSelectAllState();
-        }
-    });
-
     // Modal functionality
     const addCategoryBtn = document.getElementById('addCategoryBtn');
     const addCategoryModal = document.getElementById('addCategoryModal');
     const modalOverlay = document.querySelector('.modal-overlay');
     const modalCloseBtn = document.querySelector('.modal-close');
     const cancelBtn = document.querySelector('.cancel-btn');
-
-    function openModal() {
-        if (addCategoryModal) {
-            addCategoryModal.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-
-    function closeModal() {
-        if (addCategoryModal) {
-            addCategoryModal.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-    }
 
     if (addCategoryBtn) {
         addCategoryBtn.addEventListener('click', () => {
@@ -526,32 +655,236 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Pagination
-    const pageButtons = document.querySelectorAll('.page-btn');
-    const prevButton = document.querySelector('.prev-btn');
-    const nextButton = document.querySelector('.next-btn');
-
-    pageButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            pageButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-
-            // Update prev/next button states
-            if (this.textContent === '1') {
-                prevButton.disabled = true;
-            } else {
-                prevButton.disabled = false;
-            }
-
-            if (this.textContent === '5') {
-                nextButton.disabled = true;
-            } else {
-                nextButton.disabled = false;
+    // Khởi tạo quản lý danh mục
+    setupCategoryEventListeners();
+    setupCustomModal();
+    updateBulkActionButtons(); // Khởi tạo button state
+    filterCategories();
+    
+    // Export functionality - with better timing
+    setTimeout(() => {
+        const exportBtn = document.getElementById('exportCategoriesBtn');
+        console.log('Export button found:', exportBtn); // Debug
+        if (exportBtn) {
+            console.log('Adding click listener to export button'); // Debug
+            exportBtn.addEventListener('click', function(e) {
+                console.log('Export button clicked!'); // Debug
+                e.preventDefault();
+                e.stopPropagation();
+                exportCategoriesToCSV();
+            });
+            
+            // Test click programmatically
+            console.log('Export button ready for clicks');
+        } else {
+            console.error('Export button not found! Available buttons:', 
+                Array.from(document.querySelectorAll('button')).map(b => b.id || b.className));
+        }
+    }, 100); // Small delay to ensure DOM is ready
+    
+    // Backup: Event delegation
+    document.body.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'exportCategoriesBtn') {
+            console.log('Export button clicked via delegation!'); // Debug
+            e.preventDefault();
+            e.stopPropagation();
+            exportCategoriesToCSV();
+        }
+    });
+    
+    // Custom Modal Functions
+    function setupCustomModal() {
+        const modal = document.getElementById('confirmModal');
+        const cancelBtn = document.getElementById('confirmCancel');
+        const overlay = modal.querySelector('.modal-overlay');
+        
+        // Close modal when clicking cancel or overlay
+        cancelBtn.addEventListener('click', hideConfirmModal);
+        overlay.addEventListener('click', hideConfirmModal);
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display !== 'none') {
+                hideConfirmModal();
             }
         });
-    });
-
-    // ===== Khởi tạo quản lý danh mục =====
-    setupCategoryEventListeners();
-    filterCategories();
+    }
 });
+
+    // Export Categories to CSV - Fetch all data from server
+    async function exportCategoriesToCSV() {
+        console.log('Export categories function called'); // Debug
+        
+        try {
+            // Removed loading notification as requested
+            
+            // Get ALL categories from server (active + inactive + deleted)
+            const response = await fetch('/admin/categories?size=1000&tab=all&export=true');
+            
+            if (!response.ok) {
+                throw new Error('Không thể tải dữ liệu từ server');
+            }
+            
+            // Parse HTML response to extract real data
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const data = [];
+            
+            // Header
+            data.push([
+                'STT', 'Tên danh mục', 'Mô tả', 'Trạng thái', 'Ngày tạo'
+            ]);
+            
+            // Get real data from server response
+            const rows = doc.querySelectorAll('.category-card, .category-item, .grid-item');
+            console.log('Found server rows:', rows.length); // Debug
+            
+            if (rows.length === 0) {
+                // Fallback: try different selectors
+                const tableRows = doc.querySelectorAll('tbody tr, .data-row');
+                console.log('Found table rows:', tableRows.length); // Debug
+                
+                tableRows.forEach((row, index) => {
+                    const cells = row.querySelectorAll('td, .cell');
+                    if (cells.length >= 3) {
+                        const name = cells[1]?.textContent?.trim() || '';
+                        const status = cells[2]?.textContent?.trim() || 'Hoạt động';
+                        const date = cells[3]?.textContent?.trim() || new Date().toLocaleDateString('vi-VN');
+                        
+                        if (name && name !== 'Tên danh mục') { // Skip header
+                            const rowData = [
+                                index,
+                                name,
+                                '', // Description not available in table
+                                status,
+                                date
+                            ];
+                            data.push(rowData);
+                        }
+                    }
+                });
+            } else {
+                rows.forEach((row, index) => {
+                    const name = row.querySelector('.category-name, h3, .title')?.textContent?.trim() || '';
+                    const desc = row.querySelector('.category-desc, p, .description')?.textContent?.trim() || '';
+                    const status = row.querySelector('.status-badge, .status')?.textContent?.trim() || 'Hoạt động';
+                    
+                    if (name) {
+                        const rowData = [
+                            index + 1,
+                            name,
+                            desc,
+                            status,
+                            new Date().toLocaleDateString('vi-VN')
+                        ];
+                        data.push(rowData);
+                    }
+                });
+            }
+            
+            console.log('Total data rows:', data.length); // Debug
+            
+            if (data.length <= 1) {
+                showCategoryNotification('Không có dữ liệu để xuất!', 'error');
+                return;
+            }
+            
+            // Create CSV content
+            const csvContent = data.map(row => 
+                row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(',')
+            ).join('\n');
+            
+            // Download file
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `categories_export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showCategoryNotification(`Đã xuất ${data.length - 1} danh mục thành công!`, 'success');
+            
+        } catch (error) {
+            console.error('Export error:', error);
+            showCategoryNotification('Lỗi khi xuất dữ liệu: ' + error.message, 'error');
+        }
+    }
+
+// Notification function with inline CSS for Categories page
+function showCategoryNotification(message, type = 'info') {
+    // Tạo toast notification với inline CSS
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    
+    // Inline CSS để đảm bảo hiển thị đúng
+    const bgColor = type === 'success' ? '#d1e7dd' : '#f8d7da';
+    const borderColor = type === 'success' ? '#badbcc' : '#f5c2c7';
+    const textColor = type === 'success' ? '#0f5132' : '#842029';
+    
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        padding: 12px 16px;
+        margin-bottom: 1rem;
+        border: 1px solid ${borderColor};
+        border-radius: 8px;
+        background-color: ${bgColor};
+        color: ${textColor};
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    // Thêm keyframe animation
+    if (!document.getElementById('category-toast-animations')) {
+        const style = document.createElement('style');
+        style.id = 'category-toast-animations';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" 
+           style="color: ${type === 'success' ? '#0f5132' : '#842029'}; margin-right: 8px;"></i>
+        <span style="flex: 1;">${message}</span>
+        <button type="button" 
+                style="background: none; border: none; font-size: 18px; color: ${textColor}; cursor: pointer; padding: 0; margin-left: 8px;"
+                onclick="this.parentElement.remove()">&times;</button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Tự động xóa sau 3 giây với animation
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+    }, 3000);
+}

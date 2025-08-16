@@ -74,6 +74,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL AND u.createdAt BETWEEN :from AND :to")
     Long countUsersByDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
     
     Optional<User> findByUsername(String username);
 
@@ -97,5 +98,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 		List<Object[]> countUsersByMonth(@Param("year") int year);
 		
 	long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
+
 
 }

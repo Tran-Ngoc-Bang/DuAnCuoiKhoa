@@ -63,9 +63,10 @@ public class CommentsController {
 		model.addAttribute("hiddenCount", commentService.countHiddenComments());
 
 		model.addAttribute("commentsPage", comments);
+
 		model.addAttribute("current", page);
 		model.addAttribute("currentPage", "comments");
-		
+		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", comments.getTotalPages());
 		model.addAttribute("activeTab", tab);
 		model.addAttribute("keyword", keyword);

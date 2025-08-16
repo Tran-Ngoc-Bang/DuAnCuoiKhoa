@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý tài liệu - EduShare Admin</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin_documents.css}" />
+    <style>
+      .modal-content.large {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 24px;
+        animation: modalFadeIn 0.3s ease;
+      }
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+      }
+      .modal-header h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #222;
+        margin: 0;
+      }
+      .modal-close {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .modal-close:hover {
+        color: #333;
+      }
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid #eee;
+      }
+      .modal-tabs .tab-nav {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .tab-btn {
+        padding: 10px 16px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #f9f9f9;
+        font-weight: 600;
+        color: #555;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+      }
+      .tab-btn.active {
+        background: #4f46e5;
+        color: #fff;
+        border-color: #4f46e5;
+      }
+      .tab-btn:hover {
+        background: #eee;
+      }
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+      .form-group {
+        flex: 1 1 48%;
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+      }
+      input,
+      select,
+      textarea {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #4f46e5;
+        outline: none;
+      }
+      .file-upload {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        border-radius: 6px;
+        transition: border-color 0.2s;
+      }
+      .file-upload:hover {
+        border-color: #4f46e5;
+      }
+      .file-upload-label i {
+        font-size: 2rem;
+        color: #aaa;
+      }
+      .file-upload-label span {
+        display: block;
+        font-weight: 500;
+        margin-top: 8px;
+      }
+      .thumbnail-preview img {
+        max-width: 100%;
+        border-radius: 6px;
+        margin-top: 10px;
+      }
+      .btn-remove {
+        background: none;
+        border: none;
+        color: #dc2626;
+        cursor: pointer;
+      }
+      .btn-remove:hover {
+        color: #991b1b;
+      }
+      .form-help {
+        font-size: 0.85rem;
+        color: #666;
+      }
+      .required {
+        color: #dc2626;
+      }
+      /* Style cho phân trang */
+      .pagination-btn {
+        display: inline-block;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 0 4px;
+        text-decoration: none;
+        color: #333;
+      }
+      .pagination-btn:hover {
+        background: #f0f0f0;
+      }
+      .pagination-btn:disabled,
+      .pagination-btn.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+      .pagination-btn.active {
+        background: #4f46e5;
+        color: #fff;
+        border-color: #4f46e5;
+      }
+      /* Advanced Filters Styles */
+      .advanced-filters {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .filters-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+        border-radius: 8px 8px 0 0;
+      }
+      .filters-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+      }
+      .btn-close {
+        background: none;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+      .btn-close:hover {
+        background: #e5e7eb;
+        color: #374151;
+      }
+      .filters-content {
+        padding: 20px;
+      }
+      .filter-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .filter-group {
+        flex: 1;
+        min-width: 200px;
+      }
+      .filter-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.9rem;
+      }
+      .filter-group select,
+      .filter-group input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: border-color 0.2s;
+      }
+      .filter-group select:focus,
+      .filter-group input:focus {
+        border-color: #4f46e5;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+      .filters-actions {
+        display: flex;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+      }
+      .btn-filter {
+        padding: 8px 16px;
+        border: 1px solid #4f46e5;
+        background: #4f46e5;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+      }
+      .btn-filter:hover {
+        background: #4338ca;
+        border-color: #4338ca;
+      }
+      .btn-clear {
+        padding: 8px 16px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #374151;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+      }
+      .btn-clear:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+      }
+
+      /* Tab Navigation Styles */
+      .tab-navigation {
+        margin: 20px 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .tab-navigation a {
+        color: #6b7280 !important;
+        text-decoration: none !important;
+        padding: 12px 24px;
+        border-bottom: 3px solid transparent;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tab-navigation a:hover {
+        color: #4f46e5 !important;
+        border-bottom-color: #e5e7eb !important;
+      }
+
+      .tab-navigation a.active {
+        color: #4f46e5 !important;
+        border-bottom-color: #4f46e5 !important;
+        font-weight: 600;
+      }
+
+      /* Success and Error Messages */
+      .success-message {
+        background-color: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+      .success-message i {
+        color: #16a34a;
+        font-size: 1.1rem;
+      }
+      .error-message {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+      .error-message i {
+        color: #dc2626;
+        font-size: 1.1rem;
+      }
+
+      
+    </style>
+  </head>
+  <body class="admin-page">
+    <!-- Giữ nguyên header, sidebar, và các phần khác -->
+    <header class="admin-header">
+      <div class="admin-header-content">
+        <div class="admin-logo">
+          <a href="index" class="logo">
+            <div class="logo-icon">E</div>
+            <div class="logo-text">EduShare</div>
+          </a>
+        </div>
+        <div class="admin-header-actions">
+          <div class="admin-search">
+            <input type="text" placeholder="Tìm kiếm..." />
+            <button><i class="fas fa-search"></i></button>
+          </div>
+          <div class="dark-mode-toggle" id="darkModeToggle"></div>
+          <div class="admin-notifications">
+            <button type="button" class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">5</span>
+            </button>
+          </div>
+          <div class="admin-profile">
+            <div class="admin-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                alt="Admin"
+              />
+            </div>
+            <div class="admin-info">
+              <span class="admin-name">Nguyễn Văn A</span>
+              <span class="admin-role">Quản trị viên</span>
+            </div>
+            <div class="admin-dropdown">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="admin-container">
+      <aside class="admin-sidebar">
+        <nav class="admin-nav">
+          <ul class="admin-menu">
+            <li class="admin-menu-item">
+              <a href="index"
+                ><i class="fas fa-tachometer-alt"></i
+                ><span>Bảng điều khiển</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="users"
+                ><i class="fas fa-users"></i><span>Quản lý người dùng</span></a
+              >
+            </li>
+            <li class="admin-menu-item active">
+              <a href="documents"
+                ><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="categories"
+                ><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="tags"
+                ><i class="fas fa-tags"></i><span>Quản lý tags</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="comments"
+                ><i class="fas fa-comments"></i
+                ><span>Quản lý bình luận</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="reports"
+                ><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="ip-bans"
+                ><i class="fas fa-ban"></i><span>IP bị cấm</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="statistics"
+                ><i class="fas fa-chart-bar"></i><span>Thống kê</span></a
+              >
+            </li>
+            <li class="admin-menu-item has-submenu">
+              <a href="javascript:void(0)"
+                ><i class="fas fa-coins"></i><span>Quản lý doanh thu</span
+                ><i class="fas fa-chevron-down submenu-icon"></i
+              ></a>
+              <ul class="submenu">
+                <li class="submenu-item">
+                  <a href="coin-packages"
+                    ><i class="fas fa-box"></i><span>Gói xu</span></a
+                  >
+                </li>
+                <li class="submenu-item">
+                  <a href="transactions"
+                    ><i class="fas fa-exchange-alt"></i
+                    ><span>Giao dịch</span></a
+                  >
+                </li>
+                <li class="submenu-item">
+                  <a href="withdrawals"
+                    ><i class="fas fa-money-bill-wave"></i
+                    ><span>Yêu cầu rút tiền</span></a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="admin-menu-item">
+              <a href="settings"
+                ><i class="fas fa-cog"></i><span>Cài đặt</span></a
+              >
+            </li>
+            <li class="admin-menu-item">
+              <a href="../index"
+                ><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Quản lý tài liệu</h1>
+          <div class="admin-breadcrumbs">
+            <a href="index">Admin</a><span>/</span><span>Tài liệu</span>
+          </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success success-message">
+          <i class="fas fa-check-circle"></i>
+          <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger error-message">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span th:text="${error}"></span>
+        </div>
+
+        <div class="stats-cards">
+          <div class="stats-card">
+            <div class="stats-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stats-content">
+              <div
+                class="stats-number"
+                th:text="${totalDocuments}"
+                th:data-total="${totalDocuments}"
+              ></div>
+              <div class="stats-label">Tổng tài liệu</div>
+            </div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-icon"><i class="fas fa-eye"></i></div>
+            <div class="stats-content">
+              <div
+                class="stats-number"
+                th:text="${totalViews}"
+                th:data-total="${totalViews}"
+              ></div>
+              <div class="stats-label">Lượt xem</div>
+            </div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-icon"><i class="fas fa-download"></i></div>
+            <div class="stats-content">
+              <div
+                class="stats-number"
+                th:text="${totalDownloads}"
+                th:data-total="${totalDownloads}"
+              ></div>
+              <div class="stats-label">Lượt tải</div>
+            </div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-icon"><i class="fas fa-clock"></i></div>
+            <div class="stats-content">
+              <div class="stats-number" th:text="${pendingDocuments}"></div>
+              <div class="stats-label">Chờ duyệt</div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-actions">
+          <div class="admin-actions-left">
+            <a th:href="@{/admin/documents/create}" class="btn btn-primary">
+              <i class="fas fa-plus"></i><span>Thêm tài liệu</span>
+            </a>
+            <button
+              type="button"
+              class="btn btn-outline"
+              id="importDocumentsBtn"
+            >
+              <i class="fas fa-upload"></i><span>Import</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline"
+              id="exportDocumentsBtn"
+            >
+              <i class="fas fa-download"></i><span>Export</span>
+            </button>
+          </div>
+          <div class="admin-actions-right">
+            <div class="search-box">
+              <form th:action="@{/admin/documents}" method="get">
+                <input type="hidden" name="tab" th:value="${currentTab}" />
+                <input
+                  type="text"
+                  id="searchInput"
+                  name="search"
+                  th:value="${param.search}"
+                  placeholder="Tìm kiếm tài liệu..."
+                />
+                <button type="submit" id="searchBtn">
+                  <i class="fas fa-search"></i>
+                </button>
+              </form>
+            </div>
+            <button type="button" class="btn btn-outline" id="refreshBtn">
+              <i class="fas fa-refresh"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline"
+              id="advancedFiltersToggle"
+            >
+              <i class="fas fa-filter"></i><span>Bộ lọc</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Debug Info 
+            <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 12px;">
+                Debug: currentTab = '<span th:text="${currentTab}">null</span>'
+            </div>-->
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+          <a
+            th:href="@{/admin/documents(tab='active')}"
+            th:classappend="${currentTab == null or currentTab == 'active'} ? 'active' : ''"
+          >
+            <i class="fas fa-file-alt"></i>
+            <span>Tài liệu hoạt động</span>
+          </a>
+          <a
+            th:href="@{/admin/documents(tab='deleted')}"
+            th:classappend="${currentTab == 'deleted'} ? 'active' : ''"
+          >
+            <i class="fas fa-trash"></i>
+            <span>Đã xóa</span>
+          </a>
+        </div>
+
+        <div
+          class="advanced-filters"
+          id="advancedFilters"
+          style="display: none"
+        >
+          <form th:action="@{/admin/documents}" method="get">
+            <!-- Giữ lại tham số search và tab -->
+            <input type="hidden" name="search" th:value="${param.search}" />
+            <input type="hidden" name="tab" th:value="${currentTab}" />
+            <div class="filters-header">
+              <h3>Bộ lọc nâng cao</h3>
+              <button type="button" class="btn-close" id="closeFilters">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="filters-content">
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label>Trạng thái</label>
+                  <select id="statusFilter" name="status">
+                    <option value="">Tất cả trạng thái</option>
+                    <option
+                      value="PUBLISHED"
+                      th:selected="${param.status == 'PUBLISHED'}"
+                    >
+                      Đã xuất bản
+                    </option>
+                    <option
+                      value="PENDING"
+                      th:selected="${param.status == 'PENDING'}"
+                    >
+                      Chờ duyệt
+                    </option>
+                    <option
+                      value="REJECTED"
+                      th:selected="${param.status == 'REJECTED'}"
+                    >
+                      Bị từ chối
+                    </option>
+                    <option
+                      value="DRAFT"
+                      th:selected="${param.status == 'DRAFT'}"
+                    >
+                      Bản nháp
+                    </option>
+                    <option
+                      value="ARCHIVED"
+                      th:selected="${param.status == 'ARCHIVED'}"
+                    >
+                      Đã lưu trữ
+                    </option>
+                    <option
+                      value="SUSPENDED"
+                      th:selected="${param.status == 'SUSPENDED'}"
+                    >
+                      Đã tạm ngưng
+                    </option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Danh mục</label>
+                  <select id="categoryFilter" name="category">
+                    <option value="">Tất cả danh mục</option>
+                    <option
+                      th:each="category : ${categories}"
+                      th:value="${category.id}"
+                      th:text="${category.name}"
+                      th:selected="${param.category == category.id}"
+                    ></option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Loại tài liệu</label>
+                  <select id="typeFilter" name="type">
+                    <option value="">Tất cả loại</option>
+                    <option value="PDF" th:selected="${param.type == 'PDF'}">
+                      PDF
+                    </option>
+                    <option value="DOC" th:selected="${param.type == 'DOC'}">
+                      Word Document
+                    </option>
+                    <option value="PPT" th:selected="${param.type == 'PPT'}">
+                      PowerPoint
+                    </option>
+                    <option value="XLS" th:selected="${param.type == 'XLS'}">
+                      Excel
+                    </option>
+                    <option value="TXT" th:selected="${param.type == 'TXT'}">
+                      Text
+                    </option>
+                    <option
+                      value="IMAGE"
+                      th:selected="${param.type == 'IMAGE'}"
+                    >
+                      Hình ảnh
+                    </option>
+                    <option
+                      value="VIDEO"
+                      th:selected="${param.type == 'VIDEO'}"
+                    >
+                      Video
+                    </option>
+                    <option
+                      value="AUDIO"
+                      th:selected="${param.type == 'AUDIO'}"
+                    >
+                      Audio
+                    </option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Giá</label>
+                  <select id="priceFilter" name="price">
+                    <option value="">Tất cả</option>
+                    <option value="free" th:selected="${param.price == 'free'}">
+                      Miễn phí
+                    </option>
+                    <option value="paid" th:selected="${param.price == 'paid'}">
+                      Có phí
+                    </option>
+                    <option value="1-10" th:selected="${param.price == '1-10'}">
+                      1 - 10 coin
+                    </option>
+                    <option
+                      value="11-50"
+                      th:selected="${param.price == '11-50'}"
+                    >
+                      11 - 50 coin
+                    </option>
+                    <option
+                      value="51-100"
+                      th:selected="${param.price == '51-100'}"
+                    >
+                      51 - 100 coin
+                    </option>
+                    <option value="100+" th:selected="${param.price == '100+'}">
+                      Trên 100 coin
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label>Tác giả</label>
+                  <input
+                    type="text"
+                    id="authorFilter"
+                    name="author"
+                    th:value="${param.author}"
+                    placeholder="Nhập tên tác giả..."
+                  />
+                </div>
+                <div class="filter-group">
+                  <label>Thẻ tag</label>
+                  <input
+                    type="text"
+                    id="tagsFilter"
+                    name="tags"
+                    th:value="${param.tags}"
+                    placeholder="Nhập thẻ tag..."
+                  />
+                </div>
+                <div class="filter-group">
+                  <label>Ngày tạo từ</label>
+                  <input
+                    type="date"
+                    id="dateFromFilter"
+                    name="dateFrom"
+                    th:value="${param.dateFrom}"
+                  />
+                </div>
+                <div class="filter-group">
+                  <label>Ngày tạo đến</label>
+                  <input
+                    type="date"
+                    id="dateToFilter"
+                    name="dateTo"
+                    th:value="${param.dateTo}"
+                  />
+                </div>
+              </div>
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label>Kích thước file</label>
+                  <select id="sizeFilter" name="fileSize">
+                    <option value="">Tất cả kích thước</option>
+                    <option value="0-1" th:selected="${param.fileSize == '0-1'}">
+                      < 1 MB
+                    </option>
+                    <option value="1-10" th:selected="${param.fileSize == '1-10'}">
+                      1 - 10 MB
+                    </option>
+                    <option
+                      value="10-50"
+                      th:selected="${param.fileSize == '10-50'}"
+                    >
+                      10 - 50 MB
+                    </option>
+                    <option
+                      value="50-100"
+                      th:selected="${param.fileSize == '50-100'}"
+                    >
+                      50 - 100 MB
+                    </option>
+                    <option value="100+" th:selected="${param.fileSize == '100+'}">
+                      > 100 MB
+                    </option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Lượt xem</label>
+                  <select id="viewsFilter" name="views">
+                    <option value="">Tất cả</option>
+                    <option
+                      value="0-100"
+                      th:selected="${param.views == '0-100'}"
+                    >
+                      0 - 100
+                    </option>
+                    <option
+                      value="101-500"
+                      th:selected="${param.views == '101-500'}"
+                    >
+                      101 - 500
+                    </option>
+                    <option
+                      value="501-1000"
+                      th:selected="${param.views == '501-1000'}"
+                    >
+                      501 - 1,000
+                    </option>
+                    <option
+                      value="1001-5000"
+                      th:selected="${param.views == '1001-5000'}"
+                    >
+                      1,001 - 5,000
+                    </option>
+                    <option
+                      value="5000+"
+                      th:selected="${param.views == '5000+'}"
+                    >
+                      Trên 5,000
+                    </option>
+                  </select>
+                </div>
+                <!--   <div class="filter-group">
+                                <label>Đánh giá</label>
+                                <select id="ratingFilter" name="rating">
+                                    <option value="">Tất cả đánh giá</option>
+                                    <option value="5" th:selected="${param.rating == '5'}">⭐⭐⭐⭐⭐ (5 sao)</option>
+                                    <option value="4" th:selected="${param.rating == '4'}">⭐⭐⭐⭐ (4 sao trở lên)</option>
+                                    <option value="3" th:selected="${param.rating == '3'}">⭐⭐⭐ (3 sao trở lên)</option>
+                                    <option value="2" th:selected="${param.rating == '2'}">⭐⭐ (2 sao trở lên)</option>
+                                    <option value="1" th:selected="${param.rating == '1'}">⭐ (1 sao trở lên)</option>
+                                    <option value="0" th:selected="${param.rating == '0'}">Chưa có đánh giá</option>
+                                </select>
+                            </div> -->
+
+              </div>
+              <div class="filters-actions">
+                <button type="submit" class="btn-filter">
+                  <i class="fas fa-check"></i> Áp dụng bộ lọc
+                </button>
+                <a
+                  th:href="@{/admin/documents(tab=${currentTab})}"
+                  class="btn-clear"
+                  ><i class="fas fa-eraser"></i> Xóa bộ lọc</a
+                >
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="bulk-actions" id="bulkActions" style="display: none">
+          <div class="bulk-actions-content">
+            <div class="bulk-actions-info">
+              <span id="selectedCount">0</span> tài liệu được chọn
+            </div>
+            <div class="bulk-actions-buttons">
+              <button type="button" class="btn btn-success" id="bulkApprove">
+                <i class="fas fa-check"></i><span>Duyệt</span>
+              </button>
+              <button type="button" class="btn btn-warning" id="bulkReject">
+                <i class="fas fa-times"></i><span>Từ chối</span>
+              </button>
+              <button type="button" class="btn btn-info" id="bulkArchive">
+                <i class="fas fa-archive"></i><span>Lưu trữ</span>
+              </button>
+              <button type="button" class="btn btn-danger" id="bulkDelete">
+                <i class="fas fa-trash"></i><span>Xóa</span>
+              </button>
+              <button type="button" class="btn btn-outline" id="bulkExport">
+                <i class="fas fa-download"></i><span>Export</span>
+              </button>
+              <button type="button" class="btn btn-outline" id="clearSelection">
+                <i class="fas fa-times-circle"></i><span>Bỏ chọn</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Filter Status Indicator 
+            <div th:if="${param.search != null or param.status != null or param.category != null or param.type != null or param.price != null or param.author != null or param.tags != null}" 
+                 class="filter-status" style="background: #e0f2fe; border: 1px solid #81d4fa; border-radius: 6px; padding: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-filter" style="color: #0277bd;"></i>
+                    <span style="color: #01579b; font-weight: 500;">Đang áp dụng bộ lọc:</span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span th:if="${param.search != null and param.search != ''}" class="filter-tag" style="background: #4fc3f7; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                            Tìm kiếm: "<span th:text="${param.search}"></span>"
+                        </span>
+                        <span th:if="${param.status != null and param.status != ''}" class="filter-tag" style="background: #4fc3f7; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                            Trạng thái: <span th:text="${param.status}"></span>
+                        </span>
+                        <span th:if="${param.category != null and param.category != ''}" class="filter-tag" style="background: #4fc3f7; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                            Danh mục: <span th:text="${param.category}"></span>
+                        </span>
+                        <span th:if="${param.type != null and param.type != ''}" class="filter-tag" style="background: #4fc3f7; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                            Loại: <span th:text="${param.type}"></span>
+                        </span>
+                        <span th:if="${param.price != null and param.price != ''}" class="filter-tag" style="background: #4fc3f7; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                            Giá: <span th:text="${param.price == 'free' ? 'Miễn phí' : param.price == 'paid' ? 'Có phí' : param.price}"></span>
+                        </span>
+                        <span th:if="${param.author != null and param.author != ''}" class="filter-tag" style="background: #4fc3f7; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                            Tác giả: <span th:text="${param.author}"></span>
+                        </span>
+                        <span th:if="${param.tags != null and param.tags != ''}" class="filter-tag" style="background: #4fc3f7; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                            Tags: <span th:text="${param.tags}"></span>
+                        </span>
+                    </div>
+                </div>
+                <a th:href="@{/admin/documents}" style="color: #0277bd; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 4px;">
+                    <i class="fas fa-times"></i> Xóa bộ lọc
+                </a>
+            </div>-->
+
+        <div class="data-table-container">
+          <table class="data-table" id="documentsTable">
+            <thead>
+              <tr>
+             <!-- <th class="checkbox-column">
+                  <input type="checkbox" id="selectAll" />
+                </th>-->  
+                <th
+                  class="sortable"
+                  th:classappend="${param.sortBy == 'title' ? param.sortDir : ''}"
+                >
+                  <a
+                    th:href="@{/admin/documents(sortBy='title',sortDir=${sortBy == 'title' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Tiêu đề
+                    <i th:class="${sortBy == 'title'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <th
+                  class="sortable"
+                  th:classappend="${param.sortBy == 'author' ? param.sortDir : ''}"
+                >
+                  <a
+                    th:href="@{/admin/documents(sortBy='author',sortDir=${sortBy == 'author' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Tác giả
+                    <i th:class="${sortBy == 'author'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <!--   <th class="sortable" th:classappend="${param.sortBy == 'category' ? param.sortDir : ''}">
+                                <a th:href="@{/admin/documents(sortBy='category',sortDir=${param.sortBy == 'category' and param.sortDir == 'asc' ? 'desc' : 'asc'},page=${page.number},size=${page.size},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},size=${param.size},views=${param.views},rating=${param.rating},violation=${param.violation})}">Danh mục<i class="fas fa-sort"></i></a>
+                            </th>  -->
+                <th
+                  class="sortable"
+                  th:classappend="${param.sortBy == 'status' ? param.sortDir : ''}"
+                >
+                  <a
+                    th:href="@{/admin/documents(sortBy='status',sortDir=${sortBy == 'status' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Trạng thái
+                    <i th:class="${sortBy == 'status'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <th
+                  class="sortable"
+                  th:classappend="${param.sortBy == 'price' ? param.sortDir : ''}"
+                >
+                  <a
+                    th:href="@{/admin/documents(sortBy='price',sortDir=${sortBy == 'price' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Giá
+                    <i th:class="${sortBy == 'price'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <th
+                  class="sortable"
+                  th:classappend="${param.sortBy == 'views' ? param.sortDir : ''}"
+                >
+                  <a
+                    th:href="@{/admin/documents(sortBy='views',sortDir=${sortBy == 'views' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Lượt xem
+                    <i th:class="${sortBy == 'views'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <th
+                  class="sortable"
+                  th:classappend="${param.sortBy == 'downloads' ? param.sortDir : ''}"
+                >
+                  <a
+                    th:href="@{/admin/documents(sortBy='downloads',sortDir=${sortBy == 'downloads' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Lượt tải
+                    <i th:class="${sortBy == 'downloads'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <th
+                  th:if="${currentTab != 'deleted'}"
+                  class="sortable"
+                  th:classappend="${param.sortBy == 'created_at' ? param.sortDir : ''}"
+                >
+                  <a
+                    th:href="@{/admin/documents(sortBy='created_at',sortDir=${sortBy == 'created_at' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Ngày tạo
+                    <i th:class="${sortBy == 'created_at'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <th th:if="${currentTab == 'deleted'}" class="sortable">
+                  <a
+                    th:href="@{/admin/documents(sortBy='deleted_at',sortDir=${sortBy == 'deleted_at' and sortDir == 'asc' ? 'desc' : 'asc'},page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views})}"
+                    >Ngày xóa
+                    <i th:class="${sortBy == 'deleted_at'} ? (${sortDir == 'asc'} ? 'fas fa-sort-up' : 'fas fa-sort-down') : 'fas fa-sort'"></i
+                  ></a>
+                </th>
+                <th class="actions-column">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="documentsTableBody">
+              <tr th:each="document : ${documents}">
+               <!-- <td class="checkbox-column">
+                  <input
+                    type="checkbox"
+                    class="document-checkbox"
+                    th:value="${document.id}"
+                  />
+                </td>-->
+                <td>
+                  <div class="document-info">
+                   <!--  <div class="document-thumbnail">
+                      <img th:src="${document.thumbnail != null ? document.thumbnail : '/images/default-thumbnail.jpg'}" alt="Thumbnail" class="doc-thumb"> 
+                    </div>-->
+                    <div class="document-details">
+                      <h4
+                        class="doc-title"
+                        th:text="${document.title != null ? document.title : 'Untitled'}"
+                      ></h4>
+                      <p
+                        class="doc-desc"
+                        th:text="${document.description != null ? document.description : ''}"
+                      ></p>
+                      <div class="doc-meta">
+                        <span
+                          class="doc-type"
+                          th:text="${document.fileType != null ? document.fileType : 'Unknown'}"
+                        ></span>
+                        <span
+                          class="doc-size"
+                          th:text="${document.fileSize != null ? document.fileSize + ' KB' : '0 KB'}"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-info">
+                    <div class="user-avatar">
+                      <img
+                        th:src="${document.authorAvatar != null ? document.authorAvatar : '/images/default-avatar.jpg'}"
+                        alt="Author"
+                        class="author-avatar"
+                      />
+                    </div>
+                    <span
+                      class="user-name author-name"
+                      th:text="${document.authorName != null ? document.authorName : 'Unknown'}"
+                    ></span>
+                  </div>
+                </td>
+                <!--  <td><span class="category-name" th:text="${document.categoryNames != null && !document.categoryNames.isEmpty() ? #strings.listJoin(document.categoryNames, ', ') : 'Không danh mục'}"></span></td> -->
+                <td>
+                  <span
+                    class="status-badge"
+                    th:classappend="${document.status}"
+                    th:text="${document.status == 'DRAFT' ? 'Bản nháp' : 
+                                                document.status == 'PENDING' ? 'Chờ duyệt' : 
+                                                document.status == 'PUBLISHED' ? 'Đã xuất bản' : 
+                                                document.status == 'ARCHIVED' ? 'Đã lưu trữ' : 
+                                                document.status == 'REJECTED' ? 'Bị từ chối' : 
+                                                document.status == 'SUSPENDED' ? 'Đã tạm ngưng' : 
+                                                document.status == 'APPROVED' ? 'Đã duyệt' : 
+                                                 document.status == 'DELETED' ? 'Đã xóa' : 
+                                                document.status != null ? document.status : 'Không xác định'}"
+                  ></span>
+                </td>
+                <td>
+                  <span
+                    class="price-display"
+                    th:text="${document.price != null ? (document.price == 0 ? 'Miễn phí' : document.price + ' coin') : 'Miễn phí'}"
+                  ></span>
+                </td>
+                <td>
+                  <div class="stats-display views-count">
+                    <i class="fas fa-eye"></i
+                    ><span
+                      th:text="${document.viewsCount != null ? document.viewsCount : 0}"
+                    ></span>
+                  </div>
+                </td>
+                <td>
+                  <div class="stats-display downloads-count">
+                    <i class="fas fa-download"></i
+                    ><span
+                      th:text="${document.downloadsCount != null ? document.downloadsCount : 0}"
+                    ></span>
+                  </div>
+                </td>
+                <td th:if="${currentTab != 'deleted'}" class="date-column">
+                  <span
+                    class="created-date"
+                    th:text="${document.createdAt != null ? #temporals.format(document.createdAt, 'dd/MM/yyyy') : ''}"
+                  ></span>
+                </td>
+                <td th:if="${currentTab == 'deleted'}" class="date-column">
+                  <span
+                    class="deleted-date"
+                    th:text="${document.deletedAt != null ? #temporals.format(document.deletedAt, 'dd/MM/yyyy HH:mm') : ''}"
+                  ></span>
+                </td>
+                <td class="actions-column">
+                  <div
+                    class="table-actions"
+                    style="display: flex; gap: 4px; align-items: center"
+                  >
+                    <a
+                      th:href="@{/admin/documents/{id}/details(id=${document.id})}"
+                      class="action-btn view"
+                      title="Xem"
+                      ><i class="fas fa-eye"></i
+                    ></a>
+
+                    <!-- Actions for active documents -->
+                    <th:block
+                      th:if="${currentTab == null or currentTab == 'active'}"
+                    >
+                      <a
+                        th:href="@{/admin/documents/{id}/edit(id=${document.id})}"
+                        class="action-btn edit"
+                        title="Chỉnh sửa"
+                        ><i class="fas fa-edit"></i
+                      ></a>
+                      <a
+                        th:href="@{/admin/documents/{id}/delete(id=${document.id})}"
+                        class="action-btn delete"
+                        title="Xóa"
+                        ><i class="fas fa-trash"></i
+                      ></a>
+                    </th:block>
+
+                    <!-- Actions for deleted documents -->
+                    <th:block th:if="${currentTab == 'deleted'}">
+                      <form
+                        th:action="@{/admin/documents/{id}/restore(id=${document.id})}"
+                        method="post"
+                        style="display: inline"
+                      >
+                        <button
+                          type="submit"
+                          class="action-btn restore"
+                          title="Khôi phục"
+                          style="
+                            background: #10b981;
+                            color: white;
+                            border: none;
+                            padding: 8px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                          "
+                        >
+                          <i class="fas fa-undo"></i>
+                        </button>
+                      </form>
+                    </th:block>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                th:if="${documents == null or documents.isEmpty()}"
+                class="empty-state-row"
+              >
+                <td th:attr="colspan=${currentTab == 'deleted' ? '9' : '10'}">
+                  <div class="empty-state">
+                    <div class="empty-icon">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3
+                      th:text="${currentTab == 'deleted' ? 'Không có tài liệu đã xóa' : 'Không có tài liệu nào'}"
+                    >
+                      Không có tài liệu nào
+                    </h3>
+                    <p
+                      th:text="${currentTab == 'deleted' ? 'Chưa có tài liệu nào được chuyển vào thùng rác.' : 'Không tìm thấy tài liệu nào phù hợp với bộ lọc hiện tại.'}"
+                    >
+                      Không tìm thấy tài liệu nào phù hợp với bộ lọc hiện tại.
+                    </p>
+                    <a
+                      th:if="${currentTab != 'deleted'}"
+                      th:href="@{/admin/documents/create}"
+                      class="btn btn-primary"
+                      ><i class="fas fa-plus"></i
+                      ><span>Tạo tài liệu đầu tiên</span></a
+                    >
+                    <!-- Debug info -->
+                    <small
+                      style="color: #999; margin-top: 10px; display: block"
+                    >
+                      Debug: Tab = <span th:text="${currentTab}"></span>,
+                      Documents size =
+                      <span
+                        th:text="${documents != null ? documents.size() : 'null'}"
+                      ></span>
+                    </small>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="loading-state" id="loadingState" style="display: none">
+            <div class="loading-spinner"></div>
+            <p>Đang tải dữ liệu...</p>
+          </div>
+          <div class="empty-state" id="emptyState" style="display: none">
+            <div class="empty-icon"><i class="fas fa-file-alt"></i></div>
+            <h3>Không có tài liệu nào</h3>
+            <p>Không tìm thấy tài liệu nào phù hợp với bộ lọc hiện tại.</p>
+            <a th:href="@{/admin/documents/create}" class="btn btn-primary"
+              ><i class="fas fa-plus"></i><span>Tạo tài liệu đầu tiên</span></a
+            >
+          </div>
+          <div class="error-state" id="errorState" style="display: none">
+            <div class="error-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Có lỗi xảy ra</h3>
+            <p id="errorMessage">
+              Không thể tải dữ liệu. Vui lòng thử lại sau.
+            </p>
+            <button type="button" class="btn btn-outline" id="retryLoad">
+              <i class="fas fa-redo"></i><span>Thử lại</span>
+            </button>
+          </div>
+        </div>
+        <div class="pagination-container">
+          <div class="pagination-info">
+            Hiển thị
+            <span
+              th:text="${page != null ? (page.number * page.size + 1) : 1}"
+            ></span
+            >-
+            <span
+              th:text="${page != null ? (page.number * page.size + documents.size()) : documents.size()}"
+            ></span>
+            trong tổng số <span th:text="${totalDocuments}"></span> tài liệu
+            <!-- Debug info -->
+            <small style="color: #666; margin-left: 10px">
+              (Trang
+              <span th:text="${page != null ? page.number + 1 : 1}"></span
+              >/<span th:text="${page != null ? page.totalPages : 1}"></span>)
+            </small>
+          </div>
+          <div class="pagination-controls">
+            <div class="items-per-page">
+              <label>Hiển thị:</label>
+              <form th:action="@{/admin/documents}" method="get">
+                <select name="size" onchange="this.form.submit()">
+                  <option
+                    value="10"
+                    th:selected="${page != null and page.size == 10}"
+                  >
+                    10
+                  </option>
+                  <option
+                    value="25"
+                    th:selected="${page != null and page.size == 25}"
+                  >
+                    25
+                  </option>
+                  <option
+                    value="50"
+                    th:selected="${page != null and page.size == 50}"
+                  >
+                    50
+                  </option>
+                  <option
+                    value="100"
+                    th:selected="${page != null and page.size == 100}"
+                  >
+                    100
+                  </option>
+                  <option
+                    value="200"
+                    th:selected="${page != null and page.size == 200}"
+                  >
+                    200
+                  </option>
+                </select>
+                <input type="hidden" name="sortBy" th:value="${param.sortBy}" />
+                <input
+                  type="hidden"
+                  name="sortDir"
+                  th:value="${param.sortDir}"
+                />
+                <input type="hidden" name="search" th:value="${param.search}" />
+                <input type="hidden" name="status" th:value="${param.status}" />
+                <input
+                  type="hidden"
+                  name="category"
+                  th:value="${param.category}"
+                />
+                <input type="hidden" name="type" th:value="${param.type}" />
+                <input type="hidden" name="price" th:value="${param.price}" />
+                <input type="hidden" name="author" th:value="${param.author}" />
+                <input type="hidden" name="tags" th:value="${param.tags}" />
+                <input
+                  type="hidden"
+                  name="dateFrom"
+                  th:value="${param.dateFrom}"
+                />
+                <input type="hidden" name="dateTo" th:value="${param.dateTo}" />
+                <input type="hidden" name="size" th:value="${param.size}" />
+                <input type="hidden" name="views" th:value="${param.views}" />
+                <input type="hidden" name="rating" th:value="${param.rating}" />
+
+                <input type="hidden" name="tab" th:value="${currentTab}" />
+              </form>
+              <span>mục/trang</span>
+            </div>
+            <div
+              class="pagination-buttons"
+              th:if="${page != null and page.totalPages > 1}"
+            >
+              <!-- Nút First -->
+              <a
+                th:href="@{/admin/documents(page=0,size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views},sortBy=${sortBy},sortDir=${sortDir})}"
+                th:class="${page.number == 0} ? 'pagination-btn disabled' : 'pagination-btn'"
+                th:attr="aria-disabled=${page.number == 0} ? 'true' : 'false'"
+              >
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+              <!-- Nút Previous -->
+              <a
+                th:href="@{/admin/documents(page=${page.number - 1},size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views},sortBy=${sortBy},sortDir=${sortDir})}"
+                th:class="${page.number == 0} ? 'pagination-btn disabled' : 'pagination-btn'"
+                th:attr="aria-disabled=${page.number == 0} ? 'true' : 'false'"
+              >
+                <i class="fas fa-angle-left"></i>
+              </a>
+              <!-- Các nút số trang -->
+              <div class="pagination-numbers">
+                <!-- Hiển thị các trang gần trang hiện tại -->
+                <th:block
+                  th:with="startPage=${#numbers.sequence(page.number - 2 >= 0 ? page.number - 2 : 0, page.number + 2 < page.totalPages ? page.number + 2 : page.totalPages - 1)}"
+                >
+                  <a
+                    th:each="i : ${startPage}"
+                    th:href="@{/admin/documents(page=${i},size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views},sortBy=${sortBy},sortDir=${sortDir})}"
+                    th:class="${i == page.number} ? 'pagination-btn active' : 'pagination-btn'"
+                    th:text="${i + 1}"
+                  ></a>
+                </th:block>
+              </div>
+              <!-- Nút Next -->
+              <a
+                th:href="@{/admin/documents(page=${page.number + 1},size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views},sortBy=${sortBy},sortDir=${sortDir})}"
+                th:class="${page.number + 1 >= page.totalPages} ? 'pagination-btn disabled' : 'pagination-btn'"
+                th:attr="aria-disabled=${page.number + 1 >= page.totalPages} ? 'true' : 'false'"
+              >
+                <i class="fas fa-angle-right"></i>
+              </a>
+              <!-- Nút Last -->
+              <a
+                th:href="@{/admin/documents(page=${page.totalPages - 1},size=${page.size},tab=${currentTab},search=${param.search},status=${param.status},category=${param.category},type=${param.type},price=${param.price},author=${param.author},tags=${param.tags},dateFrom=${param.dateFrom},dateTo=${param.dateTo},fileSize=${param.fileSize},views=${param.views},sortBy=${sortBy},sortDir=${sortDir})}"
+                th:class="${page.number + 1 >= page.totalPages} ? 'pagination-btn disabled' : 'pagination-btn'"
+                th:attr="aria-disabled=${page.number + 1 >= page.totalPages} ? 'true' : 'false'"
+              >
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="modal" id="confirmDeleteModal">
+          <div class="modal-overlay" data-modal-close></div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Xác nhận xóa</h3>
+              <button type="button" class="modal-close" data-modal-close>
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="confirm-delete-content">
+                <div class="confirm-icon">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p>Bạn có chắc chắn muốn xóa tài liệu này không?</p>
+                <p class="text-muted">Hành động này không thể hoàn tác.</p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" data-modal-close>
+                Hủy
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                id="confirmDeleteBtn"
+              >
+                <i class="fas fa-trash"></i><span>Xóa</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal" id="bulkActionModal">
+          <div class="modal-overlay" data-modal-close></div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="bulkActionTitle">Xác nhận thao tác</h3>
+              <button type="button" class="modal-close" data-modal-close>
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="bulk-action-content">
+                <p id="bulkActionMessage">
+                  Bạn có chắc chắn muốn thực hiện thao tác này?
+                </p>
+                <div class="bulk-action-details">
+                  <strong
+                    >Số tài liệu được chọn:
+                    <span id="bulkActionCount">0</span></strong
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" data-modal-close>
+                Hủy
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="confirmBulkActionBtn"
+              >
+                <i class="fas fa-check"></i><span>Thực hiện</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="toast-container" id="toastContainer"></div>
+      </main>
+    </div>
+
+    <!-- Modal xác nhận -->
+    <div
+      id="confirmModal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          max-width: 500px;
+          width: 90%;
+          text-align: center;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        "
+      >
+        <div style="color: #f59e0b; font-size: 48px; margin-bottom: 20px">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 style="color: #1f2937; margin-bottom: 16px; font-size: 20px">
+          Xác nhận chuyển vào thùng rác
+        </h3>
+        <p style="color: #6b7280; margin-bottom: 24px; line-height: 1.5">
+          Bạn có chắc chắn muốn chuyển tài liệu này vào thùng rác không?<br />
+          Tài liệu có thể được khôi phục sau này.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center">
+          <button
+            type="button"
+            onclick="hideConfirmModal()"
+            style="
+              padding: 10px 20px;
+              background: #f3f4f6;
+              color: #374151;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: 500;
+            "
+          >
+            <i class="fas fa-times"></i> Hủy
+          </button>
+          <button
+            type="button"
+            onclick="confirmDelete()"
+            style="
+              padding: 10px 20px;
+              background: #ef4444;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: 500;
+            "
+          >
+            <i class="fas fa-trash"></i> Chuyển vào thùng rác
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin/documents.js}"></script>
+    <script>
+      // Global functions for modal
+      function showConfirmModal() {
+        document.getElementById("confirmModal").style.display = "flex";
+      }
+
+      function hideConfirmModal() {
+        document.getElementById("confirmModal").style.display = "none";
+      }
+
+      function confirmDelete() {
+        hideConfirmModal();
+        // This will be handled by the specific delete action
+        console.log("Delete confirmed");
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Xử lý toggle bộ lọc nâng cao
+        const advancedFiltersToggle = document.getElementById(
+          "advancedFiltersToggle"
+        );
+        const advancedFilters = document.getElementById("advancedFilters");
+        const closeFilters = document.getElementById("closeFilters");
+
+        if (advancedFiltersToggle && advancedFilters && closeFilters) {
+          advancedFiltersToggle.addEventListener("click", function () {
+            advancedFilters.style.display =
+              advancedFilters.style.display === "none" ? "block" : "none";
+          });
+
+          closeFilters.addEventListener("click", function () {
+            advancedFilters.style.display = "none";
+          });
+        }
+
+        // Xử lý xóa tài liệu
+        document.querySelectorAll(".action-btn.delete").forEach((button) => {
+          button.addEventListener("click", function () {
+            const documentId = this.getAttribute("data-id");
+            document.getElementById("confirmDeleteBtn").onclick = function () {
+              fetch(`/api/documents/${documentId}`, {
+                method: "DELETE",
+              }).then((response) => {
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  alert("Xóa tài liệu thất bại!");
+                }
+              });
+            };
+          });
+        });
+
+        // Import/Export functionality
+        const importBtn = document.getElementById("importDocumentsBtn");
+        const exportBtn = document.getElementById("exportDocumentsBtn");
+
+        // Export documents to Excel
+        if (exportBtn) {
+          exportBtn.addEventListener("click", function () {
+            // Tạo và download file Excel
+            exportToExcel();
+          });
+        }
+
+        // Import documents from Excel
+        if (importBtn) {
+          importBtn.addEventListener("click", function () {
+            // Tạo input file ẩn để chọn file Excel
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = ".xlsx,.xls";
+            fileInput.style.display = "none";
+
+            fileInput.addEventListener("change", function (e) {
+              const file = e.target.files[0];
+              if (file) {
+                importFromExcel(file);
+              }
+            });
+
+            document.body.appendChild(fileInput);
+            fileInput.click();
+            document.body.removeChild(fileInput);
+          });
+        }
+
+        // Function export to Excel - Fetch ALL data from server
+        async function exportToExcel() {
+          try {
+            // Fetch ALL documents from server (not just current page)
+            const response = await fetch(
+              "/admin/documents?size=1000&export=true"
+            );
+
+            if (!response.ok) {
+              throw new Error("Không thể tải dữ liệu từ server");
+            }
+
+            // Parse HTML response to extract ALL data
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            const data = [];
+
+            // Header
+            data.push([
+              "ID",
+              "Tiêu đề",
+              "Mô tả",
+              "Tác giả",
+              "Loại file",
+              "Kích thước",
+              "Trạng thái",
+              "Giá (coin)",
+              "Lượt xem",
+              "Lượt tải",
+              "Ngày tạo",
+            ]);
+
+            // Get ALL rows from server response
+            const rows = doc.querySelectorAll("tbody tr:not(.empty-state-row)");
+            console.log("Found total server rows:", rows.length); // Debug
+
+            // Data rows
+            rows.forEach((row, index) => {
+              const cells = row.querySelectorAll("td");
+
+              if (cells.length > 0) {
+                // Lấy dữ liệu theo cấu trúc HTML thực tế
+                const checkbox = cells[0]?.querySelector(".document-checkbox");
+                const docTitle = cells[1]?.querySelector(".doc-title");
+                const docDesc = cells[1]?.querySelector(".doc-desc");
+                const docType = cells[1]?.querySelector(".doc-type");
+                const docSize = cells[1]?.querySelector(".doc-size");
+                const authorName = cells[2]?.querySelector(".author-name");
+                const statusBadge = cells[3]?.querySelector(".status-badge");
+                const priceDisplay = cells[4]?.querySelector(".price-display");
+                const viewsCount = cells[5]?.querySelector(".views-count span");
+                const downloadsCount = cells[6]?.querySelector(
+                  ".downloads-count span"
+                );
+                const createdDate = cells[7]?.querySelector(".created-date");
+
+                const rowData = [
+                  checkbox?.value || "",
+                  docTitle?.textContent?.trim() || "",
+                  docDesc?.textContent?.trim() || "",
+                  authorName?.textContent?.trim() || "",
+                  docType?.textContent?.trim() || "",
+                  docSize?.textContent?.trim() || "",
+                  statusBadge?.textContent?.trim() || "",
+                  priceDisplay?.textContent?.trim() || "",
+                  viewsCount?.textContent?.trim() || "",
+                  downloadsCount?.textContent?.trim() || "",
+                  createdDate?.textContent?.trim() || "",
+                ];
+
+                data.push(rowData);
+              }
+            });
+
+            console.log("Total data rows from server:", data.length); // Debug
+
+            if (data.length <= 1) {
+              showNotification("Không có dữ liệu để xuất!", "error");
+              return;
+            }
+
+            // Tạo CSV content
+            const csvContent = data
+              .map((row) =>
+                row
+                  .map((cell) => `"${cell.toString().replace(/"/g, '""')}"`)
+                  .join(",")
+              )
+              .join("\n");
+
+            // Download file
+            const blob = new Blob(["\uFEFF" + csvContent], {
+              type: "text/csv;charset=utf-8;",
+            });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute(
+              "download",
+              `documents_export_${new Date().toISOString().split("T")[0]}.csv`
+            );
+            link.style.visibility = "hidden";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Hiển thị thông báo thành công
+            showNotification(
+              `Đã xuất ${data.length - 1} tài liệu thành công!`,
+              "success"
+            );
+          } catch (error) {
+            console.error("Export error:", error);
+            showNotification("Lỗi khi xuất dữ liệu: " + error.message, "error");
+          }
+        }
+
+        // Function import from Excel
+        function importFromExcel(file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            try {
+              const data = e.target.result;
+              const lines = data.split("\n");
+
+              if (lines.length < 2) {
+                showNotification("File không có dữ liệu hợp lệ!", "error");
+                return;
+              }
+
+              // Hiển thị modal xác nhận import
+              showImportConfirmModal(lines.length - 1);
+            } catch (error) {
+              showNotification("Lỗi đọc file: " + error.message, "error");
+            }
+          };
+          reader.readAsText(file, "UTF-8");
+        }
+
+        // Function hiển thị thông báo - updated to match Tags/Categories
+        function showNotification(message, type = "info") {
+          // Tạo toast notification với inline CSS
+          const toast = document.createElement("div");
+          toast.className = `alert alert-${
+            type === "success" ? "success" : "danger"
+          } alert-dismissible fade show`;
+
+          // Inline CSS để đảm bảo hiển thị đúng
+          const bgColor = type === "success" ? "#d1e7dd" : "#f8d7da";
+          const borderColor = type === "success" ? "#badbcc" : "#f5c2c7";
+          const textColor = type === "success" ? "#0f5132" : "#842029";
+
+          toast.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        min-width: 300px;
+                        padding: 12px 16px;
+                        margin-bottom: 1rem;
+                        border: 1px solid ${borderColor};
+                        border-radius: 8px;
+                        background-color: ${bgColor};
+                        color: ${textColor};
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        font-size: 14px;
+                        line-height: 1.5;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        animation: slideIn 0.3s ease-out;
+                    `;
+
+          // Thêm keyframe animation
+          if (!document.getElementById("documents-toast-animations")) {
+            const style = document.createElement("style");
+            style.id = "documents-toast-animations";
+            style.textContent = `
+                            @keyframes slideIn {
+                                from { transform: translateX(100%); opacity: 0; }
+                                to { transform: translateX(0); opacity: 1; }
+                            }
+                            @keyframes slideOut {
+                                from { transform: translateX(0); opacity: 1; }
+                                to { transform: translateX(100%); opacity: 0; }
+                            }
+                        `;
+            document.head.appendChild(style);
+          }
+
+          toast.innerHTML = `
+                        <i class="fas fa-${
+                          type === "success"
+                            ? "check-circle"
+                            : "exclamation-circle"
+                        }" 
+                           style="color: ${
+                             type === "success" ? "#0f5132" : "#842029"
+                           }; margin-right: 8px;"></i>
+                        <span style="flex: 1;">${message}</span>
+                        <button type="button" 
+                                style="background: none; border: none; font-size: 18px; color: ${textColor}; cursor: pointer; padding: 0; margin-left: 8px;"
+                                onclick="this.parentElement.remove()">&times;</button>
+                    `;
+
+          document.body.appendChild(toast);
+
+          // Tự động xóa sau 3 giây với animation
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.style.animation = "slideOut 0.3s ease-in";
+              setTimeout(() => {
+                if (toast.parentNode) {
+                  toast.parentNode.removeChild(toast);
+                }
+              }, 300);
+            }
+          }, 3000);
+        }
+
+        // Function hiển thị modal xác nhận import
+        function showImportConfirmModal(recordCount) {
+          const modal = document.createElement("div");
+          modal.className = "modal fade show";
+          modal.style.display = "block";
+          modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+
+          modal.innerHTML = `
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-upload text-primary"></i>
+                                        Xác nhận Import
+                                    </h5>
+                                    <button type="button" class="btn-close" onclick="this.closest('.modal').remove()"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><i class="fas fa-info-circle text-info"></i> Sẽ import <strong>${recordCount}</strong> bản ghi từ file Excel.</p>
+                                    <p class="text-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <strong>Lưu ý:</strong> Đây là chức năng demo. Trong thực tế cần xử lý ở backend.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Hủy</button>
+                                    <button type="button" class="btn btn-primary" onclick="confirmImport(${recordCount})">
+                                        <i class="fas fa-upload"></i> Xác nhận Import
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+          document.body.appendChild(modal);
+        }
+
+        // Function xác nhận import
+        window.confirmImport = function (recordCount) {
+          // Đóng modal
+          const modal = document.querySelector(".modal.show");
+          if (modal) modal.remove();
+
+          // Hiển thị loading
+          showNotification("Đang xử lý import...", "info");
+
+          // Simulate import process
+          setTimeout(() => {
+            showNotification(
+              `Đã import thành công ${recordCount} bản ghi!`,
+              "success"
+            );
+            // Reload trang để cập nhật dữ liệu
+            // window.location.reload();
+          }, 2000);
+        };
+      });
+
+      // Handle search form submission
+      const searchForm = document.querySelector(".search-box form");
+      const searchInput = document.getElementById("searchInput");
+
+      if (searchForm && searchInput) {
+        // Submit on Enter key
+        searchInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            searchForm.submit();
+          }
+        });
+
+        // Submit on search button click
+        const searchBtn = document.getElementById("searchBtn");
+        if (searchBtn) {
+          searchBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            searchForm.submit();
+          });
+        }
+      }
+
+      // Handle advanced filter form submission
+      const filterForm = document.querySelector("#advancedFilters form");
+      const applyFiltersBtn = document.querySelector(".btn-filter");
+      const clearFiltersBtn = document.querySelector(".btn-clear");
+
+      if (filterForm) {
+        // Apply filters button
+        if (applyFiltersBtn) {
+          applyFiltersBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            filterForm.submit();
+          });
+        }
+
+        // Clear filters button - handle link click
+        if (clearFiltersBtn) {
+          clearFiltersBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            // Navigate to clear URL
+            window.location.href = clearFiltersBtn.href;
+          });
+        }
+      }
+
+      // Handle refresh button
+      const refreshBtn = document.getElementById("refreshBtn");
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", function () {
+          // Reload page without parameters
+          window.location.href = "/admin/documents";
+        });
+      }
+
+      // Auto-submit filter form when select changes
+      const filterSelects = document.querySelectorAll(
+        "#advancedFilters select"
+      );
+      filterSelects.forEach((select) => {
+        select.addEventListener("change", function () {
+          // Optional: Auto-submit on change
+          // filterForm.submit();
+        });
+      });
+      
+      // Function to build URL with all filter parameters
+      function buildFilterUrl(baseUrl, additionalParams = {}) {
+        const urlParams = new URLSearchParams();
+        
+        // Get current filter values
+        const search = document.querySelector('input[name="search"]')?.value || '';
+        const tab = '[[${currentTab}]]';
+        const status = document.querySelector('select[name="status"]')?.value || '';
+        const category = document.querySelector('select[name="category"]')?.value || '';
+        const type = document.querySelector('select[name="type"]')?.value || '';
+        const price = document.querySelector('input[name="price"]')?.value || '';
+        const author = document.querySelector('input[name="author"]')?.value || '';
+        const tags = document.querySelector('input[name="tags"]')?.value || '';
+        const dateFrom = document.querySelector('input[name="dateFrom"]')?.value || '';
+        const dateTo = document.querySelector('input[name="dateTo"]')?.value || '';
+        const fileSize = document.querySelector('input[name="fileSize"]')?.value || '';
+        const views = document.querySelector('input[name="views"]')?.value || '';
+        
+        // Add parameters if they have values
+        if (search) urlParams.set('search', search);
+        if (tab) urlParams.set('tab', tab);
+        if (status) urlParams.set('status', status);
+        if (category) urlParams.set('category', category);
+        if (type) urlParams.set('type', type);
+        if (price) urlParams.set('price', price);
+        if (author) urlParams.set('author', author);
+        if (tags) urlParams.set('tags', tags);
+        if (dateFrom) urlParams.set('dateFrom', dateFrom);
+        if (dateTo) urlParams.set('dateTo', dateTo);
+        if (fileSize) urlParams.set('fileSize', fileSize);
+        if (views) urlParams.set('views', views);
+        
+        // Add additional parameters
+        Object.keys(additionalParams).forEach(key => {
+          if (additionalParams[key] !== null && additionalParams[key] !== undefined) {
+            urlParams.set(key, additionalParams[key]);
+          }
+        });
+        
+        return baseUrl + '?' + urlParams.toString();
+      }
+    </script>
+  </body>
+</html>

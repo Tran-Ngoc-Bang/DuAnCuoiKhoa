@@ -21,6 +21,7 @@ public class CommentDTO {
 	private Long userId;
 	private String userFullName;
 	private String content;
+	private String userName;
 	private String userAvatar;
 	private String status; // active, hidden...
 	private LocalDateTime createdAt;
@@ -33,6 +34,7 @@ public class CommentDTO {
 	
 	private List<ReplyDTO> replies;
 
+    private String reportStatus;
 
 	public CommentDTO(Long id, Long documentId, String documentTitle, Long userId, String userFullName, String content,
 			String userAvatar, String status, LocalDateTime createdAt) {
@@ -48,7 +50,8 @@ public class CommentDTO {
 	}
 
 	public void setReportInfo(Report report) {
-		this.reported = true;	
+		this.reported = true;			
+		this.reported = true;
 		this.reportId = report.getId();
 		this.reporterName = report.getReporter().getFullName();
 		this.reportReason = report.getReason();
@@ -175,4 +178,5 @@ public class CommentDTO {
 		this.replies = replies;
 	}
 	
+
 }

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chỉnh sửa danh mục - EduShare Admin</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/categories.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+    />
+    <style>
+      .form-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      .edit-container {
+        background: var(--card-bg, #fff);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 100%;
+        max-width: 100%;
+      }
+      .edit-header {
+        padding: 20px 20px 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .edit-header h3 {
+        margin: 0 0 15px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      .edit-body {
+        padding: 0;
+      }
+      .edit-footer {
+        padding: 20px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+      }
+      .cancel-btn,
+      .save-btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+      }
+      .cancel-btn {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+      .cancel-btn:hover {
+        background: #e5e7eb;
+      }
+      .save-btn {
+        background: #4361ee;
+        color: white;
+      }
+      .save-btn:hover {
+        background: #3651d4;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 20px;
+      }
+
+      @media (max-width: 1024px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+      }
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+      .form-group {
+        margin-bottom: 0;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.9rem;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+      .readonly-input {
+        background-color: #f9fafb !important;
+        color: #6b7280 !important;
+        cursor: not-allowed;
+      }
+      .required {
+        color: #dc2626;
+      }
+
+      /* Category styling */
+      .categories-container {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      @media (max-width: 900px) {
+        .categories-container {
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+
+      .category-section {
+        flex: 1;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
+        min-width: 250px;
+      }
+
+      .category-section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .category-section-title i {
+        margin-right: 8px;
+        width: 16px;
+      }
+
+      .category-group {
+        background: white;
+        border-radius: 6px;
+        padding: 12px;
+        max-height: 180px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .category-group .form-check {
+        margin-bottom: 6px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+        border: 1px solid transparent;
+      }
+
+      .category-group .form-check:hover {
+        background-color: #f8f9fa;
+        border-color: #e9ecef;
+      }
+
+      .category-group .form-check:last-child {
+        margin-bottom: 0;
+      }
+
+      .category-group .form-check-label i {
+        margin-right: 8px;
+        width: 16px;
+      }
+
+      .general-category:checked + label {
+        font-weight: 600;
+        color: #0d6efd;
+      }
+
+      .specific-category:checked + label {
+        font-weight: 600;
+        color: #198754;
+      }
+
+      .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .invalid-feedback.show {
+        display: block;
+      }
+
+      .form-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+
+      .form-check {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 10px;
+        padding: 6px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .form-check:hover {
+        background-color: #f8f9fa;
+      }
+
+      .form-check-input {
+        margin-right: 10px;
+        margin-top: 2px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+
+      .form-check-label {
+        cursor: pointer;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        line-height: 1.4;
+        font-size: 0.9rem;
+      }
+
+      .form-check-label i {
+        margin-right: 8px;
+        width: 16px;
+        flex-shrink: 0;
+      }
+
+      .form-check-label span {
+        display: inline-block;
+      }
+
+      .text-muted {
+        color: #6c757d !important;
+      }
+
+      .small {
+        font-size: 0.875em;
+      }
+
+      /* Ensure proper text display */
+      .category-group {
+        min-width: 200px;
+      }
+
+      .form-check-label span.small {
+        white-space: normal !important;
+        overflow: visible;
+        text-overflow: unset;
+      }
+      
+      /* Fix text display issues *///
+      .categories-container .form-check-label {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        text-align: left !important;
+      }
+
+      .categories-container .form-check-label span {
+        display: inline-block !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+        line-height: 1.4 !important;
+        vertical-align: middle !important;
+      }
+
+      .categories-container .form-check-label i {
+        display: inline-block !important;
+        width: 16px !important;
+        text-align: center !important;
+        margin-right: 8px !important;
+        flex-shrink: 0 !important;
+      }
+
+      .categories-container .form-check {
+        display: flex !important;
+        align-items: flex-start !important;
+        width: 100% !important;
+      }
+
+      .categories-container .form-check-input {
+        margin-top: 2px !important;
+        margin-right: 10px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Additional fixes for better display */
+      .category-group .form-check-label {
+        font-size: 0.9rem !important;
+        color: #374151 !important;
+        cursor: pointer !important;
+      }
+
+      .category-group .form-check-label:hover {
+        color: #1f2937 !important;
+      }
+
+      .category-group .form-check-input:checked + .form-check-label {
+        font-weight: 600 !important;
+      }
+
+      .general-category:checked + .form-check-label {
+        color: #0d6efd !important;
+      }
+
+      .specific-category:checked + .form-check-label {
+        color: #198754 !important;
+      }
+
+      /* Ensure proper spacing */
+      .category-group .form-check {
+        padding: 8px 10px !important;
+        margin-bottom: 6px !important;
+        border-radius: 6px !important;
+        border: 1px solid transparent !important;
+        transition: all 0.2s ease !important;
+      }
+
+      .category-group .form-check:hover {
+        background-color: #f8f9fa !important;
+        border-color: #e9ecef !important;
+      }
+
+      .category-group .form-check:last-child {
+        margin-bottom: 0 !important;
+      }
+
+      /* Modern select styling */
+      .form-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background-color: #fff;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 12px center;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        appearance: none;
+        transition: all 0.2s ease;
+      }
+
+      .form-select:focus {
+        border-color: #4f46e5;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      .form-select:hover {
+        border-color: #9ca3af;
+      }
+
+      /* Style for optgroups */
+      .form-select optgroup {
+        font-weight: 600;
+        color: #374151;
+        background-color: #f9fafb;
+        padding: 8px 0;
+      }
+
+      .form-select option {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        color: #374151;
+      }
+
+      .form-select option:hover {
+        background-color: #f3f4f6;
+      }
+
+      .form-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .form-text i {
+        color: #9ca3af;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 1200px) {
+        .form-container {
+          max-width: 95%;
+          padding: 0 15px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .form-container {
+          margin: 1rem auto;
+          padding: 0 10px;
+        }
+
+        .form-grid {
+          padding: 15px;
+        }
+
+        .category-section {
+          padding: 12px;
+        }
+
+        .category-group {
+          padding: 8px;
+          max-height: 120px;
+        }
+      }
+    </style>
+  </head>
+  <body class="admin-body">
+    <header class="admin-header">
+      <div class="admin-header-content">
+        <div class="admin-logo">
+          <a th:href="@{/admin/index}" class="logo">
+            <div class="logo-icon">E</div>
+            <div class="logo-text">EduShare</div>
+          </a>
+        </div>
+        <div class="admin-header-actions">
+          <div class="admin-search">
+            <input
+              type="text"
+              placeholder="Tìm kiếm..."
+              class="search-input"
+              id="headerSearchInput"
+            />
+            <button id="headerSearchBtn"><i class="fas fa-search"></i></button>
+          </div>
+          <div class="dark-mode-toggle" id="darkModeToggle"></div>
+          <div class="admin-notifications">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">5</span>
+            </button>
+          </div>
+          <div class="admin-profile">
+            <div class="admin-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                alt="Admin"
+              />
+            </div>
+            <div class="admin-info">
+              <span class="admin-name">Nguyễn Văn Anh</span>
+              <span class="admin-role">Quản trị viên</span>
+            </div>
+            <div class="admin-dropdown">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-container">
+      <aside class="admin-sidebar">
+        <nav class="admin-nav">
+          <ul class="admin-menu">
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/index}">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Bảng điều khiển</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/users}">
+                <i class="fas fa-users"></i>
+                <span>Quản lý người dùng</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/documents}">
+                <i class="fas fa-file-alt"></i>
+                <span>Quản lý tài liệu</span>
+              </a>
+            </li>
+            <li class="admin-menu-item active">
+              <a th:href="@{/admin/categories}">
+                <i class="fas fa-folder"></i>
+                <span>Quản lý danh mục</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/tags}">
+                <i class="fas fa-tags"></i>
+                <span>Quản lý tags</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/comments}">
+                <i class="fas fa-comments"></i>
+                <span>Quản lý bình luận</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/reports}">
+                <i class="fas fa-flag"></i>
+                <span>Báo cáo vi phạm</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/ip-bans}">
+                <i class="fas fa-ban"></i>
+                <span>IP bị cấm</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/statistics}">
+                <i class="fas fa-chart-bar"></i>
+                <span>Thống kê</span>
+              </a>
+            </li>
+            <li class="admin-menu-item has-submenu">
+              <a href="javascript:void(0)">
+                <i class="fas fa-coins"></i>
+                <span>Quản lý doanh thu</span>
+                <i class="fas fa-chevron-down submenu-icon"></i>
+              </a>
+              <ul class="submenu">
+                <li class="submenu-item">
+                  <a th:href="@{/admin/coin-packages}">
+                    <i class="fas fa-box"></i>
+                    <span>Gói xu</span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a th:href="@{/admin/transactions}">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Giao dịch</span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a th:href="@{/admin/withdrawals}">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Yêu cầu rút tiền</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/settings}">
+                <i class="fas fa-cog"></i>
+                <span>Cài đặt</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/logout}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Đăng xuất</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Chỉnh sửa danh mục</h1>
+
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin/index}">Admin</a>
+            <span>/</span>
+            <a th:href="@{/admin/categories}">Quản lý danh mục</a>
+            <span>/</span>
+            <span>Chỉnh sửa</span>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <div class="edit-container">
+            <div class="edit-header">
+              <h3>Chỉnh sửa danh mục</h3>
+            </div>
+            <div class="edit-body">
+              <form
+                class="form-grid"
+                id="categoryForm"
+                th:action="@{/admin/categories/edit/{id}(id=${category.id})}"
+                th:object="${category}"
+                method="post"
+              >
+                <!-- Thông tin cơ bản -->
+                <div class="form-group">
+                  <label for="categoryName"
+                    >Tên danh mục <span class="required">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="categoryName"
+                    th:field="*{name}"
+                    placeholder="Nhập tên danh mục"
+                    required
+                  />
+                  <div class="error" id="nameError" th:errors="*{name}"></div>
+                  <div th:if="${error}" class="error" style="color: #dc2626; font-size: 0.875rem; margin-top: 0.25rem;">
+                    <span th:text="${error}"></span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="categoryStatus">Trạng thái</label>
+                  <select id="categoryStatus" th:field="*{status}">
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Vô hiệu hóa</option>
+                  </select>
+                  <div
+                    class="error"
+                    id="statusError"
+                    th:errors="*{status}"
+                  ></div>
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="categoryDescription">Mô tả</label>
+                  <textarea
+                    id="categoryDescription"
+                    th:field="*{description}"
+                    rows="3"
+                    placeholder="Nhập mô tả danh mục"
+                  ></textarea>
+                  <div
+                    class="error"
+                    id="descriptionError"
+                    th:errors="*{description}"
+                  ></div>
+                </div>
+
+                <!-- Phân loại danh mục -->
+                <div class="form-group full-width">
+                  <label for="parentCategorySelect"
+                    >Danh mục cha <span class="required">*</span></label
+                  >
+                  <select id="parentCategorySelect" name="parentId" class="form-select">
+                    <option value="0" th:selected="${category.parentId == null or category.parentId == 0}">
+                      🏠 Danh mục gốc (không có cha)
+                    </option>
+                    <optgroup label="📁 Danh mục Tổng quát">
+                      <option 
+                        th:each="parent : ${categories}"
+                        th:if="${parent.parentId == null and parent.id != category.id}"
+                        th:value="${parent.id}"
+                        th:text="'📂 ' + ${parent.name}"
+                        th:selected="${category.parentId == parent.id}">
+                      </option>
+                    </optgroup>
+                    <optgroup label="🏷️ Chuyên mục">
+                      <option 
+                        th:each="parent : ${categories}"
+                        th:if="${parent.parentId != null and parent.id != category.id}"
+                        th:value="${parent.id}"
+                        th:text="'🔖 ' + ${parent.name} + (${parent.parentName != null} ? ' (thuộc: ' + ${parent.parentName} + ')' : '')"
+                        th:selected="${category.parentId == parent.id}">
+                      </option>
+                    </optgroup>
+                  </select>
+                  <small class="form-text text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    Chọn danh mục cha để xác định vị trí của danh mục này trong hệ thống phân cấp.
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <label for="sortOrder">Thứ tự sắp xếp</label>
+                  <input
+                    type="number"
+                    id="sortOrder"
+                    th:field="*{sortOrder}"
+                    placeholder="0"
+                    min="0"
+                  />
+                  <div
+                    class="error"
+                    id="sortOrderError"
+                    th:errors="*{sortOrder}"
+                  ></div>
+                </div>
+
+                <!-- Thông tin chỉ đọc -->
+                <div class="form-group">
+                  <label>Người tạo</label>
+                  <input
+                    type="text"
+                    th:value="${category.createdByName ?: 'Không xác định'}"
+                    readonly
+                    class="readonly-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Ngày tạo</label>
+                  <input
+                    type="text"
+                    th:value="${category.createdAt != null ? #temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm') : 'Không có'}"
+                    readonly
+                    class="readonly-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Số tài liệu</label>
+                  <input
+                    type="text"
+                    th:value="${category.documents}"
+                    readonly
+                    class="readonly-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Số danh mục con</label>
+                  <input
+                    type="text"
+                    th:value="${category.subcategories}"
+                    readonly
+                    class="readonly-input"
+                  />
+                </div>
+
+                <div class="form-group" th:if="${category.updatedAt != null}">
+                  <label>Cập nhật lần cuối</label>
+                  <input
+                    type="text"
+                    th:value="${#temporals.format(category.updatedAt, 'dd/MM/yyyy HH:mm')}"
+                    readonly
+                    class="readonly-input"
+                  />
+                </div>
+
+                <div class="form-group" th:if="${category.deletedAt != null}">
+                  <label>Thời gian xóa</label>
+                  <input
+                    type="text"
+                    th:value="${#temporals.format(category.deletedAt, 'dd/MM/yyyy HH:mm')}"
+                    readonly
+                    class="readonly-input"
+                    style="color: #dc2626"
+                  />
+                </div>
+
+                <input type="hidden" id="categoryId" th:field="*{id}" />
+              </form>
+            </div>
+            <div class="edit-footer">
+              <a th:href="@{/admin/categories}" class="cancel-btn">Hủy bỏ</a>
+              <button class="save-btn" type="submit" form="categoryForm">
+                Lưu
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast-container" id="toastContainer"></div>
+      </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("categoryForm");
+        const parentSelect = document.getElementById("parentCategorySelect");
+
+        // Validate form khi submit
+        form.addEventListener("submit", function (e) {
+          const selectedValue = parentSelect.value;
+
+          if (!selectedValue && selectedValue !== "0") {
+            e.preventDefault();
+            alert("Vui lòng chọn danh mục cha!");
+            parentSelect.focus();
+            return false;
+          }
+        });
+
+        // Thêm hiệu ứng khi thay đổi select
+        parentSelect.addEventListener("change", function() {
+          this.style.borderColor = "#4f46e5";
+          setTimeout(() => {
+            this.style.borderColor = "#e1e5e9";
+          }, 300);
+        });
+
+        // Validation tên danh mục real-time
+        const nameInput = document.getElementById("categoryName");
+        const nameError = document.getElementById("nameError");
+        
+        if (nameInput) {
+          nameInput.addEventListener("blur", function() {
+            const name = this.value.trim();
+            if (name) {
+              checkDuplicateName(name);
+            }
+          });
+        }
+
+        function checkDuplicateName(name) {
+          if (name.length < 2) {
+            showNameError("Tên danh mục phải có ít nhất 2 ký tự");
+          } else if (name.length > 100) {
+            showNameError("Tên danh mục không được quá 100 ký tự");
+          } else {
+            clearNameError();
+          }
+        }
+
+        function showNameError(message) {
+          if (nameError) {
+            nameError.textContent = message;
+            nameError.style.display = "block";
+            nameInput.style.borderColor = "#dc2626";
+          }
+        }
+
+        function clearNameError() {
+          if (nameError) {
+            nameError.textContent = "";
+            nameError.style.display = "none";
+            nameInput.style.borderColor = "#e1e5e9";
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

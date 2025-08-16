@@ -22,6 +22,7 @@ import com.fpoly.shared_learning_materials.dto.CommentDTO;
 import com.fpoly.shared_learning_materials.dto.ReplyDTO;
 import com.fpoly.shared_learning_materials.repository.CommentRepository;
 import com.fpoly.shared_learning_materials.repository.ReplyRepository;
+import com.fpoly.shared_learning_materials.repository.CommentRepository;
 import com.fpoly.shared_learning_materials.repository.ReportRepository;
 
 @Service
@@ -121,7 +122,9 @@ public class CommentService {
 			if (rpt != null) {
 				dto.setReportInfo(rpt);
 			}
+
 			dto.setReplies(mapRepliesToDto(c.getId()));
+
 
 			return dto;
 		}).collect(Collectors.toList());
@@ -250,7 +253,7 @@ public class CommentService {
 		Page<Comment> comments = commentRepository.findAll(spec, pg);
 		return mapToDtoPage(comments);
 	}
-	
+
 	private List<ReplyDTO> mapRepliesToDto(Long commentId) {
 	    return replyRepository.findByCommentIdAndDeletedAtIsNullOrderByCreatedAtAsc(commentId)
 	            .stream()
@@ -266,5 +269,4 @@ public class CommentService {
 	            ))
 	            .collect(Collectors.toList());
 	}
-
 }
