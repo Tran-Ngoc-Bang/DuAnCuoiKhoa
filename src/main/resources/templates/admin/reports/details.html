@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết báo cáo vi phạm - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/reports.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a th:href="@{/admin/index}" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm..." class="search-input" id="headerSearchInput">
+                    <button id="headerSearchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn Anh</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item"><a th:href="@{/admin/index}"><i class="fas fa-tachometer-alt"></i><span>Bảng điều khiển</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/users}"><i class="fas fa-users"></i><span>Quản lý người dùng</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/documents}"><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/categories}"><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/tags}"><i class="fas fa-tags"></i><span>Quản lý tags</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/comments}"><i class="fas fa-comments"></i><span>Quản lý bình luận</span></a></li>
+                    <li class="admin-menu-item active"><a th:href="@{/admin/reports}"><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/ip-bans}"><i class="fas fa-ban"></i><span>IP bị cấm</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/statistics}"><i class="fas fa-chart-bar"></i><span>Thống kê</span></a></li>
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item"><a th:href="@{/admin/coin-packages}"><i class="fas fa-box"></i><span>Gói xu</span></a></li>
+                            <li class="submenu-item"><a th:href="@{/admin/transactions}"><i class="fas fa-exchange-alt"></i><span>Giao dịch</span></a></li>
+                            <li class="submenu-item"><a th:href="@{/admin/withdrawals}"><i class="fas fa-money-bill-wave"></i><span>Yêu cầu rút tiền</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item"><a th:href="@{/admin/settings}"><i class="fas fa-cog"></i><span>Cài đặt</span></a></li>
+                    <li class="admin-menu-item"><a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="admin-content">
+        <div class="admin-content-header">
+            <h1 class="admin-page-title">Chi tiết báo cáo vi phạm</h1>
+            <p class="admin-page-description">Xem thông tin chi tiết báo cáo vi phạm</p>
+            <div class="admin-breadcrumbs">
+                <a th:href="@{/admin/index}">Admin</a>
+                <span>/</span>
+                <a th:href="@{/admin/reports}">Báo cáo vi phạm</a>
+                <span>/</span>
+                <span>Chi tiết</span>
+            </div>
+        </div>
+
+        <div class="report-detail-container">
+            <div class="report-detail-header">
+                <div class="report-id">
+                    <h2 th:text="'#RPT' + ${report.id}">Báo cáo #RPT001</h2>
+                </div>
+
+                <div class="report-actions">
+                    <a th:href="@{/admin/reports/edit/{id}(id=${report.id})}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Chỉnh sửa
+                    </a>
+                    
+                </div>
+                
+            </div>
+
+          
+
+            <div class="report-detail-content">
+                <div class="report-overview">
+                    <div class="report-status">
+                        <span class="status-label">Trạng thái:</span>
+                        <span class="status-badge" th:switch="${report.status}">
+                            <span th:case="'pending'" class="status-badge pending">Đang chờ xử lý</span>
+                            <span th:case="'approved'" class="status-badge resolved">Đã duyệt</span>
+                            <span th:case="'rejected'" class="status-badge rejected">Đã từ chối</span>
+                            <span th:case="*">Không rõ</span>
+                        </span>
+                    </div>
+                    <div class="report-date">
+                        <span class="date-label">Ngày báo cáo:</span>
+                        <span class="date-value" th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy - HH:mm')}">15/04/2023 - 10:24</span>
+                    </div>
+                    <div class="report-reviewed" th:if="${report.reviewedAt}">
+                        <span class="reviewed-label">Ngày xem xét:</span>
+                        <span class="reviewed-value" th:text="${#temporals.format(report.reviewedAt, 'dd/MM/yyyy - HH:mm')}">16/04/2023 - 14:30</span>
+                    </div>
+                </div>
+
+                <div class="report-sections">
+                    <div class="report-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-flag"></i> Thông tin báo cáo
+                        </h4>
+                        <div class="section-content">
+                            <div class="info-row">
+                                <div class="info-label">Loại vi phạm</div>
+                                <div class="info-value">
+                                    <span class="violation-type" th:switch="${report.type}">
+                                        <span th:case="'copyright'">Vi phạm bản quyền</span>
+                                        <span th:case="'inappropriate'">Nội dung không phù hợp</span>
+                                        <span th:case="'spam'">Spam / Quảng cáo</span>
+                                        <span th:case="'fake'">Tài liệu giả mạo</span>
+                                        <span th:case="'other'">Vi phạm khác</span>
+                                        <span th:case="*">Không xác định</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Người báo cáo</div>
+                                <div class="info-value">
+                                    <div class="user-info">
+                                        <div class="user-details">
+                                            <div class="user-name" th:text="${report.reporter?.username ?: 'Không xác định'}">Tên người báo cáo</div>
+                                            <div class="user-email" th:text="${report.reporter?.email}" th:if="${report.reporter?.email}">Email</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="info-row full-width">
+                                <div class="info-label">Lý do báo cáo</div>
+                                <div class="info-value description">
+                                    <p th:text="${report.reason}">Mô tả chi tiết về vi phạm</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-file-alt"></i> Thông tin tài liệu báo cáo
+                        </h4>
+                        <div class="section-content">
+                            <div class="document-card" th:if="${report.document}">
+                                <div class="document-details">
+                                    <h4 class="document-title" th:text="${report.document.title}">Tên tài liệu</h4>
+                                    <div class="document-meta">
+                                        <div class="meta-item" th:if="${report.document.author}">
+                                            <i class="fas fa-user"></i> <span th:text="${report.document.author}">Tác giả</span>
+                                        </div>
+                                        <div class="meta-item" th:if="${report.document.createdAt}">
+                                            <i class="fas fa-calendar"></i> Đăng ngày: <span th:text="${#temporals.format(report.document.createdAt, 'dd/MM/yyyy')}">01/04/2023</span>
+                                        </div>
+                                        <div class="meta-item" th:if="${report.document.downloadCount}">
+                                            <i class="fas fa-download"></i> <span th:text="${report.document.downloadCount}">0</span> lượt tải
+                                        </div>
+                                    </div>
+                                    <div class="document-stats" th:if="${report.document.fileSize || report.document.pageCount}">
+                                        <div class="stat-item" th:if="${report.document.fileSize}">
+                                            <span class="stat-label">Kích thước</span>
+                                            <span class="stat-value" th:text="${report.document.fileSize}">15.2 MB</span>
+                                        </div>
+                                        <div class="stat-item" th:if="${report.document.pageCount}">
+                                            <span class="stat-label">Trang</span>
+                                            <span class="stat-value" th:text="${report.document.pageCount}">84</span>
+                                        </div>
+                                        <div class="stat-item" th:if="${report.document.fileType}">
+                                            <span class="stat-label">Loại</span>
+                                            <span class="stat-value" th:text="${report.document.fileType}">PDF</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:unless="${report.document}" class="no-document">
+                                <p><i class="fas fa-exclamation-triangle"></i> Không có thông tin tài liệu</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-section" th:if="${report.reviewer}">
+                        <h4 class="section-title">
+                            <i class="fas fa-user-check"></i> Thông tin người xem xét
+                        </h4>
+                        <div class="section-content">
+                            <div class="reviewer-info">
+                                <div class="info-row">
+                                    <div class="info-label">Người xem xét:</div>
+                                    <div class="info-value" th:text="${report.reviewer.username}">Admin</div>
+                                </div>
+                                <div class="info-row" th:if="${report.reviewedAt}">
+                                    <div class="info-label">Thời gian xem xét:</div>
+                                    <div class="info-value" th:text="${#temporals.format(report.reviewedAt, 'dd/MM/yyyy HH:mm')}">16/04/2023 14:30</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-actions-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-cogs"></i> Hành động
+                    </h4>
+                    <div class="action-buttons-group">
+                        <button class="btn btn-success" th:if="${report.status != 'approved'}" id="approveReportBtn" th:attr="data-report-id=${report.id}">
+                            <i class="fas fa-check"></i> Duyệt báo cáo
+                        </button>
+                        <button class="btn btn-warning" th:if="${report.status != 'pending'}" id="pendingReportBtn" th:attr="data-report-id=${report.id}">
+                            <i class="fas fa-hourglass-half"></i> Đánh dấu đang chờ xử lý
+                        </button>
+                        <button class="btn btn-danger" th:if="${report.status != 'rejected'}" id="rejectReportBtn" th:attr="data-report-id=${report.id}">
+                            <i class="fas fa-times"></i> Từ chối báo cáo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast-container" id="toastContainer"></div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/reports.js}"></script>
+</body>
+</html>

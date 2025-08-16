@@ -11,11 +11,11 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="../css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/toast.css">
-    <link rel="stylesheet" href="css/setting.css">
-    <script src="js/admin.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/setting.css}">
+    <script th:src="@{/js/admin/settings.js}" defer></script>
 
 </head>
 
@@ -24,7 +24,7 @@
     <header class="admin-header">
         <div class="admin-header-content">
             <div class="admin-logo">
-                <a href="index.html" class="logo">
+                <a th:href="@{/admin/index}" class="logo"></a>
                     <div class="logo-icon">E</div>
                     <div class="logo-text">EduShare</div>
                 </a>
@@ -171,10 +171,20 @@
             <div class="admin-content-header">
                 <h1 class="admin-page-title">Cài đặt hệ thống</h1>
                 <div class="admin-breadcrumbs">
-                    <a href="index.html">Admin</a>
+                    <a th:href="@{/admin/index}">Admin</a>
                     <span>/</span>
                     <span>Cài đặt</span>
                 </div>
+            </div>
+
+            <!-- Flash Messages -->
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${error}"></span>
             </div>
 
             <!-- Settings Navigation -->
@@ -228,26 +238,40 @@
                                 <h3>Thông tin website</h3>
                                 <p>Cấu hình thông tin cơ bản của website</p>
                             </div>
-                            <div class="card-content">
+                            <form th:action="@{/admin/settings/general}" method="post" class="card-content">
                                 <div class="form-group">
                                     <label class="form-label">Tên website</label>
-                                    <input type="text" class="form-input" value="EduShare - Chia sẻ tài liệu giáo dục">
+                                    <input type="text" class="form-input" name="site.name" 
+                                           th:value="${settings['site.name'] ?: 'EduShare - Chia sẻ tài liệu giáo dục'}">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Mô tả website</label>
-                                    <textarea class="form-input form-textarea"
-                                        rows="3">Nền tảng chia sẻ tài liệu giáo dục hàng đầu Việt Nam, cung cấp hàng triệu tài liệu chất lượng cao cho học sinh, sinh viên và giảng viên.</textarea>
+                                    <textarea class="form-input form-textarea" name="site.description" rows="3" 
+                                              th:text="${settings['site.description'] ?: 'Nền tảng chia sẻ tài liệu giáo dục hàng đầu Việt Nam'}"></textarea>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label class="form-label">Email liên hệ</label>
-                                        <input type="email" class="form-input" value="admin@edushare.vn">
+                                        <input type="email" class="form-input" name="site.email" 
+                                               th:value="${settings['site.email'] ?: 'admin@edushare.vn'}">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Số điện thoại</label>
-                                        <input type="tel" class="form-input" value="(+84) 123 456 789">
+                                        <input type="tel" class="form-input" name="site.phone" 
+                                               th:value="${settings['site.phone'] ?: '(+84) 123 456 789'}">
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label class="form-label">Địa chỉ</label>
+                                    <input type="text" class="form-input" name="site.address" 
+                                           th:value="${settings['site.address'] ?: '123 Đường ABC, Quận 1, TP. Hồ Chí Minh'}">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Lưu thay đổi
+                                    </button>
+                                </div>
+                            </form>
                                 <div class="form-group">
                                     <label class="form-label">Địa chỉ</label>
                                     <input type="text" class="form-input"
@@ -1010,24 +1034,33 @@
                 </div>
             </div>
 
-            <!-- Save Button -->
+            <!-- Settings Actions -->
             <div class="settings-actions">
-                <button class="save-settings-btn" onclick="saveAllSettings()">
-                    <i class="fas fa-save"></i> Lưu tất cả cài đặt
-                </button>
-                <button class="reset-settings-btn" onclick="resetSettings()">
-                    <i class="fas fa-undo"></i> Khôi phục mặc định
-                </button>
-                <button class="export-settings-btn" onclick="exportSettings()">
-                    <i class="fas fa-download"></i> Xuất cấu hình
-                </button>
+                <div class="action-buttons">
+                    <button class="action-btn primary" onclick="saveAllSettings()">
+                        <i class="fas fa-save"></i>
+                        <span>Lưu tất cả cài đặt</span>
+                    </button>
+                    <button class="action-btn secondary" onclick="resetSettings()">
+                        <i class="fas fa-undo"></i>
+                        <span>Khôi phục mặc định</span>
+                    </button>
+                    <button class="action-btn info" onclick="exportSettings()">
+                        <i class="fas fa-download"></i>
+                        <span>Xuất cấu hình</span>
+                    </button>
+                    <button class="action-btn warning" onclick="importSettings()">
+                        <i class="fas fa-upload"></i>
+                        <span>Nhập cấu hình</span>
+                    </button>
+                </div>
             </div>
         </main>
     </div>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
-    <script src="js/settings.js"></script>
+    <script th:src="@{/js/admin/settings.js}"></script>
 </body>
 
 </html>

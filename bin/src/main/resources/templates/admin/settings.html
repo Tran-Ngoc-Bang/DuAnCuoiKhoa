@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài đặt hệ thống - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/setting.css">
+    <script src="js/admin.js"></script>
+
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">E</div>
+                    <div class="logo-text">EduShare</div>
+                </a>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="admin-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="dark-mode-toggle" id="darkModeToggle"></div>
+
+                <div class="admin-notifications">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="admin-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt="Admin">
+                    </div>
+                    <div class="admin-info">
+                        <span class="admin-name">Nguyễn Văn A</span>
+                        <span class="admin-role">Quản trị viên</span>
+                    </div>
+                    <div class="admin-dropdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <ul class="admin-menu">
+                    <li class="admin-menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Bảng điều khiển</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="users.html">
+                            <i class="fas fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="documents.html">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Quản lý tài liệu</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="categories.html">
+                            <i class="fas fa-folder"></i>
+                            <span>Quản lý danh mục</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="tags.html">
+                            <i class="fas fa-tags"></i>
+                            <span>Quản lý tags</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="comments.html">
+                            <i class="fas fa-comments"></i>
+                            <span>Quản lý bình luận</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="reports.html">
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="ip-bans.html">
+                            <i class="fas fa-ban"></i>
+                            <span>IP bị cấm</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="statistics.html">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Thống kê</span>
+                        </a>
+                    </li>
+                    <!-- Revenue Management Dropdown -->
+                    <li class="admin-menu-item has-submenu">
+                        <a href="javascript:void(0)">
+                            <i class="fas fa-coins"></i>
+                            <span>Quản lý doanh thu</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li class="submenu-item">
+                                <a href="coin-packages.html">
+                                    <i class="fas fa-box"></i>
+                                    <span>Gói xu</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="transactions.html">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span>Giao dịch</span>
+                                </a>
+                            </li>
+                            <li class="submenu-item">
+                                <a href="withdrawals.html">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Yêu cầu rút tiền</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="admin-menu-item active">
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
+                    </li>
+                    <li class="admin-menu-item">
+                        <a href="../index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Cài đặt hệ thống</h1>
+                <div class="admin-breadcrumbs">
+                    <a href="index.html">Admin</a>
+                    <span>/</span>
+                    <span>Cài đặt</span>
+                </div>
+            </div>
+
+            <!-- Settings Navigation -->
+            <div class="settings-nav">
+                <div class="settings-nav-item active" data-section="general">
+                    <i class="fas fa-cog"></i>
+                    <span>Cài đặt chung</span>
+                </div>
+                <div class="settings-nav-item" data-section="users">
+                    <i class="fas fa-users"></i>
+                    <span>Người dùng</span>
+                </div>
+                <div class="settings-nav-item" data-section="content">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Nội dung</span>
+                </div>
+                <div class="settings-nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Thông báo</span>
+                </div>
+                <div class="settings-nav-item" data-section="security">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Bảo mật</span>
+                </div>
+                <div class="settings-nav-item" data-section="integrations">
+                    <i class="fas fa-plug"></i>
+                    <span>Tích hợp</span>
+                </div>
+                <div class="settings-nav-item" data-section="backup">
+                    <i class="fas fa-database"></i>
+                    <span>Sao lưu</span>
+                </div>
+                <div class="settings-nav-item" data-section="advanced">
+                    <i class="fas fa-tools"></i>
+                    <span>Nâng cao</span>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="settings-content">
+                <!-- General Settings -->
+                <div class="settings-section active" id="general">
+                    <div class="section-header">
+                        <h2><i class="fas fa-cog"></i> Cài đặt chung</h2>
+                        <p>Cấu hình cơ bản cho hệ thống EduShare</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Thông tin website</h3>
+                                <p>Cấu hình thông tin cơ bản của website</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-group">
+                                    <label class="form-label">Tên website</label>
+                                    <input type="text" class="form-input" value="EduShare - Chia sẻ tài liệu giáo dục">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Mô tả website</label>
+                                    <textarea class="form-input form-textarea"
+                                        rows="3">Nền tảng chia sẻ tài liệu giáo dục hàng đầu Việt Nam, cung cấp hàng triệu tài liệu chất lượng cao cho học sinh, sinh viên và giảng viên.</textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Email liên hệ</label>
+                                        <input type="email" class="form-input" value="admin@edushare.vn">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Số điện thoại</label>
+                                        <input type="tel" class="form-input" value="(+84) 123 456 789">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Địa chỉ</label>
+                                    <input type="text" class="form-input"
+                                        value="123 Đường ABC, Quận 1, TP. Hồ Chí Minh">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Cấu hình hiển thị</h3>
+                                <p>Tùy chỉnh giao diện và cách hiển thị</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Ngôn ngữ mặc định</label>
+                                        <select class="form-input">
+                                            <option value="vi" selected>Tiếng Việt</option>
+                                            <option value="en">English</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Múi giờ</label>
+                                        <select class="form-input">
+                                            <option value="Asia/Ho_Chi_Minh" selected>GMT+7 (Việt Nam)</option>
+                                            <option value="UTC">UTC</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Số tài liệu mỗi trang</label>
+                                        <select class="form-input">
+                                            <option value="10">10</option>
+                                            <option value="20" selected>20</option>
+                                            <option value="50">50</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Định dạng ngày</label>
+                                        <select class="form-input">
+                                            <option value="dd/mm/yyyy" selected>DD/MM/YYYY</option>
+                                            <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                            <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Cho phép dark mode
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Hiển thị số lượt xem
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Settings -->
+                <div class="settings-section" id="users">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> Cài đặt người dùng</h2>
+                        <p>Quản lý quyền hạn và hành vi của người dùng</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Đăng ký và xác thực</h3>
+                                <p>Cấu hình quy trình đăng ký tài khoản</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Cho phép đăng ký mới
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Yêu cầu xác thực email
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input">
+                                            <span class="toggle-slider"></span>
+                                            Yêu cầu xác thực số điện thoại
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Duyệt tài khoản thủ công
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Mật khẩu tối thiểu</label>
+                                    <select class="form-input">
+                                        <option value="6">6 ký tự</option>
+                                        <option value="8" selected>8 ký tự</option>
+                                        <option value="12">12 ký tự</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Quyền hạn mặc định</h3>
+                                <p>Thiết lập quyền hạn cho người dùng mới</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="permission-group">
+                                    <h4>Người dùng thường</h4>
+                                    <div class="toggle-group">
+                                        <div class="toggle-item">
+                                            <label class="toggle-label">
+                                                <input type="checkbox" class="toggle-input" checked>
+                                                <span class="toggle-slider"></span>
+                                                Tải xuống tài liệu
+                                            </label>
+                                        </div>
+                                        <div class="toggle-item">
+                                            <label class="toggle-label">
+                                                <input type="checkbox" class="toggle-input" checked>
+                                                <span class="toggle-slider"></span>
+                                                Đăng tài liệu
+                                            </label>
+                                        </div>
+                                        <div class="toggle-item">
+                                            <label class="toggle-label">
+                                                <input type="checkbox" class="toggle-input" checked>
+                                                <span class="toggle-slider"></span>
+                                                Bình luận
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="permission-group">
+                                    <h4>Cộng tác viên</h4>
+                                    <div class="toggle-group">
+                                        <div class="toggle-item">
+                                            <label class="toggle-label">
+                                                <input type="checkbox" class="toggle-input" checked>
+                                                <span class="toggle-slider"></span>
+                                                Duyệt tài liệu
+                                            </label>
+                                        </div>
+                                        <div class="toggle-item">
+                                            <label class="toggle-label">
+                                                <input type="checkbox" class="toggle-input" checked>
+                                                <span class="toggle-slider"></span>
+                                                Quản lý bình luận
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Settings -->
+                <div class="settings-section" id="content">
+                    <div class="section-header">
+                        <h2><i class="fas fa-file-alt"></i> Cài đặt nội dung</h2>
+                        <p>Quản lý tài liệu và nội dung trên hệ thống</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Upload và lưu trữ</h3>
+                                <p>Cấu hình quy tắc upload tài liệu</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Kích thước file tối đa</label>
+                                        <select class="form-input">
+                                            <option value="10">10 MB</option>
+                                            <option value="50" selected>50 MB</option>
+                                            <option value="100">100 MB</option>
+                                            <option value="500">500 MB</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Số file upload đồng thời</label>
+                                        <select class="form-input">
+                                            <option value="1">1 file</option>
+                                            <option value="5" selected>5 files</option>
+                                            <option value="10">10 files</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Định dạng file cho phép</label>
+                                    <div class="file-types">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" checked> PDF
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" checked> DOC/DOCX
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" checked> PPT/PPTX
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" checked> XLS/XLSX
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox"> TXT
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox"> RTF
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Quét virus tự động
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Tạo thumbnail preview
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Kiểm duyệt nội dung</h3>
+                                <p>Thiết lập quy trình duyệt tài liệu</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-group">
+                                    <label class="form-label">Chế độ kiểm duyệt</label>
+                                    <select class="form-input">
+                                        <option value="auto">Tự động duyệt</option>
+                                        <option value="manual" selected>Duyệt thủ công</option>
+                                        <option value="mixed">Kết hợp</option>
+                                    </select>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Kiểm tra từ khóa nhạy cảm
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Phát hiện plagiarism
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input">
+                                            <span class="toggle-slider"></span>
+                                            Thông báo tác giả khi duyệt
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="settings-section" id="notifications">
+                    <div class="section-header">
+                        <h2><i class="fas fa-bell"></i> Cài đặt thông báo</h2>
+                        <p>Quản lý các loại thông báo và cách gửi</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Email notifications</h3>
+                                <p>Cấu hình gửi email thông báo</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">SMTP Server</label>
+                                        <input type="text" class="form-input" value="smtp.gmail.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">SMTP Port</label>
+                                        <input type="number" class="form-input" value="587">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Email gửi</label>
+                                        <input type="email" class="form-input" value="noreply@edushare.vn">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Tên hiển thị</label>
+                                        <input type="text" class="form-input" value="EduShare Team">
+                                    </div>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Thông báo tài liệu mới
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Thông báo bình luận mới
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Báo cáo hệ thống
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Push notifications</h3>
+                                <p>Thông báo đẩy trên website và mobile</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Kích hoạt push notifications
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Thông báo real-time
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tần suất gửi email tổng hợp</label>
+                                    <select class="form-input">
+                                        <option value="immediate">Ngay lập tức</option>
+                                        <option value="daily" selected>Hàng ngày</option>
+                                        <option value="weekly">Hàng tuần</option>
+                                        <option value="never">Không gửi</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="settings-section" id="security">
+                    <div class="section-header">
+                        <h2><i class="fas fa-shield-alt"></i> Cài đặt bảo mật</h2>
+                        <p>Tăng cường bảo mật cho hệ thống</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Xác thực và bảo mật</h3>
+                                <p>Cấu hình các biện pháp bảo mật</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Bắt buộc 2FA cho admin
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input">
+                                            <span class="toggle-slider"></span>
+                                            Bắt buộc 2FA cho tất cả
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Khóa IP sau nhiều lần đăng nhập sai
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Ghi log hoạt động admin
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Thời gian session (phút)</label>
+                                        <select class="form-input">
+                                            <option value="30">30 phút</option>
+                                            <option value="60" selected>1 giờ</option>
+                                            <option value="120">2 giờ</option>
+                                            <option value="480">8 giờ</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Số lần đăng nhập sai tối đa</label>
+                                        <select class="form-input">
+                                            <option value="3">3 lần</option>
+                                            <option value="5" selected>5 lần</option>
+                                            <option value="10">10 lần</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Whitelist & Blacklist</h3>
+                                <p>Quản lý danh sách IP và domain</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-group">
+                                    <label class="form-label">IP Whitelist (mỗi IP một dòng)</label>
+                                    <textarea class="form-input form-textarea" rows="4" placeholder="192.168.1.1
+127.0.0.1
+10.0.0.0/8"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">IP Blacklist (mỗi IP một dòng)</label>
+                                    <textarea class="form-input form-textarea" rows="4"
+                                        placeholder="Nhập IP cần chặn..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integration Settings -->
+                <div class="settings-section" id="integrations">
+                    <div class="section-header">
+                        <h2><i class="fas fa-plug"></i> Tích hợp bên thứ 3</h2>
+                        <p>Kết nối với các dịch vụ và API bên ngoài</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Social Login</h3>
+                                <p>Đăng nhập bằng mạng xã hội</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="integration-item">
+                                    <div class="integration-info">
+                                        <div class="integration-icon google">
+                                            <i class="fab fa-google"></i>
+                                        </div>
+                                        <div class="integration-details">
+                                            <h4>Google OAuth</h4>
+                                            <p>Đăng nhập bằng tài khoản Google</p>
+                                        </div>
+                                    </div>
+                                    <div class="integration-toggle">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="integration-item">
+                                    <div class="integration-info">
+                                        <div class="integration-icon facebook">
+                                            <i class="fab fa-facebook"></i>
+                                        </div>
+                                        <div class="integration-details">
+                                            <h4>Facebook Login</h4>
+                                            <p>Đăng nhập bằng tài khoản Facebook</p>
+                                        </div>
+                                    </div>
+                                    <div class="integration-toggle">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="integration-item">
+                                    <div class="integration-info">
+                                        <div class="integration-icon github">
+                                            <i class="fab fa-github"></i>
+                                        </div>
+                                        <div class="integration-details">
+                                            <h4>GitHub OAuth</h4>
+                                            <p>Đăng nhập bằng tài khoản GitHub</p>
+                                        </div>
+                                    </div>
+                                    <div class="integration-toggle">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Analytics & Tracking</h3>
+                                <p>Tích hợp công cụ phân tích</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-group">
+                                    <label class="form-label">Google Analytics ID</label>
+                                    <input type="text" class="form-input" placeholder="G-XXXXXXXXXX">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Facebook Pixel ID</label>
+                                    <input type="text" class="form-input" placeholder="Nhập Facebook Pixel ID">
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Kích hoạt Google Analytics
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input">
+                                            <span class="toggle-slider"></span>
+                                            Kích hoạt Facebook Pixel
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup Settings -->
+                <div class="settings-section" id="backup">
+                    <div class="section-header">
+                        <h2><i class="fas fa-database"></i> Sao lưu và phục hồi</h2>
+                        <p>Quản lý việc sao lưu dữ liệu hệ thống</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Lịch sao lưu tự động</h3>
+                                <p>Thiết lập backup định kỳ</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Tần suất sao lưu</label>
+                                        <select class="form-input">
+                                            <option value="daily" selected>Hàng ngày</option>
+                                            <option value="weekly">Hàng tuần</option>
+                                            <option value="monthly">Hàng tháng</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Thời gian sao lưu</label>
+                                        <input type="time" class="form-input" value="02:00">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Số bản backup giữ lại</label>
+                                    <select class="form-input">
+                                        <option value="5">5 bản</option>
+                                        <option value="10" selected>10 bản</option>
+                                        <option value="30">30 bản</option>
+                                    </select>
+                                </div>
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Kích hoạt sao lưu tự động
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Sao lưu cơ sở dữ liệu
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Sao lưu files upload
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Sao lưu thủ công</h3>
+                                <p>Tạo backup ngay lập tức</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="backup-info">
+                                    <div class="backup-stat">
+                                        <div class="stat-label">Backup cuối cùng</div>
+                                        <div class="stat-value">20/03/2024 02:00</div>
+                                    </div>
+                                    <div class="backup-stat">
+                                        <div class="stat-label">Kích thước backup</div>
+                                        <div class="stat-value">2.4 GB</div>
+                                    </div>
+                                    <div class="backup-stat">
+                                        <div class="stat-label">Tổng số backup</div>
+                                        <div class="stat-value">10 files</div>
+                                    </div>
+                                </div>
+                                <div class="backup-actions">
+                                    <button class="backup-btn primary" onclick="createBackup()">
+                                        <i class="fas fa-download"></i> Tạo backup ngay
+                                    </button>
+                                    <button class="backup-btn secondary" onclick="viewBackups()">
+                                        <i class="fas fa-list"></i> Xem danh sách backup
+                                    </button>
+                                    <button class="backup-btn danger" onclick="restoreBackup()">
+                                        <i class="fas fa-upload"></i> Phục hồi từ backup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings -->
+                <div class="settings-section" id="advanced">
+                    <div class="section-header">
+                        <h2><i class="fas fa-tools"></i> Cài đặt nâng cao</h2>
+                        <p>Các tùy chọn nâng cao cho hệ thống</p>
+                    </div>
+
+                    <div class="settings-cards">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Performance & Caching</h3>
+                                <p>Tối ưu hóa hiệu suất hệ thống</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Kích hoạt Redis cache
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Compress CSS/JS
+                                        </label>
+                                    </div>
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input" checked>
+                                            <span class="toggle-slider"></span>
+                                            Lazy load images
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Cache TTL (giây)</label>
+                                        <input type="number" class="form-input" value="3600">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Max connections</label>
+                                        <input type="number" class="form-input" value="1000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3>Maintenance Mode</h3>
+                                <p>Chế độ bảo trì hệ thống</p>
+                            </div>
+                            <div class="card-content">
+                                <div class="toggle-group">
+                                    <div class="toggle-item">
+                                        <label class="toggle-label">
+                                            <input type="checkbox" class="toggle-input">
+                                            <span class="toggle-slider"></span>
+                                            Kích hoạt chế độ bảo trì
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Thông báo bảo trì</label>
+                                    <textarea class="form-input form-textarea"
+                                        rows="3">Hệ thống đang trong quá trình bảo trì. Chúng tôi sẽ quay lại sớm nhất có thể!</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Thời gian dự kiến hoàn thành</label>
+                                    <input type="datetime-local" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="settings-actions">
+                <button class="save-settings-btn" onclick="saveAllSettings()">
+                    <i class="fas fa-save"></i> Lưu tất cả cài đặt
+                </button>
+                <button class="reset-settings-btn" onclick="resetSettings()">
+                    <i class="fas fa-undo"></i> Khôi phục mặc định
+                </button>
+                <button class="export-settings-btn" onclick="exportSettings()">
+                    <i class="fas fa-download"></i> Xuất cấu hình
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="js/settings.js"></script>
+</body>
+
+</html>

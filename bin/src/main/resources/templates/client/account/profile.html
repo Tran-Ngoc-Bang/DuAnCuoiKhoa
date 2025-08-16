@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Hồ sơ cá nhân - EduShare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+  <link rel="stylesheet" href="../../css/main-fixes.css">
+  <link rel="stylesheet" href="../../css/account.css">
+  <link rel="stylesheet" href="../../css/footer-modern.css">
+  <style>
+     :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --primary-light: rgba(67, 97, 238, 0.1);
+      --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.1);
+      --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
+      --warning: #f59e0b;
+      --warning-light: rgba(245, 158, 11, 0.1);
+      --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.1);
+      --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --radius: 0.375rem;
+      --radius-lg: 0.5rem;
+      --radius-xl: 0.75rem;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      background-color: #f5f7fb;
+      min-height: 100vh;
+    }
+    
+    .dashboard-page {
+      padding-top: 2rem;
+      padding-bottom: 3rem;
+    }
+    
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    
+    .dashboard-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .date-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      background-color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+    
+    .refresh-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--primary);
+      background-color: var(--primary-light);
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .refresh-button:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .dashboard-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .dashboard-sidebar {
+      width: 280px;
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 0;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+      overflow: hidden;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 0;
+      position: relative;
+      background-color: var(--primary-light);
+    }
+    
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-bottom: 0.5rem;
+    }
+    
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 1rem;
+    }
+    
+    .user-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+    }
+    
+    .user-email {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 1rem;
+    }
+    
+    .user-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .user-status-icon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      margin-right: 0.5rem;
+    }
+    
+    .sidebar-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 0.5rem;
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+      padding: 0.75rem 0;
+      margin: 0;
+    }
+    
+    .sidebar-menu-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      padding-left: 0.5rem;
+    }
+    
+    .sidebar-menu-item {
+      margin-bottom: 0.25rem;
+    }
+    
+    .sidebar-menu-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: var(--gray-700);
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      font-size: 0.95rem;
+    }
+    
+    .sidebar-menu-link:hover {
+      color: var(--primary);
+      background-color: var(--primary-light);
+    }
+    
+    .sidebar-menu-link.active {
+      color: var(--primary);
+      font-weight: 600;
+      background-color: var(--primary-light);
+    }
+    
+    .sidebar-menu-link.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background-color: var(--primary);
+    }
+    
+    .sidebar-icon {
+      width: 1.25rem;
+      margin-right: 0.75rem;
+      text-align: center;
+    }
+    
+    .sidebar-badge {
+      margin-left: auto;
+      background-color: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+    }
+    
+    .dashboard-main {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      border: 1px solid var(--gray-100);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .stat-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      position: relative;
+      margin-bottom: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    
+    .stat-icon.primary {
+      background: var(--primary-gradient);
+      color: white;
+    }
+    
+    .stat-icon.success {
+      background: var(--success-gradient);
+      color: white;
+    }
+    
+    .stat-icon.warning {
+      background: var(--warning-gradient);
+      color: white;
+    }
+    
+    .stat-icon.danger {
+      background: var(--danger-gradient);
+      color: white;
+    }
+    
+    .stat-info {
+      width: 100%;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      margin-bottom: 0.25rem;
+      max-width: 100%;
+      display: block;
+      line-height: 1.2;
+      white-space: normal;
+    }
+    
+    .stat-trend {
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .trend-positive {
+      color: var(--success);
+    }
+    
+    .trend-negative {
+      color: var(--danger);
+    }
+    
+    .trend-icon {
+      margin-right: 0.25rem;
+    }
+    
+    .trend-period {
+      color: var(--gray-500);
+      margin-left: 0.25rem;
+    }
+    
+    /* Dashboard Sections */
+    .dashboard-section {
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2.5rem;
+      border: 1px solid var(--gray-100);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title-icon {
+      margin-right: 0.75rem;
+      color: var(--primary);
+      font-size: 1.125rem;
+    }
+    
+    .section-actions {
+      display: flex;
+      align-items: center;
+    }
+    
+    .action-button {
+      padding: 0.5rem 0.875rem;
+      border-radius: var(--radius);
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+    
+    .time-range-select {
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-300);
+      background-color: var(--white);
+      font-size: 0.875rem;
+      color: var(--gray-700);
+      cursor: pointer;
+    }
+    
+    /* Activity Chart */
+    .chart-container {
+      width: 100%;
+      height: 300px;
+    }
+    
+    /* Activity List */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      padding: 1.25rem;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+    
+    .activity-item:hover {
+      background-color: var(--gray-50);
+      border-color: var(--gray-200);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .activity-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .activity-title {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+    }
+    
+    .activity-description {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 0.5rem;
+    }
+    
+    .activity-meta {
+      display: flex;
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      gap: 1rem;
+    }
+    
+    .activity-meta-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .activity-meta-icon {
+      margin-right: 0.25rem;
+    }
+    
+    /* Document Cards */
+    .documents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.75rem;
+    }
+    
+    .document-card {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border: 1px solid var(--gray-100);
+    }
+    
+    .document-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-light);
+    }
+    
+    .document-image {
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .document-image::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%);
+      z-index: 1;
+    }
+    
+    .document-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Profile Info Grid */
+    .dashboard-main #profile-preview .profile-info-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+      gap: 20px !important;
+      margin-bottom: 30px !important;
+    }
+
+    .dashboard-main #profile-preview .info-card {
+      background: white !important;
+      border-radius: var(--radius-lg) !important;
+      box-shadow: var(--shadow-md) !important;
+      overflow: hidden !important;
+      transition: all 0.3s ease !important;
+      border: 1px solid var(--gray-200) !important;
+    }
+
+    .dashboard-main #profile-preview .info-card:hover {
+      box-shadow: var(--shadow-lg) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    .dashboard-main #profile-preview .info-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+      color: white !important;
+      padding: 15px 20px !important;
+      border-bottom: 1px solid var(--gray-200) !important;
+    }
+
+    .dashboard-main #profile-preview .info-title {
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      color: white !important;
+    }
+
+    .dashboard-main #profile-preview .info-icon {
+      font-size: 18px !important;
+      opacity: 0.9 !important;
+    }
+
+    .dashboard-main #profile-preview .info-content {
+      padding: 20px !important;
+    }
+
+    .dashboard-main #profile-preview .info-item {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 12px 0 !important;
+      border-bottom: 1px solid var(--gray-100) !important;
+    }
+
+    .dashboard-main #profile-preview .info-item:last-child {
+      border-bottom: none !important;
+      padding-bottom: 0 !important;
+    }
+
+    .dashboard-main #profile-preview .info-label {
+      font-weight: 500 !important;
+      color: var(--gray-600) !important;
+      font-size: 14px !important;
+    }
+
+    .dashboard-main #profile-preview .info-value {
+      font-weight: 600 !important;
+      color: var(--gray-900) !important;
+      font-size: 14px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+
+    .dashboard-main #profile-preview .btn-copy {
+      background: var(--primary) !important;
+      color: white !important;
+      border: none !important;
+      padding: 4px 8px !important;
+      border-radius: var(--radius-sm) !important;
+      font-size: 12px !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .dashboard-main #profile-preview .btn-copy:hover {
+      background: var(--primary-dark) !important;
+      transform: scale(1.05) !important;
+    }
+
+    .dashboard-main #profile-preview .social-link-profile {
+      color: var(--primary) !important;
+      text-decoration: none !important;
+      font-weight: 500 !important;
+      transition: color 0.3s ease !important;
+    }
+
+    .dashboard-main #profile-preview .social-link-profile:hover {
+      color: var(--primary-dark) !important;
+    }
+
+    .dashboard-main #profile-preview .social-link-profile i {
+      margin-right: 5px !important;
+    }
+
+    /* Account Section */
+    .dashboard-main #profile-preview .account-section {
+      margin-top: 30px !important;
+    }
+
+    .dashboard-main #profile-preview .account-stats {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+      gap: 15px !important;
+      margin-bottom: 20px !important;
+    }
+
+    .dashboard-main #profile-preview .account-stat {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      padding: 15px !important;
+      background: var(--gray-50) !important;
+      border-radius: var(--radius-md) !important;
+      border: 1px solid var(--gray-200) !important;
+    }
+
+    .dashboard-main #profile-preview .stat-icon-wrapper {
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: var(--radius-md) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 18px !important;
+      color: white !important;
+    }
+
+    .dashboard-main #profile-preview .stat-icon-wrapper.success {
+      background: var(--success-gradient) !important;
+    }
+
+    .dashboard-main #profile-preview .stat-icon-wrapper.primary {
+      background: var(--primary-gradient) !important;
+    }
+
+    .dashboard-main #profile-preview .stat-details {
+      flex: 1 !important;
+    }
+
+    .dashboard-main #profile-preview .stat-value {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: var(--gray-900) !important;
+      margin-bottom: 2px !important;
+    }
+
+    .dashboard-main #profile-preview .stat-label {
+      font-size: 12px !important;
+      color: var(--gray-600) !important;
+      font-weight: 500 !important;
+    }
+
+    .dashboard-main #profile-preview .payment-info {
+      background: var(--gray-50) !important;
+      padding: 15px !important;
+      border-radius: var(--radius-md) !important;
+      margin-bottom: 20px !important;
+    }
+
+    .dashboard-main #profile-preview .upgrade-section {
+      text-align: center !important;
+    }
+
+    .dashboard-main #profile-preview .btn-upgrade {
+      background: var(--success-gradient) !important;
+      color: white !important;
+      padding: 12px 24px !important;
+      border-radius: var(--radius-md) !important;
+      text-decoration: none !important;
+      font-weight: 600 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .dashboard-main #profile-preview .btn-upgrade:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: var(--shadow-lg) !important;
+    }
+
+    .dashboard-main #profile-preview .btn-upgrade i {
+      font-size: 16px !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .profile-info-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+      }
+      
+      .account-stats {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      
+      .info-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 5px !important;
+      }
+      
+      .info-value {
+        width: 100% !important;
+      }
+    }
+
+    /* Enhanced Styles */
+    .btn-account {
+      background-color: #472fe0;
+      color: white;
+      padding: 12.9px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      margin: 0 8px;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+    }
+
+    .btn-account:hover {
+      background-color: #3a25c6;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-account:active {
+      transform: scale(0.98);
+    }
+
+    .btn-toggle {
+      margin: 10px 5px;
+      padding: 10px 20px;
+      background-color: #472fe0;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .btn-toggle:hover {
+      background-color: #341bb8;
+      transform: translateY(-2px);
+    }
+
+    .btn-save {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: -1px;
+      position: relative;
+    }
+
+    .btn-save:hover {
+      background-color: #1e7e34;
+      transform: translateY(-2px);
+    }
+
+    .btn-upgrade {
+      background-color: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .btn-upgrade:hover {
+      background-color: #ffd633;
+      box-shadow: var(--shadow-lg);
+      transform: scale(1.05);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+      padding: 8px 14px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+      padding: 8px 14px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      transition: border 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    .readonly-value {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .avatar-wrapper {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      border: 2px solid transparent;
+      transition: border 0.2s ease;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid #472fe0;
+      box-shadow: var(--shadow-md);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .btn-upload {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #472fe0;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-upload:hover {
+      background-color: #341bb8;
+      transform: translateY(-2px);
+    }
+
+    .account-edit {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      max-width: 600px;
+      margin: auto;
+      transition: var(--transition);
+    }
+
+    .account-edit h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #222;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .role-select-wrapper {
+      margin-top: 10px;
+    }
+
+    .role-select-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    #userRole {
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      flex: 1;
+    }
+
+    #roleColorBox {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background-color: gray;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: var(--success-gradient);
+    }
+
+    .toast.error {
+      background: var(--danger-gradient);
+    }
+
+    .toast i {
+      font-size: 16px;
+    }
+
+    /* Popup Styles */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .popup-content h3 {
+      margin-bottom: 10px;
+      color: var(--gray-900);
+    }
+
+    .popup-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .popup.hidden {
+      display: none;
+    }
+
+    /* Ripple Effect */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: scale(0);
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    .ripple:active::after {
+      transform: scale(2);
+      opacity: 0;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      border: 4px solid var(--gray-200);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: none;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Chat Widget */
+    .chat-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 300px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      z-index: 1500;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .chat-body {
+      max-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .chat-message {
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 80%;
+    }
+
+    .chat-message.user {
+      background: var(--primary-light);
+      margin-left: auto;
+    }
+
+    .chat-message.bot {
+      background: var(--gray-100);
+    }
+
+    #chatForm {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    #chatForm input {
+      flex: 1;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      margin-right: 5px;
+    }
+
+    #chatForm button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .chat-widget.hidden .chat-body {
+      display: none;
+    }
+
+    .chat-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg);
+      cursor: pointer;
+      z-index: 1500;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      background: var(--gray-800);
+      color: white;
+      font-size: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      z-index: 1000;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    .stat-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      position: relative;
+      margin-bottom: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .documents-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-content {
+        flex-direction: column;
+      }
+
+      .dashboard-sidebar {
+        width: 100%;
+        position: static;
+        margin-bottom: 2rem;
+      }
+
+      .sidebar-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .sidebar-menu-title {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .documents-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-item {
+        flex-direction: column;
+      }
+
+      .activity-icon {
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .section {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .section.hidden {
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+    .view-all-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.875rem;
+      margin-top: 1.25rem;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      background: var(--primary-gradient);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .view-all-link:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      filter: brightness(1.05);
+    }
+    
+  </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+          <div class="header-content">
+              <div class="logo">
+                  <a href="../../index.html">
+                      <div class="logo-icon">E</div>
+                      <span class="logo-text">EduShare</span>
+                  </a>
+              </div>
+
+
+
+              
+              <nav class="main-nav">
+                  <a href="../../index.html" class="nav-link">Trang chủ</a>
+                  <a href="../categories.html" class="nav-link">Danh mục</a>
+                  <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+                  <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+                  <a href="../about.html" class="nav-link">Giới thiệu</a>
+              </nav>
+              <div class="header-actions">
+                  <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+                      <span class="dark-mode-handle" id="darkModeHandle"></span>
+                  </button>
+                  <a href="../login.html" class="login-btn">
+                      <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                  </a>
+                  <a href="../register.html" class="register-btn active">
+                      <i class="fas fa-user-plus"></i> Đăng ký
+                  </a>
+              </div>
+              <div class="mobile-menu-toggle" id="mobileMenuBtn">
+                  <i class="fas fa-bars"></i>
+              </div>
+          </div>
+      </div>
+      <!-- Mobile menu -->
+      <div id="mobileMenu" class="mobile-menu">
+          <div class="mobile-search">
+              <input type="text" placeholder="Tìm kiếm tài liệu...">
+              <button>
+                  <i class="fas fa-search"></i>
+              </button>
+          </div>
+          <nav class="mobile-nav">
+            <a href="../../index.html" class="nav-link">Trang chủ</a>
+            <a href="../categories.html" class="nav-link">Danh mục</a>
+            <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+            <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
+              <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+          </nav>
+          <div class="mobile-auth">
+              <a href="../login.html" class="mobile-login-btn">Đăng nhập</a>
+              <a href="../register.html" class="mobile-register-btn">Đăng ký</a>
+          </div>
+      </div>
+  </header>
+
+  <main>
+    <div class="container dashboard-page">
+
+      <div class="dashboard-content">
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar">
+              <div class="sidebar-header">
+                <div class="user-profile">
+                  <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="User avatar" class="user-avatar">
+                  <div class="user-name">Nguyễn Văn Anh</div>
+                  <div class="user-email">nguyenvananh@gmail.com</div>
+                  <div class="user-status">
+                    <span class="user-status-icon"></span>
+                    Tài khoản Premium
+                  </div>
+                </div>
+                <div class="sidebar-title">Quản lý tài khoản</div>
+              </div>
+              
+              <ul class="sidebar-menu">
+                <li class="sidebar-menu-title">Tài liệu</li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="dashboard.html" class="sidebar-menu-link ">
+                    <i class="fas fa-tachometer-alt sidebar-icon"></i>
+                    Tổng quan
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="documents.html" class="sidebar-menu-link">
+                    <i class="fas fa-file-alt sidebar-icon"></i>
+                    Tài liệu của tôi
+                    <span class="sidebar-badge">15</span>
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="../search.html" class="sidebar-menu-link">
+                    <i class="fas fa-search sidebar-icon"></i>
+                    Khám phá tài liệu
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="../upload.html" class="sidebar-menu-link">
+                    <i class="fas fa-cloud-upload-alt sidebar-icon"></i>
+                    Tải lên tài liệu
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="favorites.html" class="sidebar-menu-link">
+                    <i class="fas fa-bookmark sidebar-icon"></i>
+                    Tài liệu đã lưu
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-title">Tài khoản</li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="profile.html" class="sidebar-menu-link active">
+                    <i class="fas fa-user sidebar-icon"></i>
+                    Thông tin cá nhân
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="transactions.html" class="sidebar-menu-link ">
+                    <i class="fas fa-history sidebar-icon"></i>
+                    Lịch sử giao dịch
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="recharge.html" class="sidebar-menu-link">
+                    <i class="fas fa-coins sidebar-icon"></i>
+                    Nạp xu
+                    <span class="sidebar-badge">250</span>
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-title">Cài đặt</li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="security.html" class="sidebar-menu-link">
+                    <i class="fas fa-shield-alt sidebar-icon"></i>
+                    Bảo mật
+                  </a>
+                </li>
+                
+                <li class="sidebar-menu-item">
+                  <a href="notifications.html" class="sidebar-menu-link">
+                    <i class="fas fa-bell sidebar-icon"></i>
+                    Thông báo
+                  </a>
+                </li>
+                <li class="sidebar-menu-item">
+                  <a href="options.html" class="sidebar-menu-link">
+                    <i class="fas fa-cog sidebar-icon"></i>
+                    Tùy chọn
+                  </a>
+                </li>
+                <li class="sidebar-menu-item">
+                  <a href="notifications.html" class="sidebar-menu-link">
+                    <i class="fas fa-question-circle sidebar-icon"></i>
+                    Trợ giúp
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+        <!-- Main Content -->
+        <div class="dashboard-main">
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon primary">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">Cơ bản</div>
+                <div class="stat-label">Loại tài khoản</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon success">
+                <i class="fas fa-coins"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">320</div>
+                <div class="stat-label">Số dư (xu)</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon warning">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">15/01/2023</div>
+                <div class="stat-label">Ngày tham gia</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Information Section -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-user section-title-icon"></i>
+                Thông tin cá nhân
+              </h2>
+              <div class="section-actions">
+                <button class="btn-account ripple" onclick="showProfileEdit()">
+                  <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
+                </button>
+              </div>
+            </div>
+
+            <div class="section avatar-wrapper" ondragover="event.preventDefault(); this.style.border='2px dashed var(--primary)';" ondragleave="this.style.border='none';" ondrop="handleAvatarDrop(event);">
+              <img src="https://via.placeholder.com/90" class="avatar" id="avatarPreview">
+              <input type="file" id="avatarInput">
+              <label for="avatarInput" class="btn-upload ripple">Thay ảnh</label>
+            </div>
+
+            <div class="section-actions" style="margin: 20px 0; display: flex; gap: 10px; flex-wrap: wrap;">
+              <a href="security.html" class="btn-toggle ripple">
+                <i class="fas fa-key"></i> Đổi mật khẩu
+              </a>
+              <a href="recharge.html" class="btn-toggle ripple">
+                <i class="fas fa-link"></i> Liên kết tài khoản
+              </a>
+              <button class="btn-account ripple" onclick="showAccountEdit()">
+                <i class="fas fa-cog"></i> Chỉnh sửa tài khoản
+              </button>
+            </div>
+
+            <!-- Profile Preview -->
+            <div id="profile-preview" class="section">
+              <div class="profile-info-grid">
+                <div class="info-card">
+                  <div class="info-header">
+                    <h3 class="info-title">
+                      <i class="fas fa-id-card info-icon"></i>
+                      Thông tin cơ bản
+                    </h3>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-item">
+                      <span class="info-label">Mã định danh:</span>
+                      <span class="info-value">
+                        USR-20240611-001 
+                        <button class="btn-copy ripple" onclick="copyToClipboard('USR-20240611-001')" title="Sao chép">
+                          <i class="fas fa-copy"></i>
+                        </button>
+                      </span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Họ và tên:</span>
+                      <span class="info-value">Nguyễn Thanh Đức</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Biệt danh:</span>
+                      <span class="info-value">Đức Momo</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Ngày tham gia:</span>
+                      <span class="info-value">15/01/2023</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="info-card">
+                  <div class="info-header">
+                    <h3 class="info-title">
+                      <i class="fas fa-envelope info-icon"></i>
+                      Thông tin liên hệ
+                    </h3>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-item">
+                      <span class="info-label">Email:</span>
+                      <span class="info-value">Coppyrightemomo@email.com</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Số điện thoại:</span>
+                      <span class="info-value">0123456789</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Địa chỉ:</span>
+                      <span class="info-value">123 Lê Lợi, Quận 1, TP.HCM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="info-card">
+                  <div class="info-header">
+                    <h3 class="info-title">
+                      <i class="fas fa-share-alt info-icon"></i>
+                      Mạng xã hội
+                    </h3>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-item">
+                      <span class="info-label">Facebook:</span>
+                      <span class="info-value">
+                        <a href="#" class="social-link-profile" target="_blank">
+                          <i class="fab fa-facebook"></i> facebook.com/nguoi-dung
+                        </a>
+                      </span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">GitHub:</span>
+                      <span class="info-value">
+                        <a href="#" class="social-link-profile" target="_blank">
+                          <i class="fab fa-github"></i> github.com/nguoi-dung
+                        </a>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="account-preview" class="account-section">
+                <div class="info-card">
+                  <div class="info-header">
+                    <h3 class="info-title">
+                      <i class="fas fa-credit-card info-icon"></i>
+                      Tài khoản & Gói dịch vụ
+                    </h3>
+                  </div>
+                  <div class="info-content">
+                    <div class="account-stats">
+                      <div class="account-stat">
+                        <div class="stat-icon-wrapper success">
+                          <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-details">
+                          <div class="stat-value">320 xu</div>
+                          <div class="stat-label">Số dư hiện tại</div>
+                        </div>
+                      </div>
+                      <div class="account-stat">
+                        <div class="stat-icon-wrapper primary">
+                          <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="stat-details">
+                          <div class="stat-value">Cơ bản</div>
+                          <div class="stat-label">Gói tài khoản</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="payment-info">
+                      <div class="info-item">
+                        <span class="info-label">Phương thức thanh toán:</span>
+                        <span class="info-value">
+                          <i class="fab fa-cc-visa"></i> Visa **** 5321
+                        </span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Tài khoản rút tiền:</span>
+                        <span class="info-value">
+                          <i class="fas fa-university"></i> MB Bank - 9704********3210
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div class="upgrade-section">
+                      <a href="recharge.html" class="btn-upgrade ripple" id="upgradeBtn">
+                        <i class="fas fa-arrow-up"></i>
+                        Nâng cấp tài khoản
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Edit -->
+            <div id="profile-edit" class="section hidden">
+              <form>
+                <div class="form-group">
+                  <br>
+                  <label>Mã định danh</label>
+                  <input type="text" value="USR-20240611-001" readonly />
+                </div>
+                <div class="form-group">
+                  <label>Họ và tên</label>
+                  <input type="text" value="Nguyễn Thanh Đức" required />
+                </div>
+                <div class="form-group">
+                  <label>Biệt danh</label>
+                  <input type="text" value="Đức Momo" required />
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input type="email" value="Coppyrightemomo@email.com" required />
+                </div>
+                <div class="form-group">
+                  <label>Số điện thoại</label>
+                  <input type="tel" value="0123456789" required />
+                </div>
+                <div class="form-group">
+                  <label>Facebook</label>
+                  <input type="url" value="https://facebook.com/nguoi-dung" />
+                </div>
+                <div class="form-group">
+                  <label>LinkedIn</label>
+                  <input type="url" value="https://linkedin.com/in/nguoi-dung" />
+                </div>
+                <div class="form-group">
+                  <label>GitHub</label>
+                  <input type="url" value="https://github.com/nguoi-dung" />
+                </div>
+                <div class="form-group">
+                  <label>Ngày tham gia</label>
+                  <input type="date" value="2023-01-15" readonly />
+                </div>
+                <div class="form-group">
+                  <label>Địa chỉ</label>
+                  <input type="text" value="123 Lê Lợi, Quận 1, TP.HCM" required />
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn-save ripple">Lưu thay đổi <span class="spinner"></span></button>
+                  <button type="button" class="btn-secondary ripple" onclick="cancelProfileEdit()">Hủy</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Account Edit -->
+            <div id="account-edit" class="section hidden">
+              <br>
+              <h3>Chỉnh sửa tài khoản</h3>
+              <form>
+                <div class="form-group">
+                  <label>Số dư tài khoản</label>
+                  <div class="readonly-value">💰 320 xu</div>
+                </div>
+                <div class="form-group tooltip">
+                  <label>Phương thức thanh toán <span class="tooltip-text">Nhập thông tin thẻ hoặc ví điện tử</span></label>
+                  <input type="text" value="Visa **** 5321" required>
+                  <div class="action-buttons">
+                    <button type="button" class="btn-secondary ripple">Thêm phương thức</button>
+                    <button type="button" class="btn-danger ripple" onclick="showConfirmation('Bạn có chắc chắn muốn xóa phương thức thanh toán này?', () => showToast('Đã xóa phương thức thanh toán!', 'success'))">Xóa phương thức</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Tài khoản rút tiền</label>
+                  <input type="text" value="MB Bank - 9704********3210" required>
+                  <div class="action-buttons">
+                    <button type="button" class="btn-secondary ripple" onclick="requireVerification()">Chỉnh sửa</button>
+                    <button type="button" class="btn-secondary ripple">Thêm tài khoản</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Gói tài khoản</label>
+                  <select required>
+                    <option selected>🎖️ Cơ bản (Miễn phí)</option>
+                    <option>💎 Cao cấp</option>
+                    <option>🏢 Doanh nghiệp</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <button type="button" class="btn-upgrade ripple" onclick="goToUpgrade()">Nâng cấp tài khoản</button>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn-save ripple">Lưu thay đổi <span class="spinner"></span></button>
+                  <button type="button" class="btn-secondary ripple" onclick="cancelAccountEdit()">Hủy</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Password Change Form -->
+            <div id="password-form" class="section hidden">
+              <h3>Đổi mật khẩu</h3>
+              <form>
+                <div class="form-group">
+                  <label>Mật khẩu hiện tại</label>
+                  <input type="password" required />
+                </div>
+                <div class="form-group">
+                  <label>Mật khẩu mới</label>
+                  <input type="password" required />
+                </div>
+                <div class="form-group">
+                  <label>Nhập lại mật khẩu mới</label>
+                  <input type="password" required />
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn-save ripple">Lưu thay đổi <span class="spinner"></span></button>
+                  <button type="button" class="btn-secondary ripple" onclick="document.getElementById('password-form').classList.add('hidden')">Hủy</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- User Role -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-user-tag section-title-icon"></i>
+                Vai trò người dùng
+              </h2>
+            </div>
+            
+            <div class="account-info-section">
+              <div class="form-group role-select-wrapper">
+                <label for="userRole"><strong>Chọn vai trò:</strong></label>
+                <div class="role-select-box">
+                  <select id="userRole" onchange="updateRoleColor()">
+                    <option value="ADMIN">Quản trị viên</option>
+                    <option value="TEACHER">Giảng viên</option>
+                    <option value="STUDENT">Học viên</option>
+                    <option value="MODERATOR">Kiểm duyệt viên</option>
+                    <option value="USER" selected>Thành viên</option>
+                    <option value="GUEST">Khách</option>
+                  </select>
+                  <div id="roleColorBox"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-history section-title-icon"></i>
+                Hoạt động gần đây
+              </h2>
+            </div>
+            
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon primary">
+                  <i class="fas fa-user-edit"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Đã cập nhật thông tin cá nhân</div>
+                  <div class="activity-description">Thay đổi họ tên, email, SĐT hoặc địa chỉ</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">
+                      <i class="far fa-clock activity-meta-icon"></i>
+                      2 ngày trước
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon warning">
+                  <i class="fas fa-key"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Đã thay đổi mật khẩu</div>
+                  <div class="activity-description">Bảo mật tài khoản đã được cập nhật</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">
+                      <i class="far fa-clock activity-meta-icon"></i>
+                      5 ngày trước
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon success">
+                  <i class="fas fa-camera"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Đã thay đổi ảnh đại diện</div>
+                  <div class="activity-description">Ảnh mới đã được cập nhật thành công</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">
+                      <i class="far fa-clock activity-meta-icon"></i>
+                      1 tuần trước
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-bell section-title-icon"></i>
+                Thông báo mới
+              </h2>
+              <!-- <button class="action-button ripple" onclick="markNotificationsAsRead()">Đánh dấu đã đọc</button> -->
+            </div>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon primary">
+                  <i class="fas fa-gift"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Khuyến mãi đặc biệt</div>
+                  <div class="activity-description">Nhận ngay 50 xu khi nạp 200 xu vào tài khoản. Ưu đãi chỉ áp dụng trong tuần này!</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">
+                      <i class="far fa-clock activity-meta-icon"></i>
+                      1 giờ trước
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon success">
+                  <i class="fas fa-coins"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Nhận thưởng từ tài liệu</div>
+                  <div class="activity-description">Bạn đã nhận được 15 xu từ tài liệu "Lập trình ứng dụng web với React và NodeJS"</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">
+                      <i class="far fa-clock activity-meta-icon"></i>
+                      5 giờ trước
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon warning">
+                  <i class="fas fa-star"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Đánh giá mới</div>
+                  <div class="activity-description">Người dùng Trần Văn A đã đánh giá 5 sao cho tài liệu của bạn</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">
+                      <i class="far fa-clock activity-meta-icon"></i>
+                      1 ngày trước
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <a href="notifications.html" class="view-all-link ripple">
+              Xem tất cả thông báo
+              <i class="fas fa-arrow-right view-all-icon"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-about">
+          <div class="footer-logo">
+            <div class="logo-icon footer-logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </div>
+          <p class="footer-description">
+            Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất lượng cao.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link-profile"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link-profile"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-link-profile"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link-profile"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Khám phá</h3>
+          <ul class="footer-links">
+            <li><a href="../categories.html">Danh mục</a></li>
+            <li><a href="../search.html?sort=newest">Tài liệu mới</a></li>
+            <li><a href="../search.html?sort=popular">Tài liệu phổ biến</a></li>
+            <li><a href="#">Tác giả hàng đầu</a></li>
+            <li><a href="#">Sự kiện & Tin tức</a></li>
+          </ul>
+        </div>
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Thông tin</h3>
+          <ul class="footer-links">
+            <li><a href="#">Giới thiệu</a></li>
+            <li><a href="#">Chính sách bảo mật</a></li>
+            <li><a href="#">Điều khoản sử dụng</a></li>
+            <li><a href="#">Chương trình tác giả</a></li>
+            <li><a href="#">Hợp tác & Liên kết</a></li>
+          </ul>
+        </div>
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Liên hệ</h3>
+          <ul class="contact-info">
+            <li><i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội</li>
+            <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+            <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="copyright">
+          2023 EduShare. Tất cả quyền được bảo lưu.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#">Chính sách bảo mật</a>
+          <a href="#">Điều khoản sử dụng</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Trợ giúp</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back To Top Button -->
+  <button id="backToTop" class="back-to-top ripple">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- Toast Container -->
+  <div id="toastContainer"></div>
+
+  <!-- Confirmation Popup -->
+  <div id="confirmationPopup" class="popup hidden">
+    <div class="popup-content">
+      <h3>Xác nhận</h3>
+      <p id="confirmationMessage"></p>
+      <div class="popup-actions">
+        <button class="btn-secondary ripple" onclick="closePopup()">Hủy</button>
+        <button class="btn-danger ripple" id="confirmAction">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Support Popup -->
+  <div id="supportPopup" class="popup hidden">
+    <div class="popup-content">
+      <h3>Hỗ trợ</h3>
+      <form id="supportForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" required>
+        </div>
+        <div class="form-group">
+          <label>Mô tả vấn đề</label>
+          <textarea style="width: 100%; height: 100px; border-radius: 6px; border: 1px solid #ccc; padding: 10px;" required></textarea>
+        </div>
+        <div class="popup-actions">
+          <button type="submit" class="btn-save ripple">Gửi <span class="spinner"></span></button>
+          <button type="button" class="btn-secondary ripple" onclick="closePopup()">Đóng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chat Widget -->
+  <div id="chatWidget" class="chat-widget hidden">
+    <div class="chat-header" onclick="toggleChat()">
+      <span>Chat Hỗ trợ</span>
+      <i class="fas fa-times" id="closeChat"></i>
+    </div>
+    <div class="chat-body">
+      <div class="chat-messages" id="chatMessages"></div>
+      <form id="chatForm">
+        <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." required>
+        <button type="submit" class="ripple"><i class="fas fa-paper-plane"></i></button>
+      </form>
+    </div>
+  </div>
+  <button class="chat-toggle ripple" onclick="toggleChat()"><i class="fas fa-comment-dots"></i></button>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="../../js/main.js"></script>
+  <script src="../../js/account.js"></script>
+  <script>
+    // Toast Notification
+    function showToast(message, type = 'success') {
+      const toastContainer = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>${message}`;
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Form Validation
+    function validateForm(form) {
+      const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
+      let valid = true;
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.style.borderColor = 'var(--danger)';
+          valid = false;
+        } else {
+          input.style.borderColor = 'var(--gray-300)';
+        }
+      });
+      return valid;
+    }
+
+    // Profile and Account Edit
+    function showProfileEdit() {
+      document.getElementById('profile-edit').classList.remove('hidden');
+      document.getElementById('account-edit').classList.add('hidden');
+      document.getElementById('password-form').classList.add('hidden');
+      document.getElementById('profile-preview').classList.add('hidden');
+    }
+
+    function showAccountEdit() {
+      document.getElementById('account-edit').classList.remove('hidden');
+      document.getElementById('profile-edit').classList.add('hidden');
+      document.getElementById('password-form').classList.add('hidden');
+      document.getElementById('profile-preview').classList.add('hidden');
+    }
+
+    function cancelProfileEdit() {
+      document.getElementById('profile-edit').classList.add('hidden');
+      document.getElementById('profile-preview').classList.remove('hidden');
+    }
+
+    function cancelAccountEdit() {
+      document.getElementById('account-edit').classList.add('hidden');
+      document.getElementById('profile-preview').classList.remove('hidden');
+    }
+
+    // Avatar Upload
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+    avatarInput.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          avatarPreview.src = e.target.result;
+          showToast('Ảnh đã được tải lên!', 'success');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        showToast('Vui lòng chọn file ảnh!', 'error');
+      }
+    });
+
+    function handleAvatarDrop(e) {
+      e.preventDefault();
+      const avatarWrapper = document.querySelector('.avatar-wrapper');
+      avatarWrapper.style.border = 'none';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          avatarPreview.src = reader.result;
+          showToast('Ảnh đã được tải lên!', 'success');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        showToast('Vui lòng chọn file ảnh!', 'error');
+      }
+    }
+
+    // Copy to Clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Đã sao chép mã định danh!', 'success');
+      }).catch(() => {
+        showToast('Lỗi khi sao chép!', 'error');
+      });
+    }
+
+    // Confirmation Popup
+    function showConfirmation(message, callback) {
+      const popup = document.getElementById('confirmationPopup');
+      document.getElementById('confirmationMessage').textContent = message;
+      const confirmButton = document.getElementById('confirmAction');
+      const newConfirmButton = confirmButton.cloneNode(true);
+      confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+      newConfirmButton.addEventListener('click', () => {
+        callback();
+        closePopup();
+      });
+      popup.classList.remove('hidden');
+    }
+
+    function closePopup() {
+      document.getElementById('confirmationPopup').classList.add('hidden');
+      document.getElementById('supportPopup').classList.add('hidden');
+    }
+
+    // Support Popup
+    function showSupportPopup() {
+      document.getElementById('supportPopup').classList.remove('hidden');
+    }
+
+    document.getElementById('supportForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const spinner = e.target.querySelector('.spinner');
+      spinner.style.display = 'inline-block';
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        showToast('Yêu cầu hỗ trợ đã được gửi!', 'success');
+        closePopup();
+      }, 2000);
+    });
+
+    // Chat Widget
+    function toggleChat() {
+      const chatWidget = document.getElementById('chatWidget');
+      chatWidget.classList.toggle('hidden');
+    }
+
+    document.getElementById('chatForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      if (message) {
+        const messages = document.getElementById('chatMessages');
+        messages.insertAdjacentHTML('beforeend', `<div class="chat-message user">${message}</div>`);
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+        setTimeout(() => {
+          messages.insertAdjacentHTML('beforeend', `<div class="chat-message bot">Cảm ơn tin nhắn của bạn! Chúng tôi sẽ trả lời sớm.</div>`);
+          messages.scrollTop = messages.scrollHeight;
+        }, 1000);
+      }
+    });
+
+    // Role Color
+    function updateRoleColor() {
+      const role = document.getElementById('userRole').value;
+      const colorBox = document.getElementById('roleColorBox');
+      const colors = {
+        ADMIN: 'red',
+        TEACHER: 'green',
+        STUDENT: 'goldenrod',
+        MODERATOR: 'blueviolet',
+        USER: 'gray',
+        GUEST: 'darkcyan'
+      };
+      colorBox.style.backgroundColor = colors[role] || 'transparent';
+    }
+
+    // Form Submission Handling
+    document.querySelector('#profile-edit form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const spinner = e.target.querySelector('.spinner');
+      spinner.style.display = 'inline-block';
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      if (validateForm(e.target)) {
+        setTimeout(() => {
+          spinner.style.display = 'none';
+          e.target.querySelector('button[type="submit"]').disabled = false;
+          showToast('Cập nhật hồ sơ thành công!', 'success');
+          cancelProfileEdit();
+        }, 2000);
+      } else {
+        spinner.style.display = 'none';
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        showToast('Vui lòng điền đầy đủ thông tin!', 'error');
+      }
+    });
+
+    document.querySelector('#account-edit form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const spinner = e.target.querySelector('.spinner');
+      spinner.style.display = 'inline-block';
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      if (validateForm(e.target)) {
+        setTimeout(() => {
+          spinner.style.display = 'none';
+          e.target.querySelector('button[type="submit"]').disabled = false;
+          showToast('Cập nhật tài khoản thành công!', 'success');
+          cancelAccountEdit();
+        }, 2000);
+      } else {
+        spinner.style.display = 'none';
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        showToast('Vui lòng điền đầy đủ thông tin!', 'error');
+      }
+    });
+
+    document.querySelector('#password-form form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const spinner = e.target.querySelector('.spinner');
+      spinner.style.display = 'inline-block';
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      if (validateForm(e.target)) {
+        setTimeout(() => {
+          spinner.style.display = 'none';
+          e.target.querySelector('button[type="submit"]').disabled = false;
+          showToast('Đổi mật khẩu thành công!', 'success');
+          document.getElementById('password-form').classList.add('hidden');
+          document.getElementById('profile-preview').classList.remove('hidden');
+        }, 2000);
+      } else {
+        spinner.style.display = 'none';
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        showToast('Vui lòng điền đầy đủ thông tin!', 'error');
+      }
+    });
+
+    // Mark Notifications as Read
+    function markNotificationsAsRead() {
+      const badge = document.querySelector('.sidebar-menu-link[href="notifications.html"] .sidebar-badge');
+      if (badge) {
+        badge.textContent = '0';
+        setTimeout(() => badge.remove(), 300);
+      }
+      showToast('Đã đánh dấu tất cả thông báo là đã đọc!', 'success');
+    }
+
+    // Miscellaneous Functions
+    function requireVerification() {
+      showToast('Vui lòng xác minh danh tính để chỉnh sửa!', 'error');
+    }
+
+    function goToUpgrade() {
+      window.location.href = 'recharge.html';
+    }
+
+    // Chart Initialization
+    document.addEventListener('DOMContentLoaded', function () {
+      const chartOptions = {
+        series: [
+          { name: 'Lượt tải xuống', data: [12, 19, 13, 14, 22, 27, 20] },
+          { name: 'Lượt xem', data: [45, 52, 38, 45, 65, 71, 60] },
+          { name: 'Xu nhận được', data: [5, 8, 7, 10, 12, 15, 10] }
+        ],
+        chart: {
+          height: 350,
+          type: 'area',
+          fontFamily: 'Nunito, sans-serif',
+          toolbar: { show: false }
+        },
+        colors: ['#4361ee', '#10b981', '#f59e0b'],
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
+        fill: {
+          type: 'gradient',
+          gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.3, stops: [0, 90, 100] }
+        },
+        grid: {
+          xaxis: { lines: { show: true } },
+          yaxis: { lines: { show: true } },
+          padding: { top: 0, right: 0, bottom: 0, left: 10 }
+        },
+        xaxis: {
+          categories: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+          labels: { style: { colors: '#6b7280', fontSize: '12px', fontFamily: 'Nunito, sans-serif' } }
+        },
+        yaxis: {
+          labels: {
+            style: { colors: '#6b7280', fontSize: '12px', fontFamily: 'Nunito, sans-serif' },
+            formatter: function (value) { return value.toFixed(0); }
+          }
+        },
+        tooltip: { x: { format: 'dd/MM/yy' }, shared: true },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'right',
+          offsetY: -15,
+          markers: { width: 12, height: 12, radius: 12 },
+          itemMargin: { horizontal: 10 }
+        }
+      };
+
+      const chart = new ApexCharts(document.querySelector("#activityChart") || document.createElement('div'), chartOptions);
+      chart.render();
+
+      // Initialize Role Color
+      updateRoleColor();
+
+      // Add Ripple Effect
+      document.querySelectorAll('.btn-account, .action-button, .btn-save, .btn-secondary, .btn-danger, .btn-upgrade, .view-all-link, .btn-toggle, .refresh-button, .back-to-top, .chat-toggle, .mobile-nav-link, .mobile-login-btn, .mobile-register-btn').forEach(button => {
+        button.classList.add('ripple');
+      });
+    });
+  </script>
+</body>
+</html>
