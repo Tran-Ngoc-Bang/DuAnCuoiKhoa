@@ -19,7 +19,7 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, columnDefinition = "nvarchar(255)")
     private String title;
 
     @Column(name = "slug", unique = true, nullable = false)

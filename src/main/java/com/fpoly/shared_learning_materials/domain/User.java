@@ -27,7 +27,7 @@ public class User {
     @Column(name = "password_hash", length = 255, nullable = false)
     private String passwordHash;
 
-    @Column(name = "full_name", length = 255)
+    @Column(name = "full_name", columnDefinition = "nvarchar(255)")
     private String fullName;
 
     @Column(name = "avatar_url", length = 255)
@@ -36,7 +36,7 @@ public class User {
     @Column(name = "phone_number", length = 50)
     private String phoneNumber;
 
-    @Column(name = "address", columnDefinition = "nvarchar(max)")
+    @Column(name = "address", columnDefinition = "nvarchar(255)")
     private String address;
 
     @Column(name = "bio", columnDefinition = "nvarchar(max)")

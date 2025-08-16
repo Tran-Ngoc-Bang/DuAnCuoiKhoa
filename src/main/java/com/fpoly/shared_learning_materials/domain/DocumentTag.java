@@ -37,4 +37,46 @@ public class DocumentTag {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+	public DocumentTagId getId() {
+		return id;
+	}
+
+	public void setId(DocumentTagId id) {
+		this.id = id;
+	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public Tag getTag() {
+		return tag;
+	}
+
+	public void setTag(Tag tag) {
+		this.tag = tag;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public User getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(User createdBy) {
+		this.createdBy = createdBy;
+	}
+    
+    
 }

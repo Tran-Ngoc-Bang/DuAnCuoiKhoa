@@ -36,4 +36,46 @@ public class CategoryHierarchy {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+	public CategoryHierarchyId getId() {
+		return id;
+	}
+
+	public void setId(CategoryHierarchyId id) {
+		this.id = id;
+	}
+
+	public Category getParent() {
+		return parent;
+	}
+
+	public void setParent(Category parent) {
+		this.parent = parent;
+	}
+
+	public Category getChild() {
+		return child;
+	}
+
+	public void setChild(Category child) {
+		this.child = child;
+	}
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+    
+    
 }

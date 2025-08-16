@@ -27,7 +27,7 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "content", columnDefinition = "nvarchar(max)", nullable = false)
+    @Column(name = "content", columnDefinition = "nvarchar(255)", nullable = false)
     private String content;
 
     @Column(name = "status", length = 20)

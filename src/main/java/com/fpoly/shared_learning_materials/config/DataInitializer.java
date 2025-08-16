@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -53,6 +54,9 @@ public class DataInitializer implements CommandLineRunner {
 
         @Autowired
         private PasswordEncoder passwordEncoder;
+
+        @Autowired
+        private ReplyRepository replyRepository;
 
         @Override
         public void run(String... args) throws Exception {
@@ -105,10 +109,17 @@ public class DataInitializer implements CommandLineRunner {
                 } else {
                         System.out.println("Sample comments already exist, skipping comment initialization.");
                 }
+
+                if (replyRepository.count() == 0) {
+                        createSampleReplies();
+                        System.out.println("Sample replies created successfully!");
+                } else {
+                        System.out.println("Sample replies already exist, skipping reply initialization.");
+                }
+
         }
 
         private void createSampleUsers() {
-                // Create admin user
                 User admin = new User();
                 admin.setUsername("admin");
                 admin.setEmail("admin@example.com");
@@ -123,7 +134,6 @@ public class DataInitializer implements CommandLineRunner {
                 admin.setUpdatedAt(LocalDateTime.now());
                 userRepository.save(admin);
 
-                // Create user1
                 User user1 = new User();
                 user1.setUsername("user1");
                 user1.setEmail("user1@example.com");
@@ -138,7 +148,6 @@ public class DataInitializer implements CommandLineRunner {
                 user1.setUpdatedAt(LocalDateTime.now());
                 userRepository.save(user1);
 
-                // Create user2
                 User user2 = new User();
                 user2.setUsername("user2");
                 user2.setEmail("user2@example.com");
@@ -152,6 +161,76 @@ public class DataInitializer implements CommandLineRunner {
                 user2.setCreatedAt(LocalDateTime.now());
                 user2.setUpdatedAt(LocalDateTime.now());
                 userRepository.save(user2);
+
+                User user3 = new User();
+                user3.setUsername("user3");
+                user3.setEmail("user3@example.com");
+                user3.setPasswordHash(passwordEncoder.encode("password"));
+                user3.setFullName("Người dùng 3");
+                user3.setRole("USER");
+                user3.setStatus("active");
+                user3.setCoinBalance(50);
+                user3.setTotalSpent(new BigDecimal("20000.00"));
+                user3.setTotalCoinsPurchased(70);
+                user3.setCreatedAt(LocalDateTime.now());
+                user3.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user3);
+
+                User user4 = new User();
+                user4.setUsername("user4");
+                user4.setEmail("user4@example.com");
+                user4.setPasswordHash(passwordEncoder.encode("password"));
+                user4.setFullName("Người dùng 4");
+                user4.setRole("USER");
+                user4.setStatus("active");
+                user4.setCoinBalance(0);
+                user4.setTotalSpent(new BigDecimal("0.00"));
+                user4.setTotalCoinsPurchased(0);
+                user4.setCreatedAt(LocalDateTime.now());
+                user4.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user4);
+
+                User user5 = new User();
+                user5.setUsername("user5");
+                user5.setEmail("user5@example.com");
+                user5.setPasswordHash(passwordEncoder.encode("password"));
+                user5.setFullName("Người dùng 5");
+                user5.setRole("USER");
+                user5.setStatus("active");
+                user5.setCoinBalance(120);
+                user5.setTotalSpent(new BigDecimal("74000.00"));
+                user5.setTotalCoinsPurchased(120);
+                user5.setCreatedAt(LocalDateTime.now());
+                user5.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user5);
+
+                User contributor1 = new User();
+                contributor1.setUsername("contributor1");
+                contributor1.setEmail("contributor1@example.com");
+                contributor1.setPasswordHash(passwordEncoder.encode("password"));
+                contributor1.setFullName("Cộng tác viên 1");
+                contributor1.setRole("CONTRIBUTOR");
+                contributor1.setStatus("active");
+                contributor1.setCoinBalance(500);
+                contributor1.setTotalSpent(new BigDecimal("210000.00"));
+                contributor1.setTotalCoinsPurchased(600);
+                contributor1.setCreatedAt(LocalDateTime.now());
+                contributor1.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(contributor1);
+
+                User contributor2 = new User();
+                contributor2.setUsername("contributor2");
+                contributor2.setEmail("contributor2@example.com");
+                contributor2.setPasswordHash(passwordEncoder.encode("password"));
+                contributor2.setFullName("Cộng tác viên 2");
+                contributor2.setRole("CONTRIBUTOR");
+                contributor2.setStatus("active");
+                contributor2.setCoinBalance(300);
+                contributor2.setTotalSpent(new BigDecimal("110000.00"));
+                contributor2.setTotalCoinsPurchased(400);
+                contributor2.setCreatedAt(LocalDateTime.now());
+                contributor2.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(contributor2);
         }
 
         private void createSampleCoinPackages() {
@@ -730,4 +809,53 @@ public class DataInitializer implements CommandLineRunner {
                 comment.setUpdatedAt(comment.getCreatedAt());
                 commentRepository.save(comment);
         }
+
+        private Reply createReply(Comment comment, User user, String content, LocalDateTime now) {
+                Reply reply = new Reply();
+                reply.setComment(comment);
+                reply.setUser(user);
+                reply.setContent(content);
+                reply.setStatus("active");
+                reply.setCreatedAt(now);
+                reply.setUpdatedAt(now);
+                return reply;
+        }
+
+        private void createSampleReplies() {
+                try {
+                        User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
+                        User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
+                        List<Comment> comments = commentRepository.findAll();
+
+                        if (user1 == null || user2 == null || comments.isEmpty()) {
+                                System.err.println("❌ Thiếu user hoặc comment để tạo reply.");
+                                System.err.println("user1: " + (user1 == null ? "null" : "OK"));
+                                System.err.println("user2: " + (user2 == null ? "null" : "OK"));
+                                System.err.println("comments count: " + comments.size());
+                                return;
+                        }
+
+                        LocalDateTime now = LocalDateTime.now();
+
+                        Reply[] replies = {
+                                        createReply(comments.get(0), user2, "Cảm ơn bạn, mình cũng thấy vậy!", now),
+                                        createReply(comments.get(1), user1, "Mình nghĩ là được, nhớ ghi nguồn nhé.",
+                                                        now),
+                                        createReply(comments.get(2), user2, "Ý kiến hay, mình cũng muốn thêm ví dụ.",
+                                                        now),
+                                        createReply(comments.get(3), user1, "Chính xác, rất dễ hiểu luôn.", now),
+                                        createReply(comments.get(4), user2, "Hình như có bản cập nhật hôm trước đấy.",
+                                                        now)
+                        };
+
+                        for (Reply reply : replies) {
+                                replyRepository.save(reply);
+                                System.out.println("✅ Đã lưu reply: " + reply.getContent());
+                        }
+                } catch (Exception e) {
+                        System.err.println("❌ Lỗi khi tạo replies: " + e.getMessage());
+                        e.printStackTrace();
+                }
+        }
+
 }

@@ -36,4 +36,46 @@ public class DocumentOwner {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+	public DocumentOwnerId getId() {
+		return id;
+	}
+
+	public void setId(DocumentOwnerId id) {
+		this.id = id;
+	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public String getOwnershipType() {
+		return ownershipType;
+	}
+
+	public void setOwnershipType(String ownershipType) {
+		this.ownershipType = ownershipType;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+    
+    
 }
