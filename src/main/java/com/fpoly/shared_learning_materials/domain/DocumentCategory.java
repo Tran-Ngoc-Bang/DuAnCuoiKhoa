@@ -33,4 +33,38 @@ public class DocumentCategory {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+	public DocumentCategoryId getId() {
+		return id;
+	}
+
+	public void setId(DocumentCategoryId id) {
+		this.id = id;
+	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+    
+    
 }

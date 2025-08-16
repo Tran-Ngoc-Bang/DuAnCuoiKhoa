@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -83,4 +84,26 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     // Thống kê số giao dịch chờ xử lý
     @Query("SELECT COUNT(t) FROM Transaction t WHERE t.deletedAt IS NULL AND t.status = 'PENDING'")
     long countPendingTransactions();
+    
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.type = :type AND t.status = :status AND t.createdAt BETWEEN :start AND :end AND t.deletedAt IS NULL")
+    BigDecimal sumAmountByTypeAndStatusAndCreatedAtBetween(
+        @Param("type") Transaction.TransactionType type,
+        @Param("status") Transaction.TransactionStatus status,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+    );
+    
+    @Query("SELECT YEAR(t.createdAt), MONTH(t.createdAt), SUM(t.amount) " +
+    	       "FROM Transaction t " +
+    	       "WHERE t.type = :type AND t.status = :status AND t.createdAt BETWEEN :start AND :end AND t.deletedAt IS NULL " +
+    	       "GROUP BY YEAR(t.createdAt), MONTH(t.createdAt) " +
+    	       "ORDER BY YEAR(t.createdAt), MONTH(t.createdAt)")
+	List<Object[]> getMonthlyRevenueSummary(
+	        @Param("type") Transaction.TransactionType type,
+	        @Param("status") Transaction.TransactionStatus status,
+	        @Param("start") LocalDateTime start,
+	        @Param("end") LocalDateTime end
+	);
+
+
 }
