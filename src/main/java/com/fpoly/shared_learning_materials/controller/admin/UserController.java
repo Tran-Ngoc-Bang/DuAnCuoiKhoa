@@ -47,13 +47,10 @@ public class UserController {
 	    @RequestParam(required = false) String dir,       
 	    Model model) {
 
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String currentUsername = auth.getName();
-
 	    String sortBy = (sort != null) ? sort : "createdAt";
 	    Sort.Direction direction = ("desc".equalsIgnoreCase(dir)) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
-	    Page<User> usersPage = userService.searchUsers(keyword, role, status, page, size, sortBy, direction, currentUsername);
+	    Page<User> usersPage = userService.searchUsers(keyword, role, status, page, size, sortBy, direction);
 
 	    model.addAttribute("usersPage", usersPage);
 	    model.addAttribute("currentPage", "users");

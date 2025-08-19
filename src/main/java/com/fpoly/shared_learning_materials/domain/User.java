@@ -105,12 +105,6 @@ public class User {
     @Column(name = "total_coins_purchased")
     private Integer totalCoinsPurchased = 0;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

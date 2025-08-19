@@ -1,588 +1,522 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý người dùng - EduShare Admin</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-      rel="stylesheet"
-    />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý người dùng - EduShare Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
-    <!-- Bootstrap JS bundle (bao gồm Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
-    <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
-    <style>
-      .action-buttons {
-        display: flex;
-        gap: 6px;
-        flex-wrap: nowrap;
-        align-items: center;
-      }
+  <!-- Bootstrap JS bundle (bao gồm Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-      .action-buttons .action-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 6px 8px;
-        border-radius: 4px;
-        background-color: #f1f1f1;
-        color: #333;
-        text-decoration: none;
-        font-size: 14px;
-        transition: background-color 0.2s ease;
-      }
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
 
-      .action-buttons .action-btn i {
-        pointer-events: none;
-      }
+  <style>
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
 
-      .status-badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        color: white;
-        font-weight: bold;
-      }
+    .action-buttons .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background-color: #f1f1f1;
+      color: #333;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
 
-      .status-badge.active {
-        background-color: #28a745;
-      }
+    .action-buttons .action-btn i {
+      pointer-events: none;
+    }
 
-      .status-badge.pending {
-        background-color: #ffc107; /* vàng */
-        color: #333; /* chữ màu tối cho dễ nhìn */
-      }
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+    }
 
-      .status-badge.inactive {
-        background-color: #dc3545; /* đỏ */
-      }
-    </style>
+    .status-badge.active {
+      background-color: #28a745;
+    }
 
-    <style>
-      /* Overlay nền mờ */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-      }
+    .status-badge.pending {
+      background-color: #ffc107;
+      /* vàng */
+      color: #333;
+      /* chữ màu tối cho dễ nhìn */
+    }
 
-      /* Hiện modal */
-      .modal-overlay.active {
-        display: flex;
-      }
+    .status-badge.inactive {
+      background-color: #dc3545;
+      /* đỏ */
+    }
+  </style>
 
-      /* Hộp modal */
-      .modal-box {
-        background: white;
-        border-radius: 6px;
-        padding: 20px;
-        max-width: 400px;
-        width: 90%;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        text-align: center;
-      }
+  <style>
+    /* Overlay nền mờ */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
 
-      .modal-title {
-        font-size: 1.25rem;
-        margin-bottom: 12px;
-        font-weight: bold;
-      }
+    /* Hiện modal */
+    .modal-overlay.active {
+      display: flex;
+    }
 
-      .modal-message {
-        margin-bottom: 20px;
-      }
+    /* Hộp modal */
+    .modal-box {
+      background: white;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
 
-      /* Nút */
-      .btn {
-        cursor: pointer;
-        padding: 8px 16px;
-        border-radius: 4px;
-        border: none;
-        font-weight: 600;
-        margin: 0 6px;
-        transition: background-color 0.2s ease;
-        min-width: 90px;
-      }
+    .modal-title {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
 
-      .btn-confirm {
-        background-color: #007bff;
-        color: white;
-      }
-      .btn-confirm.lock {
-        background-color: #ffc107;
-      } /* vàng */
-      .btn-confirm.unlock {
-        background-color: #28a745;
-      } /* xanh lá */
-      .btn-confirm.delete {
-        background-color: #dc3545;
-      } /* đỏ */
-      .btn-confirm.approve {
-        background-color: #007bff;
-      } /* xanh dương */
-      .btn-confirm.reject {
-        background-color: #6c757d;
-      } /* xám */
+    .modal-message {
+      margin-bottom: 20px;
+    }
 
-      .btn-confirm:hover {
-        filter: brightness(0.9);
-      }
+    /* Nút */
+    .btn {
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      font-weight: 600;
+      margin: 0 6px;
+      transition: background-color 0.2s ease;
+      min-width: 90px;
+    }
 
-      .btn-cancel {
-        background-color: #6c757d;
-        color: white;
-      }
-      .btn-cancel:hover {
-        filter: brightness(0.8);
-      }
-    </style>
-  </head>
+    .btn-confirm {
+      background-color: #007bff;
+      color: white;
+    }
 
-  <body class="admin-body">
-    <!-- Admin Header -->
-    <div th:replace="~{fragments/admin/layout :: header}"></div>
+    .btn-confirm.lock {
+      background-color: #ffc107;
+    }
 
-    <!-- Admin Container -->
-    <div class="admin-container">
-      <!-- Sidebar -->
-      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
-      <!-- Main Content -->
-      <main class="admin-content">
-        <div class="admin-content-header">
-          <h1 class="admin-page-title">Quản lý người dùng</h1>
-          <div class="admin-breadcrumbs">
-            <a href="/admin">Admin</a>
-            <span>/</span>
-            <span>Quản lý người dùng</span>
-          </div>
+    /* vàng */
+    .btn-confirm.unlock {
+      background-color: #28a745;
+    }
+
+    /* xanh lá */
+    .btn-confirm.delete {
+      background-color: #dc3545;
+    }
+
+    /* đỏ */
+    .btn-confirm.approve {
+      background-color: #007bff;
+    }
+
+    /* xanh dương */
+    .btn-confirm.reject {
+      background-color: #6c757d;
+    }
+
+    /* xám */
+
+    .btn-confirm:hover {
+      filter: brightness(0.9);
+    }
+
+    .btn-cancel {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      vertical-align: middle;
+      display: inline-block;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+      background-color: #5a6268;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      vertical-align: middle;
+      display: inline-block;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body class="admin-body">
+  <!-- Admin Header -->
+  <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+  <!-- Admin Container -->
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+    <!-- Main Content -->
+    <main class="admin-content">
+      <div>
+        <h1 class="admin-page-title">Quản lý người dùng</h1>
+        <div class="admin-breadcrumbs">
+          <a th:href="@{/admin}">Admin</a>
+          <span class="breadcrumb-separator">/</span>
+          <span>Quản lý người dùng</span>
         </div>
-        <div class="flash-messages">
-          <div
-            th:if="${successMessage}"
-            class="alert alert-success"
-            th:text="${successMessage}"
-          ></div>
-          <div
-            th:if="${errorMessage}"
-            class="alert alert-danger"
-            th:text="${errorMessage}"
-          ></div>
-        </div>
+      </div>
+      <div class="flash-messages">
+        <div th:if="${successMessage}" class="alert alert-success flash-alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger flash-alert" th:text="${errorMessage}"></div>
+      </div>
 
-        <!-- User Management Tools -->
-        <div class="management-tools">
-          <form method="get" class="search-filters">
-            <div class="tool-item">
-              <input
-                type="text"
-                name="keyword"
-                placeholder="Tìm kiếm người dùng..."
-                class="search-input"
-                th:value="${keyword}"
-              />
-            </div>
-            <div class="tool-item">
-              <select name="role" class="filter-select">
-                <option
-                  value="all"
-                  th:selected="${selectedRole == null or selectedRole == 'all'}"
-                >
-                  Tất cả vai trò
-                </option>
-                <option value="admin" th:selected="${selectedRole == 'admin'}">
-                  Admin
-                </option>
-                <option value="user" th:selected="${selectedRole == 'user'}">
-                  User
-                </option>
-                <option
-                  value="contributor"
-                  th:selected="${selectedRole == 'contributor'}"
-                >
-                  Contributor
-                </option>
-              </select>
-            </div>
-            <div class="tool-item">
-              <select name="status" class="filter-select">
-                <option
-                  value="all"
-                  th:selected="${selectedStatus == null or selectedStatus == 'all'}"
-                >
-                  Tất cả trạng thái
-                </option>
-                <option
-                  value="active"
-                  th:selected="${selectedStatus == 'active'}"
-                >
-                  Hoạt động
-                </option>
-                <option
-                  value="inactive"
-                  th:selected="${selectedStatus == 'inactive'}"
-                >
-                  Tạm khóa
-                </option>
-                <option
-                  value="pending"
-                  th:selected="${selectedStatus == 'pending'}"
-                >
-                  Chờ xác nhận
-                </option>
-              </select>
-            </div>
-          </form>
+      <script>
+        setTimeout(function () {
+          const alerts = document.querySelectorAll('.flash-alert');
+          alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s ease-out';
+            alert.style.opacity = '0';
 
-          <div class="action-buttons">
-            <a th:href="@{/admin/users/create}" class="add-new-btn">
-              <i class="fas fa-plus"></i> Thêm người dùng
-            </a>
-          </div>
-        </div>
-        <!-- Users Table -->
-        <div class="data-container">
-          <table class="data-table users-table">
-            <thead>
-              <tr>
-                <th>STT</th>
-                <th>Người dùng</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-
-                <th class="sortable" data-sort="createdAt">
-                  <a
-                    th:href="@{/admin/users(sort='createdAt', dir=${(sort == 'createdAt' and dir == 'asc') ? 'desc' : 'asc'})}"
-                    style="color: inherit; text-decoration: none"
-                  >
-                    Ngày tạo
-                    <i
-                      class="fas fa-sort-up"
-                      th:if="${sort == 'createdAt' and dir == 'asc'}"
-                    ></i>
-                    <i
-                      class="fas fa-sort-down"
-                      th:if="${sort == 'createdAt' and dir == 'desc'}"
-                    ></i>
-                    <i class="fas fa-sort" th:if="${sort != 'createdAt'}"></i>
-                  </a>
-                </th>
-
-                <th class="sortable" data-sort="downloads">
-                  Lượt tải <i class="fas fa-sort"></i>
-                </th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="user, iterStat : ${usersPage.content}">
-                <td
-                  th:text="${iterStat.index + 1 + (usersPage.number * usersPage.size)}"
-                >
-                  1
-                </td>
-                <td>
-                  <div class="user-info">
-                    <img
-                      th:src="${user.avatarUrl != null} ? @{${user.avatarUrl}} : @{/images/default-avatar.png}"
-                      th:alt="${user.fullName}"
-                      class="user-avatar"
-                    />
-
-                    <div class="user-details">
-                      <div class="user-name" th:text="${user.fullName}"></div>
-                      <div class="user-username">
-                        @<span th:text="${user.username}"></span>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td th:text="${user.email}"></td>
-                <td>
-                  <span
-                    th:class="'role-badge ' + ${user.role}"
-                    th:text="${#strings.toUpperCase(user.role)}"
-                  ></span>
-                </td>
-                <td
-                  th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}"
-                ></td>
-                <td>--</td>
-                <td>
-                  <span
-                    th:class="'status-badge ' + ${user.status}"
-                    th:text="${user.status == 'active' ? 'Hoạt động' : (user.status == 'pending' ? 'Chờ xác nhận' : 'Tạm khóa')}"
-                  >
-                  </span>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <a
-                      th:href="@{'/admin/users/' + ${user.id} + '/detail'}"
-                      type="button"
-                      class="action-btn"
-                      title="Xem chi tiết"
-                    >
-                      <i class="fas fa-eye"></i>
-                    </a>
-
-                    <a
-                      th:if="${user.status == 'active'}"
-                      th:href="@{/admin/users/{id}/edit(id=${user.id})}"
-                      class="action-btn edit-user-btn"
-                      title="Chỉnh sửa"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </a>
-
-                    <a
-                      href="#"
-                      class="action-btn"
-                      th:data-userid="${user.id}"
-                      data-action="lock"
-                      th:if="${user.status == 'active'}"
-                      title="Khóa tài khoản"
-                    >
-                      <i class="fas fa-lock"></i>
-                    </a>
-
-                    <a
-                      href="#"
-                      class="action-btn"
-                      th:data-userid="${user.id}"
-                      data-action="unlock"
-                      th:if="${user.status == 'inactive'}"
-                      title="Mở khóa"
-                    >
-                      <i class="fas fa-unlock"></i>
-                    </a>
-
-                    <a
-                      th:href="@{/admin/users/{id}/delete(id=${user.id})}"
-                      class="action-btn"
-                      th:if="${user.status == 'inactive'}"
-                      title="Xóa tài khoản"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </a>
-
-                    <a
-                      href="#"
-                      class="action-btn"
-                      th:data-userid="${user.id}"
-                      data-action="approve"
-                      th:if="${user.status == 'pending'}"
-                      title="Xác nhận tài khoản"
-                    >
-                      <i class="fas fa-check"></i>
-                    </a>
-
-                    <a
-                      href="#"
-                      class="action-btn"
-                      th:data-userid="${user.id}"
-                      data-action="reject"
-                      th:if="${user.status == 'pending'}"
-                      title="Từ chối tài khoản"
-                    >
-                      <i class="fas fa-times"></i>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="modal-overlay" id="customModal">
-            <div
-              class="modal-box"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="modalTitle"
-              aria-describedby="modalMessage"
-            >
-              <div class="modal-title" id="modalTitle">Xác nhận hành động</div>
-              <div class="modal-message" id="modalMessage">
-                Bạn có chắc chắn muốn thực hiện?
-              </div>
-              <div>
-                <button class="btn btn-cancel" id="modalCancelBtn">Hủy</button>
-                <a href="#" id="modalConfirmBtn" class="btn btn-confirm"
-                  >Xác nhận</a
-                >
-              </div>
-            </div>
-          </div>
-
-          <script>
-            const modal = document.getElementById("customModal");
-            const modalTitle = document.getElementById("modalTitle");
-            const modalMessage = document.getElementById("modalMessage");
-            const modalConfirmBtn = document.getElementById("modalConfirmBtn");
-            const modalCancelBtn = document.getElementById("modalCancelBtn");
-
-            const actionConfig = {
-              lock: {
-                title: "Xác nhận khóa tài khoản",
-                message: "Bạn có chắc chắn muốn khóa tài khoản này?",
-                btnText: "Khóa tài khoản",
-                btnClass: "lock",
-              },
-              unlock: {
-                title: "Xác nhận mở khóa tài khoản",
-                message: "Bạn có chắc chắn muốn mở khóa tài khoản này?",
-                btnText: "Mở khóa",
-                btnClass: "unlock",
-              },
-              delete: {
-                title: "Xác nhận xóa tài khoản",
-                message: "Bạn có chắc chắn muốn xóa tài khoản này?",
-                btnText: "Xóa",
-                btnClass: "delete",
-              },
-              approve: {
-                title: "Xác nhận tài khoản",
-                message: "Bạn có chắc chắn muốn xác nhận tài khoản này?",
-                btnText: "Xác nhận",
-                btnClass: "approve",
-              },
-              reject: {
-                title: "Từ chối tài khoản",
-                message: "Bạn có chắc chắn muốn từ chối tài khoản này?",
-                btnText: "Từ chối",
-                btnClass: "reject",
-              },
-            };
-
-            function openModal(userId, action) {
-              const config = actionConfig[action];
-              if (!config) return;
-
-              modalTitle.textContent = config.title;
-              modalMessage.textContent = config.message;
-              modalConfirmBtn.textContent = config.btnText;
-
-              modalConfirmBtn.className = "btn btn-confirm " + config.btnClass;
-              modalConfirmBtn.href = `/admin/users/${userId}/${action}`;
-
-              modal.classList.add("active");
-            }
-
-            function closeModal() {
-              modal.classList.remove("active");
-            }
-
-            document.querySelectorAll(".action-btn").forEach((btn) => {
-              if (btn.hasAttribute("data-action")) {
-                btn.addEventListener("click", (e) => {
-                  e.preventDefault();
-                  const userId = btn.getAttribute("data-userid");
-                  const action = btn.getAttribute("data-action");
-                  openModal(userId, action);
-                });
-              }
-            });
-
-            modalCancelBtn.addEventListener("click", closeModal);
-            modal.addEventListener("click", (e) => {
-              if (e.target === modal) closeModal();
-            });
-
-            document.addEventListener("keydown", (e) => {
-              if (e.key === "Escape" && modal.classList.contains("active")) {
-                closeModal();
-              }
-            });
-          </script>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination">
-          <button
-            type="button"
-            class="pagination-btn prev-btn"
-            th:disabled="${usersPage.first}"
-            th:attr="data-url='?page=' + (${current} - 1) + '&size=' + ${usersPage.size}"
-            onclick="window.location.href=this.dataset.url"
-          >
-            <i class="fas fa-chevron-left"></i>
-          </button>
-
-          <div class="pagination-pages">
-            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-              <button
-                type="button"
-                class="pagination-btn page-btn"
-                th:classappend="${i} == ${current} ? ' active' : ''"
-                th:text="${i + 1}"
-                th:attr="data-url='?page=' + ${i} + '&size=' + ${usersPage.size}"
-                onclick="window.location.href=this.dataset.url"
-              ></button>
-            </span>
-          </div>
-
-          <button
-            type="button"
-            class="pagination-btn next-btn"
-            th:disabled="${usersPage.last}"
-            th:attr="data-url='?page=' + (${current} + 1) + '&size=' + ${usersPage.size}"
-            onclick="window.location.href=this.dataset.url"
-          >
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </main>
-    </div>
-    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const form = document.querySelector(".search-filters");
-        const keywordInput = form.querySelector('input[name="keyword"]');
-        const selects = form.querySelectorAll("select");
-
-        selects.forEach((select) => {
-          select.addEventListener("change", () => form.submit());
-        });
-
-        keywordInput.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            form.submit();
-          }
-        });
-
-        document.querySelectorAll("a[data-confirm]").forEach((link) => {
-          link.addEventListener("click", (e) => {
-            const message = link.getAttribute("data-confirm");
-            if (!confirm(message)) e.preventDefault();
+            setTimeout(() => {
+              alert.style.display = 'none';
+            }, 500);
           });
+        }, 3000);
+      </script>
+
+      <div class="section-header">
+        <h2>Quản lý người dùng</h2>
+        <div class="section-actions">
+          <a th:href="@{/admin/users/create}" class="add-package-btn"
+            onclick="console.log('Add user button clicked (section)')">
+            <i class="fas fa-plus"></i> Thêm người dùng mới
+          </a>
+        </div>
+      </div>
+
+      <!-- User Management Tools -->
+      <div class="management-tools">
+        <form method="get" class="search-filters">
+          <div class="tool-item">
+            <input type="text" name="keyword" placeholder="Tìm kiếm theo tên đăng nhập, email..." class="search-input"
+              th:value="${keyword}" />
+          </div>
+          <div class="tool-item">
+            <select name="role" class="filter-select">
+              <option value="all" th:selected="${selectedRole == null or selectedRole == 'all'}">
+                Tất cả vai trò
+              </option>
+              <option value="admin" th:selected="${selectedRole == 'admin'}">
+                Admin
+              </option>
+              <option value="user" th:selected="${selectedRole == 'user'}">
+                User
+              </option>
+              <option value="contributor" th:selected="${selectedRole == 'contributor'}">
+                Contributor
+              </option>
+            </select>
+          </div>
+          <div class="tool-item">
+            <select name="status" class="filter-select">
+              <option value="all" th:selected="${selectedStatus == null or selectedStatus == 'all'}">
+                Tất cả trạng thái
+              </option>
+              <option value="active" th:selected="${selectedStatus == 'active'}">
+                Hoạt động
+              </option>
+              <option value="inactive" th:selected="${selectedStatus == 'inactive'}">
+                Tạm khóa
+              </option>
+              <option value="pending" th:selected="${selectedStatus == 'pending'}">
+                Chờ xác nhận
+              </option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <!-- Users Table -->
+      <div class="data-container">
+        <table class="data-table users-table">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Tên đăng nhập</th>
+              <th>Email</th>
+              <th>Vai trò</th>
+
+              <th class="sortable" data-sort="createdAt">
+                <a th:href="@{/admin/users(sort='createdAt', dir=${(sort == 'createdAt' and dir == 'asc') ? 'desc' : 'asc'})}"
+                  style="color: inherit; text-decoration: none">
+                  Ngày tạo
+                  <i class="fas fa-sort-up" th:if="${sort == 'createdAt' and dir == 'asc'}"></i>
+                  <i class="fas fa-sort-down" th:if="${sort == 'createdAt' and dir == 'desc'}"></i>
+                  <i class="fas fa-sort" th:if="${sort != 'createdAt'}"></i>
+                </a>
+              </th>
+
+              <th class="sortable" data-sort="downloads">
+                Lượt tải <i class="fas fa-sort"></i>
+              </th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="user, iterStat : ${usersPage.content}">
+              <td th:text="${iterStat.index + 1 + (usersPage.number * usersPage.size)}">
+                1
+              </td>
+              <td>
+                <div class="user-info">
+                  <img th:src="${user.avatarUrl != null} ? @{${user.avatarUrl}} : @{/assets/images/default-avatar.png}"
+                    th:alt="${user.fullName}" class="user-avatar" />
+
+                  <div class="user-details">
+                    <div class="user-name" th:text="${user.username}"></div>
+                  </div>
+                </div>
+              </td>
+              <td th:text="${user.email}"></td>
+              <td>
+                <span th:class="'role-badge ' + ${user.role}" th:text="${#strings.toUpperCase(user.role)}"></span>
+              </td>
+              <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}"></td>
+              <td>--</td>
+              <td>
+                <span th:class="'status-badge ' + ${user.status}"
+                  th:text="${user.status == 'active' ? 'Hoạt động' : (user.status == 'pending' ? 'Chờ xác nhận' : 'Tạm khóa')}">
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <a th:href="@{'/admin/users/' + ${user.id} + '/detail'}" type="button" class="action-btn"
+                    title="Xem chi tiết">
+                    <i class="fas fa-eye"></i>
+                  </a>
+
+                  <a th:if="${user.status == 'active'}" th:href="@{/admin/users/{id}/edit(id=${user.id})}"
+                    class="action-btn edit-user-btn" title="Chỉnh sửa">
+                    <i class="fas fa-edit"></i>
+                  </a>
+
+                  <a href="#" class="action-btn" th:data-userid="${user.id}" data-action="lock"
+                    th:if="${user.status == 'active'}" title="Khóa tài khoản">
+                    <i class="fas fa-lock"></i>
+                  </a>
+
+                  <a href="#" class="action-btn" th:data-userid="${user.id}" data-action="unlock"
+                    th:if="${user.status == 'inactive'}" title="Mở khóa">
+                    <i class="fas fa-unlock"></i>
+                  </a>
+
+                  <a th:href="@{/admin/users/{id}/delete(id=${user.id})}" class="action-btn"
+                    th:if="${user.status == 'inactive'}" title="Xóa tài khoản">
+                    <i class="fas fa-trash"></i>
+                  </a>
+
+                  <a href="#" class="action-btn" th:data-userid="${user.id}" data-action="approve"
+                    th:if="${user.status == 'pending'}" title="Xác nhận tài khoản">
+                    <i class="fas fa-check"></i>
+                  </a>
+
+                  <a href="#" class="action-btn" th:data-userid="${user.id}" data-action="reject"
+                    th:if="${user.status == 'pending'}" title="Từ chối tài khoản">
+                    <i class="fas fa-times"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="modal-overlay" id="customModal">
+          <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
+            aria-describedby="modalMessage">
+            <div class="modal-title" id="modalTitle">Xác nhận hành động</div>
+            <div class="modal-message" id="modalMessage">
+              Bạn có chắc chắn muốn thực hiện?
+            </div>
+            <div>
+              <button class="btn btn-cancel" id="modalCancelBtn">Hủy</button>
+              <a href="#" id="modalConfirmBtn" class="btn btn-confirm">Xác nhận</a>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          const modal = document.getElementById("customModal");
+          const modalTitle = document.getElementById("modalTitle");
+          const modalMessage = document.getElementById("modalMessage");
+          const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+          const modalCancelBtn = document.getElementById("modalCancelBtn");
+
+          const actionConfig = {
+            lock: {
+              title: "Xác nhận khóa tài khoản",
+              message: "Bạn có chắc chắn muốn khóa tài khoản này?",
+              btnText: "Khóa tài khoản",
+              btnClass: "lock",
+            },
+            unlock: {
+              title: "Xác nhận mở khóa tài khoản",
+              message: "Bạn có chắc chắn muốn mở khóa tài khoản này?",
+              btnText: "Mở khóa",
+              btnClass: "unlock",
+            },
+            delete: {
+              title: "Xác nhận xóa tài khoản",
+              message: "Bạn có chắc chắn muốn xóa tài khoản này?",
+              btnText: "Xóa",
+              btnClass: "delete",
+            },
+            approve: {
+              title: "Xác nhận tài khoản",
+              message: "Bạn có chắc chắn muốn xác nhận tài khoản này?",
+              btnText: "Xác nhận",
+              btnClass: "approve",
+            },
+            reject: {
+              title: "Từ chối tài khoản",
+              message: "Bạn có chắc chắn muốn từ chối tài khoản này?",
+              btnText: "Từ chối",
+              btnClass: "reject",
+            },
+          };
+
+          function openModal(userId, action) {
+            const config = actionConfig[action];
+            if (!config) return;
+
+            modalTitle.textContent = config.title;
+            modalMessage.textContent = config.message;
+            modalConfirmBtn.textContent = config.btnText;
+
+            modalConfirmBtn.className = "btn btn-confirm " + config.btnClass;
+            modalConfirmBtn.href = `/admin/users/${userId}/${action}`;
+
+            modal.classList.add("active");
+          }
+
+          function closeModal() {
+            modal.classList.remove("active");
+          }
+
+          document.querySelectorAll(".action-btn").forEach((btn) => {
+            if (btn.hasAttribute("data-action")) {
+              btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                const userId = btn.getAttribute("data-userid");
+                const action = btn.getAttribute("data-action");
+                openModal(userId, action);
+              });
+            }
+          });
+
+          modalCancelBtn.addEventListener("click", closeModal);
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+          });
+
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && modal.classList.contains("active")) {
+              closeModal();
+            }
+          });
+        </script>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button type="button" class="pagination-btn prev-btn" th:disabled="${usersPage.first}"
+          th:attr="data-url='?page=' + (${current} - 1) + '&size=' + ${usersPage.size}"
+          onclick="window.location.href=this.dataset.url">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="pagination-pages">
+          <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <button type="button" class="pagination-btn page-btn" th:classappend="${i} == ${current} ? ' active' : ''"
+              th:text="${i + 1}" th:attr="data-url='?page=' + ${i} + '&size=' + ${usersPage.size}"
+              onclick="window.location.href=this.dataset.url"></button>
+          </span>
+        </div>
+
+        <button type="button" class="pagination-btn next-btn" th:disabled="${usersPage.last}"
+          th:attr="data-url='?page=' + (${current} + 1) + '&size=' + ${usersPage.size}"
+          onclick="window.location.href=this.dataset.url">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </main>
+  </div>
+  <div th:replace="~{fragments/admin/layout :: scripts}"></div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector(".search-filters");
+      const keywordInput = form.querySelector('input[name="keyword"]');
+      const selects = form.querySelectorAll("select");
+
+      selects.forEach((select) => {
+        select.addEventListener("change", () => form.submit());
+      });
+
+      keywordInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          form.submit();
+        }
+      });
+
+      document.querySelectorAll("a[data-confirm]").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const message = link.getAttribute("data-confirm");
+          if (!confirm(message)) e.preventDefault();
         });
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>

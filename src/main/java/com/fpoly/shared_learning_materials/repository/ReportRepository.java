@@ -1,24 +1,18 @@
 package com.fpoly.shared_learning_materials.repository;
 
-
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.fpoly.shared_learning_materials.domain.Report;
 
-
-import com.fpoly.shared_learning_materials.domain.Report;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
@@ -128,25 +122,61 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     Optional<Report> findFirstByCommentIdAndStatusOrderByCreatedAtDesc(Long commentId, String status);
 
-     // Find reports by comment
+    // Find reports by comment
     List<Report> findByCommentId(Long commentId);
-    
+
     // Find reports by document
     List<Report> findByDocumentId(Long documentId);
-    
+
     // Find reports by reporter
     List<Report> findByReporterId(Long reporterId);
-    
+
     // Check if user already reported a comment
     @Query("SELECT r FROM Report r WHERE r.reporter.id = :reporterId AND r.comment.id = :commentId")
-    Optional<Report> findByReporterIdAndCommentId(@Param("reporterId") Long reporterId, @Param("commentId") Long commentId);
-    
+    Optional<Report> findByReporterIdAndCommentId(@Param("reporterId") Long reporterId,
+            @Param("commentId") Long commentId);
+
     // Check if user already reported a document
     @Query("SELECT r FROM Report r WHERE r.reporter.id = :reporterId AND r.document.id = :documentId")
-    Optional<Report> findByReporterIdAndDocumentId(@Param("reporterId") Long reporterId, @Param("documentId") Long documentId);
-    
-    
+    Optional<Report> findByReporterIdAndDocumentId(@Param("reporterId") Long reporterId,
+            @Param("documentId") Long documentId);
+
     // Count reports by comment
     long countByCommentId(Long commentId);
 
+    Page<Report> findByStatusIgnoreCase(String status, Pageable pageable);
+
+    @Query("SELECT r FROM Report r WHERE " +
+            "(LOWER(r.reason) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(r.type) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Report> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Report r WHERE " +
+            "(LOWER(r.reason) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(r.type) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND LOWER(r.status) = LOWER(:status)")
+    Page<Report> searchByKeywordAndStatus(@Param("keyword") String keyword,
+            @Param("status") String status,
+            Pageable pageable);
+
+    long countByStatusIgnoreCase(String status);
+
+    Page<Report> findByStatus(String status, Pageable pageable);
+
+    Page<Report> findByType(String type, Pageable pageable);
+
+    Page<Report> findByStatusAndType(String status, String type, Pageable pageable);
+
+    @Query("SELECT r FROM Report r " +
+            "WHERE (:keyword IS NULL OR r.reason LIKE %:keyword% OR r.type LIKE %:keyword%) " +
+
+            "AND (:status = 'all' OR r.status = :status) " +
+            "AND (:type = 'all' OR r.type = :type)")
+    Page<Report> searchReports(@Param("keyword") String keyword,
+            @Param("status") String status,
+            @Param("type") String type,
+            Pageable pageable);
+
+    @Query("SELECT COUNT(DISTINCT r.comment.id) FROM Report r WHERE r.comment IS NOT NULL")
+    long countReportedComments();
 }

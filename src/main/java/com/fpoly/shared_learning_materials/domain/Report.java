@@ -35,6 +35,12 @@ public class Report {
     @Column(name = "reason", columnDefinition = "nvarchar(max)", nullable = false)
     private String reason;
 
+	@Column(name = "note", columnDefinition = "nvarchar(255)")
+    private String note;
+
+	@Column(name = "reply", columnDefinition = "nvarchar(255)")
+    private String reply;
+
     @Column(name = "status", length = 20)
     private String status = "pending";
 
