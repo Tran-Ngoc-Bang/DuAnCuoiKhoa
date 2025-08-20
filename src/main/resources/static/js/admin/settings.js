@@ -1,105 +1,131 @@
+// Settings page JavaScript functionality
 
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function () {
-    setupEventListeners();
-});
-
-function setupEventListeners() {
-    // Settings navigation
-    document.querySelectorAll('.settings-nav-item').forEach(item => {
-        item.addEventListener('click', function () {
-            const section = this.dataset.section;
-            switchSection(section);
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.settings-nav-item');
+    const tabContents = document.querySelectorAll('.settings-section');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-section');
+            
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            const targetContent = document.getElementById(targetTab);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         });
     });
-}
-
-function switchSection(sectionName) {
-    // Update navigation
-    document.querySelectorAll('.settings-nav-item').forEach(item => {
-        item.classList.remove('active');
+    
+    // Form submission feedback
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                
+                // Re-enable after 3 seconds to prevent permanent disable
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }, 3000);
+            }
+        });
     });
-    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+});
 
-    // Update content
-    document.querySelectorAll('.settings-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    document.getElementById(sectionName).classList.add('active');
-}
-
-function saveAllSettings() {
-    showToast('Đang lưu cài đặt...', 'info');
-
-    // Simulate save process
-    setTimeout(() => {
-        showToast('Đã lưu tất cả cài đặt thành công!', 'success');
-    }, 1500);
-}
-
-function resetSettings() {
-    if (confirm('Bạn có chắc chắn muốn khôi phục tất cả cài đặt về mặc định? Thao tác này không thể hoàn tác.')) {
-        showToast('Đang khôi phục cài đặt mặc định...', 'info');
-
-        setTimeout(() => {
-            showToast('Đã khôi phục cài đặt mặc định thành công!', 'success');
-            // Simulate page reload
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        }, 1500);
+// Test email connection
+function testEmailConnection() {
+    const smtpServer = document.querySelector('input[name="smtpServer"]').value;
+    const smtpPort = document.querySelector('input[name="smtpPort"]').value;
+    const emailSender = document.querySelector('input[name="emailSender"]').value;
+    const smtpPassword = document.querySelector('input[name="smtpPassword"]').value;
+    
+    if (!smtpServer || !smtpPort || !emailSender || !smtpPassword) {
+        alert('Vui lòng điền đầy đủ thông tin email trước khi test!');
+        return;
     }
-}
-
-function exportSettings() {
-    showToast('Đang xuất file cấu hình...', 'info');
-
-    // Simulate export process
-    setTimeout(() => {
-        showToast('Đã xuất file cấu hình thành công!', 'success');
-    }, 1500);
-}
-
-function createBackup() {
-    showToast('Đang tạo backup...', 'info');
-
-    // Simulate backup process
-    setTimeout(() => {
-        showToast('Đã tạo backup thành công!', 'success');
-    }, 3000);
-}
-
-function viewBackups() {
-    showToast('Chức năng xem danh sách backup đang được phát triển', 'info');
-}
-
-function restoreBackup() {
-    if (confirm('Bạn có chắc chắn muốn phục hồi từ backup? Dữ liệu hiện tại sẽ bị ghi đè.')) {
-        showToast('Chức năng phục hồi backup đang được phát triển', 'info');
-    }
-}
-
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-
-    const iconMap = {
-        'success': 'fas fa-check-circle',
-        'error': 'fas fa-exclamation-circle',
-        'warning': 'fas fa-exclamation-triangle',
-        'info': 'fas fa-info-circle'
+    
+    // Show loading
+    const testBtn = event.target;
+    const originalText = testBtn.innerHTML;
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang test...';
+    
+    // Create form and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/settings/email/test';
+    form.style.display = 'none';
+    
+    const fields = {
+        'smtpServer': smtpServer,
+        'smtpPort': smtpPort,
+        'emailSender': emailSender,
+        'smtpPassword': smtpPassword
     };
+    
+    Object.keys(fields).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = fields[key];
+        form.appendChild(input);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+}
 
+// Auto-save settings (optional)
+function autoSaveSettings() {
+    const form = document.getElementById('settingsForm');
+    if (form) {
+        const formData = new FormData(form);
+        
+        fetch('/admin/settings/save', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                showToast('Cài đặt đã được lưu tự động', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Auto-save failed:', error);
+        });
+    }
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
     toast.innerHTML = `
-        <i class="${iconMap[type] || iconMap.info}"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: auto;">
+        <div class="toast-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">
             <i class="fas fa-times"></i>
         </button>
     `;
-
-    document.getElementById('toastContainer').appendChild(toast);
-
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
     setTimeout(() => {
         if (toast.parentElement) {
             toast.remove();

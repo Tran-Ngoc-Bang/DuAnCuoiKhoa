@@ -1,6 +1,8 @@
 package com.fpoly.shared_learning_materials.controller.admin;
 
 import com.fpoly.shared_learning_materials.domain.Transaction;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 // import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.service.TransactionService;
 import com.fpoly.shared_learning_materials.service.UserService;
@@ -19,13 +21,17 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/transactions")
-public class TransactionController {
+public class TransactionController extends BaseAdminController {
 
     @Autowired
     private TransactionService transactionService;
 
     @Autowired
     private UserService userService;
+
+     public TransactionController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 
     /**
      * Hiển thị danh sách giao dịch với phân trang và tìm kiếm

@@ -22,6 +22,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.UserDTO;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 import com.fpoly.shared_learning_materials.service.UserService;
 import com.fpoly.shared_learning_materials.util.ImageUtils;
 import com.fpoly.shared_learning_materials.util.UserExcelExporter;
@@ -32,9 +34,13 @@ import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/admin/users")
-public class UserController {
+public class UserController extends BaseAdminController {
 	@Autowired
 	private UserService userService;
+
+	public UserController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 
 	@GetMapping
 	public String showUsersPage(

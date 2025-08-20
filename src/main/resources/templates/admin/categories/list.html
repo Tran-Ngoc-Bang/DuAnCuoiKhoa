@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    
+    <!-- Flash Attributes for Toast -->
+    <meta name="flash-success" th:content="${success}" th:if="${success}"/>
+    <meta name="flash-error" th:content="${error}" th:if="${error}"/>
+    <meta name="flash-warning" th:content="${warning}" th:if="${warning}"/>
+    <meta name="flash-info" th:content="${info}" th:if="${info}"/>
     <title>Quản lý danh mục - EduShare Admin</title>
     <link
       rel="stylesheet"
@@ -21,10 +27,12 @@
     <link rel="stylesheet" th:href="@{/css/admin/categories.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
-    />
+
+    <meta name="flash-success" th:content="${successMessage}" th:if="${successMessage}"/>
+    <meta name="flash-error" th:content="${errorMessage}" th:if="${errorMessage}"/>
+    <meta name="flash-warning" th:content="${warningMessage}" th:if="${warningMessage}"/>
+    <meta name="flash-info" th:content="${infoMessage}" th:if="${infoMessage}"/>
+    
     <style type="text/css">
       .pagination-btn.disabled {
         pointer-events: none;
@@ -323,7 +331,7 @@
         background: #cbd5e1;
       }
 
-      .category-admin-card:has(.parent-info)::after {
+      {% comment %} .category-admin-card:has(.parent-info)::after {
         content: "";
         position: absolute;
         left: -15px;
@@ -331,7 +339,7 @@
         width: 2px;
         height: 28px;
         background: #cbd5e1;
-      }
+      } {% endcomment %}
 
       /* Parent category enhanced styling */
       .category-admin-card:not(:has(.parent-info)) {
@@ -604,146 +612,174 @@
       .confirm-btn.danger:hover {
         background: #dc2626;
       }
+
+      /* OVERRIDE CSS TO ENSURE FULL INFORMATION DISPLAY */
+      .category-admin-card {
+        background: white !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        height: 350px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        overflow: visible !important;
+      }
+
+      /* Ensure all content is visible */
+      .category-admin-content {
+        overflow: visible !important;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+      }
+
+      /* Stats styling */
+      .category-stats {
+        display: flex !important;
+        gap: 8px !important;
+        margin: 12px 0 !important;
+        justify-content: space-between !important;
+      }
+
+      .stat-item {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px !important;
+        padding: 8px 4px !important;
+        text-align: center !important;
+        flex: 1 !important;
+      }
+
+      .stat-label {
+        font-size: 11px !important;
+        color: #64748b !important;
+        font-weight: 500 !important;
+        margin-bottom: 2px !important;
+      }
+
+      .stat-value {
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        color: #1e293b !important;
+      }
+
+      /* Date styling */
+      .category-date {
+        font-size: 11px !important;
+        color: #6b7280 !important;
+        text-align: center !important;
+        margin: 8px 0 4px 0 !important;
+        font-weight: 500 !important;
+      }
+
+      /* Status badge */
+      .status-badge {
+        display: inline-block !important;
+        padding: 4px 8px !important;
+        border-radius: 12px !important;
+        font-size: 10px !important;
+        font-weight: 500 !important;
+        text-align: center !important;
+        min-width: 60px !important;
+      }
+
+      /* Category info */
+      .category-info {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+      }
+
+      .category-icon {
+        font-size: 24px !important;
+        flex-shrink: 0 !important;
+      }
+
+      .category-admin-title {
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        margin: 0 0 4px 0 !important;
+        color: #1f2937 !important;
+        line-height: 1.3 !important;
+      }
+
+      /* Parent info */
+      .parent-info {
+        font-size: 12px !important;
+        color: #6b7280 !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+      }
+
+      /* Clickable stats */
+      .clickable-stat {
+        cursor: pointer !important;
+        position: relative !important;
+        transition: all 0.2s ease !important;
+      }
+
+      .clickable-stat:hover {
+        background-color: #e0f2fe !important;
+        border-color: #0369a1 !important;
+        transform: translateY(-1px) !important;
+      }
+
+      .stat-icon {
+        position: absolute !important;
+        top: 2px !important;
+        right: 2px !important;
+        font-size: 8px !important;
+        color: #0369a1 !important;
+        opacity: 0.7 !important;
+      }
+
+      .clickable-stat:hover .stat-icon {
+        opacity: 1 !important;
+      }
+      
+      /* Different colors for different stat types */
+      .clickable-stat[onclick*="viewDocuments"]:hover {
+        background-color: #fef3c7 !important;
+        border-color: #d97706 !important;
+      }
+      
+      .clickable-stat[onclick*="viewDocuments"] .stat-icon {
+        color: #d97706 !important;
+      }
+      
+      .clickable-stat[onclick*="showSubcategories"]:hover {
+        background-color: #e0f2fe !important;
+        border-color: #0369a1 !important;
+      }
+      
+      .clickable-stat[onclick*="showSubcategories"] .stat-icon {
+        color: #0369a1 !important;
+      }
+      .add-new-btn.danger {
+    background-color: #dc3545;
+    color: white;
+    cursor: pointer;
+}
+
+.add-new-btn.danger.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
     </style>
   </head>
   <body class="admin-body">
-    <header class="admin-header">
-      <div class="admin-header-content">
-        <div class="admin-logo">
-          <a th:href="@{/admin/index}" class="logo">
-            <div class="logo-icon">E</div>
-            <div class="logo-text">EduShare</div>
-          </a>
-        </div>
-        <div class="admin-header-actions">
-          <div class="admin-search">
-            <input
-              type="text"
-              placeholder="Tìm kiếm..."
-              class="search-input"
-              id="headerSearchInput"
-            />
-            <button id="headerSearchBtn"><i class="fas fa-search"></i></button>
-          </div>
-          <div class="dark-mode-toggle" id="darkModeToggle"></div>
-          <div class="admin-notifications">
-            <button class="notification-btn">
-              <i class="fas fa-bell"></i>
-              <span class="notification-badge">5</span>
-            </button>
-          </div>
-          <div class="admin-profile">
-            <div class="admin-avatar">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt="Admin"
-              />
-            </div>
-            <div class="admin-info">
-              <span class="admin-name">Nguyễn Văn Anh</span>
-              <span class="admin-role">Quản trị viên</span>
-            </div>
-            <div class="admin-dropdown">
-              <i class="fas fa-chevron-down"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
 
     <div class="admin-container">
-      <aside class="admin-sidebar">
-        <nav class="admin-nav">
-          <ul class="admin-menu">
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/index}"
-                ><i class="fas fa-tachometer-alt"></i
-                ><span>Bảng điều khiển</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/users}"
-                ><i class="fas fa-users"></i><span>Quản lý người dùng</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/documents}"
-                ><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a
-              >
-            </li>
-            <li class="admin-menu-item active">
-              <a th:href="@{/admin/categories}"
-                ><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/tags}"
-                ><i class="fas fa-tags"></i><span>Quản lý tags</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/comments}"
-                ><i class="fas fa-comments"></i
-                ><span>Quản lý bình luận</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/reports}"
-                ><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/ip-bans}"
-                ><i class="fas fa-ban"></i><span>IP bị cấm</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/statistics}"
-                ><i class="fas fa-chart-bar"></i><span>Thống kê</span></a
-              >
-            </li>
-            <li class="admin-menu-item has-submenu">
-              <a href="javascript:void(0)">
-                <i class="fas fa-coins"></i>
-                <span>Quản lý doanh thu</span>
-                <i class="fas fa-chevron-down submenu-icon"></i>
-              </a>
-              <ul class="submenu">
-                <li class="submenu-item">
-                  <a th:href="@{/admin/coin-packages}"
-                    ><i class="fas fa-box"></i><span>Gói xu</span></a
-                  >
-                </li>
-                <li class="submenu-item">
-                  <a th:href="@{/admin/transactions}"
-                    ><i class="fas fa-exchange-alt"></i
-                    ><span>Giao dịch</span></a
-                  >
-                </li>
-                <li class="submenu-item">
-                  <a th:href="@{/admin/withdrawals}"
-                    ><i class="fas fa-money-bill-wave"></i
-                    ><span>Yêu cầu rút tiền</span></a
-                  >
-                </li>
-              </ul>
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/admin/settings}"
-                ><i class="fas fa-cog"></i><span>Cài đặt</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a th:href="@{/logout}"
-                ><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a
-              >
-            </li>
-          </ul>
-        </nav>
-      </aside>
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
 
       <main class="admin-content">
         <div class="admin-content-header">
+          
           <h1 class="admin-page-title">Quản lý danh mục</h1>
 
           <div class="admin-breadcrumbs">
@@ -883,7 +919,7 @@
             >
               <i class="fas fa-plus"></i> Thêm danh mục
             </a>
-            <button
+           <!-- <button
               type="button"
               class="btn btn-outline"
               id="exportCategoriesBtn"
@@ -899,7 +935,7 @@
               "
             >
               <i class="fas fa-download"></i><span>Export</span>
-            </button>
+            </button>-->
             <button
               id="deleteSelectedBtn"
               class="add-new-btn danger"
@@ -914,6 +950,12 @@
             >
               <i class="fas fa-undo"></i> Khôi phục đã chọn
             </button>
+             <form id="bulkPermanentDeleteForm" th:action="@{/admin/categories/bulk-permanent-delete}" method="post" style="display: inline">
+   
+    <button type="submit" id="permanentDeleteSelectedBtn" class="add-new-btn danger" th:if="${tab == 'deleted'}">
+        <i class="fas fa-trash-alt"></i> Xóa vĩnh viễn
+    </button>
+</form>
           </div>
         </div>
 
@@ -982,7 +1024,13 @@
                       >
                         <i class="fas fa-undo"></i>
                       </button>
+                       
                     </form>
+                    <form th:action="@{/admin/categories/{id}/permanent-delete(id=${cat.id})}" method="post" style="display: inline">
+        <button type="submit" class="action-btn danger" title="Xóa vĩnh viễn">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </form>
                   </div>
                 </div>
               </div>
@@ -998,7 +1046,7 @@
                     <h4
                       class="category-admin-title"
                       th:text="${cat.name}"
-                      th:style="${cat.parentId != null ? 'font-size: 0.9rem; color: #6c757d; font-family: monospace; white-space: pre;' : ''}"
+                      th:style="${cat.parentId != null ? 'font-size: 0.9rem;' : ''}"
                     ></h4>
                     <!-- Hiển thị thông tin parent nếu là danh mục con -->
                     <div th:if="${cat.parentId != null}" class="parent-info">
@@ -1015,30 +1063,54 @@
                   </div>
                 </div>
                 <div class="category-stats">
-                  <div class="stat-item">
+                  <div
+                    class="stat-item clickable-stat"
+                    th:if="${cat.documents > 0}"
+                    th:attr="data-category-id=${cat.id}"
+                    onclick="viewDocuments(this.getAttribute('data-category-id'))"
+                    title="Click để xem tài liệu trong danh mục này"
+                  >
                     <span class="stat-label">Tài liệu</span>
-                    <span class="stat-value" th:text="${cat.documents}"></span>
+                    <span class="stat-value" th:text="${cat.documents}">0</span>
+                    <i class="fas fa-file-alt stat-icon"></i>
                   </div>
-                  <div class="stat-item">
+                  <div class="stat-item" th:if="${cat.documents == 0}">
+                    <span class="stat-label">Tài liệu</span>
+                    <span class="stat-value">0</span>
+                  </div>
+                  
+                  <div
+                    class="stat-item clickable-stat"
+                    th:if="${cat.subcategories > 0}"
+                    th:attr="data-category-id=${cat.id}"
+                    onclick="showSubcategories(this.getAttribute('data-category-id'))"
+                    title="Click để xem danh mục con"
+                  >
                     <span class="stat-label">Mục con</span>
-                    <span
-                      class="stat-value"
-                      th:text="${cat.subcategories}"
-                    ></span>
+                    <span class="stat-value" th:text="${cat.subcategories}"
+                      >0</span
+                    >
+                    <i class="fas fa-eye stat-icon"></i>
                   </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Ngày tạo</span>
-                    <span
-                      class="stat-value"
-                      th:text="${cat.hierarchyCreatedAt != null} ? ${#temporals.format(cat.hierarchyCreatedAt, 'dd/MM/yyyy')} : ${#temporals.format(cat.createdAt, 'dd/MM/yyyy')}"
-                    ></span>
+                  <div class="stat-item" th:if="${cat.subcategories == 0}">
+                    <span class="stat-label">Mục con</span>
+                    <span class="stat-value">0</span>
                   </div>
                 </div>
+
+                <div
+                  class="category-date"
+                  th:text="${cat.hierarchyCreatedAt != null} ? ${#temporals.format(cat.hierarchyCreatedAt, 'dd/MM/yyyy')} : ${#temporals.format(cat.createdAt, 'dd/MM/yyyy')}"
+                >
+                  15/08/2025
+                </div>
+
                 <div class="category-admin-status">
                   <span
                     th:class="'status-badge ' + ${cat.status == 'active' ? 'badge-success' : 'badge-danger'}"
                     th:text="${cat.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"
-                  ></span>
+                    >Hoạt động</span
+                  >
                 </div>
               </div>
             </div>
@@ -1065,18 +1137,10 @@
                     </div>
                   </th>
                   <th>Danh mục</th>
-                  <th>
-                    Số tài liệu
-                  </th>
-                  <th>
-                    Danh mục con
-                  </th>
-                  <th>
-                    Ngày tạo
-                  </th>
-                  <th>
-                    Trạng thái
-                  </th>
+                  <th>Số tài liệu</th>
+                  <th>Danh mục con</th>
+                  <th>Ngày tạo</th>
+                  <th>Trạng thái</th>
                   <th>Thao tác</th>
                 </tr>
               </thead>
@@ -1094,55 +1158,20 @@
                     </div>
                   </td>
                   <td>
-                    <div class="category-info">
-                      <div class="category-icon">
-                        <i
-                          th:class="${cat.parentId != null ? 'fas fa-folder-open' : 'fas fa-folder'}"
-                          th:style="${cat.parentId != null ? 'color: #6c757d;' : 'color: #4361ee;'}"
-                        ></i>
-                      </div>
-                      <div class="category-details">
-                        <h4
-                          class="category-name"
-                          th:text="${cat.name}"
-                          th:style="${cat.parentId != null ? 'font-size: 0.85rem; color: #6c757d; font-family: monospace; white-space: pre;' : 'font-weight: 600; color: #1e293b;'}"
-                        ></h4>
-                        <!-- Parent info for table view -->
-                        <div
-                          th:if="${cat.parentId != null}"
-                          class="parent-info-table"
-                        >
-                          <i
-                            class="fas fa-level-up-alt"
-                            style="font-size: 0.6rem; color: #9ca3af"
-                          ></i>
-                          <span
-                            style="font-size: 0.7rem; color: #9ca3af"
-                            th:text="'Danh mục con của ' + ${cat.parentName}"
-                            >Danh mục con của ABC</span
-                          >
-                        </div>
-                      </div>
+                    <div class="category-preview">
+                      <i
+                        th:class="${cat.parentId != null ? 'fas fa-folder-open' : 'fas fa-folder'}"
+                        style="color: #4361ee; font-size: 0.8rem;"
+                      ></i>
+                      <span class="category-label" th:text="${cat.name}"></span>
                     </div>
                   </td>
-                  <td th:text="${cat.documents}"></td>
-                  <td>
-                    <div class="stat-item">
-                      <i class="fas fa-sitemap"></i>
-                      <span th:text="${cat.subcategories}"></span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="stat-item">
-                      <i class="fas fa-calendar-alt"></i>
-                      <span
-                        th:text="${cat.hierarchyCreatedAt != null} ? ${#temporals.format(cat.hierarchyCreatedAt, 'dd/MM/yyyy')} : ${#temporals.format(cat.createdAt, 'dd/MM/yyyy')}"
-                      ></span>
-                    </div>
-                  </td>
+                  <td th:text="${cat.documents ?: 0}">0</td>
+                  <td th:text="${cat.subcategories ?: 0}">0</td>
+                  <td th:text="${#temporals.format(cat.createdAt, 'dd/MM/yyyy')}"></td>
                   <td>
                     <span
-                      th:class="'status-badge ' + ${cat.status == 'active' ? 'badge-success' : 'badge-danger'}"
+                      th:class="${cat.status == 'active'} ? 'status-badge approved' : 'status-badge rejected'"
                       th:text="${cat.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"
                     ></span>
                   </td>
@@ -1193,6 +1222,11 @@
                             <i class="fas fa-undo"></i>
                           </button>
                         </form>
+                        <form th:action="@{/admin/categories/{id}/permanent-delete(id=${cat.id})}" method="post" style="display: inline">
+        <button type="submit" class="action-btn danger" title="Xóa vĩnh viễn">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </form>
                       </div>
                     </div>
                   </td>
@@ -1207,14 +1241,14 @@
 
         <div class="pagination" th:if="${totalPages > 0}">
           <a
-            th:if="${currentPage > 1}"
-            th:href="@{/admin/categories(page=${currentPage - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'}, tab=${tab != null ? tab : 'active'})}"
+            th:if="${currentPageNumber > 1}"
+            th:href="@{/admin/categories(page=${currentPageNumber - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'}, tab=${tab != null ? tab : 'active'})}"
             class="pagination-btn prev-btn"
           >
             <i class="fas fa-chevron-left"></i>
           </a>
           <a
-            th:if="${currentPage == 1}"
+            th:if="${currentPageNumber == 1}"
             class="pagination-btn prev-btn disabled"
           >
             <i class="fas fa-chevron-left"></i>
@@ -1222,45 +1256,45 @@
           <div class="pagination-pages">
             <!-- Trang đầu -->
             <a
-              th:if="${currentPage > 3}"
+              th:if="${currentPageNumber > 3}"
               th:href="@{/admin/categories(page=1, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'}, tab=${tab != null ? tab : 'active'})}"
               class="pagination-btn page-btn"
               >1</a
             >
-            <span th:if="${currentPage > 4}" class="pagination-ellipsis"
+            <span th:if="${currentPageNumber > 4}" class="pagination-ellipsis"
               >...</span
             >
 
             <!-- Các trang gần currentPage -->
             <a
-              th:each="i : ${#numbers.sequence(currentPage - 2 > 1 ? currentPage - 2 : 1, currentPage + 2 < totalPages ? currentPage + 2 : totalPages)}"
+              th:each="i : ${#numbers.sequence(currentPageNumber - 2 > 1 ? currentPageNumber - 2 : 1, currentPageNumber + 2 < totalPages ? currentPageNumber + 2 : totalPages)}"
               th:href="@{/admin/categories(page=${i}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'}, tab=${tab != null ? tab : 'active'})}"
-              th:class="${i == currentPage ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
+              th:class="${i == currentPageNumber ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
               th:text="${i}"
             ></a>
 
             <!-- Dấu ... và trang cuối -->
             <span
-              th:if="${currentPage < totalPages - 3}"
+              th:if="${currentPageNumber < totalPages - 3}"
               class="pagination-ellipsis"
               >...</span
             >
             <a
-              th:if="${currentPage < totalPages - 2}"
+              th:if="${currentPageNumber < totalPages - 2}"
               th:href="@{/admin/categories(page=${totalPages}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'}, tab=${tab != null ? tab : 'active'})}"
               class="pagination-btn page-btn"
               th:text="${totalPages}"
             ></a>
           </div>
           <a
-            th:if="${currentPage < totalPages}"
-            th:href="@{/admin/categories(page=${currentPage + 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'}, tab=${tab != null ? tab : 'active'})}"
+            th:if="${currentPageNumber < totalPages}"
+            th:href="@{/admin/categories(page=${currentPageNumber + 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, status=${status != null ? status : 'all'}, sort=${sort != null ? sort : 'none'}, tab=${tab != null ? tab : 'active'})}"
             class="pagination-btn next-btn"
           >
             <i class="fas fa-chevron-right"></i>
           </a>
           <a
-            th:if="${currentPage == totalPages}"
+            th:if="${currentPageNumber == totalPages}"
             class="pagination-btn next-btn disabled"
           >
             <i class="fas fa-chevron-right"></i>
@@ -1327,6 +1361,46 @@
           </div>
         </div>
 
+        <!--<div class="custom-modal" id="permanentDeleteModal" style="display: none">
+       <div class="modal-overlay" onclick="closePermanentDeleteModal()"></div>
+       <div class="modal-content">
+         <div class="modal-header">
+           <h3>Xác nhận xóa vĩnh viễn</h3>
+         </div>
+         <div class="modal-body">
+           <p>Bạn có chắc chắn muốn xóa vĩnh viễn danh mục này?</p>
+           <p class="text-muted">Hành động này sẽ xóa hoàn toàn dữ liệu và không thể khôi phục.</p>
+         </div>
+         <div class="modal-footer">
+           <button class="modal-btn cancel-btn" onclick="closePermanentDeleteModal()">Hủy</button>
+           <button class="modal-btn confirm-btn danger" id="confirmPermanentDeleteBtn">Xóa vĩnh viễn</button>
+         </div>
+       </div>
+     </div>
+
+       <div class="custom-modal" id="bulkPermanentDeleteModal" style="display: none">
+       <div class="modal-overlay" onclick="closeBulkPermanentDeleteModal()"></div>
+       <div class="modal-container">
+         <div class="modal-header">
+           <h3>Xác nhận xóa vĩnh viễn</h3>
+           <button class="modal-close" onclick="closeBulkPermanentDeleteModal()"><i class="fas fa-times"></i></button>
+         </div>
+         <div class="modal-body">
+           <div class="bulk-action-content">
+             <p>Bạn có chắc chắn muốn xóa vĩnh viễn các danh mục đã chọn?</p>
+             <p class="text-muted">Hành động này sẽ xóa hoàn toàn dữ liệu và không thể khôi phục.</p>
+             <div class="bulk-action-details">
+               <strong>Số danh mục được chọn: <span id="bulkPermanentDeleteCount">0</span></strong>
+             </div>
+           </div>
+         </div>
+         <div class="modal-footer">
+           <button class="cancel-btn" onclick="closeBulkPermanentDeleteModal()">Hủy</button>
+           <button class="save-btn danger" id="confirmBulkPermanentDeleteBtn">Xóa vĩnh viễn</button>
+         </div>
+       </div>
+     </div> -->
+
         <!-- Toast Container -->
         <div class="toast-container" id="toastContainer"></div>
 
@@ -1352,12 +1426,333 @@
         </div>
       </main>
     </div>
-
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/admin/admin.js}"></script>
     <script th:src="@{/js/admin/notifications.js}"></script>
     <script th:src="@{/js/admin/categories.js}"></script>
+    <script th:src="@{/js/admin/toast.js}"></script>
+    <script th:src="@{/js/admin/flash-toast.js}"></script>
   </body>
 </html>
+
+<!-- Subcategories Modal -->
+<div id="subcategoriesModal" class="custom-modal" style="display: none">
+  <div class="modal-overlay" onclick="closeSubcategoriesModal()"></div>
+  <div class="modal-content" style="max-width: 600px">
+    <div class="modal-header">
+      <h3>Danh mục con</h3>
+      <button class="modal-close" onclick="closeSubcategoriesModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="subcategoriesTree" class="tree-view">
+        <!-- Tree content will be loaded here -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" onclick="closeSubcategoriesModal()">
+        Đóng
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+    const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+    if (!token || !header) {
+        console.error("CSRF token or header not found!", { token, header });
+        toastr.error("Không thể gửi yêu cầu do lỗi cấu hình CSRF!");
+        return;
+    }
+  // Function to show subcategories in tree view
+  function showSubcategories(categoryId) {
+    console.log("Showing subcategories for category:", categoryId);
+
+    // Show modal
+    document.getElementById("subcategoriesModal").style.display = "flex";
+
+    // Load subcategories via AJAX
+    fetch(`/admin/categories/${categoryId}/subcategories`)
+      .then((response) => response.json())
+      .then((data) => {
+        renderSubcategoriesTree(data);
+      })
+      .catch((error) => {
+        console.error("Error loading subcategories:", error);
+        document.getElementById("subcategoriesTree").innerHTML =
+          '<p class="text-center text-gray-500">Không thể tải danh mục con</p>';
+      });
+  }
+
+  function closeSubcategoriesModal() {
+    document.getElementById("subcategoriesModal").style.display = "none";
+  }
+
+  function renderSubcategoriesTree(categories) {
+    const treeContainer = document.getElementById("subcategoriesTree");
+
+    if (!categories || categories.length === 0) {
+      treeContainer.innerHTML =
+        '<p class="text-center text-gray-500">Không có danh mục con nào</p>';
+      return;
+    }
+
+    let html = '<ul class="tree-list">';
+    categories.forEach((category) => {
+      html += renderTreeNode(category);
+    });
+    html += "</ul>";
+
+    treeContainer.innerHTML = html;
+  }
+
+  function renderTreeNode(category) {
+    let html = `
+        <li class="tree-node">
+            <div class="tree-item">
+                <i class="fas fa-folder tree-icon"></i>
+                <span class="tree-name">${category.name}</span>
+                <span class="tree-stats">
+                    <small class="text-gray-500">
+                        ${category.documents} tài liệu
+                        ${
+                          category.subcategories > 0
+                            ? `, ${category.subcategories} mục con`
+                            : ""
+                        }
+                    </small>
+                </span>
+                <div class="tree-actions">
+                    <a href="/admin/categories/details/${
+                      category.id
+                    }" class="tree-action-btn view" title="Xem">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/admin/categories/edit/${
+                      category.id
+                    }" class="tree-action-btn edit" title="Sửa">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+            </div>
+    `;
+
+    if (category.children && category.children.length > 0) {
+      html += '<ul class="tree-children">';
+      category.children.forEach((child) => {
+        html += renderTreeNode(child);
+      });
+      html += "</ul>";
+    }
+
+    html += "</li>";
+    return html;
+  }
+
+  // Close modal when clicking outside
+  document.addEventListener("click", function (event) {
+    const modal = document.getElementById("subcategoriesModal");
+    if (event.target === modal) {
+      closeSubcategoriesModal();
+    }
+  });
+</script>
+
+<style>
+  /* Tree View Styles */
+  .tree-view {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .tree-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tree-node {
+    margin: 0;
+    padding: 0;
+  }
+
+  .tree-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 2px 0;
+    transition: background-color 0.2s;
+  }
+
+  .tree-item:hover {
+    background-color: #f8fafc;
+  }
+
+  .tree-icon {
+    color: #4361ee;
+    margin-right: 8px;
+    font-size: 14px;
+  }
+
+  .tree-name {
+    font-weight: 500;
+    color: #1f2937;
+    flex: 1;
+  }
+
+  .tree-stats {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .tree-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tree-action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .tree-action-btn.view {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .tree-action-btn.edit {
+    background-color: #fef3c7;
+    color: #d97706;
+  }
+
+  .tree-children {
+    list-style: none;
+    padding-left: 24px;
+    margin: 4px 0;
+    border-left: 2px solid #e5e7eb;
+  }
+
+  .tree-children .tree-item {
+    position: relative;
+  }
+
+  .tree-children .tree-item::before {
+    content: "";
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    background-color: #e5e7eb;
+  }
+</style>
+<script>
+// Function to view documents in a category
+function viewDocuments(categoryId) {
+    console.log('Viewing documents for category:', categoryId);
+    
+    // Redirect to documents page with category filter
+    const documentsUrl = `/admin/documents?search=&tab=active&status=&category=${categoryId}&type=&price=&author=&tags=&dateFrom=&dateTo=&fileSize=&views=`;
+    window.location.href = documentsUrl;
+}
+
+// Function to show subcategories in tree view
+function showSubcategories(categoryId) {
+    console.log('Showing subcategories for category:', categoryId);
+    
+    // Show modal
+    document.getElementById('subcategoriesModal').style.display = 'flex';
+    
+    // Load subcategories via AJAX
+    fetch(`/admin/categories/${categoryId}/subcategories`)
+        .then(response => response.json())
+        .then(data => {
+            renderSubcategoriesTree(data);
+        })
+        .catch(error => {
+            console.error('Error loading subcategories:', error);
+            document.getElementById('subcategoriesTree').innerHTML = 
+                '<p class="text-center text-gray-500">Không thể tải danh mục con</p>';
+        });
+}
+
+function closeSubcategoriesModal() {
+    document.getElementById('subcategoriesModal').style.display = 'none';
+}
+
+function renderSubcategoriesTree(categories) {
+    const treeContainer = document.getElementById('subcategoriesTree');
+    
+    if (!categories || categories.length === 0) {
+        treeContainer.innerHTML = '<p class="text-center text-gray-500">Không có danh mục con nào</p>';
+        return;
+    }
+    
+    let html = '<ul class="tree-list">';
+    categories.forEach(category => {
+        html += renderTreeNode(category);
+    });
+    html += '</ul>';
+    
+    treeContainer.innerHTML = html;
+}
+
+function renderTreeNode(category) {
+    let html = `
+        <li class="tree-node">
+            <div class="tree-item">
+                <i class="fas fa-folder tree-icon"></i>
+                <span class="tree-name">${category.name}</span>
+                <span class="tree-stats">
+                    <small class="text-gray-500">
+                        ${category.documents} tài liệu
+                        ${category.subcategories > 0 ? `, ${category.subcategories} mục con` : ''}
+                    </small>
+                </span>
+                <div class="tree-actions">
+                    <a href="/admin/categories/details/${category.id}" class="tree-action-btn view" title="Xem">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/admin/categories/edit/${category.id}" class="tree-action-btn edit" title="Sửa">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+            </div>
+    `;
+    
+    if (category.children && category.children.length > 0) {
+        html += '<ul class="tree-children">';
+        category.children.forEach(child => {
+            html += renderTreeNode(child);
+        });
+        html += '</ul>';
+    }
+    
+    html += '</li>';
+    return html;
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('subcategoriesModal');
+    if (event.target === modal) {
+        closeSubcategoriesModal();
+    }
+});
+</script>

@@ -82,6 +82,7 @@ function updateBulkActionButtons() {
     const hasSelection = selectedCategories.size > 0;
     const deleteBtn = document.getElementById('deleteSelectedBtn');
     const restoreBtn = document.getElementById('restoreSelectedBtn');
+      const permanentDeleteBtn = document.getElementById('permanentDeleteSelectedBtn');
     // permanentDeleteBtn removed
     
     // Update delete button state
@@ -107,6 +108,20 @@ function updateBulkActionButtons() {
             restoreBtn.disabled = true;
         }
     }
+
+    if (permanentDeleteBtn) {
+        if (hasSelection) {
+            permanentDeleteBtn.classList.remove('disabled');
+            permanentDeleteBtn.disabled = false;
+        } else {
+            permanentDeleteBtn.classList.add('disabled');
+            permanentDeleteBtn.disabled = true;
+        }
+    }
+    
+    // Update restore and permanent delete buttons
+   
+
     // permanentDeleteBtn logic removed
 }
 
@@ -302,23 +317,74 @@ function setupCategoryEventListeners() {
             }
         );
     });
-    
+
+   
     // Xử lý nút xóa vĩnh viễn hàng loạt
-    $('#permanentDeleteSelectedBtn').on('click', function() {
-        if (selectedCategories.size === 0) {
-            return; // Không làm gì cả
-        }
-        
-        showConfirmModal(
-            'Xác nhận xóa vĩnh viễn',
-            `Bạn có chắc muốn xóa vĩnh viễn ${selectedCategories.size} danh mục đã chọn? Hành động này không thể hoàn tác!`,
-            function() {
-                // Implement permanent delete logic here
-                toastr.info('Tính năng xóa vĩnh viễn hàng loạt đang được phát triển.');
-            },
-            true // isDanger = true
-        );
-    });
+    $('#permanentDeleteSelectedBtn').on('click', function(event) {
+    event.preventDefault();
+    console.log('permanentDeleteSelectedBtn clicked - selectedCategories:', Array.from(selectedCategories));
+    
+    if (selectedCategories.size === 0) {
+        console.log('No categories selected for permanent delete');
+        toastr.warning('Vui lòng chọn ít nhất một danh mục để xóa vĩnh viễn!');
+        return;
+    }
+    
+    if ($(this).prop('disabled')) {
+        console.warn('Button is disabled, click ignored');
+        return;
+    }
+    
+    showConfirmModal(
+        'Xác nhận xóa vĩnh viễn',
+        `Bạn có chắc muốn xóa vĩnh viễn ${selectedCategories.size} danh mục đã chọn? Hành động này không thể hoàn tác!`,
+        function() {
+            const form = document.getElementById('bulkPermanentDeleteForm');
+            if (form) {
+                // Xóa các input cũ
+                const oldInputs = form.querySelectorAll('input[name="categoryIds"]');
+                oldInputs.forEach(input => input.remove());
+
+                // Thêm input categoryIds
+                const selectedIds = Array.from(selectedCategories);
+                selectedIds.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'categoryIds';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+
+                // Thêm CSRF token
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_csrf';
+                    csrfInput.value = csrfToken;
+                    form.appendChild(csrfInput);
+                } else {
+                    console.error('CSRF token not found');
+                    toastr.error('Không thể xóa vĩnh viễn do lỗi CSRF token.');
+                    return;
+                }
+
+                console.log('Form data before submit:');
+                const formData = new FormData(form);
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+
+                console.log('Submitting bulk permanent delete form with IDs:', selectedIds);
+                form.submit();
+            } else {
+                console.error('Form bulkPermanentDeleteForm not found');
+                toastr.error('Không thể xóa vĩnh viễn do lỗi cấu hình form.');
+            }
+        },
+        true
+    );
+});
     
     // Function đã được định nghĩa ở global scope
 }
@@ -412,14 +478,19 @@ function nextCatPage() {
 }
 
 function toggleCategorySelection(id, isChecked) {
-    if (Number.isNaN(id)) return;
+    console.log('toggleCategorySelection - id:', id, 'isChecked:', isChecked, 'type:', typeof id);
+    if (Number.isNaN(id)) {
+        console.error('Invalid category ID:', id);
+        return;
+    }
     if (isChecked) {
         selectedCategories.add(id);
     } else {
         selectedCategories.delete(id);
     }
-    updateBulkActionButtons();
-    console.log('Selected categories:', Array.from(selectedCategories));
+    console.log('Before calling toggleActionButtons - selectedCategories:', Array.from(selectedCategories));
+    updateBulkActionButtons(); // hoặc toggleActionButtons()
+    console.log('After calling toggleActionButtons - selectedCategories:', Array.from(selectedCategories));
 }
 
 function editCategory(id) {

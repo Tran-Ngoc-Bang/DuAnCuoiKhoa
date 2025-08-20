@@ -25,6 +25,13 @@
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals-index.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+    <meta name="flash-success" th:content="${successMessage}" th:if="${successMessage}"/>
+    <meta name="flash-error" th:content="${errorMessage}" th:if="${errorMessage}"/>
+    <meta name="flash-warning" th:content="${warning}" th:if="${warning}"/>
+    <meta name="flash-info" th:content="${info}" th:if="${info}"/>
+     <script th:src="@{/js/admin/flash-toast.js}"></script>
+   <script th:src="@{/js/admin/notifications.js}"></script>
   </head>
 
   <body class="admin-body">

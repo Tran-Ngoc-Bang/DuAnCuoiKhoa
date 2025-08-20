@@ -14,10 +14,15 @@
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}"/>
     <link rel="stylesheet" th:href="@{/css/main.css}" />
     <link rel="stylesheet" th:href="@{/css/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <div th:replace="~{fragments/admin/flash-toast :: meta-tags}"></div>
     <th:block th:replace="~{::head}"></th:block>
   </head>
   <body class="admin-body">
@@ -37,10 +42,80 @@
           </div>
           <div class="dark-mode-toggle" id="darkModeToggle"></div>
           <div class="admin-notifications">
-            <button type="button" class="notification-btn">
+            <button
+              type="button"
+              class="notification-btn"
+              id="notificationBtn"
+              onclick="toggleNotificationDropdown()"
+            >
               <i class="fas fa-bell"></i>
-              <span class="notification-badge">5</span>
+              <span
+                class="notification-badge"
+                id="notificationBadge"
+                th:if="${unreadCount != null and unreadCount > 0}"
+                th:text="${unreadCount}"
+              ></span>
             </button>
+
+            <!-- Notification Dropdown -->
+            <div class="notification-dropdown" id="notificationDropdown">
+              <div class="notification-header">
+                <h3>Thông báo</h3>
+                <button class="mark-all-read" onclick="markAllAsRead()">
+                  Đánh dấu đã đọc
+                </button>
+              </div>
+
+              <div class="notification-list" id="notificationList">
+                <!-- Notifications will be loaded from model -->
+                <div
+                  th:if="${notifications != null and !#lists.isEmpty(notifications)}"
+                >
+                  <div
+                    th:each="notification : ${notifications}"
+                    th:class="'notification-item' + (${!notification.isRead} ? ' unread' : '')"
+                    th:attr="data-id=${notification.id}"
+                  >
+                    <div th:class="'notification-icon ' + ${notification.type}">
+                      <i th:switch="${notification.type}">
+                        <i th:case="'document'" class="fas fa-upload"></i>
+                        <i th:case="'register'" class="fas fa-user-plus"></i>
+                        <i th:case="'report'" class="fas fa-flag"></i>
+                        <i
+                          th:case="'payment'"
+                          class="fas fa-money-bill-wave"
+                        ></i>
+                        <i th:case="'comment'" class="fas fa-comment"></i>
+                        <i th:case="*" class="fas fa-bell"></i>
+                      </i>
+                    </div>
+                    <div class="notification-content">
+                      <div
+                        class="notification-text"
+                        th:text="${notification.message}"
+                      ></div>
+                      <div class="notification-time">
+                        <i class="far fa-clock"></i>
+                        <span
+                          th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  th:if="${notifications == null or #lists.isEmpty(notifications)}"
+                  class="notification-empty"
+                >
+                  <i class="fas fa-bell-slash"></i>
+                  <p>Không có thông báo nào</p>
+                </div>
+              </div>
+
+              <div class="notification-footer">
+                <a href="/admin/notifications">Xem tất cả thông báo</a>
+              </div>
+            </div>
           </div>
           <div class="admin-profile">
             <div class="admin-avatar">
@@ -172,7 +247,26 @@
       <script
         th:src="@{/js/admin/admin.js(v=${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')})}"
       ></script>
-      <script th:src="@{/js/admin/toast.js}"></script>
+      <!-- Flash Toast Scripts -->
+      <div th:replace="~{fragments/admin/flash-toast :: scripts}"></div>
+      <script th:src="@{/js/admin/notifications.js}"></script>
     </div>
   </body>
 </html>
+<style>
+  .notification-dropdown.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+  }
+</style>
+<!-- Notification JavaScript -->
+<script th:src="@{/js/admin/notifications.js}"></script>
+
+<style>
+  .notification-dropdown.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+  }
+</style>
