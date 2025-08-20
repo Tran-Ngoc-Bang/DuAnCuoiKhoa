@@ -34,6 +34,12 @@
       color: red;
       font-size: 0.9em;
     }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 20px;
+    }
   </style>
 </head>
 
@@ -58,11 +64,6 @@
             <span class="breadcrumb-separator">/</span>
             <span>Thêm mới</span>
           </div>
-        </div>
-        <div class="dashboard-actions">
-          <a th:href="@{/admin/users}" class="secondary-btn">
-            <i class="fas fa-arrow-left"></i> Quay lại
-          </a>
         </div>
       </div>
 
@@ -110,13 +111,7 @@
                     placeholder="Nhập mật khẩu" required />
                   <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error-message"></span>
                 </div>
-              </div>
-            </div>
 
-            <!-- Settings -->
-            <div class="form-section">
-              <h3 class="section-title"><i class="fas fa-cog"></i> Cài đặt</h3>
-              <div class="form-grid">
                 <div class="form-group">
                   <label for="role">Vai trò</label>
                   <select id="role" th:field="*{role}" class="form-input">

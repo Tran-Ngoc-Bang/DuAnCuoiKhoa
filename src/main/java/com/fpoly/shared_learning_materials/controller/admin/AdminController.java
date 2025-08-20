@@ -69,14 +69,16 @@ public class AdminController {
     }
 
     @GetMapping("/statistics/user-growth")
-    public ResponseEntity<Map<String, Integer>> getUserGrowthThisYear() {
-        Year currentYear = Year.now();
-        List<Object[]> results = userRepository.countUsersByMonth(currentYear.getValue());
+    public ResponseEntity<Map<String, Integer>> getUserGrowth(@RequestParam(defaultValue = "365") int days) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days);
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+        List<Object[]> results = userRepository.countUsersByDateRange(startDateTime, endDateTime);
 
         Map<String, Integer> monthlyCounts = new LinkedHashMap<>();
-        for (int month = 1; month <= 12; month++) {
-            monthlyCounts.put("T" + month, 0);
-        }
 
         for (Object[] row : results) {
             int month = (int) row[0];
@@ -103,19 +105,36 @@ public class AdminController {
 
     @GetMapping("/statistics/summary")
     public ResponseEntity<Map<String, Object>> getStatisticsSummary(
-            @RequestParam String start,
-            @RequestParam String end) {
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end) {
 
-        LocalDateTime startDate = LocalDate.parse(start).atStartOfDay();
-        LocalDateTime endDate = LocalDate.parse(end).atTime(23, 59, 59);
+        LocalDateTime startDate = null;
+        LocalDateTime endDate = null;
 
-        long userCount = userRepository.countByCreatedAtBetweenAndDeletedAtIsNull(startDate, endDate);
-        long documentCount = documentRepository.countByCreatedAtBetweenAndDeletedAtIsNull(startDate, endDate);
+        if (start != null && end != null) {
+            startDate = LocalDate.parse(start).atStartOfDay();
+            endDate = LocalDate.parse(end).atTime(23, 59, 59);
+        }
 
-        BigDecimal revenue = transactionRepository.sumAmountByTypeAndStatusAndCreatedAtBetween(
-                Transaction.TransactionType.PURCHASE,
-                Transaction.TransactionStatus.COMPLETED,
-                startDate, endDate);
+        long userCount;
+        long documentCount;
+        BigDecimal revenue;
+
+        if (startDate != null && endDate != null) {
+            userCount = userRepository.countByCreatedAtBetweenAndDeletedAtIsNull(startDate, endDate);
+            documentCount = documentRepository.countByCreatedAtBetweenAndDeletedAtIsNull(startDate, endDate);
+            revenue = transactionRepository.sumAmountByTypeAndStatusAndCreatedAtBetween(
+                    Transaction.TransactionType.PURCHASE,
+                    Transaction.TransactionStatus.COMPLETED,
+                    startDate, endDate);
+        } else {
+            userCount = userRepository.countByDeletedAtIsNull();
+            documentCount = documentRepository.countByDeletedAtIsNull();
+            revenue = transactionRepository.sumAmountByTypeAndStatus(
+                    Transaction.TransactionType.PURCHASE,
+                    Transaction.TransactionStatus.COMPLETED);
+        }
+
         if (revenue == null)
             revenue = BigDecimal.ZERO;
 
@@ -148,16 +167,15 @@ public class AdminController {
     }
 
     @GetMapping("/statistics/revenue-monthly")
-    public ResponseEntity<Map<String, Object>> getMonthlyRevenue() {
+    public ResponseEntity<Map<String, Object>> getMonthlyRevenue(@RequestParam(defaultValue = "30") int days) {
         LocalDate now = LocalDate.now();
-        LocalDate start = now.minusMonths(5).withDayOfMonth(1);
-        LocalDate end = now.withDayOfMonth(now.lengthOfMonth());
+        LocalDate start = now.minusDays(days);
 
         List<Object[]> revenueByMonth = transactionRepository.getMonthlyRevenueSummary(
                 Transaction.TransactionType.PURCHASE,
                 Transaction.TransactionStatus.COMPLETED,
                 start.atStartOfDay(),
-                end.atTime(23, 59, 59));
+                now.atTime(23, 59, 59));
 
         List<String> labels = new ArrayList<>();
         List<BigDecimal> data = new ArrayList<>();

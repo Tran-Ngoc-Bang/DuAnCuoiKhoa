@@ -22,7 +22,6 @@ import com.fpoly.shared_learning_materials.dto.CommentDTO;
 import com.fpoly.shared_learning_materials.dto.ReplyDTO;
 import com.fpoly.shared_learning_materials.repository.CommentRepository;
 import com.fpoly.shared_learning_materials.repository.ReplyRepository;
-import com.fpoly.shared_learning_materials.repository.CommentRepository;
 import com.fpoly.shared_learning_materials.repository.ReportRepository;
 
 @Service
@@ -33,10 +32,9 @@ public class CommentService {
 
 	@Autowired
 	private ReportRepository reportRepository;
-	
+
 	@Autowired
 	private ReplyRepository replyRepository;
-
 
 	public Page<CommentDTO> getCommentsWithPendingReports(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -47,7 +45,6 @@ public class CommentService {
 					c.getUser().getId(), c.getUser().getFullName(), c.getContent(), c.getUser().getAvatarUrl(),
 					c.getStatus(), c.getCreatedAt());
 			dto.setReplies(mapRepliesToDto(c.getId()));
-
 
 			Optional<Report> optReport = reportRepository.findFirstByCommentIdAndStatusOrderByCreatedAtAsc(c.getId(),
 					"pending");
@@ -60,8 +57,11 @@ public class CommentService {
 	public Page<CommentDTO> getCommentsReported(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-		List<Long> reportedIds = reportRepository.findByStatus("pending").stream().map(r -> r.getComment().getId())
-				.distinct().collect(Collectors.toList());
+		List<Long> reportedIds = reportRepository.findByStatus("pending").stream()
+				.filter(r -> r.getComment() != null && r.getComment().getId() != null)
+				.map(r -> r.getComment().getId())
+				.distinct()
+				.collect(Collectors.toList());
 
 		if (reportedIds.isEmpty()) {
 			return new PageImpl<>(Collections.emptyList(), pageable, 0);
@@ -90,7 +90,7 @@ public class CommentService {
 	}
 
 	public long countPendingReports() {
-		return reportRepository.countByStatus("pending");
+		return reportRepository.countReportedComments();
 	}
 
 	public long countHiddenComments() {
@@ -110,8 +110,11 @@ public class CommentService {
 		List<Long> idsOnPage = commentPage.getContent().stream().map(Comment::getId).collect(Collectors.toList());
 
 		Map<Long, Report> firstPending = reportRepository.findByStatus("pending").stream()
+				.filter(r -> r.getComment() != null && r.getComment().getId() != null)
 				.filter(r -> idsOnPage.contains(r.getComment().getId()))
-				.collect(Collectors.toMap(r -> r.getComment().getId(), r -> r,
+				.collect(Collectors.toMap(
+						r -> r.getComment().getId(),
+						r -> r,
 						(r1, r2) -> r1.getCreatedAt().isBefore(r2.getCreatedAt()) ? r1 : r2));
 
 		List<CommentDTO> dtos = commentPage.getContent().stream().map(c -> {
@@ -125,11 +128,17 @@ public class CommentService {
 
 			dto.setReplies(mapRepliesToDto(c.getId()));
 
-
 			return dto;
 		}).collect(Collectors.toList());
 
 		return new PageImpl<>(dtos, commentPage.getPageable(), commentPage.getTotalElements());
+	}
+
+	private CommentDTO mapToDto(Comment c) {
+		CommentDTO dto = new CommentDTO(c.getId(), c.getDocument().getId(), c.getDocument().getTitle(),
+				c.getUser().getId(), c.getUser().getFullName(), c.getContent(), c.getUser().getAvatarUrl(),
+				c.getStatus(), c.getCreatedAt());
+		return dto;
 	}
 
 	public void approveReport(Long commentId) {
@@ -202,8 +211,11 @@ public class CommentService {
 	public Page<CommentDTO> searchVisible(String keyword, int page, int size) {
 		Pageable pg = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-		List<Long> reportedIds = reportRepository.findByStatus("pending").stream().map(r -> r.getComment().getId())
-				.distinct().collect(Collectors.toList());
+		List<Long> reportedIds = reportRepository.findByStatus("pending").stream()
+				.filter(r -> r.getComment() != null && r.getComment().getId() != null)
+				.map(r -> r.getComment().getId())
+				.distinct()
+				.collect(Collectors.toList());
 
 		Specification<Comment> spec = Specification.where(
 				(root, query, cb) -> cb.and(cb.isNull(root.get("deletedAt")), cb.equal(root.get("status"), "active")));
@@ -237,8 +249,12 @@ public class CommentService {
 	public Page<CommentDTO> searchReported(String keyword, int page, int size) {
 		Pageable pg = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-		List<Long> ids = reportRepository.findByStatus("pending").stream().map(r -> r.getComment().getId()).distinct()
+		List<Long> ids = reportRepository.findByStatus("pending").stream()
+				.filter(r -> r.getComment() != null && r.getComment().getId() != null)
+				.map(r -> r.getComment().getId())
+				.distinct()
 				.toList();
+
 		if (ids.isEmpty()) {
 			return new PageImpl<>(List.of(), pg, 0);
 		}
@@ -254,19 +270,25 @@ public class CommentService {
 		return mapToDtoPage(comments);
 	}
 
+	public CommentDTO getCommentById(Long id) {
+		Comment comment = commentRepository.findById(id).get();
+		CommentDTO commentDTO = mapToDto(comment);
+		commentDTO.setReplies(mapRepliesToDto(id));
+		return commentDTO;
+	}
+
 	private List<ReplyDTO> mapRepliesToDto(Long commentId) {
-	    return replyRepository.findByCommentIdAndDeletedAtIsNullOrderByCreatedAtAsc(commentId)
-	            .stream()
-	            .map(r -> new ReplyDTO(
-	                    r.getId(),
-	                    r.getComment().getId(),
-	                    r.getUser().getId(),
-	                    r.getUser().getFullName(),
-	                    r.getUser().getAvatarUrl(),
-	                    r.getContent(),
-	                    r.getStatus(),
-	                    r.getCreatedAt()
-	            ))
-	            .collect(Collectors.toList());
+		return replyRepository.findByCommentIdAndDeletedAtIsNullOrderByCreatedAtAsc(commentId)
+				.stream()
+				.map(r -> new ReplyDTO(
+						r.getId(),
+						r.getComment().getId(),
+						r.getUser().getId(),
+						r.getUser().getFullName(),
+						r.getUser().getAvatarUrl(),
+						r.getContent(),
+						r.getStatus(),
+						r.getCreatedAt()))
+				.collect(Collectors.toList());
 	}
 }

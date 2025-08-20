@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -57,6 +58,9 @@ public class DataInitializer implements CommandLineRunner {
 
         @Autowired
         private ReplyRepository replyRepository;
+
+        @Autowired
+        private ReportRepository reportRepository;
 
         @Override
         public void run(String... args) throws Exception {
@@ -138,9 +142,18 @@ public class DataInitializer implements CommandLineRunner {
                         System.out.println("Sample replies already exist, skipping reply initialization.");
                 }
 
+                if (reportRepository.count() == 0) {
+                        createSampleReports();
+                        System.out.println("Sample reports created successfully!");
+                } else {
+                        System.out.println("Sample reports already exist, skipping comment initialization.");
+                }
+
         }
 
         private void createSampleUsers() {
+                int currentYear = LocalDate.now().getYear();
+
                 User admin = new User();
                 admin.setUsername("admin");
                 admin.setEmail("admin@example.com");
@@ -151,8 +164,8 @@ public class DataInitializer implements CommandLineRunner {
                 admin.setCoinBalance(0);
                 admin.setTotalSpent(BigDecimal.ZERO);
                 admin.setTotalCoinsPurchased(0);
-                admin.setCreatedAt(LocalDateTime.now());
-                admin.setUpdatedAt(LocalDateTime.now());
+                admin.setCreatedAt(LocalDateTime.of(currentYear, 1, 10, 10, 0));
+                admin.setUpdatedAt(LocalDateTime.of(currentYear, 1, 10, 10, 0));
                 userRepository.save(admin);
 
                 User user1 = new User();
@@ -165,8 +178,8 @@ public class DataInitializer implements CommandLineRunner {
                 user1.setCoinBalance(275);
                 user1.setTotalSpent(new BigDecimal("158000.00"));
                 user1.setTotalCoinsPurchased(350);
-                user1.setCreatedAt(LocalDateTime.now());
-                user1.setUpdatedAt(LocalDateTime.now());
+                user1.setCreatedAt(LocalDateTime.of(currentYear, 2, 15, 10, 0));
+                user1.setUpdatedAt(LocalDateTime.of(currentYear, 2, 15, 10, 0));
                 userRepository.save(user1);
 
                 User user2 = new User();
@@ -179,8 +192,8 @@ public class DataInitializer implements CommandLineRunner {
                 user2.setCoinBalance(100);
                 user2.setTotalSpent(new BigDecimal("50000.00"));
                 user2.setTotalCoinsPurchased(100);
-                user2.setCreatedAt(LocalDateTime.now());
-                user2.setUpdatedAt(LocalDateTime.now());
+                user2.setCreatedAt(LocalDateTime.of(currentYear, 3, 20, 10, 0));
+                user2.setUpdatedAt(LocalDateTime.of(currentYear, 3, 20, 10, 0));
                 userRepository.save(user2);
 
                 User user3 = new User();
@@ -193,8 +206,8 @@ public class DataInitializer implements CommandLineRunner {
                 user3.setCoinBalance(50);
                 user3.setTotalSpent(new BigDecimal("20000.00"));
                 user3.setTotalCoinsPurchased(70);
-                user3.setCreatedAt(LocalDateTime.now());
-                user3.setUpdatedAt(LocalDateTime.now());
+                user3.setCreatedAt(LocalDateTime.of(currentYear, 4, 5, 10, 0));
+                user3.setUpdatedAt(LocalDateTime.of(currentYear, 4, 5, 10, 0));
                 userRepository.save(user3);
 
                 User user4 = new User();
@@ -207,8 +220,8 @@ public class DataInitializer implements CommandLineRunner {
                 user4.setCoinBalance(0);
                 user4.setTotalSpent(new BigDecimal("0.00"));
                 user4.setTotalCoinsPurchased(0);
-                user4.setCreatedAt(LocalDateTime.now());
-                user4.setUpdatedAt(LocalDateTime.now());
+                user4.setCreatedAt(LocalDateTime.of(currentYear, 5, 18, 10, 0));
+                user4.setUpdatedAt(LocalDateTime.of(currentYear, 5, 18, 10, 0));
                 userRepository.save(user4);
 
                 User user5 = new User();
@@ -221,8 +234,8 @@ public class DataInitializer implements CommandLineRunner {
                 user5.setCoinBalance(120);
                 user5.setTotalSpent(new BigDecimal("74000.00"));
                 user5.setTotalCoinsPurchased(120);
-                user5.setCreatedAt(LocalDateTime.now());
-                user5.setUpdatedAt(LocalDateTime.now());
+                user5.setCreatedAt(LocalDateTime.of(currentYear, 6, 22, 10, 0));
+                user5.setUpdatedAt(LocalDateTime.of(currentYear, 6, 22, 10, 0));
                 userRepository.save(user5);
 
                 User contributor1 = new User();
@@ -235,8 +248,8 @@ public class DataInitializer implements CommandLineRunner {
                 contributor1.setCoinBalance(500);
                 contributor1.setTotalSpent(new BigDecimal("210000.00"));
                 contributor1.setTotalCoinsPurchased(600);
-                contributor1.setCreatedAt(LocalDateTime.now());
-                contributor1.setUpdatedAt(LocalDateTime.now());
+                contributor1.setCreatedAt(LocalDateTime.of(currentYear, 7, 8, 10, 0));
+                contributor1.setUpdatedAt(LocalDateTime.of(currentYear, 7, 8, 10, 0));
                 userRepository.save(contributor1);
 
                 User contributor2 = new User();
@@ -249,8 +262,8 @@ public class DataInitializer implements CommandLineRunner {
                 contributor2.setCoinBalance(300);
                 contributor2.setTotalSpent(new BigDecimal("110000.00"));
                 contributor2.setTotalCoinsPurchased(400);
-                contributor2.setCreatedAt(LocalDateTime.now());
-                contributor2.setUpdatedAt(LocalDateTime.now());
+                contributor2.setCreatedAt(LocalDateTime.of(currentYear, 8, 12, 10, 0));
+                contributor2.setUpdatedAt(LocalDateTime.of(currentYear, 8, 12, 10, 0));
                 userRepository.save(contributor2);
         }
 
@@ -314,6 +327,8 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         private void createSampleTransactions() {
+                int currentYear = LocalDate.now().getYear();
+
                 // Get users for transactions
                 User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
                 User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
@@ -324,22 +339,29 @@ public class DataInitializer implements CommandLineRunner {
                 User contributor2 = userRepository.findByUsernameAndDeletedAtIsNull("contributor2").orElse(null);
 
                 if (user1 != null && user2 != null) {
-                        // Create sample purchase transactions
+                        // Tháng 1
                         createTransaction("TXN000001", Transaction.TransactionType.PURCHASE,
                                         new BigDecimal("50000.00"), Transaction.TransactionStatus.COMPLETED,
-                                        "VNPay", user1, "Mua xu gói starter");
+                                        "VNPay", user1, "Mua xu gói starter",
+                                        LocalDateTime.of(currentYear, 8, 10, 9, 30));
 
+                        // Tháng 2
                         createTransaction("TXN000002", Transaction.TransactionType.PURCHASE,
                                         new BigDecimal("100000.00"), Transaction.TransactionStatus.COMPLETED,
-                                        "VNPay", user1, "Mua xu gói premium");
+                                        "VNPay", user1, "Mua xu gói premium",
+                                        LocalDateTime.of(currentYear, 6, 15, 14, 45));
 
+                        // Tháng 3
+                        createTransaction("TXN000003", Transaction.TransactionType.PURCHASE,
+                                        new BigDecimal("25000.00"), Transaction.TransactionStatus.PENDING,
+                                        "Bank Transfer", user1, "Rút tiền về tài khoản ngân hàng",
+                                        LocalDateTime.of(currentYear, 2, 5, 11, 0));
+
+                        // Tháng 4
                         createTransaction("TXN000004", Transaction.TransactionType.PURCHASE,
                                         new BigDecimal("50000.00"), Transaction.TransactionStatus.COMPLETED,
-                                        "VNPay", user2, "Mua xu gói starter");
-
-                        createTransaction("TXN000005", Transaction.TransactionType.REFUND,
-                                        new BigDecimal("25000.00"), Transaction.TransactionStatus.COMPLETED,
-                                        "VNPay", user1, "Hoàn tiền giao dịch lỗi");
+                                        "VNPay", user2, "Mua xu gói starter",
+                                        LocalDateTime.of(currentYear, 1, 18, 16, 10));
 
                         // Create comprehensive withdrawal sample data
                         createSampleWithdrawals(user1, user2, user3, user4, user5, contributor1, contributor2);
@@ -463,7 +485,7 @@ public class DataInitializer implements CommandLineRunner {
 
         private void createTransaction(String code, Transaction.TransactionType type,
                         BigDecimal amount, Transaction.TransactionStatus status,
-                        String paymentMethod, User user, String notes) {
+                        String paymentMethod, User user, String notes, LocalDateTime createdAt) {
                 Transaction transaction = new Transaction();
                 transaction.setCode(code);
                 transaction.setType(type);
@@ -472,7 +494,7 @@ public class DataInitializer implements CommandLineRunner {
                 transaction.setPaymentMethod(paymentMethod);
                 transaction.setUser(user);
                 transaction.setNotes(notes);
-                transaction.setCreatedAt(LocalDateTime.now());
+                transaction.setCreatedAt(createdAt);
                 transactionRepository.save(transaction);
         }
 
@@ -995,6 +1017,49 @@ public class DataInitializer implements CommandLineRunner {
                 } catch (Exception e) {
                         System.err.println("❌ Lỗi khi tạo replies: " + e.getMessage());
                         e.printStackTrace();
+                }
+        }
+
+        private void createSampleReports() {
+                User admin = userRepository.findByUsernameAndDeletedAtIsNull("admin").orElse(null);
+                User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
+                User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
+
+                if (admin == null || user1 == null || user2 == null)
+                        return;
+
+                List<Document> documents = documentRepository.findAll();
+
+                if (documents.isEmpty())
+                        return;
+
+                String[][] reportData = {
+                                { "Nội dung không phù hợp", "inappropriate", "user1" },
+                                { "Spam hoặc quảng cáo", "spam", "user2" },
+                                { "Thông tin sai lệch", "fake", "user2" },
+                                { "Ngôn từ xúc phạm", "other", "admin" },
+                                { "Sao chép từ nguồn khác", "copyright", "user1" },
+                                { "Bình luận gây hiểu lầm", "other", "user2" }
+                };
+
+                for (int i = 0; i < reportData.length; i++) {
+                        String reason = reportData[i][0];
+                        String type = reportData[i][1];
+                        String username = reportData[i][2];
+
+                        User reporter = "admin".equals(username) ? admin : "user1".equals(username) ? user1 : user2;
+
+                        Report report = new Report();
+                        report.setReporter(reporter);
+                        report.setType(type);
+                        report.setReason(reason);
+                        report.setStatus("pending");
+                        report.setCreatedAt(LocalDateTime.now());
+
+                        Document doc = documents.get(i % documents.size());
+                        report.setDocument(doc);
+
+                        reportRepository.save(report);
                 }
         }
 

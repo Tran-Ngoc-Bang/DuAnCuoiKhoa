@@ -46,6 +46,19 @@
 		.text-danger {
 			color: red;
 		}
+
+		.form-note {
+			display: block;
+			color: #6c757d;
+			font-size: 0.85rem;
+			margin-top: 4px;
+		}
+
+		.form-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			grid-gap: 20px;
+		}
 	</style>
 </head>
 
@@ -70,11 +83,6 @@
 						<span class="breadcrumb-separator">/</span>
 						<span>Chỉnh sửa</span>
 					</div>
-				</div>
-				<div class="dashboard-actions">
-					<a th:href="@{/admin/users}" class="secondary-btn">
-						<i class="fas fa-arrow-left"></i> Quay lại
-					</a>
 				</div>
 			</div>
 
@@ -124,17 +132,17 @@
 								<div class="form-group">
 									<label for="password">Mật khẩu</label>
 									<input type="password" id="password" th:field="*{password}" class="form-input"
-										placeholder="Nhập mật khẩu" th:required="${userDTO.id == null}" />
+										placeholder="Mật khẩu..." th:required="${userDTO.id == null}" />
+
+									<small class="form-note" th:if="${userDTO.id != null}">
+										Để trống nếu không muốn cập nhật mật khẩu
+									</small>
+
 									<span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
 										class="error-message"></span>
 								</div>
-							</div>
-						</div>
 
-						<!-- Vai trò và trạng thái -->
-						<div class="form-section">
-							<h3 class="section-title"><i class="fas fa-cog"></i> Cài đặt</h3>
-							<div class="form-grid">
+
 								<div class="form-group">
 									<label for="role">Vai trò</label>
 									<select id="role" th:field="*{role}" class="form-input">
@@ -159,9 +167,8 @@
 							<h3 class="section-title"><i class="fas fa-image"></i> Ảnh đại diện</h3>
 							<div class="form-group">
 								<div class="avatar-upload-group">
-									<img th:if="${userDTO.avatarUrl != null}"
-										th:src="@{${userDTO.avatarUrl}}" alt="avatar"
-										class="avatar-preview" />
+									<img th:if="${userDTO.avatarUrl != null}" th:src="@{${userDTO.avatarUrl}}"
+										alt="avatar" class="avatar-preview" />
 									<img th:if="${userDTO.avatarUrl == null}"
 										th:src="@{/assets/images/default-avatar.png}" alt="avatar"
 										class="avatar-preview" />

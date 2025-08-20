@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý bình luận - EduShare Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Bootstrap JS bundle (bao gồm Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/reports.css}" />
+  <style>
+    /* Overlay nền mờ */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    /* Hiện modal */
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    /* Hộp modal */
+    .modal-box {
+      background: white;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .modal-message {
+      margin-bottom: 20px;
+    }
+
+    /* Nút */
+    .btn {
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      font-weight: 600;
+      margin: 0 6px;
+      transition: background-color 0.2s ease;
+      min-width: 90px;
+
+    }
+
+    .btn-confirm {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .btn-confirm.lock {
+      background-color: #ffc107;
+    }
+
+    /* vàng */
+    .btn-confirm.unlock {
+      background-color: #28a745;
+    }
+
+    /* xanh lá */
+    .btn-confirm.delete {
+      background-color: #dc3545;
+    }
+
+    /* đỏ */
+    .btn-confirm.approve {
+      background-color: #007bff;
+    }
+
+    /* xanh dương */
+    .btn-confirm.reject {
+      background-color: #6c757d;
+    }
+
+    /* xám */
+
+    .btn-confirm:hover {
+      filter: brightness(0.9);
+    }
+
+    .btn-cancel {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn-cancel:hover {
+      filter: brightness(0.8);
+    }
+  </style>
+</head>
+
+<body class="admin-body">
+  <div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+      <div th:if="${successMessage}" class="toast align-items-center text-bg-success border-0 show" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Admin Header -->
+  <div th:replace="~{fragments/admin/layout :: header}"></div>
+  <!-- Admin Container -->
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+    <main class="admin-content">
+      <div>
+        <h1 class="admin-page-title">Báo cáo vi phạm</h1>
+        <div class="admin-breadcrumbs">
+          <a th:href="@{/admin}">Admin</a>
+          <span class="breadcrumb-separator">/</span>
+          <span>Báo cáo vi phạm</span>
+        </div>
+      </div>
+
+      <div class="reports-summary">
+        <div class="report-summary-card">
+          <div class="summary-icon new-icon">
+            <i class="fas fa-flag"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-number" th:text="${pendingCount}">0</div>
+            <div class="summary-label">Báo cáo mới</div>
+          </div>
+        </div>
+
+        <div class="report-summary-card">
+          <div class="summary-icon processing-icon">
+            <i class="fas fa-hourglass-half"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-number" th:text="${processingCount}">0</div>
+            <div class="summary-label">Đang xử lý</div>
+          </div>
+        </div>
+
+        <div class="report-summary-card">
+          <div class="summary-icon resolved-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-number" th:text="${resolvedCount}">0</div>
+            <div class="summary-label">Đã giải quyết</div>
+          </div>
+        </div>
+
+        <div class="report-summary-card">
+          <div class="summary-icon rejected-icon">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-number" th:text="${rejectedCount}">0</div>
+            <div class="summary-label">Đã từ chối</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports Management Tools -->
+      <div class="management-tools">
+        <form action="#" method="GET" th:action="@{/admin/reports}" class="search-filters">
+          <div class="tool-item">
+            <input type="text" placeholder="Tìm kiếm báo cáo..." class="search-input" name="keyword"
+              th:value="${keyword}">
+          </div>
+          <div class="tool-item">
+            <select class="filter-select" name="type" onchange="this.form.submit()">
+              <option value="all" th:selected="${type == 'all'}">Tất cả loại vi phạm</option>
+              <option value="copyright" th:selected="${type == 'copyright'}">Vi phạm bản quyền</option>
+              <option value="inappropriate" th:selected="${type == 'inappropriate'}">Nội dung không phù hợp</option>
+              <option value="spam" th:selected="${type == 'spam'}">Spam/Quảng cáo</option>
+              <option value="fake" th:selected="${type == 'fake'}">Tài liệu giả mạo</option>
+              <option value="other" th:selected="${type == 'other'}">Vi phạm khác</option>
+            </select>
+          </div>
+          <div class="tool-item">
+            <select class="filter-select" name="status" onchange="this.form.submit()">
+              <option value="all" th:selected="${status == 'all'}">Tất cả trạng thái</option>
+              <option value="new" th:selected="${status == 'new'}">Mới</option>
+              <option value="processing" th:selected="${status == 'processing'}">Đang xử lý</option>
+              <option value="resolved" th:selected="${status == 'resolved'}">Đã giải quyết</option>
+              <option value="rejected" th:selected="${status == 'rejected'}">Đã từ chối</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <script>
+        document.querySelector(".search-input").addEventListener("keydown", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            document.querySelector("form").submit();
+          }
+        });
+      </script>
+
+
+      <!-- Reports Tabs -->
+      <div class="reports-tabs">
+        <a th:href="@{/admin/reports(status='all')}" th:classappend="${status} == 'all' ? 'active'" class="tab-button">
+          Tất cả (<span th:text="${totalReports}">0</span>)
+        </a>
+
+        <a th:href="@{/admin/reports(status='pending')}" th:classappend="${status} == 'pending' ? 'active'"
+          class="tab-button">
+          Mới (<span th:text="${pendingCount}">0</span>)
+        </a>
+
+        <a th:href="@{/admin/reports(status='processing')}" th:classappend="${status} == 'processing' ? 'active'"
+          class="tab-button">
+          Đang xử lý (<span th:text="${processingCount}">0</span>)
+        </a>
+
+        <a th:href="@{/admin/reports(status='resolved')}" th:classappend="${status} == 'resolved' ? 'active'"
+          class="tab-button">
+          Đã giải quyết (<span th:text="${resolvedCount}">0</span>)
+        </a>
+
+        <a th:href="@{/admin/reports(status='rejected')}" th:classappend="${status} == 'rejected' ? 'active'"
+          class="tab-button">
+          Đã từ chối (<span th:text="${rejectedCount}">0</span>)
+        </a>
+      </div>
+
+      <!-- Reports Table -->
+      <div class="data-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>
+                <div class="checkbox-wrapper">
+                  <input type="checkbox" id="selectAll">
+                  <label for="selectAll"></label>
+                </div>
+              </th>
+              <th>ID</th>
+              <th>Tài liệu báo cáo</th>
+              <th>Người báo cáo</th>
+              <th>Loại vi phạm</th>
+              <th>Ngày báo cáo</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="report, iterStat : ${reportsPage.content}">
+              <td>
+                <div class="checkbox-wrapper">
+                  <input type="checkbox" th:id="'report' + ${iterStat.index}" th:value="${report.id}">
+                  <label th:for="'report' + ${iterStat.index}"></label>
+                </div>
+              </td>
+              <td th:text="'#RPT' + ${report.id}"></td>
+              <td>
+                <div class="report-document" th:if="${report.document != null}">
+                  <div class="document-icon">
+                    <i class="fas fa-file"></i>
+                  </div>
+                  <div class="document-info">
+                    <div class="document-title" th:text="${report.document.title}">Tiêu đề</div>
+                  </div>
+                </div>
+
+                <div class="report-comment" th:if="${report.comment != null}">
+                  <div class="comment-content" th:text="${report.comment.content}">Nội dung bình luận</div>
+                </div>
+
+                <div th:if="${report.document == null and report.comment == null}">
+                  <em>Không có tài liệu hoặc bình luận</em>
+                </div>
+              </td>
+
+              <td>
+                <div class="reporter-info">
+                  <img th:src="${report.reporter.avatarUrl}" alt="Avatar">
+                  <span th:text="${report.reporter.fullName}">Tên người báo cáo</span>
+                </div>
+              </td>
+              <td>
+                <span class="violation-type" th:text="${report.type}"
+                  th:classappend="' ' + ${report.type.toLowerCase().replace(' ', '-')}">Loại vi phạm</span>
+              </td>
+              <td th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy')}"></td>
+
+              <td>
+                <span class="status-badge new" th:if="${report.status == 'pending'}">Mới</span>
+                <span class="status-badge processing" th:if="${report.status == 'processing'}">Đang xử lý</span>
+                <span class="status-badge resolved" th:if="${report.status == 'resolved'}">Đã giải quyết</span>
+                <span class="status-badge rejected" th:if="${report.status == 'rejected'}">Đã từ chối</span>
+                <span class="status-badge"
+                  th:if="${report.status != 'pending' and report.status != 'processing' and report.status != 'resolved' and report.status != 'rejected'}"
+                  th:text="${report.status}">Trạng thái khác</span>
+              </td>
+
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn view-report" th:attr="data-id=${'RPT' + report.id}"
+                    th:data-status="${report.status}"
+                    th:data-createdat="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm:ss')}"
+                    th:data-type="${report.type}" th:data-reason="${report.reason}"
+                    th:data-reporter-name="${report.reporter.fullName}"
+                    th:data-reporter-email="${report.reporter.email}"
+                    th:data-reporter-avatar="${report.reporter.avatarUrl}"
+                    th:data-document-title="${report.document != null ? report.document.title : ''}"
+                    data-document-author="Nguyen Van A"
+                    th:data-document-created="${report.document != null ? #temporals.format(report.document.createdAt, 'dd/MM/yyyy') : ''}"
+                    th:data-note="${report.note != null ? report.note : ''}"
+                    th:data-reply="${report.reply != null ? report.reply : ''}">
+                    <i class="fas fa-eye"></i>
+                  </button>
+
+                  <a class="action-btn" th:if="${report.status == 'pending'}"
+                    th:href="@{/admin/reports/{id}/process(id=${report.id})}" title="Xử lý">
+                    <i class="fas fa-play"></i>
+                  </a>
+
+                  <a class="action-btn" th:if="${report.status == 'processing'}"
+                    th:href="@{/admin/reports/{id}/resolve(id=${report.id})}" title="Đánh dấu đã giải quyết">
+                    <i class="fas fa-check"></i>
+                  </a>
+
+                  <a class="action-btn" th:if="${report.status == 'resolved' or report.status == 'rejected'}"
+                    th:href="@{/admin/reports/{id}/reopen(id=${report.id})}" title="Mở lại">
+                    <i class="fas fa-redo-alt"></i>
+                  </a>
+
+                  <a class="action-btn" th:if="${report.status != 'rejected' and report.status != 'resolved'}"
+                    th:href="@{/admin/reports/{id}/reject(id=${report.id})}" title="Từ chối">
+                    <i class="fas fa-times"></i>
+                  </a>
+
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="pagination-btn prev-btn" th:disabled="${current == 0}"
+          th:onclick="'window.location.href=\'?page=' + (${current} - 1) + '\';'">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="pagination-pages">
+          <span th:if="${totalPages > 1}" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
+            <button class="pagination-btn page-btn" th:text="${pageNumber + 1}"
+              th:classappend="${pageNumber == current} ? ' active' : ''"
+              th:onclick="'window.location.href=\'?page=' + ${pageNumber} + '\';'">
+            </button>
+          </span>
+        </div>
+
+        <button class="pagination-btn next-btn" th:disabled="${current == totalPages - 1}"
+          th:onclick="'window.location.href=\'?page=' + (${current} + 1) + '\';'">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="modal" id="reportDetailModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container modal-lg">
+          <div class="modal-header">
+            <h3>Chi tiết báo cáo #RPT8025</h3>
+            <button class="modal-close"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="modal-body">
+
+            <div class="report-detail">
+              <div class="report-overview">
+                <div class="report-status">
+                  <span class="status-label">Trạng thái:</span>
+                  <span class="status-badge new">Mới</span>
+                </div>
+                <div class="report-date">
+                  <span class="date-label">Ngày báo cáo:</span>
+                  <span class="date-value">15/04/2023 - 10:24 AM</span>
+                </div>
+              </div>
+
+              <div class="report-sections">
+                <div class="report-section">
+                  <h4 class="section-title">
+                    <i class="fas fa-flag"></i> Thông tin báo cáo
+                  </h4>
+                  <div class="section-content">
+                    <div class="info-row">
+                      <div class="info-label">Loại vi phạm</div>
+                      <div class="info-value">
+                        <span class="violation-type copyright">Vi phạm bản quyền</span>
+                      </div>
+                    </div>
+                    <div class="info-row">
+                      <div class="info-label">Người báo cáo</div>
+                      <div class="info-value">
+                        <div class="user-info">
+                          <img
+                            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80"
+                            alt="Trần Thị B">
+                          <div class="user-details">
+                            <div class="user-name">Trần Thị B</div>
+                            <div class="user-email">tranthib@example.com</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="info-row full-width">
+                      <div class="info-label">Mô tả vi phạm</div>
+                      <div class="info-value description">
+                        <p>Tài liệu này đã sao chép nội dung từ cuốn sách "React - The Complete
+                          Guide" của tác giả John Smith mà không được sự cho phép. Tôi là đại
+                          diện của nhà xuất bản CodeMaster và chúng tôi sở hữu bản quyền cho
+                          tài liệu gốc.</p>
+                        <p>Cụ thể, các phần từ trang 15-42 của tài liệu này hoàn toàn giống với
+                          nội dung từ cuốn sách của chúng tôi, chỉ có một vài sửa đổi nhỏ.</p>
+                      </div>
+                    </div>
+                    <div class="info-row full-width">
+                      <div class="info-label">Bằng chứng</div>
+                      <div class="info-value evidence">
+                        <div class="evidence-items">
+                          <div class="evidence-item">
+                            <img
+                              src="https://images.unsplash.com/photo-1606857521015-7f9fcf423740?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                              alt="Bằng chứng 1">
+                            <div class="evidence-overlay">
+                              <button class="view-evidence-btn"><i class="fas fa-search-plus"></i></button>
+                            </div>
+                          </div>
+                          <div class="evidence-item">
+                            <img
+                              src="https://images.unsplash.com/photo-1586282391535-74bc5c28a1f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                              alt="Bằng chứng 2">
+                            <div class="evidence-overlay">
+                              <button class="view-evidence-btn"><i class="fas fa-search-plus"></i></button>
+                            </div>
+                          </div>
+                          <div class="evidence-item document">
+                            <div class="evidence-document">
+                              <i class="fas fa-file-pdf"></i>
+                              <span>copyright_proof.pdf</span>
+                            </div>
+                            <div class="evidence-overlay">
+                              <button class="download-evidence-btn"><i class="fas fa-download"></i></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="report-section">
+                  <h4 class="section-title">
+                    <i class="fas fa-file-alt"></i> Thông tin tài liệu báo cáo
+                  </h4>
+                  <div class="section-content">
+                    <div class="document-card">
+                      <div class="document-preview">
+                        <img
+                          src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=300&q=80"
+                          alt="Document Preview">
+                        <div class="document-icon-overlay"><i class="fas fa-file-pdf"></i></div>
+                      </div>
+                      <div class="document-details">
+                        <h4 class="document-title">Lập trình ứng dụng web với React</h4>
+                        <div class="document-meta">
+                          <div class="meta-item">
+                            <i class="fas fa-user"></i> Nguyễn Văn A
+                          </div>
+                          <div class="meta-item">
+                            <i class="fas fa-calendar"></i> Đăng ngày: 01/04/2023
+                          </div>
+                          <div class="meta-item">
+                            <i class="fas fa-download"></i> 5.2K lượt tải
+                          </div>
+                        </div>
+                        <div class="document-stats">
+                          <div class="stat-item">
+                            <span class="stat-label">Kích thước</span>
+                            <span class="stat-value">15.2 MB</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-label">Trang</span>
+                            <span class="stat-value">84</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-label">Loại</span>
+                            <span class="stat-value">PDF</span>
+                          </div>
+                          <div class="stat-item">
+                            <span class="stat-label">Phiên bản</span>
+                            <span class="stat-value">1.2</span>
+                          </div>
+                        </div>
+                        <div class="document-actions">
+                          <button class="preview-btn">
+                            <i class="fas fa-eye"></i> Xem tài liệu
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="report-section">
+                  <h4 class="section-title">
+                    <i class="fas fa-history"></i> Lịch sử xử lý
+                  </h4>
+                  <div class="section-content">
+                    <div class="history-timeline">
+                      <div class="timeline-item">
+                        <div class="timeline-icon">
+                          <i class="fas fa-flag"></i>
+                        </div>
+                        <div class="timeline-content">
+                          <div class="timeline-header">
+                            <span class="timeline-title">Báo cáo được tạo</span>
+                            <span class="timeline-date">15/04/2023 - 10:24 AM</span>
+                          </div>
+                          <div class="timeline-body">
+                            Trần Thị B đã tạo báo cáo vi phạm bản quyền cho tài liệu "Lập
+                            trình ứng dụng web với React".
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="process-form">
+                <h4 class="form-title">Xử lý báo cáo</h4>
+                <form th:action="@{'/admin/reports/update'}" method="post">
+                  <input type="hidden" id="reportId" name="reportId">
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="reportStatus">Cập nhật trạng thái</label>
+                      <select name="status" id="reportStatus">
+                        <option value="processing">Đang xử lý</option>
+                        <option value="resolved">Đã giải quyết</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="documentAction">Hành động với tài liệu</label>
+                      <select name="documentAction" id="documentAction">
+                        <option value="none">Không có hành động</option>
+                        <option value="hide">Ẩn tài liệu</option>
+                        <option value="delete">Xóa tài liệu</option>
+                        <option value="warning">Cảnh báo người đăng</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="adminNote">Ghi chú của admin</label>
+                    <textarea id="adminNote" name="note" rows="4" placeholder="Thêm ghi chú..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="responseToReporter">Phản hồi tới người báo cáo</label>
+                    <textarea id="responseToReporter" name="reply" rows="4" placeholder="Gửi thông báo..."></textarea>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit" class="save-btn">Lưu & Cập nhật</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        document.querySelectorAll('.view-report').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const modal = document.getElementById('reportDetailModal');
+            const id = btn.getAttribute('data-id');
+            document.getElementById('reportId').value = id.replace('RPT', '');
+
+            const status = btn.getAttribute('data-status');
+            const createdAt = btn.getAttribute('data-createdat');
+            const type = btn.getAttribute('data-type');
+            const reason = btn.getAttribute('data-reason');
+            const reporterName = btn.getAttribute('data-reporter-name');
+            const reporterEmail = btn.getAttribute('data-reporter-email');
+            const reporterAvatar = btn.getAttribute('data-reporter-avatar');
+            const docTitle = btn.getAttribute('data-document-title');
+            const docAuthor = btn.getAttribute('data-document-author');
+            const docCreated = btn.getAttribute('data-document-created');
+            const note = btn.getAttribute('data-note');
+            const reply = btn.getAttribute('data-reply');
+
+            modal.querySelector('.modal-header h3').textContent = `Chi tiết báo cáo #${id}`;
+            modal.querySelector('.report-status .status-badge').textContent = mapStatusText(status);
+            modal.querySelector('.report-date .date-value').textContent = formatDate(createdAt);
+            modal.querySelector('.violation-type').textContent = type;
+            modal.querySelector('.description p').textContent = reason;
+
+            const reporter = modal.querySelector('.user-info');
+            reporter.querySelector('img').src = reporterAvatar;
+            reporter.querySelector('.user-name').textContent = reporterName;
+            reporter.querySelector('.user-email').textContent = reporterEmail;
+
+            modal.querySelector('.document-title').textContent = docTitle;
+            modal.querySelector('.meta-item .fa-user').nextSibling.textContent = ' ' + docAuthor;
+            modal.querySelector('.meta-item .fa-calendar').nextSibling.textContent = ' Đăng ngày: ' + docCreated;
+
+            const historyTimeline = modal.querySelector('.history-timeline');
+            historyTimeline.innerHTML = '';
+
+            const createItem = document.createElement('div');
+            createItem.classList.add('timeline-item');
+            createItem.innerHTML = `
+      <div class="timeline-icon"><i class="fas fa-flag"></i></div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <span class="timeline-title">Báo cáo được tạo</span>
+          <span class="timeline-date">${formatDateTime(createdAt)}</span>
+        </div>
+        <div class="timeline-body">
+          ${reporterName} đã tạo báo cáo vi phạm cho tài liệu "${docTitle}".
+        </div>
+      </div>
+    `;
+            historyTimeline.appendChild(createItem);
+
+            if ((note && note.trim() !== '') || (reply && reply.trim() !== '')) {
+              const reviewItem = document.createElement('div');
+              reviewItem.classList.add('timeline-item');
+              reviewItem.innerHTML = `
+        <div class="timeline-icon"><i class="fas fa-user-edit"></i></div>
+        <div class="timeline-content">
+          <div class="timeline-header">
+            <span class="timeline-title">Đánh giá báo cáo</span>
+            <span class="timeline-date">${formatDateTime(createdAt)}</span>
+          </div>
+          <div class="timeline-body">
+            <strong>Ghi chú admin:</strong> ${note || '(Không có)'}<br/>
+            <strong>Phản hồi tới người báo cáo:</strong> ${reply || '(Không có)'}
+          </div>
+        </div>
+      `;
+              historyTimeline.appendChild(reviewItem);
+            }
+          });
+        });
+
+        function mapStatusText(status) {
+          switch (status) {
+            case 'pending': return 'Mới';
+            case 'processing': return 'Đang xử lý';
+            case 'resolved': return 'Đã giải quyết';
+            case 'rejected': return 'Đã từ chối';
+            default: return status;
+          }
+        }
+
+        function formatDateTime(datetimeStr) {
+          const dt = new Date(datetimeStr);
+          return dt.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+        }
+
+
+        function formatDate(datetimeStr) {
+          const d = new Date(datetimeStr);
+          return d.toLocaleDateString('vi-VN') + ' - ' + d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        document.querySelector('.modal-close').addEventListener('click', () => {
+          document.getElementById('reportDetailModal').style.display = 'none';
+        });
+      </script>
+    </main>
+  </div>
+  <script th:src="@{/js/main.js}"></script>
+  <script th:src="@{/js/admin/admin.js}"></script>
+  <script th:src="@{/js/admin/reports.js}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var toastEl = document.querySelector('.toast');
+      if (toastEl) {
+        var toast = new bootstrap.Toast(toastEl);
+        toast.show();
+      }
+    });
+  </script>
+
+</body>
+
+</html>

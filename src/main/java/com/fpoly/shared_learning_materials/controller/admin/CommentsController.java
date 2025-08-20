@@ -1,5 +1,8 @@
 package com.fpoly.shared_learning_materials.controller.admin;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -8,9 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.dto.CommentDTO;
+import com.fpoly.shared_learning_materials.dto.ReplyDTO;
 import com.fpoly.shared_learning_materials.service.CommentService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,32 +33,32 @@ public class CommentsController {
 		Page<CommentDTO> comments;
 
 		switch (tab) {
-		case "recent":
-			comments = commentService.getCommentsNewThisWeek(page, size);
-			break;
-		case "reported":
-			comments = commentService.getCommentsReported(page, size);
-			break;
-		case "hidden":
-			comments = commentService.getCommentsHidden(page, size);
-			break;
-		default:
-			comments = commentService.getCommentsWithPendingReports(page, size);
+			case "recent":
+				comments = commentService.getCommentsNewThisWeek(page, size);
+				break;
+			case "reported":
+				comments = commentService.getCommentsReported(page, size);
+				break;
+			case "hidden":
+				comments = commentService.getCommentsHidden(page, size);
+				break;
+			default:
+				comments = commentService.getCommentsWithPendingReports(page, size);
 		}
 
 		if (keyword != null && !keyword.isBlank() || !"all".equals(statusFilter)) {
 			switch (statusFilter) {
-			case "visible":
-				comments = commentService.searchVisible(keyword, page, size);
-				break;
-			case "hidden":
-				comments = commentService.searchHidden(keyword, page, size);
-				break;
-			case "reported":
-				comments = commentService.searchReported(keyword, page, size);
-				break;
-			default: // all
-				comments = commentService.searchAll(keyword, page, size);
+				case "visible":
+					comments = commentService.searchVisible(keyword, page, size);
+					break;
+				case "hidden":
+					comments = commentService.searchHidden(keyword, page, size);
+					break;
+				case "reported":
+					comments = commentService.searchReported(keyword, page, size);
+					break;
+				default: 
+					comments = commentService.searchAll(keyword, page, size);
 			}
 		}
 
@@ -116,4 +121,15 @@ public class CommentsController {
 		String ref = req.getHeader("Referer");
 		return "redirect:" + (ref != null ? ref : "/admin/comments");
 	}
+
+	@GetMapping("/{id}/replies")
+	@ResponseBody
+	public List<ReplyDTO> getRepliesByCommentId(@PathVariable("id") Long commentId) {
+		CommentDTO comment = commentService.getCommentById(commentId);
+		if (comment != null && comment.getReplies() != null) {
+			return comment.getReplies();
+		}
+		return Collections.emptyList();
+	}
+
 }

@@ -59,13 +59,7 @@
       <div class="package-overview" th:if="${userDTO != null}">
         <div class="overview-header">
           <div class="package-info">
-            <h2 th:text="${userDTO.fullName}">Nguyễn Văn A</h2>
-            <p class="package-code" th:text="${userDTO.username}">username</p>
-            <div class="package-status">
-              <span class="status-badge" th:classappend="${userDTO.status}">
-                <span th:text="${userDTO.status}">active</span>
-              </span>
-            </div>
+            <h2 th:text="${userDTO.username}">Nguyễn Văn A</h2>
           </div>
 
           <div class="avatar-section">
@@ -116,7 +110,9 @@
               </div>
               <div class="info-item">
                 <span class="info-label">Trạng thái:</span>
-                <span class="info-value" th:text="${userDTO.status}">active</span>
+                <span class="info-value status-badge" th:classappend="${userDTO.status}">
+                  <span th:text="${userDTO.status}">active</span>
+                </span>
               </div>
             </div>
           </div>

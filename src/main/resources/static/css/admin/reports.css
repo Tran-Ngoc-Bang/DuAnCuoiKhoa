@@ -136,15 +136,27 @@
     color: var(--gray-600);
 }
 
+.status-badge.pending,
 .status-badge.new {
-    background-color: rgba(67, 97, 238, 0.1);
+    background-color: rgba(67, 97, 238, 0.1); /* xanh nhạt */
     color: var(--primary);
 }
 
 .status-badge.processing {
-    background-color: rgba(245, 158, 11, 0.1);
+    background-color: rgba(245, 158, 11, 0.1); /* vàng nhạt */
     color: var(--warning);
 }
+
+.status-badge.resolved {
+    background-color: rgba(34, 197, 94, 0.1); /* xanh lá nhạt */
+    color: var(--success);
+}
+
+.status-badge.rejected {
+    background-color: rgba(239, 68, 68, 0.1); /* đỏ nhạt */
+    color: var(--danger);
+}
+
 
 .report-document {
     display: flex;

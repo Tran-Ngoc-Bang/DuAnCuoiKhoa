@@ -92,6 +92,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("start") LocalDateTime start,
                         @Param("end") LocalDateTime end);
 
+        @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.type = :type AND t.status = :status")
+        BigDecimal sumAmountByTypeAndStatus(
+                        @Param("type") Transaction.TransactionType type,
+                        @Param("status") Transaction.TransactionStatus status);
+
         @Query("SELECT YEAR(t.createdAt), MONTH(t.createdAt), SUM(t.amount) " +
                         "FROM Transaction t " +
                         "WHERE t.type = :type AND t.status = :status AND t.createdAt BETWEEN :start AND :end AND t.deletedAt IS NULL "
@@ -104,34 +109,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("start") LocalDateTime start,
                         @Param("end") LocalDateTime end);
 
-        // Additional methods for withdrawal validation
-
-        // Kiểm tra mã giao dịch có tồn tại không (trừ ID hiện tại)
-        boolean existsByCodeAndDeletedAtIsNullAndIdNot(String code, Long id);
-
-        // Lấy giao dịch theo user và type trong khoảng thời gian
-        List<Transaction> findByUserAndTypeAndCreatedAtBetweenAndDeletedAtIsNull(
-                        com.fpoly.shared_learning_materials.domain.User user,
-                        Transaction.TransactionType type,
-                        LocalDateTime startDate,
-                        LocalDateTime endDate);
-
-        // Đếm giao dịch theo user và type trong khoảng thời gian
-        @Query("SELECT COUNT(t) FROM Transaction t WHERE t.user = :user AND t.type = :type " +
-                        "AND t.createdAt BETWEEN :startDate AND :endDate AND t.deletedAt IS NULL")
-        long countByUserAndTypeAndCreatedAtBetweenAndDeletedAtIsNull(
-                        @Param("user") com.fpoly.shared_learning_materials.domain.User user,
-                        @Param("type") Transaction.TransactionType type,
-                        @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
-
-        // Tính tổng số tiền theo user và type trong khoảng thời gian
-        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user = :user AND t.type = :type " +
-                        "AND t.createdAt BETWEEN :startDate AND :endDate AND t.deletedAt IS NULL")
-        BigDecimal sumAmountByUserAndTypeAndCreatedAtBetweenAndDeletedAtIsNull(
-                        @Param("user") com.fpoly.shared_learning_materials.domain.User user,
-                        @Param("type") Transaction.TransactionType type,
-                        @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate);
+        @Query("SELECT YEAR(t.createdAt), MONTH(t.createdAt), SUM(t.amount) " +
+                        "FROM Transaction t WHERE t.type = :type AND t.status = :status " +
+                        "AND t.createdAt BETWEEN :start AND :end " +
+                        "GROUP BY YEAR(t.createdAt), MONTH(t.createdAt) " +
+                        "ORDER BY YEAR(t.createdAt), MONTH(t.createdAt)")
+        List<Object[]> getMonthlyRevenue(@Param("type") Transaction.TransactionType type,
+                        @Param("status") Transaction.TransactionStatus status,
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
 }

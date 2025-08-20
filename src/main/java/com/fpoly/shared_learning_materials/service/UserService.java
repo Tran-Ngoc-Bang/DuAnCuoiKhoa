@@ -24,38 +24,37 @@ public class UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-/**
-     * Lấy tất cả người dùng
-     */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
 
-    public Page<User> searchUsers(String keyword, String role, String status, int page, int size, String sortBy, Sort.Direction direction, String username) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+	/**
+	 * Lấy tất cả người dùng
+	 */
+	public List<User> getAllUsers() {
+		return userRepository.findAll();
+	}
 
-        Specification<User> spec = Specification.where((root, query, cb) -> cb.isNull(root.get("deletedAt")));
+	public Page<User> searchUsers(String keyword, String role, String status, int page, int size, String sortBy,
+			Sort.Direction direction) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        if (keyword != null && !keyword.isBlank()) {
-            spec = spec.and(
-                    (root, query, cb) -> cb.like(cb.lower(root.get("fullName")), "%" + keyword.toLowerCase() + "%"));
-        }
+		Specification<User> spec = Specification.where((root, query, cb) -> cb.isNull(root.get("deletedAt")));
 
-        if (role != null && !role.equals("all")) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("role"), role));
-        }
+		if (keyword != null && !keyword.isBlank()) {
+			String loweredKeyword = "%" + keyword.toLowerCase() + "%";
+			spec = spec.and((root, query, cb) -> cb.or(
+					cb.like(cb.lower(root.get("username")), loweredKeyword),
+					cb.like(cb.lower(root.get("email")), loweredKeyword)));
+		}
 
-        if (status != null && !status.equals("all")) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
-        }
-        
-        if (username != null && !username.isBlank()) {
-            spec = spec.and((root, query, cb) -> cb.notEqual(root.get("username"), username));
-        }
+		if (role != null && !role.equals("all")) {
+			spec = spec.and((root, query, cb) -> cb.equal(root.get("role"), role));
+		}
 
-        return userRepository.findAll(spec, pageable);
-    }
+		if (status != null && !status.equals("all")) {
+			spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+		}
 
+		return userRepository.findAll(spec, pageable);
+	}
 
 	public boolean emailExists(String email) {
 		return userRepository.existsByEmail(email);

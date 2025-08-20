@@ -1,5 +1,6 @@
 package com.fpoly.shared_learning_materials.controller;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,12 @@ public class AuthController {
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         return "client/register";
+    }
+
+    @GetMapping("/logout")
+    public String logout(Model model) {
+        SecurityContextHolder.clearContext();
+        return "redirect:/login";
     }
 
     @PostMapping("/register")

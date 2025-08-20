@@ -1,628 +1,562 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý bình luận - EduShare Admin</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-      rel="stylesheet"
-    />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý bình luận - EduShare Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
-    <!-- Bootstrap JS bundle (bao gồm Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
-    <link rel="stylesheet" th:href="@{/css/admin/comments.css}" />
-    <style>
-      /* Overlay nền mờ */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-      }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-      /* Hiện modal */
-      .modal-overlay.active {
-        display: flex;
-      }
+  <!-- Bootstrap JS bundle (bao gồm Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/comments.css}" />
+  <style>
+    /* Overlay nền mờ */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
 
-      /* Hộp modal */
-      .modal-box {
-        background: white;
-        border-radius: 6px;
-        padding: 20px;
-        max-width: 400px;
-        width: 90%;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        text-align: center;
-      }
+    /* Hiện modal */
+    .modal-overlay.active {
+      display: flex;
+    }
 
-      .modal-title {
-        font-size: 1.25rem;
-        margin-bottom: 12px;
-        font-weight: bold;
-      }
+    /* Hộp modal */
+    .modal-box {
+      background: white;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
 
-      .modal-message {
-        margin-bottom: 20px;
-      }
+    .modal-title {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
 
-      /* Nút */
-      .btn {
-        cursor: pointer;
-        padding: 8px 16px;
-        border-radius: 4px;
-        border: none;
-        font-weight: 600;
-        margin: 0 6px;
-        transition: background-color 0.2s ease;
-        min-width: 90px;
-      }
+    .modal-message {
+      margin-bottom: 20px;
+    }
 
-      .btn-confirm {
-        background-color: #007bff;
-        color: white;
-      }
-      .btn-confirm.lock {
-        background-color: #ffc107;
-      } /* vàng */
-      .btn-confirm.unlock {
-        background-color: #28a745;
-      } /* xanh lá */
-      .btn-confirm.delete {
-        background-color: #dc3545;
-      } /* đỏ */
-      .btn-confirm.approve {
-        background-color: #007bff;
-      } /* xanh dương */
-      .btn-confirm.reject {
-        background-color: #6c757d;
-      } /* xám */
+    /* Nút */
+    .btn {
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      font-weight: 600;
+      margin: 0 6px;
+      transition: background-color 0.2s ease;
+      min-width: 90px;
 
-      .btn-confirm:hover {
-        filter: brightness(0.9);
-      }
+    }
 
-      .btn-cancel {
-        background-color: #6c757d;
-        color: white;
-      }
-      .btn-cancel:hover {
-        filter: brightness(0.8);
-      }
-    </style>
-  </head>
+    .btn-confirm {
+      background-color: #007bff;
+      color: white;
+    }
 
-  <body class="admin-body">
-    <!-- Admin Header -->
-    <div th:replace="~{fragments/admin/layout :: header}"></div>
-    <!-- Admin Container -->
-    <div class="admin-container">
-      <!-- Sidebar -->
-      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+    .btn-confirm.lock {
+      background-color: #ffc107;
+    }
 
-      <!-- Main Content -->
-      <main class="admin-content">
-        <div class="admin-content-header">
-          <h1 class="admin-page-title">Quản lý bình luận</h1>
-          <div class="admin-breadcrumbs">
-            <a href="index.html">Admin</a>
-            <span>/</span>
-            <span>Quản lý bình luận</span>
+    /* vàng */
+    .btn-confirm.unlock {
+      background-color: #28a745;
+    }
+
+    /* xanh lá */
+    .btn-confirm.delete {
+      background-color: #dc3545;
+    }
+
+    /* đỏ */
+    .btn-confirm.approve {
+      background-color: #007bff;
+    }
+
+    /* xanh dương */
+    .btn-confirm.reject {
+      background-color: #6c757d;
+    }
+
+    /* xám */
+
+    .btn-confirm:hover {
+      filter: brightness(0.9);
+    }
+
+    .btn-cancel {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn-cancel:hover {
+      filter: brightness(0.8);
+    }
+  </style>
+</head>
+
+<body class="admin-body">
+  <!-- Admin Header -->
+  <div th:replace="~{fragments/admin/layout :: header}"></div>
+  <!-- Admin Container -->
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+    <!-- Main Content -->
+    <main class="admin-content">
+      <div class="admin-content-header">
+        <h1 class="admin-page-title">Quản lý bình luận</h1>
+        <div class="admin-breadcrumbs">
+          <a href="index.html">Admin</a>
+          <span>/</span>
+          <span>Quản lý bình luận</span>
+        </div>
+      </div>
+
+      <!-- Comments Stats Cards -->
+      <div class="comments-stats">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-comments"></i></div>
+          <div class="stat-content">
+            <div class="stat-value" th:text="${totalComments}">0</div>
+            <div class="stat-label">Tổng số bình luận</div>
           </div>
         </div>
-
-        <!-- Comments Stats Cards -->
-        <div class="comments-stats">
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-comments"></i></div>
-            <div class="stat-content">
-              <div class="stat-value" th:text="${totalComments}">0</div>
-              <div class="stat-label">Tổng số bình luận</div>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon new-icon">
+            <i class="fas fa-comment-dots"></i>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon new-icon">
-              <i class="fas fa-comment-dots"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value" th:text="${newComments}">0</div>
-              <div class="stat-label">Bình luận mới trong tuần</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon reported-icon">
-              <i class="fas fa-flag"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value" th:text="${reportedCount}">0</div>
-              <div class="stat-label">Bình luận bị báo cáo</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon hidden-icon">
-              <i class="fas fa-eye-slash"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value" th:text="${hiddenCount}">0</div>
-              <div class="stat-label">Bình luận bị ẩn</div>
-            </div>
+          <div class="stat-content">
+            <div class="stat-value" th:text="${newComments}">0</div>
+            <div class="stat-label">Bình luận mới trong tuần</div>
           </div>
         </div>
-
-        <!-- Comments Management Tools -->
-        <div class="management-tools">
-          <form method="get" class="search-filters">
-            <input type="hidden" name="tab" th:value="${activeTab}" />
-
-            <div class="tool-item">
-              <input
-                type="text"
-                name="keyword"
-                placeholder="Tìm kiếm bình luận..."
-                class="search-input"
-                th:value="${keyword}"
-                onkeydown="if(event.key==='Enter') this.form.submit()"
-              />
-            </div>
-
-            <div class="tool-item">
-              <select
-                name="statusFilter"
-                class="filter-select"
-                th:onchange="this.form.submit()"
-              >
-                <option value="all" th:selected="${statusFilter == 'all'}">
-                  Tất cả trạng thái
-                </option>
-                <option
-                  value="visible"
-                  th:selected="${statusFilter == 'visible'}"
-                >
-                  Hiển thị
-                </option>
-                <option
-                  value="hidden"
-                  th:selected="${statusFilter == 'hidden'}"
-                >
-                  Đã ẩn
-                </option>
-                <option
-                  value="reported"
-                  th:selected="${statusFilter == 'reported'}"
-                >
-                  Bị báo cáo
-                </option>
-              </select>
-            </div>
-          </form>
+        <div class="stat-card">
+          <div class="stat-icon reported-icon">
+            <i class="fas fa-flag"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" th:text="${reportedCount}">0</div>
+            <div class="stat-label">Bình luận bị báo cáo</div>
+          </div>
         </div>
-
-        <!-- Comments Tabs -->
-        <div class="comments-tabs">
-          <a
-            th:href="@{/admin/comments(page=0,tab='all')}"
-            class="tab-button"
-            th:classappend="${activeTab == 'all'} ? ' active' : ''"
-          >
-            Tất cả (<span th:text="${totalComments}">0</span>)
-          </a>
-          <a
-            th:href="@{/admin/comments(page=0,tab='recent')}"
-            class="tab-button"
-            th:classappend="${activeTab == 'recent'} ? ' active' : ''"
-          >
-            Gần đây (<span th:text="${newComments}">0</span>)
-          </a>
-          <a
-            th:href="@{/admin/comments(page=0,tab='reported')}"
-            class="tab-button"
-            th:classappend="${activeTab == 'reported'} ? ' active' : ''"
-          >
-            Bị báo cáo (<span th:text="${reportedCount}">0</span>)
-          </a>
-          <a
-            th:href="@{/admin/comments(page=0,tab='hidden')}"
-            class="tab-button"
-            th:classappend="${activeTab == 'hidden'} ? ' active' : ''"
-          >
-            Đã ẩn (<span th:text="${hiddenCount}">0</span>)
-          </a>
+        <div class="stat-card">
+          <div class="stat-icon hidden-icon">
+            <i class="fas fa-eye-slash"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" th:text="${hiddenCount}">0</div>
+            <div class="stat-label">Bình luận bị ẩn</div>
+          </div>
         </div>
+      </div>
 
-        <!-- Comments List -->
-        <div class="comments-list">
-          <div th:each="comment : ${commentsPage.content}">
-            <!-- Comment Container with dynamic class -->
-            <div
-              class="comment-item"
-              th:classappend="${comment.reported} ? ' reported' : (comment.status != 'active' ? '' : '')"
-            >
-              <!-- Header -->
-              <div class="comment-header">
-                <div class="commenter-info">
-                  <div class="commenter-details">
-                    <img
-                      th:src="${comment.userAvatar != null} ? @{${comment.userAvatar}} : @{/images/default-avatar.png}"
-                      class="user-avatar"
-                    />
-                    <div
-                      class="commenter-name"
-                      th:text="${comment.userFullName}"
-                    >
-                      Tên người dùng
-                    </div>
-                    <div class="comment-meta">
-                      <span
-                        class="comment-time"
-                        th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy - HH:mm')}"
-                      >
-                        Ngày giờ
-                      </span>
-                      <span class="document-title">
-                        Trên:
-                        <a
-                          th:href="@{/documents/{id}(id=${comment.documentId})}"
-                          th:text="${comment.documentTitle}"
-                          >Tiêu đề tài liệu</a
-                        >
-                      </span>
+      <!-- Comments Management Tools -->
+      <div class="management-tools">
+        <form method="get" class="search-filters">
+          <input type="hidden" name="tab" th:value="${activeTab}" />
+
+          <div class="tool-item">
+            <input type="text" name="keyword" placeholder="Tìm kiếm bình luận..." class="search-input"
+              th:value="${keyword}" onkeydown="if(event.key==='Enter') this.form.submit()" />
+          </div>
+
+          <div class="tool-item">
+            <select name="statusFilter" class="filter-select" th:onchange="this.form.submit()">
+              <option value="all" th:selected="${statusFilter == 'all'}">
+                Tất cả trạng thái
+              </option>
+              <option value="visible" th:selected="${statusFilter == 'visible'}">
+                Hiển thị
+              </option>
+              <option value="hidden" th:selected="${statusFilter == 'hidden'}">
+                Đã ẩn
+              </option>
+              <option value="reported" th:selected="${statusFilter == 'reported'}">
+                Bị báo cáo
+              </option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <!-- Comments Tabs -->
+      <div class="comments-tabs">
+        <a th:href="@{/admin/comments(page=0,tab='all')}" class="tab-button"
+          th:classappend="${activeTab == 'all'} ? ' active' : ''">
+          Tất cả (<span th:text="${totalComments}">0</span>)
+        </a>
+        <a th:href="@{/admin/comments(page=0,tab='recent')}" class="tab-button"
+          th:classappend="${activeTab == 'recent'} ? ' active' : ''">
+          Gần đây (<span th:text="${newComments}">0</span>)
+        </a>
+        <a th:href="@{/admin/comments(page=0,tab='reported')}" class="tab-button"
+          th:classappend="${activeTab == 'reported'} ? ' active' : ''">
+          Bị báo cáo (<span th:text="${reportedCount}">0</span>)
+        </a>
+        <a th:href="@{/admin/comments(page=0,tab='hidden')}" class="tab-button"
+          th:classappend="${activeTab == 'hidden'} ? ' active' : ''">
+          Đã ẩn (<span th:text="${hiddenCount}">0</span>)
+        </a>
+      </div>
+
+      <!-- Comments List -->
+      <div class="data-container">
+        <table class="data-table comments-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Người dùng</th>
+              <th>Nội dung</th>
+              <th>Thời gian</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="comment, iterStat : ${commentsPage.content}">
+              <td th:text="${iterStat.index + 1 + (commentsPage.number * commentsPage.size)}">1</td>
+              <td>
+                <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
+                  <img
+                    th:src="${comment.userAvatar != null} ? @{${comment.userAvatar}} : @{/assets/images/default-avatar.png}"
+                    alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />
+                  <div>
+                    <div th:text="${comment.userFullName}">Tên người dùng</div>
+                    <div style="font-size: 0.85rem; color: #666;">
+                      <a th:href="@{/documents/{id}(id=${comment.documentId})}" th:text="${comment.documentTitle}">Tiêu
+                        đề tài liệu</a>
                     </div>
                   </div>
                 </div>
-                <div
-                  class="comment-status"
-                  th:classappend="${comment.reported?' reported':(comment.status!='active'?' hidden':' visible')}"
-                >
-                  <i
-                    th:class="${comment.reported?'fas fa-flag':(comment.status!='active'?'fas fa-eye-slash':'fas fa-eye')}"
-                  ></i>
-                  <span
-                    th:text="${comment.reported?'Bị báo cáo':(comment.status!='active'?'Đã ẩn':'Hiển thị')}"
-                  ></span>
-                </div>
-              </div>
+              </td>
+              <td th:text="${comment.content}">Nội dung bình luận</td>
+              <td th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy - HH:mm')}">Ngày giờ</td>
+              <td>
+                <span
+                  th:class="'status-badge ' + (${comment.reported} ? 'reported' : (comment.status != 'active' ? 'hidden' : 'active'))"
+                  th:text="${comment.reported ? 'Bị báo cáo' : (comment.status != 'active' ? 'Đã ẩn' : 'Hiển thị')}"></span>
+              </td>
+              <td>
+                <div class="action-buttons" style="display: flex; gap: 5px;">
 
-              <!-- Content -->
-              <div class="comment-content">
-                <p th:text="${comment.content}">Nội dung bình luận</p>
-              </div>
-
-              <!-- Report Info -->
-              <div class="report-info" th:if="${comment.reported}">
-                <div class="report-header">
-                  <i class="fas fa-exclamation-triangle"></i> Bình luận này đã
-                  bị báo cáo
-                </div>
-                <div class="report-details">
-                  <div class="reporter">
-                    <span>Người báo cáo:</span>
-                    <span th:text="${comment.reporterName}">Người báo cáo</span>
-                  </div>
-                  <div class="report-reason">
-                    <span>Lý do:</span>
-                    <span th:text="${comment.reportReason}">Lý do báo cáo</span>
-                  </div>
-                  <div class="report-time">
-                    <span>Thời gian:</span>
-                    <span
-                      th:text="${#temporals.format(comment.reportTime, 'dd/MM/yyyy - HH:mm')}"
-                      >Thời gian báo cáo</span
-                    >
-                  </div>
-                </div>
-              </div>
-
-              <div class="comment-actions">
-                <div class="comment-reply">
-                  <span class="reply-count">
-                    <i class="fas fa-reply"></i>
-                    <span
-                      th:text="${#lists.size(comment.replies)} + ' phản hồi'"
-                      >2 phản hồi</span
-                    >
-                  </span>
-                  <button
-                    class="toggle-replies"
-                    th:attr="data-id=${'comment' + comment.id}"
-                  >
-                    Xem phản hồi
+                  <button class="action-btn show-replies-btn" type="button" th:attr="data-comment-id=${comment.id}"
+                    th:onclick="'openRepliesModal(' + ${comment.id} + ')'">
+                    <i class="fas fa-comments"></i>
                   </button>
-                </div>
 
-                <div class="report-actions" th:if="${comment.reported}">
-                  <button
-                    class="report-approve action-btn"
-                    data-action="approve"
-                    th:data-comment-id="${comment.id}"
-                    onclick="openConfirmationModal(event, 'approve', [[${comment.id}]])"
-                  >
-                    Chấp nhận báo cáo
-                  </button>
-                  <button
-                    class="report-reject action-btn"
-                    data-action="reject"
-                    th:data-comment-id="${comment.id}"
-                    onclick="openConfirmationModal(event, 'reject', [[${comment.id}]])"
-                  >
-                    Từ chối báo cáo
-                  </button>
-                </div>
 
-                <div class="comment-buttons">
-                  <button
-                    th:if="${comment.status == 'active'}"
-                    href="#"
-                    class="action-btn hide-btn"
-                    data-action="hide"
+                  <button th:if="${comment.status == 'active'}" class="action-btn hide-btn" data-action="hide"
                     th:data-comment-id="${comment.id}"
-                    onclick="openConfirmationModal(event, 'hide', [[${comment.id}]])"
-                  >
+                    th:onclick="|openConfirmationModal(event, 'hide', ${comment.id})|" title="Ẩn bình luận">
                     <i class="fas fa-eye-slash"></i>
                   </button>
-                  <button
-                    th:if="${comment.status != 'active'}"
-                    class="action-btn show-btn"
-                    data-action="show"
+
+                  <button th:if="${comment.status != 'active'}" class="action-btn show-btn" data-action="show"
                     th:data-comment-id="${comment.id}"
-                    onclick="openConfirmationModal(event, 'show', [[${comment.id}]])"
-                  >
+                    th:onclick="|openConfirmationModal(event, 'show', ${comment.id})|" title="Hiển thị bình luận">
                     <i class="fas fa-eye"></i>
                   </button>
 
-                  <button
-                    class="action-btn delete-btn"
-                    data-action="delete"
-                    th:data-comment-id="${comment.id}"
-                    onclick="openConfirmationModal(event, 'delete', [[${comment.id}]])"
-                  >
+                  <button class="action-btn delete-btn" data-action="delete" th:data-comment-id="${comment.id}"
+                    th:onclick="|openConfirmationModal(event, 'delete', ${comment.id})|" title="Xóa bình luận">
                     <i class="fas fa-trash"></i>
                   </button>
+
+                  <button th:if="${comment.reported}" class="action-btn approve-btn" data-action="approve"
+                    th:data-comment-id="${comment.id}"
+                    th:onclick="|openConfirmationModal(event, 'approve', ${comment.id})|" title="Chấp nhận báo cáo">
+                    <i class="fas fa-check"></i>
+                  </button>
+
+                  <button th:if="${comment.reported}" class="action-btn reject-btn" data-action="reject"
+                    th:data-comment-id="${comment.id}"
+                    th:onclick="|openConfirmationModal(event, 'reject', ${comment.id})|" title="Từ chối báo cáo">
+                    <i class="fas fa-times"></i>
+                  </button>
+
                 </div>
-              </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-              <div class="modal-overlay" id="customModal">
-                <div
-                  class="modal-box"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-labelledby="modalTitle"
-                  aria-describedby="modalMessage"
-                >
-                  <div class="modal-title" id="modalTitle">
-                    Xác nhận hành động
-                  </div>
-                  <div class="modal-message" id="modalMessage">
-                    Bạn có chắc chắn muốn thực hiện?
-                  </div>
-                  <div>
-                    <button class="btn btn-cancel" id="modalCancelBtn">
-                      Hủy
-                    </button>
-                    <a href="#" id="modalConfirmBtn" class="btn btn-confirm"
-                      >Xác nhận</a
-                    >
-                  </div>
-                </div>
-              </div>
+        <style>
+          .btn-confirm.hide {
+            background-color: #5a5cfc;
+            color: white;
+          }
 
-              <script>
-                const modal = document.getElementById("customModal");
-                const modalTitle = document.getElementById("modalTitle");
-                const modalMessage = document.getElementById("modalMessage");
-                const modalConfirmBtn =
-                  document.getElementById("modalConfirmBtn");
-                const modalCancelBtn =
-                  document.getElementById("modalCancelBtn");
+          .btn-confirm.show {
+            background-color: #17a2b8;
+            color: white;
+          }
 
-                const actionConfig = {
-                  hide: {
-                    title: "Xác nhận ẩn bình luận",
-                    message: "Bạn có chắc chắn muốn ẩn bình luận này?",
-                    btnText: "Ẩn bình luận",
-                    btnClass: "hide",
-                  },
-                  show: {
-                    title: "Xác nhận hiển thị bình luận",
-                    message: "Bạn có chắc chắn muốn hiển thị bình luận này?",
-                    btnText: "Hiển thị bình luận",
-                    btnClass: "show",
-                  },
-                  delete: {
-                    title: "Xác nhận xóa bình luận",
-                    message: "Bạn có chắc chắn muốn xóa bình luận này?",
-                    btnText: "Xóa",
-                    btnClass: "delete",
-                  },
-                  approve: {
-                    title: "Xác nhận chấp nhận báo cáo",
-                    message:
-                      "Bạn có chắc chắn muốn chấp nhận báo cáo và ẩn bình luận này?",
-                    btnText: "Chấp nhận báo cáo",
-                    btnClass: "approve",
-                  },
-                  reject: {
-                    title: "Xác nhận từ chối báo cáo",
-                    message:
-                      "Bạn có chắc chắn muốn từ chối báo cáo và hiển thị lại bình luận này?",
-                    btnText: "Từ chối báo cáo",
-                    btnClass: "reject",
-                  },
-                };
+          .btn-confirm.delete {
+            background-color: #dc3545;
+            color: white;
+          }
 
-                function openConfirmationModal(event, action, commentId) {
-                  event.preventDefault();
-                  const config = actionConfig[action];
-                  if (!config) return;
+          .btn-confirm.approve {
+            background-color: #28a745;
+            color: white;
+          }
 
-                  modalTitle.textContent = config.title;
-                  modalMessage.textContent = config.message;
-                  modalConfirmBtn.textContent = config.btnText;
+          .btn-confirm.reject {
+            background-color: #ffc107;
+            color: black;
+          }
 
-                  modalConfirmBtn.className =
-                    "btn btn-confirm " + config.btnClass;
-                  modalConfirmBtn.href = `/admin/comments/${commentId}/${action}`;
+          .btn-confirm:hover {
+            opacity: 0.9;
+            transition: 0.2s ease-in-out;
+          }
+        </style>
 
-                  modal.classList.add("active");
-                }
 
-                function closeModal() {
-                  modal.classList.remove("active");
-                }
-
-                modalCancelBtn.addEventListener("click", closeModal);
-                modal.addEventListener("click", (e) => {
-                  if (e.target === modal) closeModal();
-                });
-
-                document.addEventListener("keydown", (e) => {
-                  if (
-                    e.key === "Escape" &&
-                    modal.classList.contains("active")
-                  ) {
-                    closeModal();
-                  }
-                });
-              </script>
-
-              <div
-                class="comment-replies"
-                th:id="${'comment' + comment.id + '-replies'}"
-                style="display: none"
-              >
-                <div class="reply-item" th:each="reply : ${comment.replies}">
-                  <div class="reply-header">
-                    <div class="commenter-info">
-                      <img
-                        th:src="${reply.userAvatarUrl != null} ? @{${reply.userAvatarUrl}} : @{/images/default-avatar.png}"
-                        alt="User Avatar"
-                      />
-                      <div class="commenter-details">
-                        <div
-                          class="commenter-name"
-                          th:text="${reply.userFullName}"
-                        >
-                          Tên người dùng
-                        </div>
-                        <div class="comment-meta">
-                          <span
-                            class="comment-time"
-                            th:text="${#temporals.format(reply.createdAt, 'dd/MM/yyyy - HH:mm')}"
-                          >
-                            Thời gian
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      class="comment-status"
-                      th:classappend="${reply.status != 'active' ? ' hidden' : ' visible'}"
-                    >
-                      <i
-                        th:class="${reply.status != 'active' ? 'fas fa-eye-slash' : 'fas fa-eye'}"
-                      ></i>
-                      <span
-                        th:text="${reply.status != 'active' ? 'Đã ẩn' : 'Hiển thị'}"
-                      ></span>
-                    </div>
-                  </div>
-
-                  <div class="reply-content">
-                    <p th:text="${reply.content}">Nội dung phản hồi</p>
-                  </div>
-                </div>
-              </div>
+        <!-- Modal xác nhận -->
+        <div class="modal-overlay" id="customModal">
+          <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
+            aria-describedby="modalMessage">
+            <div class="modal-title" id="modalTitle">Xác nhận hành động</div>
+            <div class="modal-message" id="modalMessage">
+              Bạn có chắc chắn muốn thực hiện?
+            </div>
+            <div>
+              <button class="btn btn-cancel" id="modalCancelBtn">Hủy</button>
+              <a href="#" id="modalConfirmBtn" class="btn btn-confirm">Xác nhận</a>
             </div>
           </div>
         </div>
-        <!-- Pagination -->
-        <div class="pagination">
-          <button
-            class="pagination-btn prev-btn"
-            th:disabled="${commentsPage.first}"
-            th:attr="data-page=${current - 1}"
-          >
-            <i class="fas fa-chevron-left"></i>
-          </button>
 
-          <div class="pagination-pages">
-            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-              <button
-                class="pagination-btn page-btn"
-                th:classappend="${i} == ${current} ? ' active' : ''"
-                th:text="${i + 1}"
-                th:attr="data-page=${i}"
-              ></button>
-            </span>
-          </div>
+        <script>
+          const modal = document.getElementById("customModal");
+          const modalTitle = document.getElementById("modalTitle");
+          const modalMessage = document.getElementById("modalMessage");
+          const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+          const modalCancelBtn = document.getElementById("modalCancelBtn");
 
-          <button
-            class="pagination-btn next-btn"
-            th:disabled="${commentsPage.last}"
-            th:attr="data-page=${current + 1}"
-          >
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </main>
-    </div>
+          const actionConfig = {
+            hide: {
+              title: "Xác nhận ẩn bình luận",
+              message: "Bạn có chắc chắn muốn ẩn bình luận này?",
+              btnText: "Ẩn bình luận",
+              btnClass: "hide",
+            },
+            show: {
+              title: "Xác nhận hiển thị bình luận",
+              message: "Bạn có chắc chắn muốn hiển thị bình luận này?",
+              btnText: "Hiển thị bình luận",
+              btnClass: "show",
+            },
+            delete: {
+              title: "Xác nhận xóa bình luận",
+              message: "Bạn có chắc chắn muốn xóa bình luận này?",
+              btnText: "Xóa",
+              btnClass: "delete",
+            },
+            approve: {
+              title: "Xác nhận chấp nhận báo cáo",
+              message: "Bạn có chắc chắn muốn chấp nhận báo cáo và ẩn bình luận này?",
+              btnText: "Chấp nhận báo cáo",
+              btnClass: "approve",
+            },
+            reject: {
+              title: "Xác nhận từ chối báo cáo",
+              message: "Bạn có chắc chắn muốn từ chối báo cáo và hiển thị lại bình luận này?",
+              btnText: "Từ chối báo cáo",
+              btnClass: "reject",
+            },
+          };
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        document
-          .querySelectorAll(".pagination-btn[data-page]")
-          .forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              const page = this.getAttribute("data-page");
-              if (page !== null) {
-                const url = new URL(window.location.href);
-                url.searchParams.set("page", page);
-                window.location.href = url.toString();
-              }
-            });
+          function openConfirmationModal(event, action, commentId) {
+            event.preventDefault();
+            const config = actionConfig[action];
+            if (!config) return;
+
+            modalTitle.textContent = config.title;
+            modalMessage.textContent = config.message;
+            modalConfirmBtn.textContent = config.btnText;
+
+            modalConfirmBtn.className = "btn btn-confirm " + config.btnClass;
+            modalConfirmBtn.href = `/admin/comments/${commentId}/${action}`;
+
+            modal.style.display = "flex";
+          }
+
+          function closeModal() {
+            modal.style.display = "none";
+          }
+
+          modalCancelBtn.addEventListener("click", closeModal);
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
           });
-        document.querySelectorAll("a[data-confirm]").forEach((el) => {
-          el.addEventListener("click", (e) => {
-            const msg = el.getAttribute("data-confirm");
-            if (!confirm(msg)) {
-              e.preventDefault();
+
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && modal.style.display === "flex") {
+              closeModal();
+            }
+          });
+        </script>
+      </div>
+
+      <div class="modal-overlay" id="customModal" name="replyModal">
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
+          aria-describedby="modalMessage">
+          <div class="modal-title" id="modalTitle">Phản hồi bình luận</div>
+          <div class="modal-message" id="modalMessage">
+          </div>
+          <div>
+            <button class="btn btn-cancel" id="modalCancelBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="pagination-btn prev-btn" th:disabled="${commentsPage.first}" th:attr="data-page=${current - 1}">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="pagination-pages">
+          <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <button class="pagination-btn page-btn" th:classappend="${i} == ${current} ? ' active' : ''"
+              th:text="${i + 1}" th:attr="data-page=${i}"></button>
+          </span>
+        </div>
+
+        <button class="pagination-btn next-btn" th:disabled="${commentsPage.last}" th:attr="data-page=${current + 1}">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+
+    </main>
+  </div>
+  <script>
+    const replyModal = document.querySelector('div[name="replyModal"]'); // dùng name
+    const replyModalTitle = replyModal.querySelector('#modalTitle');
+    const replyModalMessage = replyModal.querySelector('#modalMessage');
+    const replyModalCancelBtn = replyModal.querySelector('#modalCancelBtn');
+
+    function openRepliesModal(commentId) {
+      fetch(`/admin/comments/${commentId}/replies`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Lỗi HTTP ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(replies => {
+          replyModalTitle.textContent = 'Phản hồi bình luận';
+          replyModalMessage.innerHTML = '';
+
+          if (replies.length === 0) {
+            replyModalMessage.innerHTML = '<p>Không có trả lời nào.</p>';
+          } else {
+            replies.forEach(reply => {
+              const div = document.createElement('div');
+              div.classList.add('reply-item');
+              div.innerHTML = `
+  <div style="display: flex; align-items: flex-start; gap: 10px;">
+    <img src="${reply.userAvatarUrl}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+    <div>
+      <p><strong>${reply.userFullName}</strong> <br> <small>${new Date(reply.createdAt).toLocaleString()}</small></p>
+      <p>${reply.content}</p>
+    </div>
+  </div>
+  <hr>
+`; replyModalMessage.appendChild(div);
+            });
+          }
+
+          replyModal.classList.add('active');
+        })
+        .catch(err => {
+          console.error('Lỗi khi tải replies: ' + err);
+          replyModalTitle.textContent = 'Lỗi';
+          replyModalMessage.innerHTML = '<p>Không thể tải phản hồi.</p>';
+          replyModal.classList.add('active');
+        });
+    }
+
+    function closeReplyModal() {
+      replyModal.classList.remove('active');
+    }
+
+    replyModalCancelBtn.addEventListener('click', closeReplyModal);
+
+    replyModal.addEventListener('click', (e) => {
+      if (e.target === replyModal) closeReplyModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && replyModal.classList.contains('active')) {
+        closeReplyModal();
+      }
+    });
+  </script>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document
+        .querySelectorAll(".pagination-btn[data-page]")
+        .forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            const page = this.getAttribute("data-page");
+            if (page !== null) {
+              const url = new URL(window.location.href);
+              url.searchParams.set("page", page);
+              window.location.href = url.toString();
             }
           });
         });
+      document.querySelectorAll("a[data-confirm]").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          const msg = el.getAttribute("data-confirm");
+          if (!confirm(msg)) {
+            e.preventDefault();
+          }
+        });
       });
-    </script>
-    <script th:src="@{/js/main.js}"></script>
-    <script th:src="@{/js/admin/admin.js}"></script>
-    <script th:src="@{/js/admin/comments.js}"></script>
-  </body>
+    });
+  </script>
+  <script th:src="@{/js/main.js}"></script>
+  <script th:src="@{/js/admin/admin.js}"></script>
+  <!-- <script th:src="@{/js/admin/comments.js}"></script> -->
+</body>
+
 </html>
