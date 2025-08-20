@@ -1,337 +1,525 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chi tiết danh mục - EduShare Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/main.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/categories.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+    />
     <style type="text/css">
-        * {
-            box-sizing: border-box; /* Áp dụng cho toàn bộ để kiểm soát kích thước chính xác */
-        }
-        .form-container {
-            max-width: 900px; /* Giảm từ 1400px xuống 900px */
-            margin: 1rem auto;
-            padding: 0;
-            background: transparent;
-        }
-        .details-container {
-            width: 100%;
-            max-width: 100%;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: visible;
-        }
-        .details-header {
-            padding: 20px 20px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .details-header h3 {
-            margin: 0 0 15px 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        .details-body {
-            padding: 20px;
-        }
-        .details-footer {
-            padding: 20px;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        .detail-container {
-            max-width: 100%;
-            width: 100%;
-            margin: 1rem auto;
-            padding: 1.5rem; /* Giảm padding */
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .detail-header {
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .detail-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #333;
-        }
-        .detail-body {
-            display: grid;
-            gap: 0.75rem;
-        }
-        .detail-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.4rem 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.9rem;
-        }
-        .detail-item label {
-            font-weight: 500;
-            color: #555;
-        }
-        .detail-item span {
-            color: #333;
-            text-align: right;
-        }
-        /* Compact stats */
-        .category-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-        }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0.5rem;
-            background: #f8f9fa;
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-        .stat-icon {
-            color: #4361ee;
-            font-size: 0.9rem;
-        }
-        .stat-content {
-            flex: 1;
-        }
-        .stat-label {
-            display: block;
-            font-size: 0.75rem;
-            color: #6c757d;
-            margin-bottom: 2px;
-        }
-        .stat-value {
-            display: block;
-            font-weight: 500;
-            color: #333;
-        }
-        .detail-footer {
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-        }
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        .btn-back {
-            background: #f5f5f5;
-            color: #333;
-            border: 1px solid #ccc;
-        }
-        .btn-back:hover {
-            background: #e0e0e0;
-        }
-        .btn-edit {
-            background-color: var(--primary);
-            color: #fff;
-            border: none;
-        }
-        .btn-edit:hover {
-            background: #0056b3;
-        }
-        .status-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-        .badge-success {
-            background: #28a745;
-            color: #fff;
-        }
-        .badge-danger {
-            background: #dc3545;
-            color: #fff;
-        }
+              /* Fix
+      cho 2 nút trong details page */
+      .details-footer .btn {
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          text-decoration: none;
+          font-size: 0.9rem;
+          font-weight: 500;
+          transition: all 0.2s;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: 1px solid transparent;
+      }
+
+      .details-footer .btn-back {
+          background: #6c757d !important;
+          color: #fff !important;
+          border: 1px solid #6c757d !important;
+      }
+
+      .details-footer .btn-back:hover {
+          background: #5a6268 !important;
+          border-color: #5a6268 !important;
+          color: #fff !important;
+          text-decoration: none;
+      }
+
+      .details-footer .btn-edit {
+          background: #007bff !important;
+          color: #fff !important;
+          border: 1px solid #007bff !important;
+      }
+
+      .details-footer .btn-edit:hover {
+          background: #0056b3 !important;
+          border-color: #0056b3 !important;
+          color: #fff !important;
+          text-decoration: none;
+      }
+
+      /* Subcategories Section - Copy từ list page */
+      .subcategories-section {
+          margin-top: 2rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #e5e7eb;
+      }
+
+      .subcategories-header {
+          margin-bottom: 1rem;
+      }
+
+      .subcategories-header h4 {
+          margin: 0;
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #1f2937;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
+
+      .subcategories-header h4 i {
+          color: #4361ee;
+      }
+
+      .subcategories-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 1rem;
+      }
+
+      .subcategory-card {
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          overflow: visible;
+          transition: all 0.2s ease;
+          height: 220px;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+      }
+
+      .subcategory-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .subcategory-content {
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          overflow: visible;
+      }
+
+      .subcategory-icon {
+          width: 40px;
+          height: 40px;
+          background: #4361ee;
+          color: white;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          margin-bottom: 12px;
+      }
+
+      .subcategory-info {
+          flex: 1;
+          min-width: 0;
+      }
+
+      .subcategory-info h5 {
+          margin: 0 0 4px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #1f2937;
+          line-height: 1.3;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+      }
+
+      .subcategory-info p {
+          margin: 0 0 8px 0;
+          font-size: 0.8rem;
+          color: #6b7280;
+          line-height: 1.4;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+      }
+
+      .subcategory-stats {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+          margin: 12px 0;
+          flex-wrap: wrap;
+      }
+
+      .stat-badge {
+          text-align: center;
+          flex: 1;
+          min-width: 50px;
+          background-color: #f8fafc;
+          padding: 8px 4px;
+          border-radius: 6px;
+          border: 1px solid #e2e8f0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          font-size: 11px;
+          color: #64748b;
+          font-weight: 500;
+      }
+
+      .stat-badge i {
+          font-size: 10px;
+      }
+
+      .subcategory-actions {
+          display: flex;
+          justify-content: center;
+          gap: 4px;
+          margin-top: auto;
+          padding-top: 8px;
+      }
+
+      .subcategory-actions .action-btn {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          transition: all 0.2s ease;
+          text-decoration: none;
+      }
+
+      .view-btn {
+          background-color: #dbeafe;
+          color: #1d4ed8;
+      }
+
+      .view-btn:hover {
+          background-color: #bfdbfe;
+          color: #1e40af;
+          text-decoration: none;
+      }
+
+      .edit-btn {
+          background-color: #fef3c7;
+          color: #d97706;
+      }
+
+      .edit-btn:hover {
+          background-color: #fde68a;
+          color: #b45309;
+          text-decoration: none;
+      }
+
+      /* Responsive cho subcategories */
+      @media (max-width: 1400px) {
+          .subcategories-grid {
+              grid-template-columns: repeat(4, 1fr);
+          }
+      }
+
+      @media (max-width: 1200px) {
+          .subcategories-grid {
+              grid-template-columns: repeat(3, 1fr);
+          }
+      }
+
+      @media (max-width: 768px) {
+          .subcategories-grid {
+              grid-template-columns: repeat(2, 1fr);
+          }
+
+          .subcategory-card {
+              height: 200px;
+          }
+      }
+
+      @media (max-width: 480px) {
+          .subcategories-grid {
+              grid-template-columns: 1fr;
+          }
+
+          .subcategory-card {
+              height: 180px;
+          }
+      }
+              * {
+                  box-sizing: border-box; /* Áp dụng cho toàn bộ để kiểm soát kích thước chính xác */
+              }
+              .form-container {
+                  max-width: 900px; /* Giảm từ 1400px xuống 900px */
+                  margin: 1rem auto;
+                  padding: 0;
+                  background: transparent;
+              }
+              .details-container {
+                  width: 100%;
+                  max-width: 100%;
+                  background: #fff;
+                  border-radius: 8px;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                  overflow: visible;
+              }
+              .details-header {
+                  padding: 20px 20px 0;
+                  border-bottom: 1px solid #e5e7eb;
+              }
+              .details-header h3 {
+                  margin: 0 0 15px 0;
+                  font-size: 1.25rem;
+                  font-weight: 600;
+                  color: #1f2937;
+              }
+              .details-body {
+                  padding: 30px 20px 12px 20px;
+              }
+              .details-footer {
+                  padding: 20px;
+                  border-top: 1px solid #e5e7eb;
+                  display: flex;
+                  justify-content: flex-end;
+                  gap: 12px;
+              }
+              .detail-container {
+                  max-width: 100%;
+                  width: 100%;
+                  margin: 1rem auto;
+                  padding: 1.5rem; /* Giảm padding */
+                  background: #fff;
+                  border: 1px solid #e0e0e0;
+                  border-radius: 8px;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              .detail-header {
+                  margin-bottom: 1rem;
+                  padding-bottom: 0.75rem;
+                  border-bottom: 1px solid #e0e0e0;
+              }
+              .detail-header h3 {
+                  margin: 0;
+                  font-size: 1.25rem;
+                  font-weight: 600;
+                  color: #333;
+              }
+              .detail-body {
+                  display: grid;
+                  gap: 0.75rem;
+              }
+              .detail-item {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  padding: 0.4rem 0;
+                  border-bottom: 1px solid #f0f0f0;
+                  font-size: 0.9rem;
+              }
+              .detail-item label {
+                  font-weight: 500;
+                  color: #555;
+              }
+              .detail-item span {
+                  color: #333;
+                  text-align: right;
+              }
+              /* Compact stats */
+              .category-stats {
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 0.75rem;
+                 margin: 10px;
+              .stat-item {
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  padding: 0.5rem;
+                  background: #f8f9fa;
+                  border-radius: 6px;
+                  font-size: 0.85rem;
+              }
+              .stat-icon {
+                  color: #4361ee;
+                  font-size: 0.9rem;
+              }
+              .stat-content {
+                  flex: 1;
+              }
+              .stat-label {
+                  display: block;
+                  font-size: 0.75rem;
+                  color: #6c757d;
+                  margin-bottom: 2px;
+              }
+              .stat-value {
+                  display: block;
+                  font-weight: 500;
+                  color: #333;
+              }
+              .detail-footer {
+                  margin-top: 1.5rem;
+                  display: flex;
+                  justify-content: flex-end;
+                  gap: 0.5rem;
+              }
+              .btn {
+                  padding: 0.5rem 1rem;
+                  border-radius: 4px;
+                  text-decoration: none;
+                  font-size: 0.9rem;
+                  font-weight: 500;
+                  transition: all 0.2s;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 6px;
+                  border: 1px solid transparent;
+              }
+              .btn-back {
+                  background: #6c757d !important;
+                  color: #fff !important;
+                  border: 1px solid #6c757d !important;
+              }
+              .btn-back:hover {
+                  background: #5a6268 !important;
+                  border-color: #5a6268 !important;
+                  color: #fff !important;
+                  text-decoration: none;
+              }
+              .btn-edit {
+                  background: #007bff !important;
+                  color: #fff !important;
+                  border: 1px solid #007bff !important;
+              }
+              .btn-edit:hover {
+                  background: #0056b3 !important;
+                  border-color: #0056b3 !important;
+                  color: #fff !important;
+                  text-decoration: none;
+              }
+              .status-badge {
+                  padding: 0.25rem 0.5rem;
+                  border-radius: 4px;
+                  font-size: 0.85rem;
+              }
+              .badge-success {
+                  background: #28a745;
+                  color: #fff;
+              }
+              .badge-danger {
+                  background: #dc3545;
+                  color: #fff;
+              }
+
+              /* Clickable stats styling */
+              .clickable-stat {
+                  cursor: pointer;
+                  position: relative;
+                  transition: all 0.2s ease;
+              }
+
+              .clickable-stat:hover {
+                  background-color: #f0f9ff;
+                  border: 1px solid #0369a1;
+                  border-radius: 8px;
+                  transform: translateY(-1px);
+              }
+
+              .action-icon {
+                  position: absolute;
+                  top: 8px;
+                  right: 8px;
+                  font-size: 12px;
+                  color: #0369a1;
+                  opacity: 0.7;
+              }
+
+              .clickable-stat:hover .action-icon {
+                  opacity: 1;
+              }
+
+              /* Different colors for different actions */
+              .clickable-stat[onclick*="viewDocuments"]:hover {
+                  background-color: #fef3c7;
+                  border-color: #d97706;
+              }
+
+              .clickable-stat[onclick*="viewDocuments"] .action-icon {
+                  color: #d97706;
+              }
+
+              .clickable-stat[onclick*="showSubcategories"]:hover {
+                  background-color: #e0f2fe;
+                  border-color: #0369a1;
+              }
+
+              .clickable-stat[onclick*="showSubcategories"] .action-icon {
+                  color: #0369a1;
+              }
     </style>
-</head>
-<body class="admin-body">
-    <header class="admin-header">
-        <div class="admin-header-content">
-            <div class="admin-logo">
-                <a th:href="@{/admin/index}" class="logo">
-                    <div class="logo-icon">E</div>
-                    <div class="logo-text">EduShare</div>
-                </a>
-            </div>
-            <div class="admin-header-actions">
-                <div class="admin-search">
-                    <input type="text" placeholder="Tìm kiếm..." class="search-input" id="headerSearchInput">
-                    <button id="headerSearchBtn"><i class="fas fa-search"></i></button>
-                </div>
-                <div class="dark-mode-toggle" id="darkModeToggle"></div>
-                <div class="admin-notifications">
-                    <button class="notification-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">5</span>
-                    </button>
-                </div>
-                <div class="admin-profile">
-                    <div class="admin-avatar">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
-                    </div>
-                    <div class="admin-info">
-                        <span class="admin-name">Nguyễn Văn Anh</span>
-                        <span class="admin-role">Quản trị viên</span>
-                    </div>
-                    <div class="admin-dropdown">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+  </head>
+  <body class="admin-body">
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
 
     <div class="admin-container">
-        <aside class="admin-sidebar">
-            <nav class="admin-nav">
-                <ul class="admin-menu">
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/index}">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Bảng điều khiển</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/users}">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý người dùng</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/documents}">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Quản lý tài liệu</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item active">
-                        <a th:href="@{/admin/categories}">
-                            <i class="fas fa-folder"></i>
-                            <span>Quản lý danh mục</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/tags}">
-                            <i class="fas fa-tags"></i>
-                            <span>Quản lý tags</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/comments}">
-                            <i class="fas fa-comments"></i>
-                            <span>Quản lý bình luận</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/reports}">
-                            <i class="fas fa-flag"></i>
-                            <span>Báo cáo vi phạm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/ip-bans}">
-                            <i class="fas fa-ban"></i>
-                            <span>IP bị cấm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/statistics}">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Thống kê</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item has-submenu">
-                        <a href="javascript:void(0)">
-                            <i class="fas fa-coins"></i>
-                            <span>Quản lý doanh thu</span>
-                            <i class="fas fa-chevron-down submenu-icon"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/coin-packages}">
-                                    <i class="fas fa-box"></i>
-                                    <span>Gói xu</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/transactions}">
-                                    <i class="fas fa-exchange-alt"></i>
-                                    <span>Giao dịch</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/withdrawals}">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                    <span>Yêu cầu rút tiền</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/settings}">
-                            <i class="fas fa-cog"></i>
-                            <span>Cài đặt</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/logout}">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Đăng xuất</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
 
-        <main class="admin-content">
-            <div class="admin-content-header">
-                <h1 class="admin-page-title">Chi tiết danh mục</h1>
-                <p class="admin-page-description">Thông tin chi tiết về danh mục trong hệ thống</p>
-                <div class="admin-breadcrumbs">
-                    <a th:href="@{/admin/index}">Admin</a>
-                    <span>/</span>
-                    <a th:href="@{/admin/categories}">Quản lý danh mục</a>
-                    <span>/</span>
-                    <span>Chi tiết</span>
-                </div>
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Chi tiết danh mục</h1>
+          <p class="admin-page-description">
+           <!-- Thông tin chi tiết về danh mục trong hệ thống-->
+          </p>
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin/index}">Admin</a>
+            <span>/</span>
+            <a th:href="@{/admin/categories}">Quản lý danh mục</a>
+            <span>/</span>
+            <span>Chi tiết</span>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <div class="details-container">
+            <div class="details-header">
+              <h3 th:text="'Chi tiết danh mục: ' + ${category.name}">
+                Chi tiết danh mục
+              </h3>
             </div>
-
-            <div class="form-container">
-                <div class="details-container">
-                    <div class="details-header">
-                        <h3 th:text="'Chi tiết danh mục: ' + ${category.name}">Chi tiết danh mục</h3>
-                    </div>
-                    <div class="details-body">
-                        <div class="category-admin-card">
-                            <div class="category-admin-content">
-                                <h3 class="category-admin-title" th:text="${category.name}"></h3>
-                                <p class="category-admin-description" th:text="${category.description != null ? category.description : 'Không có mô tả'}"></p>
-                                <div class="category-stats">
+            <div class="details-body">
+              <div class="category-admin-card">
+                <div class="category-admin-content">
+                  <h3
+                    class="category-admin-title"
+                    th:text="${category.name}"
+                  ></h3>
+                  <p
+                    class="category-admin-description"
+                    th:text="${category.description != null ? category.description : 'Không có mô tả'}"
+                  ></p>
+                  <div class="category-stats">
+                    <!-- COMMENTED OUT: Danh mục cha -->
+                    <!--
                                     <div class="stat-item">
                                         <span class="stat-icon"><i class="fas fa-folder"></i></span>
                                         <div class="stat-content">
@@ -348,27 +536,81 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="stat-item">
-                                        <span class="stat-icon"><i class="fas fa-file-alt"></i></span>
-                                        <div class="stat-content">
-                                            <span class="stat-label">Số tài liệu</span>
-                                            <span class="stat-value" th:text="${category.documents}"></span>
-                                        </div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-icon"><i class="fas fa-sitemap"></i></span>
-                                        <div class="stat-content">
-                                            <span class="stat-label">Số danh mục con</span>
-                                            <span class="stat-value" th:text="${category.subcategories}"></span>
-                                        </div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-icon"><i class="fas fa-user"></i></span>
-                                        <div class="stat-content">
-                                            <span class="stat-label">Người tạo</span>
-                                             <span class="stat-value" th:text="${category.createdByName != null ? category.createdByName : 'Không có'}"></span>
-                                        </div>
-                                    </div>
+                                    -->
+
+                    <!-- CLICKABLE: Số tài liệu -->
+                    <div
+                      class="stat-item clickable-stat"
+                      th:if="${category.documents > 0}"
+                      th:attr="data-category-id=${category.id}"
+                      onclick="viewDocuments(this.getAttribute('data-category-id'))"
+                      title="Click để xem tài liệu trong danh mục này"
+                    >
+                      <span class="stat-icon"
+                        ><i class="fas fa-file-alt"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Số tài liệu</span>
+                        <span
+                          class="stat-value"
+                          th:text="${category.documents}"
+                        ></span>
+                      </div>
+                      <i class="fas fa-external-link-alt action-icon"></i>
+                    </div>
+                    <div class="stat-item" th:if="${category.documents == 0}">
+                      <span class="stat-icon"
+                        ><i class="fas fa-file-alt"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Số tài liệu</span>
+                        <span class="stat-value">0</span>
+                      </div>
+                    </div>
+
+                    <!-- CLICKABLE: Số danh mục con -->
+                    <div
+                      class="stat-item clickable-stat"
+                      th:if="${category.subcategories > 0}"
+                      th:attr="data-category-id=${category.id}"
+                      onclick="showSubcategories(this.getAttribute('data-category-id'))"
+                      title="Click để xem danh mục con"
+                    >
+                      <span class="stat-icon"
+                        ><i class="fas fa-sitemap"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Số danh mục con</span>
+                        <span
+                          class="stat-value"
+                          th:text="${category.subcategories}"
+                        ></span>
+                      </div>
+                      <i class="fas fa-external-link-alt action-icon"></i>
+                    </div>
+                    <div class="stat-item" th:if="${category.subcategories == 0}">
+                      <span class="stat-icon"
+                        ><i class="fas fa-sitemap"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Số danh mục con</span>
+                        <span class="stat-value">0</span>
+                      </div>
+                    </div>
+
+                    <div class="stat-item">
+                      <span class="stat-icon"><i class="fas fa-user"></i></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Người tạo</span>
+                        <span
+                          class="stat-value"
+                          th:text="${category.createdByName != null ? category.createdByName : 'Không có'}"
+                        ></span>
+                      </div>
+                    </div>
+
+                    <!-- COMMENTED OUT: Ngày tạo phân cấp -->
+                    <!--
                                     <div class="stat-item">
                                         <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
                                         <div class="stat-content">
@@ -376,6 +618,10 @@
                                             <span class="stat-value" th:text="${category.hierarchyCreatedAt != null} ? ${#temporals.format(category.hierarchyCreatedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
                                         </div>
                                     </div>
+                                    -->
+
+                    <!-- COMMENTED OUT: Mức độ phân cấp -->
+                    <!--
                                     <div class="stat-item">
                                         <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
                                         <div class="stat-content">
@@ -383,47 +629,145 @@
                                             <span class="stat-value" th:text="${categoryHierarchyRepository.findByIdChildId(category.id).orElse(null)?.level ?: '0'}"></span>
                                         </div>
                                     </div>
-                                    <div class="stat-item">
-                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
-                                        <div class="stat-content">
-                                            <span class="stat-label">Ngày tạo</span>
-                                            <span class="stat-value" th:text="${category.createdAt != null} ? ${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
-                                        </div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
-                                        <div class="stat-content">
-                                            <span class="stat-label">Ngày cập nhật</span>
-                                            <span class="stat-value" th:text="${category.updatedAt != null} ? ${#temporals.format(category.updatedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
-                                        </div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-icon"><i class="fas fa-calendar-alt"></i></span>
-                                        <div class="stat-content">
-                                            <span class="stat-label">Ngày xóa</span>
-                                            <span class="stat-value" th:text="${category.deletedAt != null} ? ${#temporals.format(category.deletedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"></span>
-                                        </div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-icon"><i class="fas fa-check-circle"></i></span>
-                                        <div class="stat-content">
-                                            <span class="stat-label">Trạng thái</span>
-                                            <span th:class="'status-badge ' + ${category.status == 'active' ? 'badge-success' : 'badge-danger'}" th:text="${category.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="details-footer">
-                        <a th:href="@{/admin/categories}" class="btn btn-back"><i class="fas fa-arrow-left"></i> Quay lại</a>
-                        <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-edit">Chỉnh sửa</a>
-                    </div>
-                </div>
-            </div>
+                                    -->
 
-            <div class="toast-container" id="toastContainer"></div>
-        </main>
+                    <div class="stat-item">
+                      <span class="stat-icon"
+                        ><i class="fas fa-calendar-alt"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Ngày tạo</span>
+                        <span
+                          class="stat-value"
+                          th:text="${category.createdAt != null} ? ${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-icon"
+                        ><i class="fas fa-calendar-alt"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Ngày cập nhật</span>
+                        <span
+                          class="stat-value"
+                          th:text="${category.updatedAt != null} ? ${#temporals.format(category.updatedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-icon"
+                        ><i class="fas fa-calendar-alt"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Ngày xóa</span>
+                        <span
+                          class="stat-value"
+                          th:text="${category.deletedAt != null} ? ${#temporals.format(category.deletedAt, 'dd/MM/yyyy HH:mm')} : 'Không có'"
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-icon"
+                        ><i class="fas fa-check-circle"></i
+                      ></span>
+                      <div class="stat-content">
+                        <span class="stat-label">Trạng thái</span>
+                        <span
+                          th:class="'status-badge ' + ${category.status == 'active' ? 'badge-success' : 'badge-danger'}"
+                          th:text="${category.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subcategories Section -->
+              <div
+                th:if="${subcategories != null and !subcategories.empty}"
+                class="subcategories-section"
+              >
+                <div class="subcategories-header">
+                  <h4>
+                    <i class="fas fa-sitemap"></i> Danh mục con (<span
+                      th:text="${#lists.size(subcategories)}"
+                    ></span
+                    >)
+                  </h4>
+                </div>
+                <div class="subcategories-grid">
+                  <div
+                    th:each="subcategory : ${subcategories}"
+                    class="subcategory-card"
+                  >
+                    <div class="subcategory-content">
+                      <div class="subcategory-icon">
+                        <i class="fas fa-folder"></i>
+                      </div>
+                      <div class="subcategory-info">
+                        <h5 th:text="${subcategory.name}">Tên danh mục con</h5>
+                        <p
+                          th:text="${subcategory.description != null ? subcategory.description : 'Không có mô tả'}"
+                        >
+                          Mô tả
+                        </p>
+                        <div class="subcategory-stats">
+                          <div class="stat-badge">
+                            <i class="fas fa-file-alt"></i>
+                            <span th:text="${subcategory.documents}">0</span>
+                          </div>
+                          <div
+                            class="stat-badge"
+                            th:if="${subcategory.subcategories > 0}"
+                          >
+                            <i class="fas fa-sitemap"></i>
+                            <span th:text="${subcategory.subcategories}"
+                              >0</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                      <div class="subcategory-actions">
+                        <a
+                          th:href="@{/admin/categories/details/{id}(id=${subcategory.id})}"
+                          class="action-btn view-btn"
+                          title="Xem chi tiết"
+                        >
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <!-- Chỉ hiển thị nút chỉnh sửa khi subcategory chưa bị xóa -->
+                        <a
+                          th:if="${subcategory.deletedAt == null}"
+                          th:href="@{/admin/categories/edit/{id}(id=${subcategory.id})}"
+                          class="action-btn edit-btn"
+                          title="Chỉnh sửa"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="details-footer">
+              <a th:href="@{/admin/categories}" class="btn btn-back"
+                ><i class="fas fa-arrow-left"></i> Quay lại</a
+              >
+              <!-- Chỉ hiển thị nút chỉnh sửa khi category chưa bị xóa -->
+              <a
+                th:if="${category.deletedAt == null}"
+                th:href="@{/admin/categories/edit/{id}(id=${category.id})}"
+                class="btn btn-edit"
+                >Chỉnh sửa</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="toast-container" id="toastContainer"></div>
+      </main>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -431,5 +775,508 @@
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/admin/admin.js}"></script>
     <script th:src="@{/js/admin/categories.js}"></script>
-</body>
+    <script th:src="@{/js/admin/notifications.js}"></script>
+
+    <script>
+      // Function to view documents in a category
+      function viewDocuments(categoryId) {
+        console.log("Viewing documents for category:", categoryId);
+        // Redirect to documents page with category filter
+        const documentsUrl = `/admin/documents?search=&tab=active&status=&category=${categoryId}&type=&price=&author=&tags=&dateFrom=&dateTo=&fileSize=&views=`;
+        window.location.href = documentsUrl;
+      }
+
+      // Function to show subcategories in tree view
+      function showSubcategories(categoryId) {
+        console.log("Showing subcategories for category:", categoryId);
+        // Show modal
+        document.getElementById("subcategoriesModal").style.display = "flex";
+        // Load subcategories via AJAX
+        fetch(`/admin/categories/${categoryId}/subcategories`)
+          .then((response) => response.json())
+          .then((data) => {
+            renderSubcategoriesTree(data);
+          })
+          .catch((error) => {
+            console.error("Error loading subcategories:", error);
+            document.getElementById("subcategoriesTree").innerHTML =
+              '<p class="text-center text-gray-500">Không thể tải danh mục con</p>';
+          });
+      }
+
+      function closeSubcategoriesModal() {
+        document.getElementById("subcategoriesModal").style.display = "none";
+      }
+
+      function renderSubcategoriesTree(categories) {
+        const treeContainer = document.getElementById("subcategoriesTree");
+        if (!categories || categories.length === 0) {
+          treeContainer.innerHTML = '<p class="text-center text-gray-500">Không có danh mục con nào</p>';
+          return;
+        }
+        let html = '<ul class="tree-list">';
+        categories.forEach((category) => {
+          html += renderTreeNode(category);
+        });
+        html += "</ul>";
+        treeContainer.innerHTML = html;
+      }
+
+      function renderTreeNode(category) {
+        let html = `
+            <li class="tree-node">
+                <div class="tree-item">
+                    <i class="fas fa-folder tree-icon"></i>
+                    <span class="tree-name">${category.name}</span>
+                    <span class="tree-stats">
+                        <small class="text-gray-500">
+                            ${category.documents} tài liệu
+                            ${category.subcategories > 0 ? `, ${category.subcategories} mục con` : ""}
+                        </small>
+                    </span>
+                    <div class="tree-actions">
+                        <a href="/admin/categories/details/${category.id}" class="tree-action-btn view" title="Xem">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/admin/categories/edit/${category.id}" class="tree-action-btn edit" title="Sửa">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+        `;
+        if (category.children && category.children.length > 0) {
+          html += '<ul class="tree-children">';
+          category.children.forEach((child) => {
+            html += renderTreeNode(child);
+          });
+          html += "</ul>";
+        }
+        html += "</li>";
+        return html;
+      }
+
+      // Close modal when clicking outside
+      document.addEventListener("click", function (event) {
+        const modal = document.getElementById("subcategoriesModal");
+        if (event.target === modal) {
+          closeSubcategoriesModal();
+        }
+      });
+    </script>
+        });
+      });
+    </script>
+
+    <!-- Subcategories Modal -->
+    <div id="subcategoriesModal" class="custom-modal" style="display: none">
+      <div class="modal-overlay" onclick="closeSubcategoriesModal()"></div>
+      <div class="modal-content" style="max-width: 600px">
+        <div class="modal-header">
+          <h3>Danh mục con</h3>
+          <button class="modal-close" onclick="closeSubcategoriesModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="subcategoriesTree" class="tree-view">
+            <!-- Tree content will be loaded here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="cancel-btn" onclick="closeSubcategoriesModal()">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      /* Modal Styles */
+      .custom-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        display: none;
+      }
+
+      .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow: hidden;
+      }
+
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9fafb;
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6b7280;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+
+      .modal-close:hover {
+        background: #e5e7eb;
+        color: #374151;
+      }
+
+      .modal-body {
+        padding: 20px;
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+
+      .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        background: #f9fafb;
+      }
+
+      .cancel-btn {
+        background: #6b7280;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+
+      .cancel-btn:hover {
+        background: #4b5563;
+      }
+
+      /* Tree View Styles */
+      .tree-view {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .tree-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .tree-node {
+        margin: 0;
+        padding: 0;
+      }
+
+      .tree-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin: 2px 0;
+        transition: background-color 0.2s;
+      }
+
+      .tree-item:hover {
+        background-color: #f8fafc;
+      }
+
+      .tree-icon {
+        color: #4361ee;
+        margin-right: 8px;
+        font-size: 14px;
+      }
+
+      .tree-name {
+        font-weight: 500;
+        color: #1f2937;
+        flex: 1;
+      }
+
+      .tree-stats {
+        margin-left: 12px;
+        margin-right: 12px;
+      }
+
+      .tree-actions {
+        display: flex;
+        gap: 4px;
+      }
+
+      .tree-action-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+
+      .tree-action-btn.view {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .tree-action-btn.edit {
+        background-color: #fef3c7;
+        color: #d97706;
+      }
+
+      .tree-children {
+        list-style: none;
+        padding-left: 24px;
+        margin: 4px 0;
+        border-left: 2px solid #e5e7eb;
+      }
+
+      .tree-children .tree-item {
+        position: relative;
+      }
+
+      .tree-children .tree-item::before {
+        content: "";
+        position: absolute;
+        left: -14px;
+        top: 50%;
+        width: 12px;
+        height: 1px;
+        background-color: #e5e7eb;
+      }
+    }
+
+    .modal-overlay.show {
+        display: flex !important;
+        opacity: 1;
+    }
+
+    .modal-container {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.show .modal-container {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f9fafb;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: #f3f4f6;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .modal-body {
+        padding: 24px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    /* Subcategories Modal Styles */
+    .subcategories-content {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .subcategory-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background: #f9fafb;
+        transition: all 0.2s ease;
+    }
+
+    .subcategory-item:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+    }
+
+    .subcategory-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .subcategory-icon {
+        width: 32px;
+        height: 32px;
+        background: #e0f2fe;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0369a1;
+        font-size: 14px;
+    }
+
+    .subcategory-details h4 {
+        margin: 0 0 4px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .subcategory-details p {
+        margin: 0;
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.3;
+    }
+
+    .subcategory-stats {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .subcategory-stat {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #6b7280;
+        text-align: center;
+        min-width: 60px;
+    }
+
+    .subcategory-actions {
+        display: flex;
+        gap: 4px;
+    }
+
+    .subcategory-action-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .subcategory-action-btn.view {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .subcategory-action-btn.view:hover {
+        background: #bfdbfe;
+    }
+
+    .subcategory-action-btn.edit {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .subcategory-action-btn.edit:hover {
+        background: #fde68a;
+    }
+
+    .subcategories-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6b7280;
+    }
+
+    .subcategories-empty i {
+        font-size: 2rem;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    .subcategories-empty p {
+        margin: 0;
+        font-size: 14px;
+    }
+    </style>
+
+  </body>
 </html>

@@ -470,7 +470,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    min-width: 200px;
+    /* min-width: 200px; */
 }
 
 .document-thumbnail {

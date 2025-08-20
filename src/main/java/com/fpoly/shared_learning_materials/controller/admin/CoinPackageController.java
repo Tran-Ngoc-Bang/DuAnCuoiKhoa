@@ -1,7 +1,10 @@
 package com.fpoly.shared_learning_materials.controller.admin;
 
 import com.fpoly.shared_learning_materials.domain.CoinPackage;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
 import com.fpoly.shared_learning_materials.service.CoinPackageService;
+import com.fpoly.shared_learning_materials.service.NotificationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +20,13 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/coin-packages")
-public class CoinPackageController {
+public class CoinPackageController extends BaseAdminController {
 
     @Autowired
     private CoinPackageService coinPackageService;
-
+    public CoinPackageController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
     /**
      * Hiển thị danh sách gói xu với phân trang và tìm kiếm
      */

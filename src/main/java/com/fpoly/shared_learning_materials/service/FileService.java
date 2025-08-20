@@ -16,8 +16,8 @@ import com.fpoly.shared_learning_materials.repository.FileRepository;
 
 @Service
 public class FileService {
-	
-	@Autowired
+
+    @Autowired
     private FileRepository fileRepository;
 
     public File saveFile(MultipartFile file, User uploadedBy) throws IOException {
@@ -39,5 +39,21 @@ public class FileService {
         Files.write(filePath, file.getBytes());
 
         return fileRepository.save(newFile);
+    }
+
+    public void deleteFile(String filePath) throws IOException {
+        try {
+            // Xóa file vật lý từ hệ thống file
+            Path path = Paths.get("src/main/resources/static/" + filePath);
+            if (Files.exists(path)) {
+                Files.delete(path);
+                System.out.println("Successfully deleted physical file: " + filePath);
+            } else {
+                System.out.println("Physical file not found: " + filePath);
+            }
+        } catch (IOException e) {
+            System.err.println("Error deleting physical file: " + filePath + " - " + e.getMessage());
+            throw e;
+        }
     }
 }

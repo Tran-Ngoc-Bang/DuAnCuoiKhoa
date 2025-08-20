@@ -3,6 +3,7 @@ package com.fpoly.shared_learning_materials.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.fpoly.shared_learning_materials.domain.CategoryHierarchy;
 import com.fpoly.shared_learning_materials.domain.CategoryHierarchyId;
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.CategoryDTO;
+import com.fpoly.shared_learning_materials.dto.CategoryTreeDTO;
 import com.fpoly.shared_learning_materials.repository.CategoryHierarchyRepository;
 import com.fpoly.shared_learning_materials.repository.CategoryRepository;
 import com.fpoly.shared_learning_materials.repository.DocumentCategoryRepository;
@@ -42,6 +44,19 @@ public class CategoryService {
 
     public List<CategoryDTO> getDeletedCategories() {
         return getCategoriesByDeletedStatus(true); // Chỉ lấy đã xóa
+    }
+
+    // New methods to get only root categories (for grid view)
+    public List<CategoryDTO> getRootCategories() {
+        return getRootCategoriesByDeletedStatus(null);
+    }
+
+    public List<CategoryDTO> getActiveRootCategories() {
+        return getRootCategoriesByDeletedStatus(false);
+    }
+
+    public List<CategoryDTO> getDeletedRootCategories() {
+        return getRootCategoriesByDeletedStatus(true);
     }
 
     private List<CategoryDTO> getCategoriesByDeletedStatus(Boolean isDeleted) {
@@ -301,6 +316,13 @@ public class CategoryService {
         // Xóa danh mục vĩnh viễn
         categoryRepository.deleteById(categoryId);
     }
+@Transactional
+    public void bulkPermanentDelete(List<Long> categoryIds) {
+        for (Long categoryId : categoryIds) {
+            permanentDeleteCategory(categoryId); // Gọi phương thức xóa vĩnh viễn cho từng danh mục
+        }
+    }
+
 
     @Transactional
     public void restoreCategory(Long categoryId) {
@@ -353,6 +375,109 @@ public class CategoryService {
         categoryRepository.save(category);
 
         System.out.println("Successfully restored category: " + category.getName() + " (ID: " + categoryId + ")");
+    }
+
+    // Method to get only root categories (no parent)
+    private List<CategoryDTO> getRootCategoriesByDeletedStatus(Boolean isDeleted) {
+        List<Category> categories;
+
+        if (isDeleted == null) {
+            // Lấy tất cả
+            categories = categoryRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        } else if (isDeleted) {
+            // Chỉ lấy đã xóa (deletedAt != null)
+            categories = categoryRepository.findByDeletedAtIsNotNull(Sort.by(Sort.Direction.DESC, "deletedAt"));
+        } else {
+            // Chỉ lấy chưa xóa (deletedAt == null)
+            categories = categoryRepository.findByDeletedAtIsNull(Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+
+        List<CategoryHierarchy> hierarchies = categoryHierarchyRepository.findAll();
+        
+        // Get all child IDs to filter out child categories
+        Set<Long> childIds = hierarchies.stream()
+                .map(h -> h.getId().getChildId())
+                .collect(Collectors.toSet());
+
+        // Filter to get only root categories (categories that are not children)
+        List<Category> rootCategories = categories.stream()
+                .filter(cat -> !childIds.contains(cat.getId()))
+                .collect(Collectors.toList());
+
+        // Tính số danh mục con cho mỗi root category
+        Map<Long, Long> subcategoryCount = hierarchies.stream()
+                .collect(Collectors.groupingBy(h -> h.getId().getParentId(), Collectors.counting()));
+
+        // Tạo map để lấy tên danh mục cha - cần lấy TẤT CẢ categories để có thể lấy tên parent
+        List<Category> allCategories = categoryRepository.findAll();
+        Map<Long, String> categoryNameMap = allCategories.stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<CategoryDTO> result = rootCategories.stream().map(cat -> {
+            CategoryDTO dto = new CategoryDTO();
+            dto.setId(cat.getId());
+            dto.setName(cat.getName());
+            dto.setSlug(cat.getSlug());
+            dto.setDescription(cat.getDescription());
+            dto.setStatus(cat.getStatus());
+            dto.setSortOrder(cat.getSortOrder());
+            dto.setCreatedById(cat.getCreatedBy() != null ? cat.getCreatedBy().getId() : null);
+            dto.setCreatedByName(cat.getCreatedBy() != null
+                    ? userRepository.findById(cat.getCreatedBy().getId()).map(User::getFullName).orElse("Không có")
+                    : "Không có");
+            dto.setCreatedAt(cat.getCreatedAt());
+            dto.setUpdatedAt(cat.getUpdatedAt());
+            dto.setDeletedAt(cat.getDeletedAt());
+            dto.setDocuments(documentCategoryRepository.countByCategoryId(cat.getId()));
+            dto.setSubcategories(subcategoryCount.getOrDefault(cat.getId(), 0L).intValue());
+            dto.setParentId(null); // Root categories have no parent
+            dto.setParentName(null);
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return result;
+    }
+
+    // Get subcategories tree for a parent category
+    public List<CategoryTreeDTO> getSubcategoriesTree(Long parentId) {
+        List<CategoryHierarchy> hierarchies = categoryHierarchyRepository.findByIdParentId(parentId);
+        List<Category> allCategories = categoryRepository.findAll();
+        Map<Long, Category> categoryMap = allCategories.stream()
+                .collect(Collectors.toMap(Category::getId, cat -> cat));
+
+        return hierarchies.stream()
+                .map(h -> buildCategoryTree(h.getId().getChildId(), categoryMap))
+                .filter(tree -> tree != null)
+                .collect(Collectors.toList());
+    }
+
+    private CategoryTreeDTO buildCategoryTree(Long categoryId, Map<Long, Category> categoryMap) {
+        Category category = categoryMap.get(categoryId);
+        if (category == null) return null;
+
+        CategoryTreeDTO tree = new CategoryTreeDTO();
+        tree.setId(category.getId());
+        tree.setName(category.getName());
+        tree.setSlug(category.getSlug());
+        tree.setDescription(category.getDescription());
+        tree.setStatus(category.getStatus());
+        tree.setDocuments(documentCategoryRepository.countByCategoryId(category.getId()));
+        tree.setCreatedAt(category.getCreatedAt());
+        tree.setUpdatedAt(category.getUpdatedAt());
+        tree.setDeletedAt(category.getDeletedAt());
+
+        // Get children
+        List<CategoryHierarchy> childHierarchies = categoryHierarchyRepository.findByIdParentId(categoryId);
+        List<CategoryTreeDTO> children = childHierarchies.stream()
+                .map(h -> buildCategoryTree(h.getId().getChildId(), categoryMap))
+                .filter(child -> child != null)
+                .collect(Collectors.toList());
+        
+        tree.setChildren(children);
+        tree.setSubcategories(children.size());
+
+        return tree;
     }
 
     // Helper method to generate slug

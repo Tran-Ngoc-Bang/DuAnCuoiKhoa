@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xem trước Email Tổng hợp - EduShare Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+    
+    <style>
+        .preview-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .preview-header {
+            background: #4f46e5;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+        
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #218838;
+            color: white;
+        }
+        
+        .preview-content {
+            padding: 0;
+            background: #f8f9fa;
+        }
+        
+        .email-content {
+            background: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .preview-note {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            color: #1565c0;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-content-header">
+                <h1 class="admin-page-title">Xem trước Email Tổng hợp</h1>
+                <div class="admin-breadcrumbs">
+                    <a th:href="@{/admin/index}">Admin</a>
+                    <span>/</span>
+                    <a th:href="@{/admin/settings}">Cài đặt</a>
+                    <span>/</span>
+                    <span>Email Tổng hợp</span>
+                </div>
+            </div>
+
+            <!-- Preview Container -->
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h2><i class="fas fa-envelope"></i> Xem trước Email Tổng hợp</h2>
+                    <div class="preview-actions">
+                        <a th:href="@{/admin/settings}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                        <form th:action="@{/admin/settings/email-digest/send-now}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-primary" onclick="return confirm('Bạn có chắc chắn muốn gửi email tổng hợp này?')">
+                                <i class="fas fa-paper-plane"></i> Gửi ngay
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="preview-content">
+                    <div class="preview-note">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Thông tin:</strong> Đây là bản xem trước nội dung email tổng hợp sẽ được gửi. 
+                        Nội dung được tạo tự động dựa trên dữ liệu hiện tại trong hệ thống.
+                    </div>
+                    
+                    <div class="email-content" th:utext="${emailContent}">
+                        <!-- Email content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/notifications.js}"></script>
+</body>
+</html>

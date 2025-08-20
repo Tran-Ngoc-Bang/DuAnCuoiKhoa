@@ -245,4 +245,39 @@ public class TagService {
         }
     }
 
+    // Permanent delete tag from database
+    public void permanentDeleteTag(Long id) {
+        System.out.println("=== PERMANENT DELETE TAG ===");
+        System.out.println("Tag ID: " + id);
+
+        try {
+            Optional<Tag> tagOpt = tagRepository.findById(id);
+            if (!tagOpt.isPresent()) {
+                throw new ResourceNotFoundException("Tag không tồn tại với ID: " + id);
+            }
+
+            Tag tag = tagOpt.get();
+
+            // Kiểm tra xem tag đã bị xóa mềm chưa
+            if (tag.getDeletedAt() == null) {
+                throw new IllegalArgumentException("Chỉ có thể xóa vĩnh viễn tag đã bị xóa mềm");
+            }
+
+            System.out.println("Permanently deleting tag: " + tag.getName());
+
+            // Xóa tất cả liên kết với documents trước
+            documentTagRepository.deleteByTagId(id);
+            System.out.println("Deleted all document-tag relationships for tag: " + id);
+
+            // Xóa tag khỏi database
+            tagRepository.delete(tag);
+            System.out.println("Tag permanently deleted from database: " + tag.getName());
+
+        } catch (Exception e) {
+            System.err.println("Error permanently deleting tag: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi xóa vĩnh viễn tag: " + e.getMessage());
+        }
+    }
+
 }

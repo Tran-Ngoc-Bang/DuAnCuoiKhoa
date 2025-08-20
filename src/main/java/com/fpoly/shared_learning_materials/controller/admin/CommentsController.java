@@ -11,16 +11,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.dto.CommentDTO;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
 import com.fpoly.shared_learning_materials.service.CommentService;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/admin/comments")
-public class CommentsController {
+public class CommentsController extends BaseAdminController {
 	@Autowired
 	CommentService commentService;
 
+	public CommentsController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 	@GetMapping
 	public String showComments(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size,
 			@RequestParam(defaultValue = "all") String tab, @RequestParam(required = false) String keyword,
@@ -28,32 +33,32 @@ public class CommentsController {
 		Page<CommentDTO> comments;
 
 		switch (tab) {
-		case "recent":
-			comments = commentService.getCommentsNewThisWeek(page, size);
-			break;
-		case "reported":
-			comments = commentService.getCommentsReported(page, size);
-			break;
-		case "hidden":
-			comments = commentService.getCommentsHidden(page, size);
-			break;
-		default:
-			comments = commentService.getCommentsWithPendingReports(page, size);
+			case "recent":
+				comments = commentService.getCommentsNewThisWeek(page, size);
+				break;
+			case "reported":
+				comments = commentService.getCommentsReported(page, size);
+				break;
+			case "hidden":
+				comments = commentService.getCommentsHidden(page, size);
+				break;
+			default:
+				comments = commentService.getCommentsWithPendingReports(page, size);
 		}
 
 		if (keyword != null && !keyword.isBlank() || !"all".equals(statusFilter)) {
 			switch (statusFilter) {
-			case "visible":
-				comments = commentService.searchVisible(keyword, page, size);
-				break;
-			case "hidden":
-				comments = commentService.searchHidden(keyword, page, size);
-				break;
-			case "reported":
-				comments = commentService.searchReported(keyword, page, size);
-				break;
-			default: // all
-				comments = commentService.searchAll(keyword, page, size);
+				case "visible":
+					comments = commentService.searchVisible(keyword, page, size);
+					break;
+				case "hidden":
+					comments = commentService.searchHidden(keyword, page, size);
+					break;
+				case "reported":
+					comments = commentService.searchReported(keyword, page, size);
+					break;
+				default: // all
+					comments = commentService.searchAll(keyword, page, size);
 			}
 		}
 
