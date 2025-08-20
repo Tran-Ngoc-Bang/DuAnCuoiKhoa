@@ -27,4 +27,10 @@ public class HomeController {
     public String homeAlias(Model model) {
         return home(model);
     }
+
+    @GetMapping("/test")
+    public String testPages(Model model) {
+        model.addAttribute("pageTitle", "Test All Client Pages");
+        return "test/client-pages";
+    }
 }

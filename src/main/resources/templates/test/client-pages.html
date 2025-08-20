@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Client Pages - EduShare</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .page-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .page-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+      }
+      .page-section h2 {
+        color: #007bff;
+        margin-top: 0;
+        margin-bottom: 15px;
+      }
+      .page-link {
+        display: block;
+        padding: 10px 15px;
+        margin: 5px 0;
+        background: white;
+        color: #333;
+        text-decoration: none;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+      }
+      .page-link:hover {
+        background: #007bff;
+        color: white;
+        transform: translateX(5px);
+      }
+      .page-link i {
+        margin-right: 10px;
+        width: 20px;
+      }
+      .status {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      .status.ready {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status.pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1><i class="fas fa-test-tube"></i> Test Client Pages</h1>
+
+      <div class="page-grid">
+        <!-- Main Pages -->
+        <div class="page-section">
+          <h2><i class="fas fa-home"></i> Main Pages</h2>
+          <a href="/" class="page-link">
+            <i class="fas fa-home"></i> Home Page
+            <span class="status ready">Ready</span>
+          </a>
+          <a href="/about" class="page-link">
+            <i class="fas fa-info-circle"></i> About Us
+            <span class="status ready">Ready</span>
+          </a>
+          <a href="/categories" class="page-link">
+            <i class="fas fa-th-large"></i> Categories
+            <span class="status ready">Ready</span>
+          </a>
+          <a href="/search" class="page-link">
+            <i class="fas fa-search"></i> Search
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/upload" class="page-link">
+            <i class="fas fa-upload"></i> Upload Document
+            <span class="status pending">Pending</span>
+          </a>
+        </div>
+
+        <!-- Document Pages -->
+        <div class="page-section">
+          <h2><i class="fas fa-file-alt"></i> Document Pages</h2>
+          <a href="/documents/1" class="page-link">
+            <i class="fas fa-file-alt"></i> Document Details
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/documents/1/view" class="page-link">
+            <i class="fas fa-eye"></i> PDF Viewer
+            <span class="status pending">Pending</span>
+          </a>
+        </div>
+
+        <!-- Auth Pages -->
+        <div class="page-section">
+          <h2><i class="fas fa-user-lock"></i> Authentication</h2>
+          <a href="/login" class="page-link">
+            <i class="fas fa-sign-in-alt"></i> Login
+            <span class="status ready">Ready</span>
+          </a>
+          <a href="/register" class="page-link">
+            <i class="fas fa-user-plus"></i> Register
+            <span class="status pending">Pending</span>
+          </a>
+        </div>
+
+        <!-- Account Pages -->
+        <div class="page-section">
+          <h2><i class="fas fa-user-cog"></i> Account Pages</h2>
+          <a href="/account/dashboard" class="page-link">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/account/profile" class="page-link">
+            <i class="fas fa-user"></i> Profile
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/account/documents" class="page-link">
+            <i class="fas fa-file-alt"></i> My Documents
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/account/favorites" class="page-link">
+            <i class="fas fa-heart"></i> Favorites
+            <span class="status pending">Pending</span>
+          </a>
+        </div>
+
+        <!-- Financial Pages -->
+        <div class="page-section">
+          <h2><i class="fas fa-money-bill-wave"></i> Financial</h2>
+          <a href="/account/transactions" class="page-link">
+            <i class="fas fa-history"></i> Transactions
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/account/recharge" class="page-link">
+            <i class="fas fa-credit-card"></i> Recharge
+            <span class="status pending">Pending</span>
+          </a>
+        </div>
+
+        <!-- Settings Pages -->
+        <div class="page-section">
+          <h2><i class="fas fa-cog"></i> Settings & Support</h2>
+          <a href="/account/security" class="page-link">
+            <i class="fas fa-shield-alt"></i> Security
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/account/notifications" class="page-link">
+            <i class="fas fa-bell"></i> Notifications
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/account/options" class="page-link">
+            <i class="fas fa-sliders-h"></i> Options
+            <span class="status pending">Pending</span>
+          </a>
+          <a href="/account/support" class="page-link">
+            <i class="fas fa-life-ring"></i> Support
+            <span class="status pending">Pending</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Test Links -->
+      <div class="page-section">
+        <h2><i class="fas fa-flask"></i> Test Links (No Auth Required)</h2>
+        <a href="/test/home" class="page-link">
+          <i class="fas fa-home"></i> Test Home
+        </a>
+        <a href="/test/about" class="page-link">
+          <i class="fas fa-info-circle"></i> Test About
+        </a>
+        <a href="/test/categories" class="page-link">
+          <i class="fas fa-th-large"></i> Test Categories
+        </a>
+        <a href="/test/account/dashboard" class="page-link">
+          <i class="fas fa-tachometer-alt"></i> Test Dashboard
+        </a>
+      </div>
+
+      <div
+        style="
+          text-align: center;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #ddd;
+        "
+      >
+        <p>
+          <strong>Legend:</strong> <span class="status ready">Ready</span> =
+          Fragment implemented | <span class="status pending">Pending</span> =
+          Needs fragment update
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

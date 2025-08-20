@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
   <meta charset="UTF-8">
@@ -11,11 +11,13 @@
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../../css/main.css">
-  <link rel="stylesheet" href="../../css/responsive.css">
-  <link rel="stylesheet" href="../../css/main-fixes.css">
-  <link rel="stylesheet" href="../../css/account.css">
-  <link rel="stylesheet" href="../../css/footer-modern.css">
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/responsive.css}">
+  <link rel="stylesheet" th:href="@{/css/main-fixes.css}">
+  <link rel="stylesheet" th:href="@{/css/account.css}">
+  <link rel="stylesheet" th:href="@{/css/footer-modern.css}">
+  <link rel="stylesheet" th:href="@{/css/client-header.css}">
+  <link rel="stylesheet" th:href="@{/css/client-footer.css}">
   <!-- Đã xóa tham chiếu tới fix-toggle.css vì file này không còn cần thiết và gây xung đột CSS -->
   <style>
     /* Styles specific to recharge page */
@@ -1026,175 +1028,13 @@
 
 <body>
   <!-- Header -->
-  <header class="header">
-    <div class="container">
-      <div class="header-content">
-        <div class="logo">
-          <a href="../../index.html">
-            <div class="logo-icon">E</div>
-            <span class="logo-text">EduShare</span>
-          </a>
-        </div>
-
-
-
-
-        <nav class="main-nav">
-          <a href="../../index.html" class="nav-link">Trang chủ</a>
-          <a href="../categories.html" class="nav-link">Danh mục</a>
-          <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
-          <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
-          <a href="../about.html" class="nav-link">Giới thiệu</a>
-        </nav>
-        <div class="header-actions">
-          <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
-            <span class="dark-mode-handle" id="darkModeHandle"></span>
-          </button>
-          <a href="../login.html" class="login-btn">
-            <i class="fas fa-sign-in-alt"></i> Đăng nhập
-          </a>
-          <a href="../register.html" class="register-btn active">
-            <i class="fas fa-user-plus"></i> Đăng ký
-          </a>
-        </div>
-        <div class="mobile-menu-toggle" id="mobileMenuBtn">
-          <i class="fas fa-bars"></i>
-        </div>
-      </div>
-    </div>
-    <!-- Mobile menu -->
-    <div id="mobileMenu" class="mobile-menu">
-      <div class="mobile-search">
-        <input type="text" placeholder="Tìm kiếm tài liệu...">
-        <button>
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-      <nav class="mobile-nav">
-        <a href="../../index.html" class="nav-link">Trang chủ</a>
-        <a href="../categories.html" class="nav-link">Danh mục</a>
-        <a href="../search.html?sort=newest" class="nav-link">Tài liệu mới</a>
-        <a href="../search.html?filter=premium" class="nav-link">Cao cấp</a>
-        <a href="#" class="mobile-nav-link">Hướng dẫn</a>
-      </nav>
-      <div class="mobile-auth">
-        <a href="../login.html" class="mobile-login-btn">Đăng nhập</a>
-        <a href="../register.html" class="mobile-register-btn">Đăng ký</a>
-      </div>
-    </div>
-  </header>
+  <div th:replace="~{fragments/client/layout :: header}"></div>
 
   <main>
     <div class="container dashboard-page">
       <div class="dashboard-content">
-        <div class="dashboard-sidebar">
-          <div class="sidebar-header">
-            <div class="user-profile">
-              <img
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                alt="User avatar" class="user-avatar">
-              <div class="user-name">Nguyễn Văn Anh</div>
-              <div class="user-email">nguyenvananh@gmail.com</div>
-              <div class="user-status">
-                <span class="user-status-icon"></span>
-                Tài khoản Premium
-              </div>
-            </div>
-            <div class="sidebar-title">Quản lý tài khoản</div>
-          </div>
-
-          <ul class="sidebar-menu">
-            <li class="sidebar-menu-title">Tài liệu</li>
-
-            <li class="sidebar-menu-item">
-              <a href="dashboard.html" class="sidebar-menu-link">
-                <i class="fas fa-tachometer-alt sidebar-icon"></i>
-                Tổng quan
-              </a>
-            </li>
-
-            <li class="sidebar-menu-item">
-              <a href="documents.html" class="sidebar-menu-link">
-                <i class="fas fa-file-alt sidebar-icon"></i>
-                Tài liệu của tôi
-                <span class="sidebar-badge">15</span>
-              </a>
-            </li>
-
-            <li class="sidebar-menu-item">
-              <a href="../search.html" class="sidebar-menu-link">
-                <i class="fas fa-search sidebar-icon"></i>
-                Khám phá tài liệu
-              </a>
-            </li>
-
-            <li class="sidebar-menu-item">
-              <a href="../upload.html" class="sidebar-menu-link">
-                <i class="fas fa-cloud-upload-alt sidebar-icon"></i>
-                Tải lên tài liệu
-              </a>
-            </li>
-
-            <li class="sidebar-menu-item">
-              <a href="favorites.html" class="sidebar-menu-link">
-                <i class="fas fa-bookmark sidebar-icon"></i>
-                Tài liệu đã lưu
-              </a>
-            </li>
-
-            <li class="sidebar-menu-title">Tài khoản</li>
-
-            <li class="sidebar-menu-item">
-              <a href="profile.html" class="sidebar-menu-link">
-                <i class="fas fa-user sidebar-icon"></i>
-                Thông tin cá nhân
-              </a>
-            </li>
-
-            <li class="sidebar-menu-item">
-              <a href="transactions.html" class="sidebar-menu-link">
-                <i class="fas fa-history sidebar-icon"></i>
-                Lịch sử giao dịch
-              </a>
-            </li>
-
-            <li class="sidebar-menu-item">
-              <a href="recharge.html" class="sidebar-menu-link active">
-                <i class="fas fa-coins sidebar-icon"></i>
-                Nạp xu
-                <span class="sidebar-badge">250</span>
-              </a>
-            </li>
-
-            <li class="sidebar-menu-title">Cài đặt</li>
-
-            <li class="sidebar-menu-item">
-              <a href="security.html" class="sidebar-menu-link">
-                <i class="fas fa-shield-alt sidebar-icon"></i>
-                Bảo mật
-              </a>
-            </li>
-
-            <li class="sidebar-menu-item">
-              <a href="notifications.html" class="sidebar-menu-link">
-                <i class="fas fa-bell sidebar-icon"></i>
-                Thông báo
-              </a>
-            </li>
-            <li class="sidebar-menu-item">
-              <a href="options.html" class="sidebar-menu-link">
-                <i class="fas fa-cog sidebar-icon"></i>
-                Tùy chọn
-              </a>
-            </li>
-            <li class="sidebar-menu-item">
-              <a href="support.html" class="sidebar-menu-link">
-                <i class="fas fa-headset sidebar-icon"></i>
-                Hỗ trợ
-              </a>
-            </li>
-          </ul>
-        </div>
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/client/account-sidebar :: account-sidebar}"></div>
         <div class="dashboard-main">
           <div class="dashboard-main">
             <!-- Stats Cards -->
@@ -1512,75 +1352,13 @@
   </main>
 
   <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-about">
-          <div class="footer-logo">
-            <div class="logo-icon footer-logo-icon">E</div>
-            <span class="logo-text">EduShare</span>
-          </div>
-          <p class="footer-description">
-            Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000 thành viên và 200,000+ tài liệu chất
-            lượng cao.
-          </p>
-          <div class="social-links">
-            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-          </div>
-        </div>
-
-        <div class="footer-links-section">
-          <h3 class="footer-heading">Khám phá</h3>
-          <ul class="footer-links">
-            <li><a href="../categories.html">Danh mục</a></li>
-            <li><a href="../search.html?sort=newest">Tài liệu mới</a></li>
-            <li><a href="../search.html?sort=popular">Tài liệu phổ biến</a></li>
-            <li><a href="#">Tác giả hàng đầu</a></li>
-            <li><a href="#">Sự kiện & Tin tức</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-links-section">
-          <h3 class="footer-heading">Tài khoản</h3>
-          <ul class="footer-links">
-            <li><a href="dashboard.html">Tổng quan</a></li>
-            <li><a href="profile.html">Thông tin cá nhân</a></li>
-            <li><a href="documents.html">Tài liệu của tôi</a></li>
-            <li><a href="transactions.html">Lịch sử giao dịch</a></li>
-            <li><a href="security.html">Cài đặt bảo mật</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-links-section">
-          <h3 class="footer-heading">Hỗ trợ</h3>
-          <ul class="footer-links">
-            <li><a href="#">Trung tâm trợ giúp</a></li>
-            <li><a href="#">Câu hỏi thường gặp</a></li>
-            <li><a href="#">Liên hệ</a></li>
-            <li><a href="#">Chính sách</a></li>
-            <li><a href="#">Điều khoản sử dụng</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <div class="copyright"> 2023 EduShare. Tất cả quyền được bảo lưu.</div>
-        <div class="footer-bottom-links">
-          <a href="#">Chính sách bảo mật</a>
-          <a href="#">Điều khoản dịch vụ</a>
-          <a href="#">Cookies</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+  <div th:replace="~{fragments/client/layout :: footer}"></div>
 
   <!-- Scripts -->
-  <script src="../../js/main.js"></script>
-  <script src="../../js/account.js"></script>
-  <script src="../../js/recharge.js"></script>
+  <script th:src="@{/js/main.js}"></script>
+  <script th:src="@{/js/account.js}"></script>
+  <script th:src="@{/js/recharge.js}"></script>
+  <script th:src="@{/js/client-header.js}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       initAccountDashboard();
@@ -1670,5 +1448,4 @@
     });
   </script>
 </body>
-
 </html>

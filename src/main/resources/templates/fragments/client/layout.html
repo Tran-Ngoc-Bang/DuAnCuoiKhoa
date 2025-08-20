@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <!-- Header Fragment -->
+  <header th:fragment="header" class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a th:href="@{/}">
+            <div class="logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </a>
+        </div>
+
+        <nav class="main-nav">
+          <a th:href="@{/}" class="nav-link">Trang chủ</a>
+          <a th:href="@{/categories}" class="nav-link">Danh mục</a>
+          <a th:href="@{/search?sort=newest}" class="nav-link">Tài liệu mới</a>
+          <a th:href="@{/search?filter=premium}" class="nav-link">Cao cấp</a>
+          <a th:href="@{/about}" class="nav-link">Giới thiệu</a>
+        </nav>
+
+        <div class="header-actions">
+          <button
+            class="dark-mode-toggle"
+            id="darkModeToggle"
+            type="button"
+            aria-label="Toggle dark mode"
+          >
+            <span class="dark-mode-handle" id="darkModeHandle"></span>
+          </button>
+
+          <!-- User Profile when logged in -->
+          <div sec:authorize="isAuthenticated()" class="admin-profile">
+            <div class="admin-avatar">
+              <img
+                th:src="${#authentication.principal.user.avatarUrl != null ? #authentication.principal.user.avatarUrl : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'}"
+                th:alt="${#authentication.principal.fullName}"
+              />
+            </div>
+            <div class="admin-info">
+              <span
+                class="admin-name"
+                th:text="${#authentication.principal.fullName}"
+                >Nguyễn Văn A</span
+              >
+              <span
+                class="admin-role"
+                th:text="${#authentication.principal.role}"
+                >Quản trị viên</span
+              >
+            </div>
+            <div class="admin-dropdown">
+              <i class="fas fa-chevron-down"></i>
+              <div class="dropdown-menu">
+                <a th:href="@{/account/dashboard}" class="dropdown-item">
+                  <i class="fas fa-user"></i> Tài khoản
+                </a>
+                <a th:href="@{/account/documents}" class="dropdown-item">
+                  <i class="fas fa-file-alt"></i> Tài liệu của tôi
+                </a>
+                <a th:href="@{/account/favorites}" class="dropdown-item">
+                  <i class="fas fa-heart"></i> Yêu thích
+                </a>
+                <div class="dropdown-divider"></div>
+                <form
+                  th:action="@{/logout}"
+                  method="post"
+                  class="dropdown-form"
+                >
+                  <button type="submit" class="dropdown-item logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Login/Register buttons when not logged in -->
+          <div sec:authorize="!isAuthenticated()" class="auth-buttons">
+            <a th:href="@{/login}" class="login-btn">
+              <i class="fas fa-sign-in-alt"></i> Đăng nhập
+            </a>
+            <a th:href="@{/register}" class="register-btn">
+              <i class="fas fa-user-plus"></i> Đăng ký
+            </a>
+          </div>
+        </div>
+
+        <div class="mobile-menu-toggle" id="mobileMenuBtn">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="mobile-menu">
+      <div class="mobile-search">
+        <input type="text" placeholder="Tìm kiếm tài liệu..." />
+        <button><i class="fas fa-search"></i></button>
+      </div>
+      <nav class="mobile-nav">
+        <a th:href="@{/}" class="nav-link">Trang chủ</a>
+        <a th:href="@{/categories}" class="nav-link">Danh mục</a>
+        <a th:href="@{/search?sort=newest}" class="nav-link">Tài liệu mới</a>
+        <a th:href="@{/search?filter=premium}" class="nav-link">Cao cấp</a>
+        <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+      </nav>
+      <div class="mobile-auth" sec:authorize="!isAuthenticated()">
+        <a th:href="@{/login}" class="mobile-login-btn">Đăng nhập</a>
+        <a th:href="@{/register}" class="mobile-register-btn">Đăng ký</a>
+      </div>
+      <div class="mobile-user" sec:authorize="isAuthenticated()">
+        <div class="mobile-user-info">
+          <img
+            th:src="${#authentication.principal.user.avatarUrl != null ? #authentication.principal.user.avatarUrl : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'}"
+            th:alt="${#authentication.principal.fullName}"
+          />
+          <div>
+            <span th:text="${#authentication.principal.fullName}"
+              >Người dùng</span
+            >
+            <small th:text="${#authentication.principal.role}"
+              >Thành viên</small
+            >
+          </div>
+        </div>
+        <div class="mobile-user-actions">
+          <a th:href="@{/account/dashboard}">Tài khoản</a>
+          <a th:href="@{/account/documents}">Tài liệu của tôi</a>
+          <form th:action="@{/logout}" method="post">
+            <button type="submit">Đăng xuất</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Footer Fragment -->
+  <footer th:fragment="footer" class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-about">
+          <div class="footer-logo">
+            <div class="logo-icon footer-logo-icon">E</div>
+            <span class="logo-text">EduShare</span>
+          </div>
+          <p class="footer-description">
+            Nền tảng chia sẻ tài liệu học tập hàng đầu Việt Nam với hơn 500,000
+            thành viên và 200,000+ tài liệu chất lượng cao.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Khám phá</h3>
+          <ul class="footer-links">
+            <li><a th:href="@{/categories}">Danh mục</a></li>
+            <li><a th:href="@{/search?sort=newest}">Tài liệu mới</a></li>
+            <li><a th:href="@{/search?sort=popular}">Tài liệu phổ biến</a></li>
+            <li><a href="#">Tác giả hàng đầu</a></li>
+            <li><a href="#">Sự kiện & Tin tức</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Thông tin</h3>
+          <ul class="footer-links">
+            <li><a th:href="@{/about}">Giới thiệu</a></li>
+            <li><a href="#">Chính sách bảo mật</a></li>
+            <li><a href="#">Điều khoản sử dụng</a></li>
+            <li><a href="#">Chương trình tác giả</a></li>
+            <li><a href="#">Hợp tác & Liên kết</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-section">
+          <h3 class="footer-heading">Liên hệ</h3>
+          <ul class="contact-info">
+            <li>
+              <i class="fas fa-map-marker-alt"></i> 123 Đường Cầu Giấy, Hà Nội
+            </li>
+            <li><i class="fas fa-phone"></i> (024) 1234 5678</li>
+            <li><i class="fas fa-envelope"></i> contact@edushare.vn</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="copyright">
+          &copy; 2023 EduShare. Tất cả quyền được bảo lưu.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#">Chính sách bảo mật</a>
+          <a href="#">Điều khoản sử dụng</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Trợ giúp</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</html>

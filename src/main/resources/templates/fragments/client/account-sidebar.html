@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Sidebar Fragment</title>
+  </head>
+  <body>
+    <!-- Account Sidebar Fragment -->
+    <div th:fragment="account-sidebar" class="dashboard-sidebar">
+      <div class="sidebar-header">
+        <div class="user-profile">
+          <img
+            th:src="${#authentication.principal.user.avatarUrl != null ? #authentication.principal.user.avatarUrl : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'}"
+            th:alt="${#authentication.principal.fullName}"
+            class="user-avatar"
+          />
+          <div
+            class="user-name"
+            th:text="${#authentication.principal.fullName}"
+          >
+            Nguyễn Văn Anh
+          </div>
+          <div
+            class="user-email"
+            th:text="${#authentication.principal.user.email}"
+          >
+            nguyenvananh@gmail.com
+          </div>
+        </div>
+        <div class="sidebar-title">Trang tổng quan</div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="sidebar-menu-title">Tài liệu</li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/dashboard}"
+            class="sidebar-menu-link"
+            data-page="dashboard"
+          >
+            <i class="fas fa-tachometer-alt sidebar-icon"></i>
+            Tổng quan
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/documents}"
+            class="sidebar-menu-link"
+            data-page="documents"
+          >
+            <i class="fas fa-file-alt sidebar-icon"></i>
+            Tài liệu của tôi
+            <span class="sidebar-badge">15</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a th:href="@{/search}" class="sidebar-menu-link">
+            <i class="fas fa-search sidebar-icon"></i>
+            Khám phá tài liệu
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a th:href="@{/upload}" class="sidebar-menu-link">
+            <i class="fas fa-cloud-upload-alt sidebar-icon"></i>
+            Tải lên tài liệu
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/favorites}"
+            class="sidebar-menu-link"
+            data-page="favorites"
+          >
+            <i class="fas fa-bookmark sidebar-icon"></i>
+            Tài liệu đã lưu
+          </a>
+        </li>
+
+        <li class="sidebar-menu-title">Tài khoản</li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/profile}"
+            class="sidebar-menu-link"
+            data-page="profile"
+          >
+            <i class="fas fa-user sidebar-icon"></i>
+            Thông tin cá nhân
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/transactions}"
+            class="sidebar-menu-link"
+            data-page="transactions"
+          >
+            <i class="fas fa-history sidebar-icon"></i>
+            Lịch sử giao dịch
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/recharge}"
+            class="sidebar-menu-link"
+            data-page="recharge"
+          >
+            <i class="fas fa-coins sidebar-icon"></i>
+            Nạp xu
+            <span class="sidebar-badge">250</span>
+          </a>
+        </li>
+
+        <li class="sidebar-menu-title">Cài đặt</li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/security}"
+            class="sidebar-menu-link"
+            data-page="security"
+          >
+            <i class="fas fa-shield-alt sidebar-icon"></i>
+            Bảo mật
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/notifications}"
+            class="sidebar-menu-link"
+            data-page="notifications"
+          >
+            <i class="fas fa-bell sidebar-icon"></i>
+            Thông báo
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/options}"
+            class="sidebar-menu-link"
+            data-page="options"
+          >
+            <i class="fas fa-cog sidebar-icon"></i>
+            Tùy chọn
+          </a>
+        </li>
+
+        <li class="sidebar-menu-item">
+          <a
+            th:href="@{/account/support}"
+            class="sidebar-menu-link"
+            data-page="support"
+          >
+            <i class="fas fa-headset sidebar-icon"></i>
+            Hỗ trợ
+          </a>
+        </li>
+      </ul>
+
+      <script>
+        // Set active class based on current page
+        document.addEventListener("DOMContentLoaded", function () {
+          const currentPath = window.location.pathname;
+          const sidebarLinks = document.querySelectorAll(
+            ".sidebar-menu-link[data-page]"
+          );
+
+          sidebarLinks.forEach((link) => {
+            const page = link.getAttribute("data-page");
+            if (
+              currentPath.includes("/account/" + page) ||
+              (page === "dashboard" && currentPath === "/account/dashboard")
+            ) {
+              link.classList.add("active");
+            }
+          });
+        });
+      </script>
+    </div>
+  </body>
+</html>
