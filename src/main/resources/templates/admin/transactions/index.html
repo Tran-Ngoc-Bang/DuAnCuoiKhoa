@@ -29,49 +29,9 @@
 
   <body class="admin-body">
     <!-- Admin Header -->
-    <header class="admin-header">
-      <div class="admin-header-content">
-        <div class="admin-logo">
-          <a href="../index.html" class="logo">
-            <div class="logo-icon">E</div>
-            <div class="logo-text">EduShare</div>
-          </a>
-        </div>
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
 
-        <div class="admin-header-actions">
-          <div class="admin-search">
-            <input type="text" placeholder="Tìm kiếm..." />
-            <button><i class="fas fa-search"></i></button>
-          </div>
-
-          <div class="dark-mode-toggle" id="darkModeToggle"></div>
-
-          <div class="admin-notifications">
-            <button class="notification-btn">
-              <i class="fas fa-bell"></i>
-              <span class="notification-badge">5</span>
-            </button>
-          </div>
-
-          <div class="admin-profile">
-            <div class="admin-avatar">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt="Admin"
-              />
-            </div>
-            <div class="admin-info">
-              <span class="admin-name">Nguyễn Văn A</span>
-              <span class="admin-role">Quản trị viên</span>
-            </div>
-            <div class="admin-dropdown">
-              <i class="fas fa-chevron-down"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
+    <!-- Admin Container -->
     <div class="admin-container">
       <!-- Sidebar -->
       <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
@@ -154,12 +114,11 @@
             <button class="apply-date-btn">Áp dụng</button>
           </div>
         </div> -->
-
-        <!-- Transaction Management -->
-        <div class="section-header">
-          <h2>Quản lý giao dịch</h2>
+          <!-- <h2>Quản lý giao dịch</h2> -->
+          <div class="section-header">
+          <!-- <h2>Quản lý gói xu</h2> -->
           <div class="section-actions">
-            <a th:href="@{/admin/transactions/create}" class="add-new-btn"
+             <a th:href="@{/admin/transactions/create}" class="add-new-btn"
               ><i class="fas fa-plus"></i> Thêm giao dịch</a
             >
             <button class="export-btn">
@@ -268,14 +227,9 @@
           <table class="data-table transactions-table">
             <thead>
               <tr>
-                <th>
-                  <label class="checkbox-container">
-                    <input type="checkbox" id="selectAll" />
-                    <span class="checkmark"></span>
-                  </label>
-                </th>
+                <th>STT</th>
                 <th>ID Giao dịch</th>
-                <th>Người dùng</th>
+                <th>Tên tài khoản</th>
                 <th>Loại</th>
                 <th>Số tiền</th>
                 <th>Phương thức</th>
@@ -285,18 +239,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr th:each="transaction : ${transactions}">
-                <td>
-                  <label class="checkbox-container">
-                    <input
-                      type="checkbox"
-                      name="transactionIds"
-                      th:value="${transaction.id}"
-                      class="row-checkbox"
-                    />
-                    <span class="checkmark"></span>
-                  </label>
-                </td>
+              <tr th:each="transaction, iterStat : ${transactions}">
+                <td th:text="${(currentPage * size) + iterStat.index + 1}">1</td>
                 <td th:text="${transaction.code}">TRX-2025060301</td>
                 <td>
                   <div class="user-info">
@@ -305,7 +249,7 @@
                       alt="User"
                       class="user-avatar large"
                     />
-                    <span th:text="${transaction.user.fullName}"
+                    <span th:text="${transaction.user.username}"
                       >Nguyễn Văn A</span
                     >
                   </div>
@@ -359,7 +303,6 @@
                       th:href="@{/admin/transactions/{id}/delete(id=${transaction.id})}"
                       class="action-btn"
                       title="Xóa"
-                      onclick="return confirm('Bạn có chắc chắn muốn xóa giao dịch này?')"
                     >
                       <i class="fas fa-trash"></i>
                     </a>
@@ -371,163 +314,47 @@
               </tr>
             </tbody>
           </table>
-                  <!-- Table Actions -->
-        <div class="table-actions">
-          <div class="bulk-actions">
-            <form
-              id="bulkActionForm"
-              method="POST"
-              th:action="@{/admin/transactions/bulk-action}"
+          <!-- Pagination -->
+          <div class="pagination">
+            <button
+              type="button"
+              class="pagination-btn prev-btn"
+              th:disabled="${isFirst}"
+              th:attr="data-url='?page=' + (${currentPage} - 1) + '&size=' + ${size} + (${keyword} != null ? '&keyword=' + ${keyword} : '') + (${type} != null ? '&type=' + ${type} : '') + (${status} != null ? '&status=' + ${status} : '') + (${amountRange} != null ? '&amountRange=' + ${amountRange} : '')"
+              onclick="window.location.href=this.dataset.url"
             >
-              <select
-                class="bulk-action-select"
-                id="bulkActionSelect"
-                name="action"
-              >
-                <option value="">Chọn hành động</option>
-                <option value="status_completed">Đánh dấu hoàn thành</option>
-                <option value="status_failed">Đánh dấu thất bại</option>
-                <option value="status_cancelled">Đánh dấu hủy</option>
-                <option value="delete">Xóa</option>
-              </select>
-              <button
-                type="submit"
-                class="apply-action"
-                id="applyBulkAction"
-                disabled
-              >
-                Áp dụng
-              </button>
-            </form>
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="pagination-pages">
+              <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <button
+                  type="button"
+                  class="pagination-btn page-btn"
+                  th:classappend="${i} == ${currentPage} ? ' active' : ''"
+                  th:text="${i + 1}"
+                  th:attr="data-url='?page=' + ${i} + '&size=' + ${size} + (${keyword} != null ? '&keyword=' + ${keyword} : '') + (${type} != null ? '&type=' + ${type} : '') + (${status} != null ? '&status=' + ${status} : '') + (${amountRange} != null ? '&amountRange=' + ${amountRange} : '')"
+                  onclick="window.location.href=this.dataset.url"
+                ></button>
+              </span>
+            </div>
+            <button
+              type="button"
+              class="pagination-btn next-btn"
+              th:disabled="${isLast}"
+              th:attr="data-url='?page=' + (${currentPage} + 1) + '&size=' + ${size} + (${keyword} != null ? '&keyword=' + ${keyword} : '') + (${type} != null ? '&type=' + ${type} : '') + (${status} != null ? '&status=' + ${status} : '') + (${amountRange} != null ? '&amountRange=' + ${amountRange} : '')"
+              onclick="window.location.href=this.dataset.url"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
           </div>
         </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination" th:if="${totalPages > 1}">
-          <a
-            th:if="${hasPrevious}"
-            th:href="@{/admin/transactions(page=${currentPage - 1}, size=${size}, keyword=${keyword}, status=${status}, type=${type}, amountRange=${amountRange})}"
-            class="pagination-btn prev-btn"
-          >
-            <i class="fas fa-chevron-left"></i>
-          </a>
-          <div class="pagination-pages">
-            <a
-              th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
-              th:href="@{/admin/transactions(page=${pageNum}, size=${size}, keyword=${keyword}, status=${status}, type=${type}, amountRange=${amountRange})}"
-              th:text="${pageNum + 1}"
-              th:class="${pageNum == currentPage ? 'pagination-btn active' : 'pagination-btn'}"
-            >
-            </a>
-          </div>
-          <a
-            th:if="${hasNext}"
-            th:href="@{/admin/transactions(page=${currentPage + 1}, size=${size}, keyword=${keyword}, status=${status}, type=${type}, amountRange=${amountRange})}"
-            class="pagination-btn next-btn"
-          >
-            <i class="fas fa-chevron-right"></i>
-          </a>
-        </div>
-
-
         </div>
       </main>
     </div>
 
+    <!-- Scripts -->
     <script src="../../js/main.js"></script>
     <script th:src="@{/js/admin/admin.js}"></script>
-    <script src="../js/transactions.js"></script>
-    <script>
-      // Bulk actions
-      // Select all functionality
-      document
-        .getElementById("selectAll")
-        .addEventListener("change", function () {
-          const checkboxes = document.querySelectorAll(
-            'input[name="transactionIds"]'
-          );
-          checkboxes.forEach((checkbox) => {
-            checkbox.checked = this.checked;
-          });
-          updateBulkActionButton();
-        });
-
-      // Individual checkbox change
-      document
-        .querySelectorAll('input[name="transactionIds"]')
-        .forEach((checkbox) => {
-          checkbox.addEventListener("change", function () {
-            updateSelectAllState();
-            updateBulkActionButton();
-          });
-        });
-
-      // Update select all state
-      function updateSelectAllState() {
-        const checkboxes = document.querySelectorAll(
-          'input[name="transactionIds"]'
-        );
-        const checkedBoxes = document.querySelectorAll(
-          'input[name="transactionIds"]:checked'
-        );
-        const selectAll = document.getElementById("selectAll");
-
-        if (checkedBoxes.length === 0) {
-          selectAll.checked = false;
-          selectAll.indeterminate = false;
-        } else if (checkedBoxes.length === checkboxes.length) {
-          selectAll.checked = true;
-          selectAll.indeterminate = false;
-        } else {
-          selectAll.checked = false;
-          selectAll.indeterminate = true;
-        }
-      }
-
-      // Update bulk action button state
-      function updateBulkActionButton() {
-        const checkedBoxes = document.querySelectorAll(
-          'input[name="transactionIds"]:checked'
-        );
-        const bulkActionButton = document.getElementById("applyBulkAction");
-        const bulkActionSelect = document.getElementById("bulkActionSelect");
-
-        if (bulkActionButton) {
-          bulkActionButton.disabled =
-            checkedBoxes.length === 0 || !bulkActionSelect.value;
-        }
-      }
-
-      // Bulk action select change
-      const bulkActionSelect = document.getElementById("bulkActionSelect");
-      if (bulkActionSelect) {
-        bulkActionSelect.addEventListener("change", function () {
-          updateBulkActionButton();
-        });
-      }
-
-      // Date range picker
-      flatpickr("#startDate, #endDate", {
-        dateFormat: "Y-m-d",
-        locale: "vi",
-      });
-
-      // Date preset buttons
-      document.querySelectorAll(".date-btn").forEach((btn) => {
-        btn.addEventListener("click", function () {
-          document
-            .querySelectorAll(".date-btn")
-            .forEach((b) => b.classList.remove("active"));
-          this.classList.add("active");
-
-          if (this.dataset.range === "custom") {
-            document.querySelector(".custom-date-range").style.display = "flex";
-          } else {
-            document.querySelector(".custom-date-range").style.display = "none";
-          }
-        });
-      });
-    </script>
+    <!-- <script src="../js/transactions.js"></script> -->
   </body>
 </html>

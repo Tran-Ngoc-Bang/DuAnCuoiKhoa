@@ -13,6 +13,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -29,22 +31,36 @@ public class SecurityConfig {
 
         @Bean
         public AuthenticationSuccessHandler authenticationSuccessHandler() {
-                return new SimpleUrlAuthenticationSuccessHandler() {
+                return new SavedRequestAwareAuthenticationSuccessHandler() {
                         @Override
                         protected String determineTargetUrl(jakarta.servlet.http.HttpServletRequest request,
                                         jakarta.servlet.http.HttpServletResponse response,
                                         org.springframework.security.core.Authentication authentication) {
 
-                                // Kiểm tra role và redirect tương ứng
+                                // Lấy saved request URL
+                                String targetUrl = super.determineTargetUrl(request, response, authentication);
+
+                                // Kiểm tra URL có hợp lệ và an toàn không
+                                if (targetUrl != null && !targetUrl.equals("/") && isValidRedirectUrl(targetUrl)) {
+                                        return targetUrl;
+                                }
+
+                                // Fallback theo role
                                 boolean isAdmin = authentication.getAuthorities().stream()
                                                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority()
                                                                 .equals("ROLE_ADMIN"));
 
-                                if (isAdmin) {
-                                        return "/admin";
-                                } else {
-                                        return "/";
-                                }
+                                return isAdmin ? "/admin" : "/";
+                        }
+
+                        private boolean isValidRedirectUrl(String url) {
+                                // Chỉ cho phép URL nội bộ, không có protocol
+                                return url != null &&
+                                                url.startsWith("/") &&
+                                                !url.startsWith("//") &&
+                                                !url.contains("javascript:") &&
+                                                !url.contains("data:") &&
+                                                url.length() < 200; // Giới hạn độ dài
                         }
                 };
         }
@@ -91,6 +107,7 @@ public class SecurityConfig {
                                 // Configure logout
                                 .logout(logout -> logout
                                                 .logoutUrl("/logout")
+                                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
                                                 .logoutSuccessUrl("/login?logout=true")
                                                 .invalidateHttpSession(true)
                                                 .deleteCookies("JSESSIONID")
@@ -125,7 +142,7 @@ public class SecurityConfig {
                                                                 .maxAgeInSeconds(31536000)
                                                                 .includeSubDomains(true)))
 
-                                // Configure exception handling 
+                                // Configure exception handling
                                 .exceptionHandling(exceptions -> exceptions
                                                 .accessDeniedPage("/access-denied"));
 

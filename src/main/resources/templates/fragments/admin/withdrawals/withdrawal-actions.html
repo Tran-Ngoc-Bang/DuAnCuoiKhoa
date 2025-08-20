@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <!-- Action Buttons Fragment -->
+    <div th:fragment="withdrawal-actions(withdrawal)" class="action-buttons">
+      <a
+        th:href="@{/admin/withdrawals/{id}/detail(id=${withdrawal.id})}"
+        class="action-btn view"
+        title="Xem chi tiết"
+      >
+        <i class="fas fa-eye"></i>
+      </a>
+      <a
+        th:href="@{/admin/withdrawals/{id}/edit(id=${withdrawal.id})}"
+        class="action-btn edit"
+        title="Chỉnh sửa"
+      >
+        <i class="fas fa-edit"></i>
+      </a>
+      <a
+        th:href="@{/admin/withdrawals/{id}/delete(id=${withdrawal.id})}"
+        class="action-btn delete"
+        title="Xóa"
+      >
+        <i class="fas fa-trash"></i>
+      </a>
+    </div>
+
+    <!-- Bulk Actions Fragment -->
+    <div
+      th:fragment="bulk-actions"
+      class="bulk-actions"
+      id="bulkActions"
+      style="display: none"
+    >
+      <form
+        th:action="@{/admin/withdrawals/bulk-action}"
+        method="post"
+        id="bulkActionForm"
+      >
+        <div class="bulk-actions-content">
+          <span class="selected-count"
+            >Đã chọn <span id="selectedCount">0</span> withdrawal</span
+          >
+          <select name="action" class="bulk-select" required>
+            <option value="">Chọn hành động</option>
+            <option value="status_completed">Đánh dấu hoàn thành</option>
+            <option value="status_failed">Đánh dấu thất bại</option>
+            <option value="status_cancelled">Đánh dấu hủy</option>
+            <option value="status_pending">Đánh dấu chờ xử lý</option>
+            <option value="delete">Xóa</option>
+          </select>
+          <button type="submit" class="bulk-apply-btn">Áp dụng</button>
+          <button
+            type="button"
+            class="bulk-cancel-btn"
+            onclick="clearSelection()"
+          >
+            Hủy
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

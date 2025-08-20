@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chi tiết withdrawal - Admin</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals-detail.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals-delete.css}" />
+  </head>
+
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">
+            Chi tiết withdrawal
+            <!-- <span class="withdrawal-code" th:text="${withdrawal.code}"></span> -->
+          </h1>
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin}">Admin</a>
+            <span>/</span>
+            <a th:href="@{/admin/withdrawals}">Quản lý doanh thu</a>
+            <span>/</span>
+            <a th:href="@{/admin/withdrawals}">Withdrawals</a>
+            <span>/</span>
+            <span>Chi tiết</span>
+          </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+          <i class="fas fa-check-circle"></i>
+          <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div th:if="${warningMessage}" class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span th:text="${warningMessage}"></span>
+        </div>
+
+        <!-- Detail Container -->
+        <div class="detail-container">
+          <!-- Main Information Card -->
+          <div class="detail-card main-info">
+            <div class="card-header">
+              <h2 style="color: #fff">
+                <i class="fas fa-money-bill-wave"></i>
+                Thông tin withdrawal
+              </h2>
+            </div>
+
+            <div class="card-content">
+              <div class="info-grid">
+                <!-- Basic Information -->
+                <div class="info-section">
+                  <h3>Thông tin cơ bản</h3>
+                  <div class="info-row">
+                    <label>Mã withdrawal:</label>
+                    <span
+                      class="value code-value"
+                      th:text="${withdrawal.code}"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Số tiền:</label>
+                    <span
+                      class="value amount-value"
+                      th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Trạng thái:</label>
+                    <span
+                      class="value status-value"
+                      th:classappend="${'status-' + withdrawal.status.value}"
+                    >
+                      <i class="fas fa-circle"></i>
+                      <span th:text="${withdrawal.status.displayName}"></span>
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <label>Phương thức thanh toán:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.paymentMethod}"
+                    ></span>
+                  </div>
+                </div>
+
+                <!-- User Information -->
+                <div class="info-section">
+                  <h3>Thông tin người dùng</h3>
+                  <div class="info-row">
+                    <label>Tên đầy đủ:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.user.fullName}"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Username:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.user.username}"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Email:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.user.email}"
+                    ></span>
+                  </div>
+                  <div class="info-row" th:if="${withdrawal.user.phoneNumber}">
+                    <label>Số điện thoại:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.user.phoneNumber}"
+                    ></span>
+                  </div>
+                </div>
+
+                <!-- Time Information -->
+                <div class="info-section">
+                  <h3>Thông tin thời gian</h3>
+                  <div class="info-row">
+                    <label>Ngày tạo:</label>
+                    <span
+                      class="value"
+                      th:text="${#temporals.format(withdrawal.createdAt, 'dd/MM/yyyy HH:mm:ss')}"
+                    ></span>
+                  </div>
+                  <div class="info-row" th:if="${withdrawal.updatedAt}">
+                    <label>Cập nhật lần cuối:</label>
+                    <span
+                      class="value"
+                      th:text="${#temporals.format(withdrawal.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"
+                    ></span>
+                  </div>
+                  <div class="info-row" th:if="${withdrawal.deletedAt}">
+                    <label>Ngày xóa:</label>
+                    <span
+                      class="value deleted-value"
+                      th:text="${#temporals.format(withdrawal.deletedAt, 'dd/MM/yyyy HH:mm:ss')}"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status History Section -->
+          <!-- <div class="detail-card status-history">
+            <div class="card-header">
+              <h2>
+                <i class="fas fa-history"></i>
+                Lịch sử thay đổi trạng thái
+              </h2>
+            </div>
+            <div class="card-content">
+              <div class="timeline"> -->
+          <!-- Current Status -->
+          <!-- <div class="timeline-item current">
+                  <div class="timeline-marker">
+                    <i class="fas fa-circle"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span
+                        class="timeline-status"
+                        th:classappend="${'status-' + withdrawal.status.value}"
+                      >
+                        <span th:text="${withdrawal.status.displayName}"></span>
+                      </span>
+                      <span
+                        class="timeline-time"
+                        th:text="${withdrawal.updatedAt != null ? #temporals.format(withdrawal.updatedAt, 'dd/MM/yyyy HH:mm') : #temporals.format(withdrawal.createdAt, 'dd/MM/yyyy HH:mm')}"
+                      ></span>
+                    </div>
+                    <div class="timeline-description">Trạng thái hiện tại</div>
+                  </div>
+                </div> -->
+
+          <!-- Created Status -->
+          <!-- <div class="timeline-item">
+                  <div class="timeline-marker">
+                    <i class="fas fa-plus-circle"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="timeline-status status-created">
+                        Đã tạo
+                      </span>
+                      <span
+                        class="timeline-time"
+                        th:text="${#temporals.format(withdrawal.createdAt, 'dd/MM/yyyy HH:mm')}"
+                      ></span>
+                    </div>
+                    <div class="timeline-description">
+                      Withdrawal được tạo trong hệ thống
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> -->
+
+          <!-- Notes Section -->
+          <!-- <div class="detail-card notes-section">
+            <div class="card-header">
+              <h2>
+                <i class="fas fa-sticky-note"></i>
+                Ghi chú
+              </h2>
+            </div>
+            <div class="card-content"> -->
+          <!-- Existing Notes -->
+          <!-- <div class="existing-notes" th:if="${withdrawal.notes}">
+                <div
+                  class="notes-content"
+                  th:utext="${#strings.replace(withdrawal.notes, '&#10;', '<br>')}"
+                ></div>
+              </div>
+              <div class="no-notes" th:unless="${withdrawal.notes}">
+                <i class="fas fa-info-circle"></i>
+                <span>Chưa có ghi chú nào</span>
+              </div> -->
+
+          <!-- Add Note Form -->
+          <!-- <div class="add-note-form">
+                <h4>Thêm ghi chú mới</h4>
+                <form
+                  id="addNoteForm"
+                  th:action="@{/admin/withdrawals/{id}/add-note(id=${withdrawal.id})}"
+                  method="post"
+                >
+                  <div class="form-group">
+                    <textarea
+                      id="noteContent"
+                      name="note"
+                      placeholder="Nhập ghi chú..."
+                      rows="3"
+                      required
+                    ></textarea>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-plus"></i>
+                      Thêm ghi chú
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      onclick="clearNoteForm()"
+                    >
+                      <i class="fas fa-times"></i>
+                      Hủy
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div> -->
+
+          <!-- Action Buttons -->
+          <div class="detail-card action-buttons">
+            <!-- <div class="card-header">
+              <h2>
+                <i class="fas fa-cogs"></i>
+                Thao tác
+              </h2>
+            </div> -->
+            <div class="card-content">
+              <div class="button-group">
+                <!-- Edit Button -->
+                <a
+                  th:href="@{/admin/withdrawals/{id}/edit(id=${withdrawal.id})}"
+                  class="btn btn-primary"
+                  th:classappend="${withdrawal.status.value == 'completed' ? ' btn-disabled' : ''}"
+                >
+                  <i class="fas fa-edit"></i>
+                  Chỉnh sửa
+                </a>
+
+                <!-- Delete Button -->
+                <a
+                  th:href="@{/admin/withdrawals/{id}/delete(id=${withdrawal.id})}"
+                  class="btn btn-danger"
+                >
+                  <i class="fas fa-trash"></i>
+                  Xóa
+                </a>
+
+                <!-- Back to List Button -->
+                <a th:href="@{/admin/withdrawals}" class="btn btn-secondary">
+                  <i class="fas fa-arrow-left"></i>
+                  Quay lại danh sách
+                </a>
+
+                <!-- Print Button -->
+                <button
+                  type="button"
+                  class="btn btn-info"
+                  onclick="printWithdrawal()"
+                >
+                  <i class="fas fa-print"></i>
+                  In
+                </button>
+
+                <!-- Export Button -->
+                <!-- <button
+                  type="button"
+                  class="btn btn-success"
+                  onclick="exportWithdrawal()"
+                >
+                  <i class="fas fa-download"></i>
+                  Xuất file
+                </button> -->
+              </div>
+
+              <!-- Status Change Quick Actions -->
+              <div
+                class="quick-actions"
+                th:if="${withdrawal.status.value != 'completed' && withdrawal.status.value != 'cancelled'}"
+              >
+                <h4>Thay đổi trạng thái nhanh</h4>
+                <div class="status-buttons">
+                  <form
+                    th:action="@{/admin/withdrawals/{id}/edit(id=${withdrawal.id})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <input
+                      type="hidden"
+                      name="id"
+                      th:value="${withdrawal.id}"
+                    />
+                    <input
+                      type="hidden"
+                      name="code"
+                      th:value="${withdrawal.code}"
+                    />
+                    <input type="hidden" name="type" value="WITHDRAWAL" />
+                    <input
+                      type="hidden"
+                      name="amount"
+                      th:value="${withdrawal.amount}"
+                    />
+                    <input
+                      type="hidden"
+                      name="paymentMethod"
+                      th:value="${withdrawal.paymentMethod}"
+                    />
+                    <input
+                      type="hidden"
+                      name="notes"
+                      th:value="${withdrawal.notes}"
+                    />
+                    <input
+                      type="hidden"
+                      name="user.id"
+                      th:value="${withdrawal.user.id}"
+                    />
+                    <input
+                      type="hidden"
+                      name="createdAt"
+                      th:value="${withdrawal.createdAt}"
+                    />
+                    <input type="hidden" name="status" value="COMPLETED" />
+
+                    <button
+                      type="submit"
+                      class="btn btn-success btn-sm"
+                      th:if="${withdrawal.status.value != 'completed'}"
+                      onclick="return confirm('Đánh dấu withdrawal này là hoàn thành?')"
+                    >
+                      <i class="fas fa-check"></i>
+                      Hoàn thành
+                    </button>
+                  </form>
+
+                  <form
+                    th:action="@{/admin/withdrawals/{id}/edit(id=${withdrawal.id})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <input
+                      type="hidden"
+                      name="id"
+                      th:value="${withdrawal.id}"
+                    />
+                    <input
+                      type="hidden"
+                      name="code"
+                      th:value="${withdrawal.code}"
+                    />
+                    <input type="hidden" name="type" value="WITHDRAWAL" />
+                    <input
+                      type="hidden"
+                      name="amount"
+                      th:value="${withdrawal.amount}"
+                    />
+                    <input
+                      type="hidden"
+                      name="paymentMethod"
+                      th:value="${withdrawal.paymentMethod}"
+                    />
+                    <input
+                      type="hidden"
+                      name="notes"
+                      th:value="${withdrawal.notes}"
+                    />
+                    <input
+                      type="hidden"
+                      name="user.id"
+                      th:value="${withdrawal.user.id}"
+                    />
+                    <input
+                      type="hidden"
+                      name="createdAt"
+                      th:value="${withdrawal.createdAt}"
+                    />
+                    <input type="hidden" name="status" value="FAILED" />
+
+                    <button
+                      type="submit"
+                      class="btn btn-danger btn-sm"
+                      th:if="${withdrawal.status.value != 'failed'}"
+                      onclick="return confirm('Đánh dấu withdrawal này là thất bại?')"
+                    >
+                      <i class="fas fa-times"></i>
+                      Thất bại
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
+    <script th:src="@{/js/admin/withdrawals.js}"></script>
+
+    <script>
+      // Page-specific functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeDetailPage();
+      });
+
+      function initializeDetailPage() {
+        // Initialize AJAX form for adding notes
+        const addNoteForm = document.getElementById("addNoteForm");
+        if (addNoteForm) {
+          addNoteForm.addEventListener("submit", handleAddNote);
+        }
+      }
+
+      function handleAddNote(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const noteContent = formData.get("note");
+
+        if (!noteContent.trim()) {
+          showToast("Vui lòng nhập nội dung ghi chú", "error");
+          return;
+        }
+
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Đang thêm...';
+
+        // Submit via AJAX
+        fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
+          .then((response) => {
+            if (response.ok) {
+              // Reload page to show new note
+              window.location.reload();
+            } else {
+              throw new Error("Network response was not ok");
+            }
+          })
+          .catch((error) => {
+            console.error("Error adding note:", error);
+            showToast("Lỗi khi thêm ghi chú", "error");
+          })
+          .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+          });
+      }
+
+      function clearNoteForm() {
+        document.getElementById("noteContent").value = "";
+      }
+
+      function printWithdrawal() {
+        window.print();
+      }
+
+      function exportWithdrawal() {
+        // Create export data
+        const withdrawalData = {
+          code: /*[[${withdrawal.code}]]*/ "",
+          amount: /*[[${withdrawal.amount}]]*/ 0,
+          status: /*[[${withdrawal.status.displayName}]]*/ "",
+          user: /*[[${withdrawal.user.fullName}]]*/ "",
+          createdAt:
+            /*[[${#temporals.format(withdrawal.createdAt, 'dd/MM/yyyy HH:mm:ss')}]]*/ "",
+        };
+
+        // Create and download CSV
+        const csvContent =
+          "data:text/csv;charset=utf-8," +
+          "Mã withdrawal,Số tiền,Trạng thái,Người dùng,Ngày tạo\n" +
+          `${withdrawalData.code},${withdrawalData.amount},${withdrawalData.status},${withdrawalData.user},${withdrawalData.createdAt}`;
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `withdrawal_${withdrawalData.code}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast("Đã xuất file thành công", "success");
+      }
+
+      // Print styles
+      const printStyles = `
+        @media print {
+          .admin-sidebar, .admin-header, .action-buttons, .add-note-form {
+            display: none !important;
+          }
+          .admin-content {
+            margin-left: 0 !important;
+            padding: 20px !important;
+          }
+          .detail-container {
+            box-shadow: none !important;
+          }
+        }
+      `;
+
+      // Add print styles to head
+      const styleSheet = document.createElement("style");
+      styleSheet.type = "text/css";
+      styleSheet.innerText = printStyles;
+      document.head.appendChild(styleSheet);
+    </script>
+  </body>
+</html>

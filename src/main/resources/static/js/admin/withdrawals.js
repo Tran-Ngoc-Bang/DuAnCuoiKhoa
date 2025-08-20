@@ -1,1415 +1,2539 @@
-
-// Khởi tạo date picker
-document.addEventListener('DOMContentLoaded', function () {
-    flatpickr('#startDate', {
-        dateFormat: 'd/m/Y',
-        locale: 'vn',
-        disableMobile: true
-    });
-
-    flatpickr('#endDate', {
-        dateFormat: 'd/m/Y',
-        locale: 'vn',
-        disableMobile: true
-    });
-
-    // Xử lý các nút lọc nhanh theo ngày
-    const quickFilters = document.querySelectorAll('.quick-filter');
-    quickFilters.forEach(filter => {
-        filter.addEventListener('click', function () {
-            quickFilters.forEach(f => f.classList.remove('active'));
-            this.classList.add('active');
-
-            // Logic lọc theo ngày dựa trên nút được chọn
-            // (Sẽ được cài đặt khi tích hợp với backend)
-        });
-    });
-
-    // Xử lý mở/đóng các modal
-    const modals = document.querySelectorAll('.modal');
-    const modalOverlays = document.querySelectorAll('.modal-overlay');
-    const modalCloseButtons = document.querySelectorAll('.modal-close');
-
-    // Đóng modal khi nhấn vào overlay hoặc nút đóng
-    modalOverlays.forEach(overlay => {
-        overlay.addEventListener('click', function () {
-            const modal = this.closest('.modal');
-            closeModal(modal);
-        });
-    });
-
-    modalCloseButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const modal = this.closest('.modal');
-            closeModal(modal);
-        });
-    });
-
-    // Đóng modal chi tiết khi nhấn nút đóng bên trong
-    document.getElementById('closeDetailBtn')?.addEventListener('click', function () {
-        const modal = document.getElementById('withdrawalDetailModal');
-        closeModal(modal);
-    });
-
-    // Từ chối - hủy
-    document.getElementById('cancelRejectBtn')?.addEventListener('click', function () {
-        const modal = document.getElementById('rejectWithdrawalModal');
-        closeModal(modal);
-    });
-
-    // Hủy xử lý chuyển khoản
-    document.getElementById('cancelProcessBtn')?.addEventListener('click', function () {
-        const modal = document.getElementById('processWithdrawalModal');
-        closeModal(modal);
-    });
-
-    // Hủy hoàn thành
-    document.getElementById('cancelCompleteBtn')?.addEventListener('click', function () {
-        const modal = document.getElementById('completeWithdrawalModal');
-        closeModal(modal);
-    });
-
-    // Hàm đóng modal
-    function closeModal(modal) {
-        if (modal) {
-            modal.classList.remove('active');
-        }
-    }
-
-    // Hàm mở modal
-    function openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('active');
-        }
-    }
-
-    // Xử lý nút xem chi tiết
-    const viewWithdrawalButtons = document.querySelectorAll('.view-withdrawal');
-    viewWithdrawalButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Làm trong thực tế: Lấy ID yêu cầu rút tiền và gọi API để lấy thông tin chi tiết
-
-            // Hiện thị modal chi tiết
-            openModal('withdrawalDetailModal');
-        });
-    });
-
-    // Xử lý nút duyệt yêu cầu
-    const approveButtons = document.querySelectorAll('.action-btn.approve');
-    approveButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Lấy id yêu cầu từ hàng dữ liệu
-            const withdrawalRow = this.closest('tr');
-            const withdrawalId = withdrawalRow.querySelector('td:first-child').textContent;
-            const userName = withdrawalRow.querySelector('.user-info span').textContent;
-
-            // Xử lý duyệt yêu cầu (thực hiện API trong thực tế)
-            if (confirm(`Xác nhận duyệt yêu cầu rút tiền #${withdrawalId} của ${userName}?`)) {
-                // Gọi API và cập nhật UI
-                // Ví dụ: updateWithdrawalStatus(withdrawalId, 'approved')
-
-                // Cập nhật giao diện
-                const statusCell = withdrawalRow.querySelector('td:nth-child(7)');
-                statusCell.innerHTML = '<span class="status-badge approved">Đã duyệt</span>';
-
-                // Thay đổi các nút hành động
-                const actionButtons = withdrawalRow.querySelector('.action-buttons');
-                actionButtons.innerHTML = `
-                    <button class="action-btn process" title="Xử lý chuyển khoản"><i class="fas fa-money-bill-wave"></i></button>
-                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-                `;
-
-                // Gắn lại sự kiện cho các nút mới
-                const newViewButton = actionButtons.querySelector('.view-withdrawal');
-                newViewButton.addEventListener('click', function () {
-                    openModal('withdrawalDetailModal');
-                });
-
-                const newProcessButton = actionButtons.querySelector('.process');
-                newProcessButton.addEventListener('click', function () {
-                    openModal('processWithdrawalModal');
-                });
-
-                // Hiển thị thông báo
-                showToast('success', `Đã duyệt yêu cầu rút tiền #${withdrawalId}`);
-            }
-        });
-    });
-
-    // Xử lý nút từ chối yêu cầu
-    const rejectButtons = document.querySelectorAll('.action-btn.reject');
-    let currentWithdrawalId = '';
-    let currentWithdrawalRow = null;
-
-    rejectButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Lấy id yêu cầu từ hàng dữ liệu
-            currentWithdrawalRow = this.closest('tr');
-            currentWithdrawalId = currentWithdrawalRow.querySelector('td:first-child').textContent;
-
-            // Mở modal từ chối
-            openModal('rejectWithdrawalModal');
-        });
-    });
-
-    // Xử lý nút xác nhận từ chối yêu cầu
-    document.getElementById('confirmRejectBtn')?.addEventListener('click', function () {
-        const withdrawalId = document.querySelector('#rejectWithdrawalModal').dataset.withdrawalId;
-        const reasonSelect = document.getElementById('withdrawalRejectReason');
-        const noteTextarea = document.getElementById('withdrawalRejectNote');
-        const notifyUser = document.getElementById('notifyUserReject').checked;
-        const confirmBtn = this;
-
-        // Xác thực form trước khi xử lý
-        if (!validateRejectForm(reasonSelect, noteTextarea)) {
-            return; // Dừng nếu form không hợp lệ
-        }
-
-        // Hiển thị hộp thoại xác nhận trước khi từ chối
-        if (confirm('Bạn có chắc chắn muốn từ chối yêu cầu rút tiền này không?')) {
-
-            // Hiển thị trạng thái loading
-            showLoadingState(confirmBtn, 'Đang xử lý...');
-
-            // Gọi API từ chối yêu cầu (thực hiện trong thực tế)
-            // Ví dụ: rejectWithdrawal(currentWithdrawalId, reasonSelect.value, noteTextarea.value, notifyUser)
-
-            // Mô phỏng API call (xóa trong môi trường thực tế)
-            setTimeout(() => {
-                // Cập nhật giao diện
-                if (currentWithdrawalRow) {
-                    const statusCell = currentWithdrawalRow.querySelector('td:nth-child(7)');
-                    statusCell.innerHTML = '<span class="status-badge refunded">Đã từ chối</span>';
-
-                    // Thay đổi các nút hành động
-                    const actionButtons = currentWithdrawalRow.querySelector('.action-buttons');
-                    actionButtons.innerHTML = `
-                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-                `;
-
-                    // Gắn lại sự kiện cho nút xem chi tiết
-                    const newViewButton = actionButtons.querySelector('.view-withdrawal');
-                    newViewButton.addEventListener('click', function () {
-                        const withdrawalId = currentWithdrawalRow.querySelector('td:first-child').textContent;
-                        loadWithdrawalDetail(withdrawalId);
-                        openModal('withdrawalDetailModal');
-                    });
-                }
-
-                // Đóng modal và reset form
-                closeModal(document.getElementById('rejectWithdrawalModal'));
-                reasonSelect.value = '';
-                noteTextarea.value = '';
-
-                // Hiển thị thông báo
-                showToast('error', `Đã từ chối yêu cầu rút tiền #${currentWithdrawalId}`);
-
-                // Reset biến tạm
-                currentWithdrawalId = '';
-                currentWithdrawalRow = null;
-
-                // Trả nút về trạng thái ban đầu
-                resetLoadingState(confirmBtn, 'Xác nhận');
-            }, 800); // Thời gian mô phỏng API call
-        }
-    });
-
-    // Hàm xác thực form từ chối
-    function validateRejectForm(reasonSelect, noteTextarea) {
-        // Xóa các thông báo lỗi cũ (nếu có)
-        document.querySelectorAll('.form-error').forEach(error => error.remove());
-
-        let isValid = true;
-
-        // Xác thực lý do từ chối
-        if (!reasonSelect.value) {
-            showFormError(reasonSelect, 'Vui lòng chọn lý do từ chối');
-            isValid = false;
-        }
-
-        // Xác thực ghi chú
-        if (!noteTextarea.value.trim()) {
-            showFormError(noteTextarea, 'Vui lòng nhập ghi chú');
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-    // Xử lý nút xử lý chuyển khoản
-    const processButtons = document.querySelectorAll('.action-btn.process');
-    processButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Lấy id yêu cầu từ hàng dữ liệu
-            currentWithdrawalRow = this.closest('tr');
-            currentWithdrawalId = currentWithdrawalRow.querySelector('td:first-child').textContent;
-
-            // Mở modal xử lý chuyển khoản
-            openModal('processWithdrawalModal');
-
-            // Cập nhật thông tin của yêu cầu vào modal
-            // Thực hiện trong thực tế: Các giá trị sẽ được lấy từ API
-        });
-    });
-
-    // Xử lý nút xác nhận xử lý chuyển khoản
-    // Helper function để hiển thị lỗi form
-    function showFormError(element, message) {
-        const formGroup = element.closest('.form-group');
-        if (formGroup) {
-            formGroup.classList.add('error');
-            const errorSpan = document.createElement('span');
-            errorSpan.className = 'form-error';
-            errorSpan.textContent = message;
-            formGroup.appendChild(errorSpan);
-        }
-    }
-
-    // Helper function để đặt trạng thái loading cho nút
-    function showLoadingState(button, loadingText) {
-        button.classList.add('btn-loading');
-        button.disabled = true;
-
-        // Lưu text gốc vào thuộc tính data
-        button.dataset.originalText = button.textContent;
-        button.textContent = loadingText || 'Đang xử lý...';
-    }
-
-    // Helper function để reset trạng thái loading cho nút
-    function resetLoadingState(button, originalText) {
-        button.classList.remove('btn-loading');
-        button.disabled = false;
-
-        // Khôi phục text gốc
-        button.textContent = originalText || button.dataset.originalText || 'Xác nhận';
-    }
-
-    // Xử lý nút xác nhận xử lý
-    document.getElementById('confirmProcessBtn')?.addEventListener('click', function () {
-        const transactionCode = document.getElementById('transactionCode');
-        const processNote = document.getElementById('processNote');
-        const notifyUser = document.getElementById('notifyUserProcess').checked;
-        const confirmBtn = this;
-
-        // Xác thực form trước khi xử lý
-        if (!validateProcessForm(transactionCode, processNote)) {
-            return; // Dừng nếu form không hợp lệ
-        }
-
-        // Hiển thị trạng thái loading
-        showLoadingState(confirmBtn, 'Đang xử lý...');
-
-        // Gọi API xử lý yêu cầu (thực hiện trong thực tế)
-        // Ví dụ: processWithdrawal(currentWithdrawalId, transactionCode.value, processNote.value, notifyUser)
-
-        // Mô phỏng API call (xóa trong môi trường thực tế)
-        setTimeout(() => {
-            // Cập nhật giao diện
-            if (currentWithdrawalRow) {
-                const statusCell = currentWithdrawalRow.querySelector('td:nth-child(7)');
-                statusCell.innerHTML = '<span class="status-badge processing">Đang xử lý</span>';
-
-                // Thay đổi các nút hành động
-                const actionButtons = currentWithdrawalRow.querySelector('.action-buttons');
-                actionButtons.innerHTML = `
-                    <button class="action-btn complete" title="Hoàn thành"><i class="fas fa-check-double"></i></button>
-                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-                `;
-
-                // Gắn lại sự kiện cho các nút
-                const newViewButton = actionButtons.querySelector('.view-withdrawal');
-                newViewButton.addEventListener('click', function () {
-                    const withdrawalId = currentWithdrawalRow.querySelector('td:first-child').textContent;
-                    loadWithdrawalDetail(withdrawalId);
-                    openModal('withdrawalDetailModal');
-                });
-
-                const newCompleteButton = actionButtons.querySelector('.action-btn.complete');
-                newCompleteButton.addEventListener('click', function () {
-                    currentWithdrawalRow = this.closest('tr');
-                    currentWithdrawalId = currentWithdrawalRow.querySelector('td:first-child').textContent;
-                    openModal('completeWithdrawalModal');
-                });
-            }
-
-            // Đóng modal và reset form
-            closeModal(document.getElementById('processWithdrawalModal'));
-            transactionCode.value = '';
-            processNote.value = '';
-
-            // Hiển thị thông báo
-            showToast('info', `Đã chuyển yêu cầu rút tiền #${currentWithdrawalId} sang trạng thái đang xử lý`);
-
-            // Reset biến tạm
-            currentWithdrawalId = '';
-            currentWithdrawalRow = null;
-
-            // Trả nút về trạng thái ban đầu
-            resetLoadingState(confirmBtn, 'Xác nhận');
-        }, 800);
-    });
-
-    // Hàm xác thực form xử lý
-    function validateProcessForm(transactionCode, processNote) {
-        // Xóa các thông báo lỗi cũ (nếu có)
-        document.querySelectorAll('.form-error').forEach(error => error.remove());
-        document.querySelectorAll('.form-group.error').forEach(group => group.classList.remove('error'));
-
-        let isValid = true;
-
-        // Xác thực mã giao dịch
-        if (!transactionCode.value.trim()) {
-            showFormError(transactionCode, 'Vui lòng nhập mã giao dịch');
-            isValid = false;
-        }
-
-        // Xác thực ghi chú (không bắt buộc nhưng nên có)
-        if (!processNote.value.trim()) {
-            showFormError(processNote, 'Vui lòng nhập ghi chú về giao dịch');
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-    // Xử lý nút hoàn thành
-    const completeButtons = document.querySelectorAll('.action-btn.complete');
-    completeButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Lấy id yêu cầu từ hàng dữ liệu
-            currentWithdrawalRow = this.closest('tr');
-            currentWithdrawalId = currentWithdrawalRow.querySelector('td:first-child').textContent;
-
-            // Mở modal hoàn thành
-            openModal('completeWithdrawalModal');
-        });
-    });
-
-    // Xử lý nút xác nhận hoàn thành
-    document.getElementById('confirmCompleteBtn')?.addEventListener('click', function () {
-        const completeNote = document.getElementById('completeNote');
-        const notifyUser = document.getElementById('notifyUserComplete').checked;
-        const confirmBtn = this;
-
-        // Xác thực form trước khi xử lý
-        if (!validateCompleteForm(completeNote)) {
-            return; // Dừng nếu form không hợp lệ
-        }
-
-        // Hiển thị trạng thái loading
-        showLoadingState(confirmBtn, 'Đang xử lý...');
-
-        // Gọi API hoàn thành yêu cầu (thực hiện trong thực tế)
-        // Ví dụ: completeWithdrawal(currentWithdrawalId, completeNote.value, notifyUser)
-
-        // Mô phỏng API call (xóa trong môi trường thực tế)
-        setTimeout(() => {
-            // Cập nhật giao diện
-            if (currentWithdrawalRow) {
-                const statusCell = currentWithdrawalRow.querySelector('td:nth-child(7)');
-                statusCell.innerHTML = '<span class="status-badge completed">Đã hoàn thành</span>';
-
-                // Thay đổi các nút hành động
-                const actionButtons = currentWithdrawalRow.querySelector('.action-buttons');
-                actionButtons.innerHTML = `
-                    <button class="action-btn view-withdrawal" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-                `;
-
-                // Gắn lại sự kiện cho nút xem chi tiết
-                const newViewButton = actionButtons.querySelector('.view-withdrawal');
-                newViewButton.addEventListener('click', function () {
-                    const withdrawalId = currentWithdrawalRow.querySelector('td:first-child').textContent;
-                    loadWithdrawalDetail(withdrawalId);
-                    openModal('withdrawalDetailModal');
-                });
-            }
-
-            // Đóng modal và reset form
-            closeModal(document.getElementById('completeWithdrawalModal'));
-            completeNote.value = '';
-
-            // Hiển thị thông báo
-            showToast('success', `Đã hoàn thành yêu cầu rút tiền #${currentWithdrawalId}`);
-
-            // Reset biến tạm
-            currentWithdrawalId = '';
-            currentWithdrawalRow = null;
-
-            // Trả nút về trạng thái ban đầu
-            resetLoadingState(confirmBtn, 'Xác nhận');
-        }, 800);
-    });
-
-    // Hàm xác thực form hoàn thành
-    function validateCompleteForm(completeNote) {
-        // Xóa các thông báo lỗi cũ (nếu có)
-        document.querySelectorAll('.form-error').forEach(error => error.remove());
-        document.querySelectorAll('.form-group.error').forEach(group => group.classList.remove('error'));
-
-        let isValid = true;
-
-        // Xác thực ghi chú
-        if (!completeNote.value.trim()) {
-            showFormError(completeNote, 'Vui lòng nhập ghi chú về việc hoàn thành');
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-    // Xử lý hiển thị thông báo toast
-    function showToast(type, message) {
-        // Tạo toast element
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-
-        // Icon cho từng loại toast
-        const icons = {
-            'success': 'fa-check-circle',
-            'error': 'fa-exclamation-circle',
-            'warning': 'fa-exclamation-triangle',
-            'info': 'fa-info-circle'
-        };
-
-        // Nội dung toast
-        toast.innerHTML = `
-            <div class="toast-content">
-                <i class="fas ${icons[type]}"></i>
-                <div class="toast-message">${message}</div>
-            </div>
-            <i class="fas fa-times toast-close"></i>
-        `;
-
-        // Thêm vào document
-        document.body.appendChild(toast);
-
-        // Hiện toast
-        setTimeout(() => {
-            toast.classList.add('active');
-        }, 10);
-
-        // Tự động ẩn sau 5 giây
-        setTimeout(() => {
-            toast.classList.remove('active');
-            setTimeout(() => {
-                document.body.removeChild(toast);
-            }, 300);
-        }, 5000);
-
-        // Xử lý nút đóng
-        const closeBtn = toast.querySelector('.toast-close');
-        closeBtn.addEventListener('click', function () {
-            toast.classList.remove('active');
-            setTimeout(() => {
-                document.body.removeChild(toast);
-            }, 300);
-        });
-    }
-
-    // ----- Xử lý các nút trong modal chi tiết rút tiền -----
-    // Khai báo biến để lưu trữ dữ liệu của yêu cầu rút tiền đang xem
-    let currentDetailWithdrawalId = '';
-
-    // Nút đóng modal chi tiết
-    document.getElementById('closeDetailBtn')?.addEventListener('click', function () {
-        closeModal(document.getElementById('withdrawalDetailModal'));
-    });
-
-    // Nút từ chối trong modal chi tiết
-    document.querySelector('.reject-withdrawal-btn')?.addEventListener('click', function () {
-        // Lấy ID từ modal chi tiết
-        currentWithdrawalId = document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent.replace('#', '');
-
-        // Đóng modal chi tiết
-        closeModal(document.getElementById('withdrawalDetailModal'));
-
-        // Mở modal từ chối
-        openModal('rejectWithdrawalModal');
-    });
-
-    // Nút xử lý trong modal chi tiết
-    document.querySelector('.process-withdrawal-btn')?.addEventListener('click', function () {
-        // Lấy ID từ modal chi tiết
-        currentWithdrawalId = document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent.replace('#', '');
-
-        // Đóng modal chi tiết
-        closeModal(document.getElementById('withdrawalDetailModal'));
-
-        // Mở modal xử lý
-        openModal('processWithdrawalModal');
-    });
-
-    // Nút hoàn thành trong modal chi tiết
-    document.querySelector('.approve-withdrawal-btn')?.addEventListener('click', function () {
-        // Lấy ID từ modal chi tiết
-        currentWithdrawalId = document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent.replace('#', '');
-
-        // Đóng modal chi tiết
-        closeModal(document.getElementById('withdrawalDetailModal'));
-
-        // Mở modal hoàn thành
-        openModal('completeWithdrawalModal');
-    });
-
-    // Nút gửi email trong modal chi tiết
-    document.querySelector('.email-btn')?.addEventListener('click', function () {
-        // Lấy ID từ modal chi tiết
-        const withdrawalId = document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent.replace('#', '');
-        const emailBtn = this;
-
-        // Hiển thị trạng thái loading
-        showLoadingState(emailBtn, 'Đang gửi...');
-
-        // Vô hiệu hóa nút trong khi xử lý
-        emailBtn.disabled = true;
-
-        // Mô phỏng gọi API gửi email (trong môi trường thực tế sẽ gọi API thực)
-        // Ví dụ: sendEmail(withdrawalId, 'withdrawal_update')
-        setTimeout(() => {
-            // Mô phỏng API gọi thành công
-            showToast('success', `Đã gửi email thông báo thành công đến khách hàng #${withdrawalId}`);
-
-            // Cập nhật lịch sử giao dịch bằng hàm chung
-            updateWithdrawalHistory(withdrawalId, 'envelope', 'Gửi email thông báo', 'Đã gửi email thông báo trạng thái giao dịch đến khách hàng.');
-
-            // Trả nút về trạng thái ban đầu
-            resetLoadingState(emailBtn, '<i class="fas fa-envelope"></i> Gửi email');
-            emailBtn.disabled = false;
-        }, 1200);
-    });
-
-    // Nút lịch sử trong modal chi tiết
-    document.querySelector('.history-btn')?.addEventListener('click', function () {
-        // Lấy ID từ modal chi tiết
-        const withdrawalId = document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent.replace('#', '');
-        const historyBtn = this;
-        const historySection = document.querySelector('.withdrawal-timeline');
-
-        // Hiển thị trạng thái loading
-        showLoadingState(historyBtn, 'Đang tải...');
-
-        // Kiểm tra xem phần lịch sử có tồn tại không
-        if (historySection) {
-            // Đảm bảo phần lịch sử được hiển thị
-            if (historySection.style.display === 'none') {
-                historySection.style.display = 'block';
-            }
-
-            // Thêm hiệu ứng mở rộng của phần lịch sử nếu nó đang thu gọn
-            const timelineContainer = historySection.closest('.detail-section');
-            if (timelineContainer && timelineContainer.classList.contains('collapsed')) {
-                // Tự động mở rộng nếu đang thu gọn
-                const expandBtn = timelineContainer.querySelector('.expand-btn');
-                if (expandBtn) {
-                    expandBtn.click();
-                }
-            }
-
-            setTimeout(() => {
-                // Scroll đến khu vực lịch sử
-                historySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                // Thêm hiệu ứng highlight
-                const originalBackground = historySection.style.backgroundColor || 'transparent';
-                const originalTransition = historySection.style.transition || '';
-
-                historySection.style.transition = 'background-color 0.3s ease-in-out';
-                historySection.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
-
-                setTimeout(() => {
-                    historySection.style.backgroundColor = originalBackground;
-                    setTimeout(() => {
-                        historySection.style.transition = originalTransition;
-                    }, 500);
-                }, 1500);
-
-                // Thêm hiệu ứng nhấp nháy cho tiêu đề lịch sử
-                const historyTitle = timelineContainer?.querySelector('.section-title');
-                if (historyTitle) {
-                    historyTitle.classList.add('highlight-text');
-                    setTimeout(() => {
-                        historyTitle.classList.remove('highlight-text');
-                    }, 2000);
-                }
-
-                // Trả nút về trạng thái ban đầu
-                resetLoadingState(historyBtn, '<i class="fas fa-history"></i> Lịch sử');
-
-                // Cập nhật lịch sử
-                updateWithdrawalHistory(withdrawalId, 'clock', 'Xem lịch sử', 'Quản trị viên đã xem lịch sử thay đổi của yêu cầu rút tiền.');
-                showToast('info', 'Hiển thị lịch sử thay đổi của yêu cầu rút tiền');
-            }, 400);
-        } else {
-            // Nếu không tìm thấy phần lịch sử
-            showToast('error', 'Không tìm thấy lịch sử giao dịch');
-            resetLoadingState(historyBtn, '<i class="fas fa-history"></i> Lịch sử');
-        }
-    });
-
-    // Xử lý textarea ghi chú admin với debounce để tránh lưu quá nhiều
-    const adminNotesTextarea = document.querySelector('#withdrawalDetailModal .admin-notes');
-    let saveTimeout;
-
-    adminNotesTextarea?.addEventListener('input', function () {
-        const textareaWrapper = this.closest('.admin-notes-section');
-
-        // Xóa hẹn giờ trước nếu có
-        clearTimeout(saveTimeout);
-
-        // Xóa bịt thông báo đã lưu cũ nếu có
-        const oldIndicator = textareaWrapper.querySelector('.save-indicator');
-        if (oldIndicator) {
-            oldIndicator.remove();
-        }
-
-        // Tạo đối tượng thông báo đang soạn thảo
-        const editingIndicator = document.createElement('span');
-        editingIndicator.className = 'save-indicator editing';
-        editingIndicator.textContent = 'Đang soạn thảo...';
-        textareaWrapper.appendChild(editingIndicator);
-
-        // Lưu sau 800ms không có thao tác
-        saveTimeout = setTimeout(() => {
-            // Lấy ID từ biến toàn cục hoặc từ modal
-            const withdrawalId = currentWithdrawalId || document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent.replace('#', '');
-            localStorage.setItem(`withdrawal_note_${withdrawalId}`, this.value);
-
-            // Xóa thông báo đang soạn thảo
-            if (editingIndicator) {
-                editingIndicator.remove();
-            }
-
-            // Hiển thị thông báo đã lưu
-            const savedIndicator = document.createElement('span');
-            savedIndicator.className = 'save-indicator saved';
-            savedIndicator.textContent = 'Đã lưu';
-            textareaWrapper.appendChild(savedIndicator);
-
-            // Tự động xóa thông báo sau 2 giây
-            setTimeout(() => {
-                if (savedIndicator) {
-                    savedIndicator.remove();
-                }
-            }, 2000);
-
-            // Cập nhật lịch sử (chỉ khi nội dung có thay đổi và không rỗng)
-            if (this.value.trim() && withdrawalId) {
-                // Cập nhật lịch sử giao dịch (mô phỏng)
-                updateWithdrawalHistory(withdrawalId, 'note', 'Cập nhật ghi chú', 'Quản trị viên đã cập nhật ghi chú cho yêu cầu rút tiền.');
-            }
-
-        }, 800);
-    });
-
-    // Hàm cập nhật lịch sử giao dịch
-    function updateWithdrawalHistory(withdrawalId, type, title, description) {
-        const historySection = document.querySelector('.withdrawal-timeline');
-        if (!historySection) return;
-
-        // Tạo icon phù hợp với loại hành động
-        const iconMap = {
-            'reject': 'fa-times-circle',
-            'process': 'fa-sync',
-            'complete': 'fa-check-circle',
-            'email': 'fa-envelope',
-            'note': 'fa-sticky-note',
-            'edit': 'fa-edit',
-            'view': 'fa-eye'
-        };
-
-        const icon = iconMap[type] || 'fa-info-circle';
-
-        // Tạo mục lịch sử mới với icon và nội dung
-        const newHistoryItem = document.createElement('div');
-        newHistoryItem.className = 'timeline-item';
-        const now = new Date();
-        const timeString = now.toLocaleString('vi-VN');
-
-        // Tạo nội dung HTML cho mục lịch sử
-        newHistoryItem.innerHTML = `
-            <div class="timeline-icon">
-                <i class="fas ${icon}"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="timeline-time">${timeString}</div>
-                <div class="timeline-title">${title}</div>
-                <div class="timeline-desc">${description}</div>
-            </div>
-        `;
-
-        // Chèn vào đầu danh sách lịch sử (để mội nhất hiển thị trên cùng)
-        historySection.prepend(newHistoryItem);
-
-        // Thêm hiệu ứng highlight cho mục mới thêm vào
-        setTimeout(() => {
-            newHistoryItem.classList.add('highlight');
-            setTimeout(() => {
-                newHistoryItem.classList.remove('highlight');
-            }, 2000);
-        }, 100);
-
-        // Phần này đã được xử lý ở trên
-    }
-
-    // Xử lý đóng mọi modal an toàn
-    function closeAllModals() {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            if (modal.classList.contains('open')) {
-                closeModal(modal);
-            }
-        });
-    }
-
-    // Xử lý lưu trạng thái các modal trong session
-    function saveModalState() {
-        // Lưu trạng thái modal đang mở
-        const openModal = document.querySelector('.modal.open');
-        if (openModal) {
-            sessionStorage.setItem('lastOpenModal', openModal.id);
-        } else {
-            sessionStorage.removeItem('lastOpenModal');
-        }
-    }
-
-    // Hàm để load dữ liệu vào modal chi tiết rút tiền
-    function loadWithdrawalDetail(withdrawalId) {
-        // Cập nhật ID và lưu lại ID hiện tại vào biến toàn cục
-        document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent = '#' + withdrawalId;
-        currentDetailWithdrawalId = withdrawalId;
-        currentWithdrawalId = withdrawalId;
-
-        // Tìm hàng tương ứng trong bảng để lấy trạng thái thực tế
-        const allTableRows = document.querySelectorAll('table.withdrawal-table tbody tr');
-        let tableRow = null;
-        let currentStatus = 'Chờ xử lý'; // Mặc định trạng thái
-
-        allTableRows.forEach(row => {
-            const idCell = row.querySelector('td:first-child');
-            if (idCell && idCell.textContent.trim() === withdrawalId) {
-                tableRow = row;
-                const statusBadge = row.querySelector('.status-badge');
-                if (statusBadge) {
-                    currentStatus = statusBadge.textContent.trim();
-                }
-            }
-        });
-
-        // Lấy ghi chú từ localStorage nếu có
-        const notesTextarea = document.querySelector('#withdrawalDetailModal .admin-notes');
-        if (notesTextarea) {
-            notesTextarea.value = localStorage.getItem(`withdrawal_note_${withdrawalId}`) || '';
-        }
-
-        // Hiển thị/ẩn các nút hành động dựa trên trạng thái hiện tại
-        const detailModal = document.getElementById('withdrawalDetailModal');
-        const rejectBtn = detailModal.querySelector('.reject-withdrawal-btn');
-        const processBtn = detailModal.querySelector('.process-withdrawal-btn');
-        const approveBtn = detailModal.querySelector('.approve-withdrawal-btn');
-        const emailBtn = detailModal.querySelector('.email-btn');
-        const historyBtn = detailModal.querySelector('.history-btn');
-
-        // Ẩn tất cả các nút hành động trước (nhưng vẫn giữ email và lịch sử)
-        if (rejectBtn) rejectBtn.style.display = 'none';
-        if (processBtn) processBtn.style.display = 'none';
-        if (approveBtn) approveBtn.style.display = 'none';
-
-        // Hiển thị nút dựa trên trạng thái
-        switch (currentStatus) {
-            case 'Chờ xử lý':
-                // Hiển thị nút Từ chối và Xử lý
-                if (rejectBtn) rejectBtn.style.display = 'inline-block';
-                if (processBtn) processBtn.style.display = 'inline-block';
-                break;
-
-            case 'Đã duyệt':
-            case 'Đang xử lý':
-                // Hiển thị nút Hoàn thành và Từ chối
-                if (approveBtn) approveBtn.style.display = 'inline-block';
-                if (rejectBtn) rejectBtn.style.display = 'inline-block';
-                break;
-
-            case 'Đã hoàn thành':
-            case 'Đã từ chối':
-                // Không hiển thị nút hành động nào
-                break;
-
-            default:
-                // Trường hợp mặc định hiển thị tất cả các nút
-                if (rejectBtn) rejectBtn.style.display = 'inline-block';
-                if (processBtn) processBtn.style.display = 'inline-block';
-                break;
-        }
-
-        // Lưu ghi lại hoạt động xem chi tiết trong lịch sử
-        setTimeout(() => {
-            updateWithdrawalHistory(withdrawalId, 'view', 'Xem chi tiết yêu cầu', 'Quản trị viên đã xem chi tiết yêu cầu rút tiền.');
-        }, 100);
-
-        // TODO: Cập nhật các thông tin khác từ API thực tế trong tương lai
-    }
-
-    // Gắn sự kiện cho các nút xem chi tiết
-    document.querySelectorAll('.view-withdrawal').forEach(button => {
-        button.addEventListener('click', function () {
-            // Lấy ID từ hàng dữ liệu
-            const withdrawalId = this.closest('tr').querySelector('td:first-child').textContent;
-
-            // Load dữ liệu vào modal
-            loadWithdrawalDetail(withdrawalId);
-
-            // Mở modal
-            openModal('withdrawalDetailModal');
-        });
-    });
-
-    // Xử lý textarea ghi chú admin với debounce để tránh lưu quá nhiều
-    document.querySelector('#withdrawalDetailModal .admin-notes')?.addEventListener('input', function () {
-        const textareaWrapper = this.closest('.admin-notes-section');
-        let noteSaveTimeout;
-
-        // Xóa hẹn giờ trước nếu có
-        clearTimeout(noteSaveTimeout);
-
-        // Xóa thông báo đã lưu cũ nếu có
-        const oldIndicator = textareaWrapper.querySelector('.save-indicator');
-        if (oldIndicator) {
-            oldIndicator.remove();
-        }
-
-        // Tạo đối tượng thông báo đang soạn thảo
-        const editingIndicator = document.createElement('span');
-        editingIndicator.className = 'save-indicator editing';
-        editingIndicator.textContent = 'Đang soạn thảo...';
-        textareaWrapper.appendChild(editingIndicator);
-
-        // Lưu sau 800ms không có thao tác
-        noteSaveTimeout = setTimeout(() => {
-            // Lấy ID từ biến toàn cục hoặc từ modal
-            const withdrawalId = currentWithdrawalId || document.querySelector('#withdrawalDetailModal .withdrawal-id').textContent.replace('#', '');
-            localStorage.setItem(`withdrawal_note_${withdrawalId}`, this.value);
-
-            // Xóa thông báo đang soạn thảo
-            if (editingIndicator) {
-                editingIndicator.remove();
-            }
-
-            // Hiển thị thông báo đã lưu
-            const savedIndicator = document.createElement('span');
-            savedIndicator.className = 'save-indicator saved';
-            savedIndicator.textContent = 'Đã lưu';
-            textareaWrapper.appendChild(savedIndicator);
-
-            // Tự động xóa thông báo sau 2 giây
-            setTimeout(() => {
-                if (savedIndicator) {
-                    savedIndicator.remove();
-                }
-            }, 2000);
-
-            // Cập nhật lịch sử ghi chú
-            updateWithdrawalHistory(withdrawalId, 'note', 'Cập nhật ghi chú', 'Quản trị viên đã cập nhật ghi chú cho yêu cầu rút tiền.');
-        }, 800);
-    });
-
-    // Xử lý tải file minh chứng
-    const transferProofInput = document.getElementById('transferProof');
-    if (transferProofInput) {
-        transferProofInput.addEventListener('change', function () {
-            const filePreview = document.querySelector('.file-preview');
-
-            // Xóa nội dung hiện tại
-            filePreview.innerHTML = '';
-
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                const fileExt = file.name.split('.').pop().toLowerCase();
-
-                // Kiểm tra định dạng file
-                const allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
-                if (!allowedExts.includes(fileExt)) {
-                    alert('Định dạng file không hợp lệ. Chỉ chấp nhận file ảnh hoặc PDF.');
-                    this.value = '';
-                    return;
-                }
-
-                // Kiểm tra kích thước file (tối đa 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('Kích thước file quá lớn. Tối đa 5MB.');
-                    this.value = '';
-                    return;
-                }
-
-                // Hiển thị thông tin file
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-
-                // Icon tương ứng với loại file
-                let fileIcon = '';
-                if (fileExt === 'pdf') {
-                    fileIcon = '<i class="fas fa-file-pdf"></i>';
-                } else {
-                    fileIcon = '<i class="fas fa-file-image"></i>';
-                }
-
-                // Hiển thị thông tin file
-                fileItem.innerHTML = `
-                    ${fileIcon}
-                    <div class="file-info">
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${formatFileSize(file.size)}</div>
-                    </div>
-                    <button type="button" class="remove-file"><i class="fas fa-times"></i></button>
-                `;
-
-                filePreview.appendChild(fileItem);
-
-                // Xử lý nút xóa file
-                const removeBtn = fileItem.querySelector('.remove-file');
-                removeBtn.addEventListener('click', function () {
-                    transferProofInput.value = '';
-                    filePreview.innerHTML = '';
-                });
-            }
-        });
-    }
-
-    // Hàm định dạng kích thước file
-    function formatFileSize(bytes) {
-        if (bytes < 1024) return bytes + ' B';
-        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-        else return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-
-    // ----------------- Xử lý phân trang -----------------
-    const paginationButtons = document.querySelectorAll('.pagination-btn');
-    paginationButtons.forEach(button => {
-        if (!button.classList.contains('prev-btn') && !button.classList.contains('next-btn')) {
-            button.addEventListener('click', function () {
-                // Bỏ chọn tất cả các nút
-                paginationButtons.forEach(btn => btn.classList.remove('active'));
-
-                // Chọn nút hiện tại
-                this.classList.add('active');
-
-                // Thực hiện hàm tìm kiếm với trang mới
-                filterWithdrawals();
-
-                // Cập nhật trạng thái nút prev/next
-                updatePaginationButtonsState();
-            });
-        }
-    });
-
-    // Xử lý nút Previous và Next
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
-
-    prevBtn?.addEventListener('click', function () {
-        if (!this.disabled) {
-            const activePage = document.querySelector('.pagination-btn.active');
-            if (activePage && activePage.previousElementSibling && !activePage.previousElementSibling.classList.contains('prev-btn')) {
-                activePage.previousElementSibling.click();
-            }
-        }
-    });
-
-    nextBtn?.addEventListener('click', function () {
-        if (!this.disabled) {
-            const activePage = document.querySelector('.pagination-btn.active');
-            if (activePage && activePage.nextElementSibling && !activePage.nextElementSibling.classList.contains('next-btn')) {
-                activePage.nextElementSibling.click();
-            }
-        }
-    });
-
-    function updatePaginationButtonsState() {
-        const activePage = document.querySelector('.pagination-btn.active');
-
-        // Kiểm tra và cập nhật trạng thái cho nút prev
-        if (prevBtn && activePage) {
-            prevBtn.disabled = !activePage.previousElementSibling || activePage.previousElementSibling.classList.contains('prev-btn');
-        }
-
-        // Kiểm tra và cập nhật trạng thái cho nút next
-        if (nextBtn && activePage) {
-            nextBtn.disabled = !activePage.nextElementSibling || activePage.nextElementSibling.classList.contains('next-btn');
-        }
-    }
-
-    // ----------------- Xử lý date range picker -----------------
-    // Khởi tạo date picker với Flatpickr sau khi trang đã tải xong
-    let startDatePicker, endDatePicker;
-
-    function initDatePickers() {
-        startDatePicker = flatpickr('#startDate', {
-            dateFormat: 'd/m/Y',
-            locale: 'vn',
-            onChange: function (selectedDates, dateStr) {
-                // Cập nhật bộ lọc khi người dùng chọn ngày
-                filterWithdrawals();
-            }
-        });
-
-        endDatePicker = flatpickr('#endDate', {
-            dateFormat: 'd/m/Y',
-            locale: 'vn',
-            onChange: function (selectedDates, dateStr) {
-                // Cập nhật bộ lọc khi người dùng chọn ngày
-                filterWithdrawals();
-            }
-        });
-
-        // Xử lý các nút quick filter
-        document.querySelectorAll('.quick-filter').forEach(button => {
-            button.addEventListener('click', function () {
-                // Bỏ chọn nút hiện tại và chọn nút mới
-                document.querySelector('.quick-filter.active')?.classList.remove('active');
-                this.classList.add('active');
-
-                const today = new Date();
-                let startDate, endDate;
-
-                // Thiết lập ngày bắt đầu và ngày kết thúc dựa trên bộ lọc được chọn
-                switch (this.textContent.trim()) {
-                    case 'Hôm nay': {
-                        startDate = today;
-                        endDate = today;
-                        break;
-                    }
-                    case '7 ngày qua': {
-                        startDate = new Date(today);
-                        startDate.setDate(today.getDate() - 6);
-                        endDate = today;
-                        break;
-                    }
-                    case '30 ngày qua': {
-                        startDate = new Date(today);
-                        startDate.setDate(today.getDate() - 29);
-                        endDate = today;
-                        break;
-                    }
-                    case 'Tháng này': {
-                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                        break;
-                    }
-                    case 'Quý này': {
-                        const quarter = Math.floor(today.getMonth() / 3);
-                        startDate = new Date(today.getFullYear(), quarter * 3, 1);
-                        endDate = new Date(today.getFullYear(), (quarter * 3) + 3, 0);
-                        break;
-                    }
-                }
-
-                // Cập nhật date picker
-                if (startDate && endDate) {
-                    const formatDate = date => {
-                        const day = date.getDate().toString().padStart(2, '0');
-                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                        const year = date.getFullYear();
-                        return `${day}/${month}/${year}`;
-                    };
-
-                    startDatePicker.setDate(startDate);
-                    endDatePicker.setDate(endDate);
-
-                    // Cập nhật bộ lọc
-                    filterWithdrawals();
-                }
-            });
-        });
-
-        // Xử lý nút Áp dụng
-        document.querySelector('.date-inputs .primary-btn').addEventListener('click', function () {
-            filterWithdrawals();
-            showToast('info', 'Bộ lọc đã được cập nhật');
-        });
-
-        // Xử lý nút Đặt lại
-        document.querySelector('.date-inputs .secondary-btn').addEventListener('click', function () {
-            startDatePicker.clear();
-            endDatePicker.clear();
-            document.querySelector('.quick-filter.active')?.classList.remove('active');
-            document.querySelector('.quick-filter:first-child')?.classList.add('active');
-            filterWithdrawals();
-            showToast('info', 'Đã đặt lại bộ lọc ngày tháng');
-        });
-    }
-
-    // Gọi hàm khởi tạo date picker sau khi trang tải xong
-    document.addEventListener('DOMContentLoaded', function () {
-        initDatePickers();
-    });
-
-    // Hàm xử lý lọc dữ liệu yêu cầu rút tiền
-    function filterWithdrawals() {
-        // Lấy giá trị từ các bộ lọc
-        const searchInput = document.getElementById('searchWithdrawals')?.value.toLowerCase();
-        const statusSelect = document.getElementById('statusFilter')?.value;
-        const minAmount = document.getElementById('minAmount')?.value;
-        const maxAmount = document.getElementById('maxAmount')?.value;
-        const startDate = document.getElementById('startDate')?.value;
-        const endDate = document.getElementById('endDate')?.value;
-        const currentPage = document.querySelector('.pagination-btn.active')?.dataset.page || 1;
-
-        // Hiển thị trạng thái loading
-        const tableBody = document.querySelector('.withdrawal-table tbody');
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="loading-spinner"></div><p>Đang tải dữ liệu...</p></td></tr>';
-
-        // Giả lập gọi API - thực tế sẽ gọi API với các tham số lọc
-        setTimeout(() => {
-            // Giả định dữ liệu được trả về từ API
-            // Trong thực tế, bạn sẽ gọi API và xử lý dữ liệu trả về
-            renderWithdrawalTable();
-
-            // Hiển thị thông báo
-            showToast('success', 'Dữ liệu đã được cập nhật');
-        }, 800);
-    }
-
-    // Hàm render bảng dữ liệu yêu cầu rút tiền
-    function renderWithdrawalTable() {
-        // Trong dự án thực tế, dữ liệu này sẽ đến từ API
-        const withdrawalData = [
-            {
-                id: 'WD-2025060301',
-                user: {
-                    name: 'Nguyễn Văn A',
-                    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-                    email: 'nguyenvana@example.com'
-                },
-                amount: 500000,
-                status: 'Chờ xử lý',
-                bankInfo: 'Vietcombank - **** **** **** 1234',
-                createdAt: '09/06/2025 09:15:00',
-                updatedAt: '09/06/2025 09:15:00'
-            },
-            {
-                id: 'WD-2025060302',
-                user: {
-                    name: 'Trần Thị B',
-                    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-                    email: 'tranthib@example.com'
-                },
-                amount: 1500000,
-                status: 'Đã từ chối',
-                bankInfo: 'BIDV - **** **** **** 5678',
-                createdAt: '09/06/2025 10:20:00',
-                updatedAt: '09/06/2025 11:05:00'
-            },
-            {
-                id: 'WD-2025060303',
-                user: {
-                    name: 'Lê Văn C',
-                    avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
-                    email: 'levanc@example.com'
-                },
-                amount: 1000000,
-                status: 'Đang xử lý',
-                bankInfo: 'Techcombank - **** **** **** 9012',
-                createdAt: '09/06/2025 13:45:00',
-                updatedAt: '09/06/2025 14:30:00'
-            },
-            {
-                id: 'WD-2025060304',
-                user: {
-                    name: 'Phạm Thị D',
-                    avatar: 'https://randomuser.me/api/portraits/women/63.jpg',
-                    email: 'phamthid@example.com'
-                },
-                amount: 3000000,
-                status: 'Đã hoàn thành',
-                bankInfo: 'ACB - **** **** **** 3456',
-                createdAt: '09/06/2025 15:10:00',
-                updatedAt: '10/06/2025 09:20:00'
-            }
-        ];
-
-        const tableBody = document.querySelector('.withdrawal-table tbody');
-        tableBody.innerHTML = '';
-
-        withdrawalData.forEach(item => {
-            // Tạo class tương ứng với trạng thái
-            let statusClass = '';
-            switch (item.status) {
-                case 'Chờ xử lý': statusClass = 'pending'; break;
-                case 'Đang xử lý': statusClass = 'processing'; break;
-                case 'Đã hoàn thành': statusClass = 'completed'; break;
-                case 'Đã từ chối': statusClass = 'rejected'; break;
-                default: statusClass = 'pending';
-            }
-
-            // Xác định các nút hành động dựa trên trạng thái
-            let actionButtons = '';
-            switch (item.status) {
-                case 'Chờ xử lý':
-                    actionButtons = `
-                        <button class="action-btn process" data-id="${item.id}"><i class="fas fa-money-check-alt"></i> Xử lý</button>
-                        <button class="action-btn reject" data-id="${item.id}"><i class="fas fa-times-circle"></i> Từ chối</button>
-                    `;
-                    break;
-                case 'Đang xử lý':
-                    actionButtons = `
-                        <button class="action-btn approve" data-id="${item.id}"><i class="fas fa-check-circle"></i> Hoàn thành</button>
-                        <button class="action-btn reject" data-id="${item.id}"><i class="fas fa-times-circle"></i> Từ chối</button>
-                    `;
-                    break;
-                case 'Đã hoàn thành':
-                    actionButtons = ''; // Không có hành động
-                    break;
-                case 'Đã từ chối':
-                    actionButtons = ''; // Không có hành động
-                    break;
-                default:
-                    actionButtons = `<button class="action-btn process" data-id="${item.id}"><i class="fas fa-money-check-alt"></i> Xử lý</button>`;
-            }
-
-            // Thêm nút xem chi tiết cho tất cả các trạng thái
-            actionButtons += `<button class="action-btn view-withdrawal" data-id="${item.id}"><i class="fas fa-eye"></i> Chi tiết</button>`;
-
-            // Tạo hàng dữ liệu
-            const row = `
-                <tr>
-                    <td>${item.id}</td>
-                    <td>
-                        <div class="user-info">
-                            <img src="${item.user.avatar}" alt="User" class="user-avatar">
-                            <div>
-                                <div class="user-name">${item.user.name}</div>
-                                <div class="user-email">${item.user.email}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><strong>${new Intl.NumberFormat('vi-VN').format(item.amount)} VNĐ</strong></td>
-                    <td>${item.bankInfo}</td>
-                    <td><span class="status-badge ${statusClass}">${item.status}</span></td>
-                    <td>${item.createdAt}</td>
-                    <td>
-                        <div class="action-buttons">
-                            ${actionButtons}
-                        </div>
-                    </td>
-                </tr>
-            `;
-
-            tableBody.innerHTML += row;
-        });
-
-        // Gắn lại sự kiện cho các nút hành động
-        attachActionButtonEvents();
-    }
-
-    // Hàm gắn sự kiện cho các nút hành động
-    function attachActionButtonEvents() {
-        // Nút xem chi tiết
-        document.querySelectorAll('.action-btn.view-withdrawal').forEach(button => {
-            button.addEventListener('click', function () {
-                const withdrawalId = this.dataset.id;
-                loadWithdrawalDetail(withdrawalId);
-            });
-        });
-
-        // Nút xử lý
-        document.querySelectorAll('.action-btn.process').forEach(button => {
-            button.addEventListener('click', function () {
-                const withdrawalId = this.dataset.id;
-                openModal('processWithdrawalModal');
-            });
-        });
-
-        // Nút từ chối
-        document.querySelectorAll('.action-btn.reject').forEach(button => {
-            button.addEventListener('click', function () {
-                const withdrawalId = this.dataset.id;
-                openModal('rejectWithdrawalModal');
-            });
-        });
-
-        // Nút hoàn thành
-        document.querySelectorAll('.action-btn.approve').forEach(button => {
-            button.addEventListener('click', function () {
-                const withdrawalId = this.dataset.id;
-                openModal('completeWithdrawalModal');
-            });
-        });
-    }
-
-    // Xử lý các bộ lọc tìm kiếm
-    // Tìm kiếm theo ID hoặc người dùng
-    document.getElementById('searchWithdrawals')?.addEventListener('input', debounce(() => {
-        filterWithdrawals();
-    }, 500));
-
-    // Lọc theo trạng thái
-    document.getElementById('statusFilter')?.addEventListener('change', function () {
-        filterWithdrawals();
-    });
-
-    // Lọc theo số tiền
-    const minAmountInput = document.getElementById('minAmount');
-    const maxAmountInput = document.getElementById('maxAmount');
-
-    minAmountInput?.addEventListener('input', debounce(() => {
-        filterWithdrawals();
-    }, 500));
-
-    maxAmountInput?.addEventListener('input', debounce(() => {
-        filterWithdrawals();
-    }, 500));
-
-    // Hàm debounce để tránh gọi quá nhiều lần
-    function debounce(func, delay) {
-        let timeout;
-        return function () {
-            const context = this;
-            const args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), delay);
-        };
-    }
-
-    // Khởi tạo bảng ban đầu
-    document.addEventListener('DOMContentLoaded', function () {
-        // Khởi tạo bộ lọc
-        filterWithdrawals();
-    });
-
-    // Xử lý nút prev/next
-    document.querySelector('.next-btn')?.addEventListener('click', function () {
-        const activeBtn = document.querySelector('.pagination-btn.active:not(.prev-btn):not(.next-btn)');
-        if (!activeBtn) return;
-
-        const nextBtn = activeBtn.nextElementSibling;
-
-        if (nextBtn && !nextBtn.classList.contains('next-btn')) {
-            // Click vào nút tiếp theo
-            nextBtn.click();
-
-            // Cập nhật trạng thái nút prev/next
-            document.querySelector('.prev-btn').disabled = false;
-            if (!nextBtn.nextElementSibling || nextBtn.nextElementSibling.classList.contains('next-btn')) {
-                this.disabled = true;
-            }
-        }
-    });
-
-    document.querySelector('.prev-btn')?.addEventListener('click', function () {
-        const activeBtn = document.querySelector('.pagination-btn.active:not(.prev-btn):not(.next-btn)');
-        if (!activeBtn) return;
-
-        const prevBtn = activeBtn.previousElementSibling;
-
-        if (prevBtn && !prevBtn.classList.contains('prev-btn')) {
-            // Click vào nút trước đó
-            prevBtn.click();
-
-            // Cập nhật trạng thái nút prev/next
-            document.querySelector('.next-btn').disabled = false;
-            if (!prevBtn.previousElementSibling || prevBtn.previousElementSibling.classList.contains('prev-btn')) {
-                this.disabled = true;
-            }
-        }
-    });
+/**
+ * Withdrawal Management JavaScript
+ * Handles form validation, AJAX requests, and UI interactions for withdrawal forms
+ */
+
+// Global variables
+let isGeneratingCode = false;
+
+// Initialize when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  initializeWithdrawalForm();
+  initializeDeleteConfirmation();
+  initializeLoadingStates();
+  initializeErrorHandling();
+
+  // Initialize page-specific functionality
+  if (window.location.pathname.includes("/detail")) {
+    initializeDetailPage();
+  }
+
+  if (
+    window.location.pathname.includes("/index") ||
+    window.location.pathname.endsWith("/withdrawals")
+  ) {
+    initializeIndexPage();
+  }
 });
+
+/**
+ * Initialize withdrawal form functionality
+ */
+function initializeWithdrawalForm() {
+  // Auto-generate code if empty
+  const codeField = document.getElementById("code");
+  if (codeField && !codeField.value) {
+    generateWithdrawalCode();
+  }
+
+  // Set default date to now
+  const createdAtField = document.getElementById("createdAt");
+  if (createdAtField && !createdAtField.value) {
+    setDefaultDateTime();
+  }
+
+  // Initialize event listeners
+  initializeEventListeners();
+}
+
+/**
+ * Set default date time to current time
+ */
+function setDefaultDateTime() {
+  const now = new Date();
+  const localDateTime = new Date(
+    now.getTime() - now.getTimezoneOffset() * 60000
+  )
+    .toISOString()
+    .slice(0, 16);
+  document.getElementById("createdAt").value = localDateTime;
+}
+
+/**
+ * Initialize all event listeners
+ */
+function initializeEventListeners() {
+  // User selection change handler
+  const userSelect = document.getElementById("userId");
+  if (userSelect) {
+    userSelect.addEventListener("change", handleUserSelectionChange);
+  }
+
+  // Amount input handler
+  const amountField = document.getElementById("amount");
+  if (amountField) {
+    amountField.addEventListener("input", handleAmountInput);
+    amountField.addEventListener("blur", validateAmount);
+  }
+
+  // Payment method change handler
+  const paymentMethodSelect = document.getElementById("paymentMethod");
+  if (paymentMethodSelect) {
+    paymentMethodSelect.addEventListener("change", handlePaymentMethodChange);
+  }
+
+  // Form submission handler
+  const withdrawalForm = document.querySelector(".withdrawal-form");
+  if (withdrawalForm) {
+    withdrawalForm.addEventListener("submit", validateWithdrawalForm);
+  }
+}
+
+/**
+ * Generate withdrawal code via AJAX with retry mechanism
+ */
+function generateWithdrawalCode() {
+  if (isGeneratingCode) return;
+
+  isGeneratingCode = true;
+  const generateBtn = document.querySelector(".generate-code-btn");
+  const codeField = document.getElementById("code");
+
+  // Update button state
+  if (generateBtn) {
+    showButtonLoading(generateBtn, "Đang tạo...");
+  }
+
+  // Use retry mechanism for better reliability
+  retryRequest(
+    () => {
+      return fetch("/admin/withdrawals/generate-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRF-TOKEN": getCSRFToken(),
+        },
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      });
+    },
+    3,
+    1000
+  )
+    .then((data) => {
+      if (data.success) {
+        if (codeField) {
+          codeField.value = data.code;
+          // Trigger change event for form validation
+          codeField.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        showToast("Đã tạo mã withdrawal: " + data.code, "success");
+
+        // Log for debugging
+        console.log("Generated withdrawal code:", data.code);
+      } else {
+        throw new Error(data.message || "Không thể tạo mã withdrawal");
+      }
+    })
+    .catch((error) => {
+      console.error("Error generating code:", error);
+      handleNetworkError(error, "khi tạo mã withdrawal");
+
+      // Fallback: generate client-side code if server fails
+      if (codeField && !codeField.value) {
+        const fallbackCode = generateFallbackCode();
+        codeField.value = fallbackCode;
+        showToast("Đã tạo mã dự phòng: " + fallbackCode, "warning");
+      }
+    })
+    .finally(() => {
+      isGeneratingCode = false;
+      if (generateBtn) {
+        hideButtonLoading(generateBtn);
+      }
+    });
+}
+
+/**
+ * Generate fallback code when server is unavailable
+ */
+function generateFallbackCode() {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substr(2, 5);
+  return `WD${timestamp}${random}`.toUpperCase();
+}
+
+/**
+ * Handle user selection change
+ */
+function handleUserSelectionChange(event) {
+  const userSelect = event.target;
+  const amountField = document.getElementById("amount");
+
+  if (userSelect.value && amountField.value) {
+    validateUserBalance();
+  }
+
+  // Clear any existing user-related errors
+  clearFieldError(userSelect);
+}
+
+/**
+ * Handle amount input changes
+ */
+function handleAmountInput(event) {
+  const amountField = event.target;
+  const amount = parseFloat(amountField.value);
+
+  // Clear previous errors
+  clearFieldError(amountField);
+
+  // Format number with thousand separators
+  if (amountField.value && !isNaN(amount)) {
+    // Only format on blur to avoid cursor jumping
+    if (event.type === "blur") {
+      amountField.value = Math.floor(amount).toString();
+    }
+  }
+
+  // Real-time validation
+  if (amountField.value) {
+    validateAmount();
+    validateUserBalance();
+  }
+}
+
+/**
+ * Handle payment method change
+ */
+function handlePaymentMethodChange(event) {
+  const paymentMethodSelect = event.target;
+  clearFieldError(paymentMethodSelect);
+
+  // You can add specific validation or UI changes based on payment method
+  if (paymentMethodSelect.value) {
+    console.log("Payment method selected:", paymentMethodSelect.value);
+  }
+}
+
+/**
+ * Validate amount field
+ */
+function validateAmount() {
+  const amountField = document.getElementById("amount");
+  const amount = parseFloat(amountField.value);
+
+  if (!amountField.value) return true;
+
+  if (isNaN(amount) || amount <= 0) {
+    showFieldError(amountField, "Số tiền phải là số dương");
+    return false;
+  }
+
+  if (amount < 50000) {
+    showFieldError(amountField, "Số tiền tối thiểu là 50,000 VND");
+    return false;
+  }
+
+  if (amount > 50000000) {
+    showFieldError(amountField, "Số tiền tối đa là 50,000,000 VND");
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Validate user balance
+ */
+function validateUserBalance() {
+  const userSelect = document.getElementById("userId");
+  const amountField = document.getElementById("amount");
+  const amount = parseFloat(amountField.value);
+
+  if (!userSelect.value || !amountField.value || isNaN(amount)) {
+    return true;
+  }
+
+  const selectedOption = userSelect.options[userSelect.selectedIndex];
+  const balanceText = selectedOption.text;
+  const balanceMatch = balanceText.match(/Số xu: ([\d,]+) xu/);
+
+  if (balanceMatch) {
+    const coinBalance = parseFloat(balanceMatch[1].replace(/,/g, ""));
+    // For withdrawal validation, we might need to check business rules
+    // For now, we'll just log the coin balance - you can add specific validation here
+    console.log("User coin balance:", coinBalance, "xu");
+
+    // Example: If you want to validate against coin balance (uncomment if needed)
+    // if (amount > coinBalance * COIN_TO_VND_RATE) {
+    //   showFieldError(amountField, "Số tiền rút vượt quá giá trị xu hiện có");
+    //   return false;
+    // }
+  }
+
+  return true;
+}
+
+/**
+ * Comprehensive form validation with enhanced checks
+ */
+function validateWithdrawalForm(event) {
+  const form = event.target;
+  let isValid = true;
+  const errors = [];
+
+  // Clear all previous errors
+  clearAllErrors();
+
+  // Required fields validation
+  const requiredFields = [
+    { id: "userId", name: "Người dùng" },
+    { id: "amount", name: "Số tiền" },
+    { id: "paymentMethod", name: "Phương thức thanh toán" },
+    { id: "status", name: "Trạng thái" },
+    { id: "createdAt", name: "Ngày tạo" },
+  ];
+
+  requiredFields.forEach((field) => {
+    const element = document.getElementById(field.id);
+    if (!element || !element.value.trim()) {
+      showFieldError(element, field.name + " là bắt buộc");
+      errors.push(field.name + " là bắt buộc");
+      isValid = false;
+    }
+  });
+
+  // Amount validation
+  if (!validateAmount()) {
+    errors.push("Số tiền không hợp lệ");
+    isValid = false;
+  }
+
+  // User balance validation
+  if (!validateUserBalance()) {
+    errors.push("Số dư không đủ");
+    isValid = false;
+  }
+
+  // Date validation
+  const createdAtField = document.getElementById("createdAt");
+  if (createdAtField && createdAtField.value) {
+    const selectedDate = new Date(createdAtField.value);
+    const now = new Date();
+    if (selectedDate > now) {
+      showFieldError(createdAtField, "Ngày tạo không được trong tương lai");
+      errors.push("Ngày tạo không hợp lệ");
+      isValid = false;
+    }
+
+    // Check if date is too far in the past (more than 1 year)
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    if (selectedDate < oneYearAgo) {
+      showFieldError(createdAtField, "Ngày tạo không được quá 1 năm trước");
+      errors.push("Ngày tạo quá cũ");
+      isValid = false;
+    }
+  }
+
+  // Code validation
+  const codeField = document.getElementById("code");
+  if (codeField) {
+    if (!codeField.value.trim()) {
+      showFieldError(codeField, "Mã withdrawal là bắt buộc");
+      errors.push("Mã withdrawal là bắt buộc");
+      isValid = false;
+    } else if (!/^WD[A-Z0-9]{6,20}$/i.test(codeField.value)) {
+      showFieldError(
+        codeField,
+        "Mã withdrawal không đúng định dạng (WD + 6-20 ký tự)"
+      );
+      errors.push("Mã withdrawal không đúng định dạng");
+      isValid = false;
+    }
+  }
+
+  // Notes validation (if present)
+  const notesField = document.getElementById("notes");
+  if (notesField && notesField.value && notesField.value.length > 1000) {
+    showFieldError(notesField, "Ghi chú không được vượt quá 1000 ký tự");
+    errors.push("Ghi chú quá dài");
+    isValid = false;
+  }
+
+  // Payment method specific validation
+  const paymentMethodField = document.getElementById("paymentMethod");
+  if (paymentMethodField && paymentMethodField.value) {
+    const validPaymentMethods = [
+      "BANK_TRANSFER",
+      "E_WALLET",
+      "CREDIT_CARD",
+      "CASH",
+    ];
+    if (!validPaymentMethods.includes(paymentMethodField.value)) {
+      showFieldError(paymentMethodField, "Phương thức thanh toán không hợp lệ");
+      errors.push("Phương thức thanh toán không hợp lệ");
+      isValid = false;
+    }
+  }
+
+  // Status validation
+  const statusField = document.getElementById("status");
+  if (statusField && statusField.value) {
+    const validStatuses = [
+      "PENDING",
+      "PROCESSING",
+      "COMPLETED",
+      "FAILED",
+      "CANCELLED",
+    ];
+    if (!validStatuses.includes(statusField.value)) {
+      showFieldError(statusField, "Trạng thái không hợp lệ");
+      errors.push("Trạng thái không hợp lệ");
+      isValid = false;
+    }
+  }
+
+  // Daily limits validation (client-side check)
+  if (!validateDailyLimits()) {
+    errors.push("Vượt quá hạn mức rút tiền trong ngày");
+    isValid = false;
+  }
+
+  // Business hours validation (example)
+  if (!validateBusinessHours()) {
+    errors.push("Chỉ có thể tạo withdrawal trong giờ làm việc");
+    isValid = false;
+  }
+
+  if (!isValid) {
+    event.preventDefault();
+
+    // Show summary of errors
+    const errorSummary =
+      errors.length > 1
+        ? `Có ${errors.length} lỗi cần khắc phục`
+        : "Vui lòng kiểm tra lại thông tin đã nhập";
+
+    showToast(errorSummary, "error", 5000);
+
+    // Scroll to first error
+    const firstError = document.querySelector(".error");
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // Focus on the first error field
+      const firstErrorField = firstError.querySelector(
+        "input, select, textarea"
+      );
+      if (firstErrorField) {
+        setTimeout(() => firstErrorField.focus(), 300);
+      }
+    }
+
+    // Log errors for debugging
+    console.warn("Form validation errors:", errors);
+  } else {
+    // Show loading state for valid form submission
+    showLoadingOverlay("Đang xử lý withdrawal...");
+  }
+
+  return isValid;
+}
+
+/**
+ * Validate daily limits (client-side approximation)
+ */
+function validateDailyLimits() {
+  const amountField = document.getElementById("amount");
+  const amount = parseFloat(amountField.value);
+
+  if (!amount || isNaN(amount)) {
+    return true; // Will be caught by amount validation
+  }
+
+  // Check maximum daily withdrawal amount
+  const MAX_DAILY_WITHDRAWAL = 10000000; // 10M VND
+  if (amount > MAX_DAILY_WITHDRAWAL) {
+    showFieldError(
+      amountField,
+      `Số tiền rút tối đa trong ngày là ${formatCurrency(MAX_DAILY_WITHDRAWAL)}`
+    );
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Validate business hours (example business rule)
+ */
+function validateBusinessHours() {
+  const now = new Date();
+  const hour = now.getHours();
+  const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+
+  // Example: Only allow withdrawals during business hours (8 AM - 6 PM, Mon-Fri)
+  // This is just an example - you might want to remove this or adjust based on business needs
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    // Weekend - allow but show warning
+    showToast(
+      "Lưu ý: Withdrawal được tạo vào cuối tuần có thể được xử lý chậm hơn",
+      "warning",
+      3000
+    );
+  }
+
+  if (hour < 8 || hour >= 18) {
+    // Outside business hours - allow but show warning
+    showToast(
+      "Lưu ý: Withdrawal được tạo ngoài giờ làm việc có thể được xử lý chậm hơn",
+      "warning",
+      3000
+    );
+  }
+
+  return true; // Always return true for now, just show warnings
+}
+
+/**
+ * Show field error message
+ */
+function showFieldError(element, message) {
+  if (!element) return;
+
+  element.classList.add("error");
+
+  // Remove existing error message
+  clearFieldError(element, false);
+
+  // Add new error message
+  const errorSpan = document.createElement("span");
+  errorSpan.className = "error-message js-error";
+  errorSpan.textContent = message;
+  errorSpan.setAttribute("role", "alert");
+  errorSpan.setAttribute("aria-live", "polite");
+
+  // Insert after the element or in a designated error container
+  const errorContainer = element.parentNode.querySelector(".error-container");
+  if (errorContainer) {
+    errorContainer.appendChild(errorSpan);
+  } else {
+    element.parentNode.appendChild(errorSpan);
+  }
+
+  // Add visual feedback
+  element.setAttribute("aria-invalid", "true");
+  element.setAttribute(
+    "aria-describedby",
+    errorSpan.id || "error-" + Date.now()
+  );
+}
+
+/**
+ * Show multiple field errors from server validation
+ */
+function showServerFieldErrors(fieldErrors) {
+  if (!fieldErrors) return;
+
+  Object.keys(fieldErrors).forEach((fieldName) => {
+    const element =
+      document.getElementById(fieldName) ||
+      document.querySelector(`[name="${fieldName}"]`);
+
+    if (
+      element &&
+      fieldErrors[fieldName] &&
+      fieldErrors[fieldName].length > 0
+    ) {
+      // Show the first error for each field
+      showFieldError(element, fieldErrors[fieldName][0]);
+    }
+  });
+}
+
+/**
+ * Clear field error
+ */
+function clearFieldError(element, removeClass = true) {
+  if (!element) return;
+
+  if (removeClass) {
+    element.classList.remove("error");
+    element.removeAttribute("aria-invalid");
+    element.removeAttribute("aria-describedby");
+  }
+
+  // Remove JS-generated error messages only
+  const existingErrors = element.parentNode.querySelectorAll(
+    ".error-message.js-error"
+  );
+  existingErrors.forEach((error) => error.remove());
+
+  // Also check error container
+  const errorContainer = element.parentNode.querySelector(".error-container");
+  if (errorContainer) {
+    const containerErrors = errorContainer.querySelectorAll(
+      ".error-message.js-error"
+    );
+    containerErrors.forEach((error) => error.remove());
+  }
+}
+
+/**
+ * Clear all form errors
+ */
+function clearAllErrors() {
+  document.querySelectorAll(".error").forEach((field) => {
+    field.classList.remove("error");
+  });
+
+  document.querySelectorAll(".error-message.js-error").forEach((error) => {
+    error.remove();
+  });
+}
+
+/**
+ * Reset withdrawal form
+ */
+function resetWithdrawalForm() {
+  const form = document.querySelector(".withdrawal-form");
+  if (!form) return;
+
+  // Reset form fields
+  form.reset();
+
+  // Clear all errors
+  clearAllErrors();
+
+  // Reset to default values
+  generateWithdrawalCode();
+  setDefaultDateTime();
+
+  showToast("Đã làm mới form", "info");
+}
+
+/**
+ * Format currency with thousand separators
+ */
+function formatCurrency(amount) {
+  return new Intl.NumberFormat("vi-VN").format(amount);
+}
+
+/**
+ * Get CSRF token from meta tag or form
+ */
+function getCSRFToken() {
+  // Try to get from meta tag first
+  const metaToken = document.querySelector('meta[name="_csrf"]');
+  if (metaToken) {
+    return metaToken.getAttribute("content");
+  }
+
+  // Try to get from form input
+  const inputToken = document.querySelector('input[name="_csrf"]');
+  if (inputToken) {
+    return inputToken.value;
+  }
+
+  return "";
+}
+
+/**
+ * Show toast notification
+ */
+function showToast(message, type = "info", duration = 3000) {
+  // Remove existing toasts
+  document.querySelectorAll(".toast").forEach((toast) => {
+    toast.remove();
+  });
+
+  // Create toast element
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas ${getToastIcon(type)}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+  // Add to page
+  document.body.appendChild(toast);
+
+  // Show toast with animation
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  // Remove toast after duration
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, duration);
+}
+
+/**
+ * Get appropriate icon for toast type
+ */
+function getToastIcon(type) {
+  switch (type) {
+    case "success":
+      return "fa-check-circle";
+    case "error":
+      return "fa-exclamation-circle";
+    case "warning":
+      return "fa-exclamation-triangle";
+    case "info":
+    default:
+      return "fa-info-circle";
+  }
+}
+
+/**
+ * Debounce function for performance optimization
+ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/**
+ * Add note to withdrawal via AJAX with enhanced error handling
+ */
+function addNoteToWithdrawal(withdrawalId, noteContent) {
+  return retryRequest(
+    () => {
+      return fetch(`/admin/withdrawals/${withdrawalId}/add-note`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRF-TOKEN": getCSRFToken(),
+        },
+        body: `note=${encodeURIComponent(noteContent)}`,
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json ? response.json() : response;
+      });
+    },
+    2,
+    1000
+  );
+}
+
+/**
+ * Handle add note form submission
+ */
+function handleAddNoteSubmission(event) {
+  event.preventDefault();
+
+  const form = event.target;
+  const formData = new FormData(form);
+  const noteContent = formData.get("note");
+  const withdrawalId = form.action.match(/\/(\d+)\/add-note/)[1];
+
+  if (!noteContent.trim()) {
+    showToast("Vui lòng nhập nội dung ghi chú", "error");
+    return;
+  }
+
+  // Show loading state
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang thêm...';
+
+  // Submit via AJAX
+  addNoteToWithdrawal(withdrawalId, noteContent)
+    .then(() => {
+      showToast("Đã thêm ghi chú thành công", "success");
+      // Clear form
+      form.querySelector("textarea").value = "";
+      // Reload page to show new note
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    })
+    .catch((error) => {
+      console.error("Error adding note:", error);
+      showToast("Lỗi khi thêm ghi chú", "error");
+    })
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    });
+}
+
+/**
+ * Clear note form
+ */
+function clearNoteForm() {
+  const noteTextarea = document.getElementById("noteContent");
+  if (noteTextarea) {
+    noteTextarea.value = "";
+    noteTextarea.focus();
+  }
+}
+
+/**
+ * Initialize detail page functionality
+ */
+function initializeDetailPage() {
+  // Initialize AJAX form for adding notes
+  const addNoteForm = document.getElementById("addNoteForm");
+  if (addNoteForm) {
+    addNoteForm.addEventListener("submit", handleAddNoteSubmission);
+  }
+
+  // Initialize quick status change forms
+  const statusForms = document.querySelectorAll(".quick-actions form");
+  statusForms.forEach((form) => {
+    form.addEventListener("submit", function (event) {
+      const status = form.querySelector('input[name="status"]').value;
+      const statusText = status === "COMPLETED" ? "hoàn thành" : "thất bại";
+
+      if (
+        !confirm(
+          `Bạn có chắc chắn muốn đánh dấu withdrawal này là ${statusText}?`
+        )
+      ) {
+        event.preventDefault();
+      }
+    });
+  });
+}
+
+/**
+ * Print withdrawal details
+ */
+function printWithdrawal() {
+  // Hide elements that shouldn't be printed
+  const elementsToHide = document.querySelectorAll(
+    ".action-buttons, .add-note-form, .quick-actions"
+  );
+  elementsToHide.forEach((el) => (el.style.display = "none"));
+
+  // Print
+  window.print();
+
+  // Restore hidden elements
+  elementsToHide.forEach((el) => (el.style.display = ""));
+}
+
+/**
+ * Export withdrawal data to CSV
+ */
+function exportWithdrawal(withdrawalData) {
+  if (!withdrawalData) {
+    showToast("Không có dữ liệu để xuất", "error");
+    return;
+  }
+
+  // Create CSV content
+  const csvContent =
+    "data:text/csv;charset=utf-8," +
+    "Mã withdrawal,Số tiền,Trạng thái,Người dùng,Email,Ngày tạo,Cập nhật lần cuối\n" +
+    `"${withdrawalData.code}","${withdrawalData.amount}","${
+      withdrawalData.status
+    }","${withdrawalData.user}","${withdrawalData.email}","${
+      withdrawalData.createdAt
+    }","${withdrawalData.updatedAt || "N/A"}"`;
+
+  // Create and trigger download
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute(
+    "download",
+    `withdrawal_${withdrawalData.code}_${
+      new Date().toISOString().split("T")[0]
+    }.csv`
+  );
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  showToast("Đã xuất file thành công", "success");
+}
+
+// Export functions for global access
+window.generateWithdrawalCode = generateWithdrawalCode;
+window.generateFallbackCode = generateFallbackCode;
+window.resetWithdrawalForm = resetWithdrawalForm;
+window.validateWithdrawalForm = validateWithdrawalForm;
+window.showToast = showToast;
+window.addNoteToWithdrawal = addNoteToWithdrawal;
+window.clearNoteForm = clearNoteForm;
+window.initializeDetailPage = initializeDetailPage;
+window.printWithdrawal = printWithdrawal;
+window.exportWithdrawal = exportWithdrawal;
+/**
+ * Edit Form Specific Functions
+ */
+
+/**
+ * Initialize edit form specific features
+ */
+function initializeWithdrawalEditForm() {
+  // Add change tracking
+  const form = document.querySelector(".withdrawal-form");
+  if (!form) return;
+
+  const originalData = new FormData(form);
+
+  // Track changes
+  form.addEventListener("change", function () {
+    const currentData = new FormData(form);
+    let hasChanges = false;
+
+    for (let [key, value] of currentData.entries()) {
+      if (originalData.get(key) !== value) {
+        hasChanges = true;
+        break;
+      }
+    }
+
+    // Show unsaved changes indicator
+    if (hasChanges) {
+      document.body.classList.add("has-unsaved-changes");
+    } else {
+      document.body.classList.remove("has-unsaved-changes");
+    }
+  });
+
+  // Warn before leaving with unsaved changes
+  window.addEventListener("beforeunload", function (e) {
+    if (document.body.classList.contains("has-unsaved-changes")) {
+      e.preventDefault();
+      e.returnValue =
+        "Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn rời khỏi trang?";
+    }
+  });
+}
+
+/**
+ * Validate edit form with business rules
+ */
+function validateWithdrawalEditForm(event) {
+  const isCompleted =
+    event.target.querySelector('input[name="status"]')?.value === "COMPLETED";
+
+  // Basic validation
+  if (!validateWithdrawalForm(event)) {
+    return false;
+  }
+
+  // Additional validation for completed withdrawals
+  if (isCompleted) {
+    const confirmation = confirm(
+      "Bạn có chắc chắn muốn cập nhật withdrawal đã hoàn thành? " +
+        "Điều này có thể ảnh hưởng đến báo cáo tài chính."
+    );
+    if (!confirmation) {
+      event.preventDefault();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Reset form to original values
+ */
+function resetWithdrawalEditForm() {
+  if (confirm("Bạn có chắc chắn muốn khôi phục form về trạng thái ban đầu?")) {
+    location.reload();
+  }
+}
+
+/**
+ * Show warning for completed withdrawals
+ */
+function showCompletedWithdrawalWarning() {
+  // Add visual indicators for restricted fields
+  const restrictedFields = document.querySelectorAll(".disabled-field");
+  restrictedFields.forEach((field) => {
+    field.style.backgroundColor = "#f8f9fa";
+    field.style.borderColor = "#dee2e6";
+  });
+
+  // Show tooltip on hover for disabled fields
+  restrictedFields.forEach((field) => {
+    field.title = "Trường này không thể chỉnh sửa cho withdrawal đã hoàn thành";
+  });
+}
+
+/**
+ * Validate status change for completed withdrawals
+ */
+function validateStatusChange(currentStatus, newStatus) {
+  if (currentStatus === "COMPLETED") {
+    const allowedTransitions = ["CANCELLED"];
+    if (!allowedTransitions.includes(newStatus)) {
+      showToast(
+        'Withdrawal đã hoàn thành chỉ có thể chuyển sang trạng thái "Hủy"',
+        "warning"
+      );
+      return false;
+    }
+
+    if (newStatus === "CANCELLED") {
+      return confirm(
+        "Bạn có chắc chắn muốn hủy withdrawal đã hoàn thành? " +
+          "Điều này sẽ ảnh hưởng đến báo cáo tài chính và có thể cần xử lý hoàn tiền."
+      );
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Handle status field change in edit form
+ */
+function handleEditStatusChange(event) {
+  const statusSelect = event.target;
+  const currentStatus =
+    statusSelect.dataset.originalValue || statusSelect.defaultValue;
+  const newStatus = statusSelect.value;
+
+  if (!validateStatusChange(currentStatus, newStatus)) {
+    statusSelect.value = currentStatus;
+    return false;
+  }
+
+  // Show confirmation for critical status changes
+  const criticalChanges = {
+    COMPLETED: "hoàn thành",
+    FAILED: "thất bại",
+    CANCELLED: "hủy",
+  };
+
+  if (criticalChanges[newStatus] && currentStatus !== newStatus) {
+    const confirmation = confirm(
+      `Bạn có chắc chắn muốn đánh dấu withdrawal này là "${criticalChanges[newStatus]}"?`
+    );
+
+    if (!confirmation) {
+      statusSelect.value = currentStatus;
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Initialize edit form event listeners
+ */
+function initializeEditFormListeners() {
+  // Status change handler
+  const statusSelect = document.getElementById("status");
+  if (statusSelect) {
+    // Store original value
+    statusSelect.dataset.originalValue = statusSelect.value;
+    statusSelect.addEventListener("change", handleEditStatusChange);
+  }
+
+  // Amount change handler for completed withdrawals
+  const amountField = document.getElementById("amount");
+  if (amountField && amountField.disabled) {
+    amountField.addEventListener("focus", function () {
+      showToast(
+        "Không thể thay đổi số tiền cho withdrawal đã hoàn thành",
+        "warning"
+      );
+      amountField.blur();
+    });
+  }
+
+  // User change handler for completed withdrawals
+  const userSelect = document.getElementById("userId");
+  if (userSelect && userSelect.disabled) {
+    userSelect.addEventListener("focus", function () {
+      showToast(
+        "Không thể thay đổi người dùng cho withdrawal đã hoàn thành",
+        "warning"
+      );
+      userSelect.blur();
+    });
+  }
+}
+
+/**
+ * Auto-save draft changes (optional feature)
+ */
+function autoSaveDraft() {
+  const form = document.querySelector(".withdrawal-form");
+  if (!form) return;
+
+  const formData = new FormData(form);
+  const draftData = {};
+
+  for (let [key, value] of formData.entries()) {
+    draftData[key] = value;
+  }
+
+  // Save to localStorage
+  const withdrawalId = form.action.match(/\/(\d+)\/edit/)?.[1];
+  if (withdrawalId) {
+    localStorage.setItem(
+      `withdrawal_draft_${withdrawalId}`,
+      JSON.stringify(draftData)
+    );
+  }
+}
+
+/**
+ * Load draft changes
+ */
+function loadDraft() {
+  const form = document.querySelector(".withdrawal-form");
+  if (!form) return;
+
+  const withdrawalId = form.action.match(/\/(\d+)\/edit/)?.[1];
+  if (!withdrawalId) return;
+
+  const draftData = localStorage.getItem(`withdrawal_draft_${withdrawalId}`);
+  if (!draftData) return;
+
+  try {
+    const data = JSON.parse(draftData);
+
+    // Ask user if they want to restore draft
+    if (confirm("Có bản nháp chưa lưu. Bạn có muốn khôi phục không?")) {
+      Object.keys(data).forEach((key) => {
+        const field = form.querySelector(`[name="${key}"]`);
+        if (field && !field.disabled && !field.readOnly) {
+          field.value = data[key];
+        }
+      });
+
+      showToast("Đã khôi phục bản nháp", "info");
+    }
+
+    // Clear draft after loading
+    localStorage.removeItem(`withdrawal_draft_${withdrawalId}`);
+  } catch (error) {
+    console.error("Error loading draft:", error);
+  }
+}
+
+/**
+ * Clear draft data
+ */
+function clearDraft() {
+  const form = document.querySelector(".withdrawal-form");
+  if (!form) return;
+
+  const withdrawalId = form.action.match(/\/(\d+)\/edit/)?.[1];
+  if (withdrawalId) {
+    localStorage.removeItem(`withdrawal_draft_${withdrawalId}`);
+  }
+}
+
+/**
+ * Show field change history (if available)
+ */
+function showFieldHistory(fieldName, history) {
+  if (!history || history.length === 0) {
+    showToast("Không có lịch sử thay đổi cho trường này", "info");
+    return;
+  }
+
+  let historyHtml = '<div class="field-history">';
+  historyHtml += `<h4>Lịch sử thay đổi: ${fieldName}</h4>`;
+
+  history.forEach((change) => {
+    historyHtml += `
+      <div class="history-entry">
+        <div class="history-time">${change.timestamp}</div>
+        <div class="history-change">
+          <span class="old-value">${change.oldValue}</span>
+          <i class="fas fa-arrow-right"></i>
+          <span class="new-value">${change.newValue}</span>
+        </div>
+        <div class="history-user">bởi ${change.user}</div>
+      </div>
+    `;
+  });
+
+  historyHtml += "</div>";
+
+  // Show in modal or toast
+  showToast(historyHtml, "info", 10000);
+}
+
+/**
+ * Export edit form data for backup
+ */
+function exportEditFormData() {
+  const form = document.querySelector(".withdrawal-form");
+  if (!form) return;
+
+  const formData = new FormData(form);
+  const exportData = {};
+
+  for (let [key, value] of formData.entries()) {
+    exportData[key] = value;
+  }
+
+  // Add metadata
+  exportData._metadata = {
+    exportedAt: new Date().toISOString(),
+    url: window.location.href,
+    userAgent: navigator.userAgent,
+  };
+
+  // Create and download JSON file
+  const dataStr = JSON.stringify(exportData, null, 2);
+  const dataBlob = new Blob([dataStr], { type: "application/json" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(dataBlob);
+  link.download = `withdrawal_edit_backup_${Date.now()}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  showToast("Đã xuất dữ liệu form thành công", "success");
+}
+
+// Export edit-specific functions for global access
+window.initializeWithdrawalEditForm = initializeWithdrawalEditForm;
+window.validateWithdrawalEditForm = validateWithdrawalEditForm;
+window.resetWithdrawalEditForm = resetWithdrawalEditForm;
+window.showCompletedWithdrawalWarning = showCompletedWithdrawalWarning;
+window.validateStatusChange = validateStatusChange;
+window.handleEditStatusChange = handleEditStatusChange;
+window.initializeEditFormListeners = initializeEditFormListeners;
+window.autoSaveDraft = autoSaveDraft;
+window.loadDraft = loadDraft;
+window.clearDraft = clearDraft;
+window.showFieldHistory = showFieldHistory;
+window.exportEditFormData = exportEditFormData;
+
+/**
+ * Delete Confirmation and Actions
+ */
+
+/**
+ * Initialize delete confirmation dialogs
+ */
+function initializeDeleteConfirmation() {
+  // Handle delete buttons
+  const deleteButtons = document.querySelectorAll(
+    '.btn-delete, .delete-btn, [data-action="delete"]'
+  );
+  deleteButtons.forEach((button) => {
+    button.addEventListener("click", handleDeleteConfirmation);
+  });
+
+  // Handle delete forms
+  const deleteForms = document.querySelectorAll(
+    '.delete-form, form[action*="/delete"]'
+  );
+  deleteForms.forEach((form) => {
+    form.addEventListener("submit", handleDeleteFormSubmission);
+  });
+
+  // Handle bulk delete actions
+  const bulkDeleteBtn = document.getElementById("bulkDeleteBtn");
+  if (bulkDeleteBtn) {
+    bulkDeleteBtn.addEventListener("click", handleBulkDelete);
+  }
+}
+
+/**
+ * Handle delete confirmation dialog
+ */
+function handleDeleteConfirmation(event) {
+  event.preventDefault();
+
+  const button = event.target.closest("button, a");
+  const withdrawalCode = button.dataset.withdrawalCode || "N/A";
+  const withdrawalAmount = button.dataset.withdrawalAmount || "N/A";
+  const withdrawalStatus = button.dataset.withdrawalStatus || "N/A";
+
+  // Create custom confirmation dialog
+  const confirmDialog = createDeleteConfirmationDialog({
+    code: withdrawalCode,
+    amount: withdrawalAmount,
+    status: withdrawalStatus,
+    isCompleted: withdrawalStatus === "COMPLETED",
+  });
+
+  document.body.appendChild(confirmDialog);
+
+  // Handle confirmation
+  const confirmBtn = confirmDialog.querySelector(".confirm-delete");
+  const cancelBtn = confirmDialog.querySelector(".cancel-delete");
+
+  confirmBtn.addEventListener("click", () => {
+    const reason = confirmDialog.querySelector("#deleteReason").value.trim();
+    if (!reason) {
+      showToast("Vui lòng nhập lý do xóa", "error");
+      return;
+    }
+
+    // Proceed with deletion
+    proceedWithDeletion(button, reason);
+    document.body.removeChild(confirmDialog);
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    document.body.removeChild(confirmDialog);
+  });
+}
+
+/**
+ * Create delete confirmation dialog
+ */
+function createDeleteConfirmationDialog(withdrawal) {
+  const dialog = document.createElement("div");
+  dialog.className = "delete-confirmation-modal";
+
+  const warningClass = withdrawal.isCompleted
+    ? "warning-severe"
+    : "warning-normal";
+  const warningText = withdrawal.isCompleted
+    ? "CẢNH BÁO: Withdrawal này đã hoàn thành. Việc xóa có thể ảnh hưởng đến báo cáo tài chính!"
+    : "Bạn có chắc chắn muốn xóa withdrawal này?";
+
+  dialog.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-exclamation-triangle"></i> Xác nhận xóa</h3>
+        </div>
+        <div class="modal-body">
+          <div class="withdrawal-info">
+            <p><strong>Mã withdrawal:</strong> ${withdrawal.code}</p>
+            <p><strong>Số tiền:</strong> ${formatCurrency(
+              withdrawal.amount
+            )} VND</p>
+            <p><strong>Trạng thái:</strong> <span class="status-${withdrawal.status.toLowerCase()}">${
+    withdrawal.status
+  }</span></p>
+          </div>
+          <div class="warning-message ${warningClass}">
+            <i class="fas fa-exclamation-triangle"></i>
+            ${warningText}
+          </div>
+          <div class="form-group">
+            <label for="deleteReason">Lý do xóa <span class="required">*</span></label>
+            <textarea id="deleteReason" class="form-control" rows="3" 
+                      placeholder="Nhập lý do xóa withdrawal này..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary cancel-delete">
+            <i class="fas fa-times"></i> Hủy
+          </button>
+          <button type="button" class="btn btn-danger confirm-delete">
+            <i class="fas fa-trash"></i> Xác nhận xóa
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return dialog;
+}
+
+/**
+ * Proceed with deletion
+ */
+function proceedWithDeletion(button, reason) {
+  const deleteUrl = button.href || button.dataset.deleteUrl;
+  if (!deleteUrl) {
+    showToast("Không tìm thấy URL xóa", "error");
+    return;
+  }
+
+  // Show loading state
+  showLoadingOverlay("Đang xóa withdrawal...");
+
+  // Create form and submit
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = deleteUrl;
+
+  // Add CSRF token
+  const csrfInput = document.createElement("input");
+  csrfInput.type = "hidden";
+  csrfInput.name = "_csrf";
+  csrfInput.value = getCSRFToken();
+  form.appendChild(csrfInput);
+
+  // Add delete reason
+  const reasonInput = document.createElement("input");
+  reasonInput.type = "hidden";
+  reasonInput.name = "deleteReason";
+  reasonInput.value = reason;
+  form.appendChild(reasonInput);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+/**
+ * Handle delete form submission
+ */
+function handleDeleteFormSubmission(event) {
+  const form = event.target;
+  const reasonField = form.querySelector('[name="deleteReason"]');
+
+  if (!reasonField || !reasonField.value.trim()) {
+    event.preventDefault();
+    showToast("Vui lòng nhập lý do xóa", "error");
+    reasonField?.focus();
+    return false;
+  }
+
+  // Show loading state
+  showLoadingOverlay("Đang xóa withdrawal...");
+  return true;
+}
+
+/**
+ * Handle bulk delete operations
+ */
+function handleBulkDelete(event) {
+  event.preventDefault();
+
+  const selectedCheckboxes = document.querySelectorAll(
+    ".withdrawal-checkbox:checked"
+  );
+  if (selectedCheckboxes.length === 0) {
+    showToast("Vui lòng chọn ít nhất một withdrawal để xóa", "warning");
+    return;
+  }
+
+  const selectedIds = Array.from(selectedCheckboxes).map((cb) => cb.value);
+  const confirmMessage = `Bạn có chắc chắn muốn xóa ${selectedIds.length} withdrawal đã chọn?`;
+
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+
+  const reason = prompt("Nhập lý do xóa:");
+  if (!reason || !reason.trim()) {
+    showToast("Vui lòng nhập lý do xóa", "error");
+    return;
+  }
+
+  // Show loading state
+  showLoadingOverlay(`Đang xóa ${selectedIds.length} withdrawal...`);
+
+  // Submit bulk delete
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "/admin/withdrawals/bulk-delete";
+
+  // Add CSRF token
+  const csrfInput = document.createElement("input");
+  csrfInput.type = "hidden";
+  csrfInput.name = "_csrf";
+  csrfInput.value = getCSRFToken();
+  form.appendChild(csrfInput);
+
+  // Add selected IDs
+  selectedIds.forEach((id) => {
+    const idInput = document.createElement("input");
+    idInput.type = "hidden";
+    idInput.name = "ids";
+    idInput.value = id;
+    form.appendChild(idInput);
+  });
+
+  // Add reason
+  const reasonInput = document.createElement("input");
+  reasonInput.type = "hidden";
+  reasonInput.name = "deleteReason";
+  reasonInput.value = reason.trim();
+  form.appendChild(reasonInput);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+/**
+ * Loading States and UI Feedback
+ */
+
+/**
+ * Initialize loading states
+ */
+function initializeLoadingStates() {
+  // Add loading states to all forms
+  const forms = document.querySelectorAll("form");
+  forms.forEach((form) => {
+    form.addEventListener("submit", function (event) {
+      if (form.classList.contains("no-loading")) return;
+
+      const submitBtn = form.querySelector(
+        'button[type="submit"], input[type="submit"]'
+      );
+      if (submitBtn) {
+        showButtonLoading(submitBtn);
+      }
+    });
+  });
+
+  // Add loading states to AJAX buttons
+  const ajaxButtons = document.querySelectorAll('[data-ajax="true"]');
+  ajaxButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      showButtonLoading(button);
+    });
+  });
+}
+
+/**
+ * Show button loading state
+ */
+function showButtonLoading(button, loadingText = "Đang xử lý...") {
+  if (button.dataset.originalText) return; // Already in loading state
+
+  button.dataset.originalText = button.innerHTML;
+  button.disabled = true;
+  button.classList.add("loading");
+
+  const icon = '<i class="fas fa-spinner fa-spin"></i>';
+  button.innerHTML = `${icon} ${loadingText}`;
+}
+
+/**
+ * Hide button loading state
+ */
+function hideButtonLoading(button) {
+  if (!button.dataset.originalText) return;
+
+  button.innerHTML = button.dataset.originalText;
+  button.disabled = false;
+  button.classList.remove("loading");
+  delete button.dataset.originalText;
+}
+
+/**
+ * Show loading overlay
+ */
+function showLoadingOverlay(message = "Đang xử lý...") {
+  // Remove existing overlay
+  hideLoadingOverlay();
+
+  const overlay = document.createElement("div");
+  overlay.id = "loadingOverlay";
+  overlay.className = "loading-overlay";
+  overlay.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <div class="loading-message">${message}</div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Auto-hide after 30 seconds as fallback
+  setTimeout(() => {
+    hideLoadingOverlay();
+  }, 30000);
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoadingOverlay() {
+  const overlay = document.getElementById("loadingOverlay");
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+/**
+ * Enhanced Error Handling
+ */
+
+/**
+ * Initialize error handling
+ */
+function initializeErrorHandling() {
+  // Global error handler for unhandled promise rejections
+  window.addEventListener("unhandledrejection", function (event) {
+    console.error("Unhandled promise rejection:", event.reason);
+    showToast("Đã xảy ra lỗi không mong muốn", "error");
+    hideLoadingOverlay();
+  });
+
+  // Global error handler for JavaScript errors
+  window.addEventListener("error", function (event) {
+    console.error("JavaScript error:", event.error);
+    if (event.error && event.error.message) {
+      showToast("Lỗi JavaScript: " + event.error.message, "error");
+    }
+    hideLoadingOverlay();
+  });
+
+  // Handle AJAX errors
+  document.addEventListener("ajaxError", function (event) {
+    console.error("AJAX error:", event.detail);
+    showToast("Lỗi kết nối mạng", "error");
+    hideLoadingOverlay();
+  });
+
+  // Handle form validation errors
+  const forms = document.querySelectorAll("form");
+  forms.forEach((form) => {
+    form.addEventListener(
+      "invalid",
+      function (event) {
+        event.preventDefault();
+        const firstInvalidField = form.querySelector(":invalid");
+        if (firstInvalidField) {
+          firstInvalidField.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          firstInvalidField.focus();
+          showToast("Vui lòng kiểm tra lại thông tin đã nhập", "error");
+        }
+      },
+      true
+    );
+  });
+}
+
+/**
+ * Handle network errors
+ */
+function handleNetworkError(error, context = "") {
+  console.error(`Network error ${context}:`, error);
+
+  let message = "Lỗi kết nối mạng";
+
+  if (error.name === "TypeError" && error.message.includes("fetch")) {
+    message = "Không thể kết nối đến server";
+  } else if (error.status) {
+    switch (error.status) {
+      case 400:
+        message = "Dữ liệu không hợp lệ";
+        break;
+      case 401:
+        message = "Phiên đăng nhập đã hết hạn";
+        break;
+      case 403:
+        message = "Không có quyền thực hiện thao tác này";
+        break;
+      case 404:
+        message = "Không tìm thấy dữ liệu";
+        break;
+      case 500:
+        message = "Lỗi server nội bộ";
+        break;
+      default:
+        message = `Lỗi HTTP ${error.status}`;
+    }
+  }
+
+  showToast(message, "error");
+  hideLoadingOverlay();
+}
+
+/**
+ * Retry mechanism for failed requests
+ */
+function retryRequest(requestFn, maxRetries = 3, delay = 1000) {
+  return new Promise((resolve, reject) => {
+    let retries = 0;
+
+    function attempt() {
+      requestFn()
+        .then(resolve)
+        .catch((error) => {
+          retries++;
+          if (retries < maxRetries) {
+            showToast(`Thử lại lần ${retries}/${maxRetries}...`, "info", 2000);
+            setTimeout(attempt, delay * retries);
+          } else {
+            reject(error);
+          }
+        });
+    }
+
+    attempt();
+  });
+}
+
+/**
+ * Index Page Specific Functions
+ */
+
+/**
+ * Initialize index page functionality
+ */
+function initializeIndexPage() {
+  initializeSearch();
+  initializeFilters();
+  initializeBulkActions();
+  initializePagination();
+  initializeTableSorting();
+  initializeRefreshButton();
+}
+
+/**
+ * Initialize search functionality
+ */
+function initializeSearch() {
+  const searchInput = document.getElementById("searchInput");
+  const searchForm = document.getElementById("searchForm");
+
+  if (searchInput) {
+    // Debounced search
+    const debouncedSearch = debounce(function () {
+      if (searchForm) {
+        searchForm.submit();
+      }
+    }, 500);
+
+    searchInput.addEventListener("input", debouncedSearch);
+
+    // Clear search
+    const clearSearchBtn = document.getElementById("clearSearch");
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener("click", function () {
+        searchInput.value = "";
+        if (searchForm) {
+          searchForm.submit();
+        }
+      });
+    }
+  }
+}
+
+/**
+ * Initialize filter functionality
+ */
+function initializeFilters() {
+  const filterForm = document.getElementById("filterForm");
+  const filterInputs = document.querySelectorAll(".filter-input");
+
+  filterInputs.forEach((input) => {
+    input.addEventListener("change", function () {
+      if (filterForm) {
+        showLoadingOverlay("Đang lọc dữ liệu...");
+        filterForm.submit();
+      }
+    });
+  });
+
+  // Clear filters
+  const clearFiltersBtn = document.getElementById("clearFilters");
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener("click", function () {
+      filterInputs.forEach((input) => {
+        if (input.type === "checkbox" || input.type === "radio") {
+          input.checked = false;
+        } else {
+          input.value = "";
+        }
+      });
+
+      if (filterForm) {
+        showLoadingOverlay("Đang xóa bộ lọc...");
+        filterForm.submit();
+      }
+    });
+  }
+}
+
+/**
+ * Initialize bulk actions
+ */
+function initializeBulkActions() {
+  const selectAllCheckbox = document.getElementById("selectAll");
+  const itemCheckboxes = document.querySelectorAll(".withdrawal-checkbox");
+  const bulkActionButtons = document.querySelectorAll(".bulk-action-btn");
+
+  // Select all functionality
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener("change", function () {
+      itemCheckboxes.forEach((checkbox) => {
+        checkbox.checked = selectAllCheckbox.checked;
+      });
+      updateBulkActionButtons();
+    });
+  }
+
+  // Individual checkbox change
+  itemCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      updateSelectAllState();
+      updateBulkActionButtons();
+    });
+  });
+
+  // Bulk action buttons
+  bulkActionButtons.forEach((button) => {
+    button.addEventListener("click", function (event) {
+      const selectedCount = document.querySelectorAll(
+        ".withdrawal-checkbox:checked"
+      ).length;
+      if (selectedCount === 0) {
+        event.preventDefault();
+        showToast("Vui lòng chọn ít nhất một withdrawal", "warning");
+      }
+    });
+  });
+}
+
+/**
+ * Update select all checkbox state
+ */
+function updateSelectAllState() {
+  const selectAllCheckbox = document.getElementById("selectAll");
+  const itemCheckboxes = document.querySelectorAll(".withdrawal-checkbox");
+
+  if (!selectAllCheckbox || itemCheckboxes.length === 0) return;
+
+  const checkedCount = document.querySelectorAll(
+    ".withdrawal-checkbox:checked"
+  ).length;
+
+  if (checkedCount === 0) {
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+  } else if (checkedCount === itemCheckboxes.length) {
+    selectAllCheckbox.checked = true;
+    selectAllCheckbox.indeterminate = false;
+  } else {
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = true;
+  }
+}
+
+/**
+ * Update bulk action buttons state
+ */
+function updateBulkActionButtons() {
+  const selectedCount = document.querySelectorAll(
+    ".withdrawal-checkbox:checked"
+  ).length;
+  const bulkActionButtons = document.querySelectorAll(".bulk-action-btn");
+  const selectedCountDisplay = document.getElementById("selectedCount");
+
+  bulkActionButtons.forEach((button) => {
+    button.disabled = selectedCount === 0;
+  });
+
+  if (selectedCountDisplay) {
+    selectedCountDisplay.textContent = selectedCount;
+  }
+}
+
+/**
+ * Initialize pagination
+ */
+function initializePagination() {
+  const paginationLinks = document.querySelectorAll(".pagination a");
+
+  paginationLinks.forEach((link) => {
+    link.addEventListener("click", function (event) {
+      // Don't show loading for disabled links
+      if (link.classList.contains("disabled")) {
+        event.preventDefault();
+        return;
+      }
+
+      showLoadingOverlay("Đang tải trang...");
+    });
+  });
+}
+
+/**
+ * Initialize table sorting
+ */
+function initializeTableSorting() {
+  const sortableHeaders = document.querySelectorAll(".sortable");
+
+  sortableHeaders.forEach((header) => {
+    header.addEventListener("click", function () {
+      showLoadingOverlay("Đang sắp xếp...");
+    });
+  });
+}
+
+/**
+ * Initialize refresh button
+ */
+function initializeRefreshButton() {
+  const refreshBtn = document.getElementById("refreshBtn");
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", function () {
+      showLoadingOverlay("Đang làm mới dữ liệu...");
+      window.location.reload();
+    });
+  }
+}
+
+// Export new functions for global access
+window.initializeDeleteConfirmation = initializeDeleteConfirmation;
+window.handleDeleteConfirmation = handleDeleteConfirmation;
+window.createDeleteConfirmationDialog = createDeleteConfirmationDialog;
+window.proceedWithDeletion = proceedWithDeletion;
+window.handleDeleteFormSubmission = handleDeleteFormSubmission;
+window.handleBulkDelete = handleBulkDelete;
+window.initializeLoadingStates = initializeLoadingStates;
+window.showButtonLoading = showButtonLoading;
+window.hideButtonLoading = hideButtonLoading;
+window.showLoadingOverlay = showLoadingOverlay;
+window.hideLoadingOverlay = hideLoadingOverlay;
+window.initializeErrorHandling = initializeErrorHandling;
+window.handleNetworkError = handleNetworkError;
+window.retryRequest = retryRequest;
+window.initializeIndexPage = initializeIndexPage;
+window.initializeSearch = initializeSearch;
+window.initializeFilters = initializeFilters;
+window.initializeBulkActions = initializeBulkActions;
+window.updateSelectAllState = updateSelectAllState;
+window.updateBulkActionButtons = updateBulkActionButtons;
+window.initializePagination = initializePagination;
+window.initializeTableSorting = initializeTableSorting;
+window.initializeRefreshButton = initializeRefreshButton;
+
+// Auto-initialize edit form features when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  // Check if we're on an edit page
+  if (window.location.pathname.includes("/edit")) {
+    initializeEditFormListeners();
+    loadDraft();
+
+    // Auto-save every 30 seconds
+    setInterval(autoSaveDraft, 30000);
+
+    // Clear draft on successful form submission
+    const form = document.querySelector(".withdrawal-form");
+    if (form) {
+      form.addEventListener("submit", function (event) {
+        if (validateWithdrawalEditForm(event)) {
+          clearDraft();
+        }
+      });
+    }
+  }
+});
+
+/**
+ * Enhanced Error Handling and Loading States
+ */
+
+/**
+ * Show loading overlay
+ */
+function showLoadingOverlay(message = "Đang xử lý...") {
+  // Remove existing overlay
+  hideLoadingOverlay();
+
+  const overlay = document.createElement("div");
+  overlay.className = "loading-overlay";
+  overlay.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-message">${message}</div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.classList.add("loading");
+
+  // Auto-hide after 30 seconds to prevent permanent loading state
+  setTimeout(() => {
+    hideLoadingOverlay();
+    showToast(
+      "Thao tác đang mất nhiều thời gian. Vui lòng kiểm tra lại.",
+      "warning"
+    );
+  }, 30000);
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoadingOverlay() {
+  const overlay = document.querySelector(".loading-overlay");
+  if (overlay) {
+    overlay.remove();
+  }
+  document.body.classList.remove("loading");
+}
+
+/**
+ * Show button loading state
+ */
+function showButtonLoading(button, loadingText = "Đang xử lý...") {
+  if (!button) return;
+
+  button.disabled = true;
+  button.dataset.originalText = button.innerHTML;
+  button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+  button.classList.add("loading");
+}
+
+/**
+ * Hide button loading state
+ */
+function hideButtonLoading(button) {
+  if (!button) return;
+
+  button.disabled = false;
+  button.innerHTML = button.dataset.originalText || button.innerHTML;
+  button.classList.remove("loading");
+  delete button.dataset.originalText;
+}
+
+/**
+ * Enhanced network error handling
+ */
+function handleNetworkError(error, context = "") {
+  console.error("Network error" + (context ? " " + context : ""), error);
+
+  let message = "Đã xảy ra lỗi kết nối";
+  let type = "error";
+
+  if (error.name === "TypeError" && error.message.includes("fetch")) {
+    message = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.";
+  } else if (error.message.includes("timeout")) {
+    message = "Kết nối bị timeout. Vui lòng thử lại.";
+  } else if (error.message.includes("HTTP 500")) {
+    message = "Lỗi máy chủ nội bộ. Vui lòng thử lại sau.";
+  } else if (error.message.includes("HTTP 404")) {
+    message = "Không tìm thấy tài nguyên yêu cầu.";
+  } else if (error.message.includes("HTTP 403")) {
+    message = "Bạn không có quyền thực hiện thao tác này.";
+  } else if (error.message.includes("HTTP 401")) {
+    message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+    type = "warning";
+    // Redirect to login after showing message
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 3000);
+  }
+
+  showToast(message, type, 5000);
+}
+
+/**
+ * Retry mechanism for network requests
+ */
+function retryRequest(requestFn, maxRetries = 3, delay = 1000) {
+  return new Promise((resolve, reject) => {
+    let retries = 0;
+
+    function attempt() {
+      requestFn()
+        .then(resolve)
+        .catch((error) => {
+          retries++;
+          if (retries < maxRetries) {
+            console.warn(
+              `Request failed, retrying (${retries}/${maxRetries})...`
+            );
+            setTimeout(attempt, delay * retries); // Exponential backoff
+          } else {
+            reject(error);
+          }
+        });
+    }
+
+    attempt();
+  });
+}
+
+/**
+ * Initialize error handling for forms
+ */
+function initializeErrorHandling() {
+  // Handle server-side validation errors
+  const fieldErrors = window.fieldErrors;
+  if (fieldErrors) {
+    showServerFieldErrors(fieldErrors);
+  }
+
+  // Handle global error messages
+  const errorMessage = document.querySelector(".alert-danger");
+  if (errorMessage) {
+    const message = errorMessage.textContent.trim();
+    if (message) {
+      showToast(message, "error", 5000);
+    }
+  }
+
+  // Handle success messages
+  const successMessage = document.querySelector(".alert-success");
+  if (successMessage) {
+    const message = successMessage.textContent.trim();
+    if (message) {
+      showToast(message, "success", 3000);
+    }
+  }
+
+  // Handle warning messages
+  const warningMessage = document.querySelector(".alert-warning");
+  if (warningMessage) {
+    const message = warningMessage.textContent.trim();
+    if (message) {
+      showToast(message, "warning", 4000);
+    }
+  }
+}
+
+/**
+ * Initialize loading states
+ */
+function initializeLoadingStates() {
+  // Add loading state to all form submissions
+  document.querySelectorAll("form").forEach((form) => {
+    form.addEventListener("submit", function (event) {
+      // Only show loading if form validation passes
+      if (!form.checkValidity || form.checkValidity()) {
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+          showButtonLoading(submitButton);
+        }
+      }
+    });
+  });
+
+  // Add loading state to AJAX buttons
+  document.querySelectorAll("[data-ajax]").forEach((button) => {
+    button.addEventListener("click", function () {
+      showButtonLoading(button);
+    });
+  });
+}
+
+/**
+ * Initialize delete confirmation
+ */
+function initializeDeleteConfirmation() {
+  // Enhanced delete confirmation with details
+  document.querySelectorAll(".delete-form").forEach((form) => {
+    form.addEventListener("submit", function (event) {
+      const withdrawalCode = form.dataset.withdrawalCode || "này";
+      const isCompleted = form.dataset.isCompleted === "true";
+
+      let message = `Bạn có chắc chắn muốn xóa withdrawal ${withdrawalCode}?`;
+
+      if (isCompleted) {
+        message +=
+          "\n\nCảnh báo: Withdrawal này đã hoàn thành. Việc xóa có thể ảnh hưởng đến báo cáo tài chính.";
+      }
+
+      message += "\n\nThao tác này không thể hoàn tác.";
+
+      if (!confirm(message)) {
+        event.preventDefault();
+      }
+    });
+  });
+
+  // Bulk delete confirmation
+  document.querySelectorAll(".bulk-delete-btn").forEach((button) => {
+    button.addEventListener("click", function (event) {
+      const selectedCount = document.querySelectorAll(
+        'input[name="withdrawalIds"]:checked'
+      ).length;
+
+      if (selectedCount === 0) {
+        event.preventDefault();
+        showToast("Vui lòng chọn ít nhất một withdrawal để xóa", "warning");
+        return;
+      }
+
+      const message = `Bạn có chắc chắn muốn xóa ${selectedCount} withdrawal đã chọn?\n\nThao tác này không thể hoàn tác.`;
+
+      if (!confirm(message)) {
+        event.preventDefault();
+      }
+    });
+  });
+}
+
+/**
+ * Initialize index page functionality
+ */
+function initializeIndexPage() {
+  // Initialize bulk actions
+  initializeBulkActions();
+
+  // Initialize search form
+  initializeSearchForm();
+
+  // Initialize filters
+  initializeFilters();
+
+  // Initialize statistics refresh
+  initializeStatisticsRefresh();
+}
+
+/**
+ * Initialize bulk actions
+ */
+function initializeBulkActions() {
+  const selectAllCheckbox = document.getElementById("selectAll");
+  const itemCheckboxes = document.querySelectorAll(
+    'input[name="withdrawalIds"]'
+  );
+  const bulkActionSelect = document.getElementById("bulkAction");
+  const bulkActionButton = document.getElementById("bulkActionButton");
+
+  // Select all functionality
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener("change", function () {
+      itemCheckboxes.forEach((checkbox) => {
+        checkbox.checked = selectAllCheckbox.checked;
+      });
+      updateBulkActionButton();
+    });
+  }
+
+  // Individual checkbox change
+  itemCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      updateSelectAllState();
+      updateBulkActionButton();
+    });
+  });
+
+  // Update select all state based on individual checkboxes
+  function updateSelectAllState() {
+    if (selectAllCheckbox) {
+      const checkedCount = document.querySelectorAll(
+        'input[name="withdrawalIds"]:checked'
+      ).length;
+      const totalCount = itemCheckboxes.length;
+
+      selectAllCheckbox.checked = checkedCount === totalCount;
+      selectAllCheckbox.indeterminate =
+        checkedCount > 0 && checkedCount < totalCount;
+    }
+  }
+
+  // Update bulk action button state
+  function updateBulkActionButton() {
+    const checkedCount = document.querySelectorAll(
+      'input[name="withdrawalIds"]:checked'
+    ).length;
+
+    if (bulkActionButton) {
+      bulkActionButton.disabled = checkedCount === 0;
+      bulkActionButton.textContent =
+        checkedCount > 0 ? `Thực hiện (${checkedCount})` : "Thực hiện";
+    }
+  }
+
+  // Bulk action confirmation
+  if (bulkActionButton) {
+    bulkActionButton.addEventListener("click", function (event) {
+      const selectedCount = document.querySelectorAll(
+        'input[name="withdrawalIds"]:checked'
+      ).length;
+      const action = bulkActionSelect ? bulkActionSelect.value : "";
+
+      if (selectedCount === 0) {
+        event.preventDefault();
+        showToast("Vui lòng chọn ít nhất một withdrawal", "warning");
+        return;
+      }
+
+      if (!action) {
+        event.preventDefault();
+        showToast("Vui lòng chọn hành động", "warning");
+        return;
+      }
+
+      let actionText = "";
+      switch (action) {
+        case "delete":
+          actionText = "xóa";
+          break;
+        case "status_completed":
+          actionText = "đánh dấu hoàn thành";
+          break;
+        case "status_failed":
+          actionText = "đánh dấu thất bại";
+          break;
+        case "status_cancelled":
+          actionText = "đánh dấu hủy";
+          break;
+        case "status_pending":
+          actionText = "đánh dấu chờ xử lý";
+          break;
+        default:
+          actionText = "thực hiện hành động";
+      }
+
+      const message = `Bạn có chắc chắn muốn ${actionText} ${selectedCount} withdrawal đã chọn?`;
+
+      if (!confirm(message)) {
+        event.preventDefault();
+      }
+    });
+  }
+}
+
+/**
+ * Initialize search form
+ */
+function initializeSearchForm() {
+  const searchForm = document.getElementById("searchForm");
+  const searchInput = document.getElementById("keyword");
+
+  if (searchForm && searchInput) {
+    // Debounced search
+    const debouncedSearch = debounce(() => {
+      if (searchInput.value.length >= 3 || searchInput.value.length === 0) {
+        searchForm.submit();
+      }
+    }, 500);
+
+    searchInput.addEventListener("input", debouncedSearch);
+  }
+}
+
+/**
+ * Initialize filters
+ */
+function initializeFilters() {
+  const filterForm = document.getElementById("filterForm");
+  const statusFilter = document.getElementById("status");
+  const startDateFilter = document.getElementById("startDate");
+  const endDateFilter = document.getElementById("endDate");
+
+  // Auto-submit on filter change
+  [statusFilter, startDateFilter, endDateFilter].forEach((filter) => {
+    if (filter) {
+      filter.addEventListener("change", () => {
+        if (filterForm) {
+          filterForm.submit();
+        }
+      });
+    }
+  });
+
+  // Date range validation
+  if (startDateFilter && endDateFilter) {
+    function validateDateRange() {
+      const startDate = new Date(startDateFilter.value);
+      const endDate = new Date(endDateFilter.value);
+
+      if (startDate && endDate && startDate > endDate) {
+        showToast("Ngày bắt đầu không thể sau ngày kết thúc", "warning");
+        endDateFilter.value = startDateFilter.value;
+      }
+    }
+
+    startDateFilter.addEventListener("change", validateDateRange);
+    endDateFilter.addEventListener("change", validateDateRange);
+  }
+}
+
+/**
+ * Initialize statistics refresh
+ */
+function initializeStatisticsRefresh() {
+  const refreshButton = document.getElementById("refreshStats");
+
+  if (refreshButton) {
+    refreshButton.addEventListener("click", function () {
+      showButtonLoading(refreshButton, "Đang tải...");
+
+      // Reload the page to refresh statistics
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    });
+  }
+}
+
+// Export additional functions for global access
+window.showLoadingOverlay = showLoadingOverlay;
+window.hideLoadingOverlay = hideLoadingOverlay;
+window.showButtonLoading = showButtonLoading;
+window.hideButtonLoading = hideButtonLoading;
+window.handleNetworkError = handleNetworkError;
+window.retryRequest = retryRequest;
+window.showServerFieldErrors = showServerFieldErrors;
+window.initializeErrorHandling = initializeErrorHandling;
+window.initializeLoadingStates = initializeLoadingStates;
+window.initializeDeleteConfirmation = initializeDeleteConfirmation;
+window.initializeIndexPage = initializeIndexPage;
+
+/**
+ * Hide button loading state
+ */
+function hideButtonLoading(button) {
+  if (!button) return;
+
+  button.disabled = false;
+  button.innerHTML = button.dataset.originalText || button.innerHTML;
+  button.classList.remove("loading");
+  delete button.dataset.originalText;
+}
+
+/**
+ * Enhanced network error handling
+ */
+function handleNetworkError(error, context = "") {
+  console.error("Network error" + (context ? " " + context : ""), error);
+
+  let message = "Đã xảy ra lỗi kết nối";
+  let type = "error";
+
+  if (error.name === "TypeError" && error.message.includes("fetch")) {
+    message = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.";
+  } else if (error.message.includes("timeout")) {
+    message = "Kết nối bị timeout. Vui lòng thử lại.";
+  } else if (error.message.includes("HTTP 500")) {
+    message = "Lỗi máy chủ nội bộ. Vui lòng thử lại sau.";
+  } else if (error.message.includes("HTTP 404")) {
+    message = "Không tìm thấy tài nguyên yêu cầu.";
+  } else if (error.message.includes("HTTP 403")) {
+    message = "Bạn không có quyền thực hiện thao tác này.";
+  } else if (error.message.includes("HTTP 401")) {
+    message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+    type = "warning";
+    // Redirect to login after showing message
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 3000);
+  }
+
+  showToast(message, type, 5000);
+}
+
+/**
+ * Retry mechanism for network requests
+ */
+function retryRequest(requestFn, maxRetries = 3, delay = 1000) {
+  return new Promise((resolve, reject) => {
+    let retries = 0;
+
+    function attempt() {
+      requestFn()
+        .then(resolve)
+        .catch((error) => {
+          retries++;
+          if (retries < maxRetries) {
+            console.warn(
+              `Request failed, retrying (${retries}/${maxRetries})...`
+            );
+            setTimeout(attempt, delay * retries); // Exponential backoff
+          } else {
+            reject(error);
+          }
+        });
+    }
+
+    attempt();
+  });
+}
+
+/**
+ * Initialize error handling for forms
+ */
+function initializeErrorHandling() {
+  // Handle server-side validation errors
+  const fieldErrors = window.fieldErrors;
+  if (fieldErrors) {
+    showServerFieldErrors(fieldErrors);
+  }
+
+  // Handle global error messages
+  const errorMessage = document.querySelector(".alert-danger");
+  if (errorMessage) {
+    const message = errorMessage.textContent.trim();
+    if (message) {
+      showToast(message, "error", 5000);
+    }
+  }
+
+  // Handle success messages
+  const successMessage = document.querySelector(".alert-success");
+  if (successMessage) {
+    const message = successMessage.textContent.trim();
+    if (message) {
+      showToast(message, "success", 3000);
+    }
+  }
+
+  // Handle warning messages
+  const warningMessage = document.querySelector(".alert-warning");
+  if (warningMessage) {
+    const message = warningMessage.textContent.trim();
+    if (message) {
+      showToast(message, "warning", 4000);
+    }
+  }
+}
+
+/**
+ * Initialize loading states
+ */
+function initializeLoadingStates() {
+  // Add loading state to all form submissions
+  document.querySelectorAll("form").forEach((form) => {
+    form.addEventListener("submit", function (event) {
+      // Only show loading if form validation passes
+      if (!form.checkValidity || form.checkValidity()) {
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+          showButtonLoading(submitButton);
+        }
+      }
+    });
+  });
+
+  // Add loading state to AJAX buttons
+  document.querySelectorAll("[data-ajax]").forEach((button) => {
+    button.addEventListener("click", function () {
+      showButtonLoading(button);
+    });
+  });
+}
+
+// Export all functions for global access
+window.showLoadingOverlay = showLoadingOverlay;
+window.hideLoadingOverlay = hideLoadingOverlay;
+window.showButtonLoading = showButtonLoading;
+window.hideButtonLoading = hideButtonLoading;
+window.handleNetworkError = handleNetworkError;
+window.retryRequest = retryRequest;
+window.showServerFieldErrors = showServerFieldErrors;
+window.initializeErrorHandling = initializeErrorHandling;
+window.initializeLoadingStates = initializeLoadingStates;
+window.initializeDeleteConfirmation = initializeDeleteConfirmation;
+window.initializeIndexPage = initializeIndexPage;

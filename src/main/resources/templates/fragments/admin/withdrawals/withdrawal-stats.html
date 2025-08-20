@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <!-- Statistics Cards Fragment -->
+    <div th:fragment="withdrawal-stats" class="revenue-overview">
+      <div class="stat-card primary">
+        <div class="stat-content">
+          <div class="stat-info">
+            <h3>Tổng yêu cầu tháng này</h3>
+            <p class="stat-number" th:text="${totalWithdrawalsThisMonth ?: 0}">
+              0
+            </p>
+            <span class="stat-change neutral">Yêu cầu rút tiền tháng này</span>
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card secondary">
+        <div class="stat-content">
+          <div class="stat-info">
+            <h3>Chờ duyệt</h3>
+            <p class="stat-number" th:text="${pendingWithdrawals ?: 0}">0</p>
+            <span
+              class="stat-change"
+              th:classappend="${pendingWithdrawals > 0 ? 'warning' : 'neutral'}"
+              th:text="${pendingWithdrawals > 0 ? 'Cần xử lý' : 'Không có'}"
+              >Cần xử lý</span
+            >
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card tertiary">
+        <div class="stat-content">
+          <div class="stat-info">
+            <h3>Tỷ lệ thành công</h3>
+            <p
+              class="stat-number"
+              th:text="${#numbers.formatDecimal(withdrawalSuccessRate ?: 0, 1, 1)} + '%'"
+            >
+              0%
+            </p>
+            <span
+              class="stat-change"
+              th:classappend="${withdrawalSuccessRate >= 90 ? 'positive' : (withdrawalSuccessRate >= 70 ? 'neutral' : 'negative')}"
+            >
+              Tỷ lệ hoàn thành
+            </span>
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card quaternary">
+        <div class="stat-content">
+          <div class="stat-info">
+            <h3>Tổng tiền rút tháng này</h3>
+            <p
+              class="stat-number"
+              th:text="${#numbers.formatDecimal(totalWithdrawalAmountThisMonth ?: 0, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+            >
+              0 ₫
+            </p>
+            <span
+              class="stat-change"
+              th:classappend="${overdueWithdrawals > 0 ? 'warning' : 'positive'}"
+              th:text="${overdueWithdrawals > 0 ? overdueWithdrawals + ' quá hạn' : 'Trong hạn'}"
+              >Trong hạn</span
+            >
+          </div>
+          <div class="stat-icon">
+            <i class="fas fa-coins"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

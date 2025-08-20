@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xóa withdrawal - Admin</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals-form.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals-delete.css}" />
+  </head>
+
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <div class="header-content">
+            <h1 class="admin-page-title">
+              Xóa withdrawal
+              <span
+                class="withdrawal-code"
+                th:text="'#' + ${withdrawal.code}"
+              ></span>
+            </h1>
+          </div>
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin}"><i class="fas fa-home"></i> Admin</a>
+            <span>/</span>
+            <a th:href="@{/admin/withdrawals}"
+              ><i class="fas fa-money-bill-wave"></i> Withdrawals</a
+            >
+            <span>/</span>
+            <span><i class="fas fa-trash-alt"></i> Xóa</span>
+          </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+          <i class="fas fa-check-circle"></i>
+          <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div th:if="${warningMessage}" class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span th:text="${warningMessage}"></span>
+        </div>
+
+        <!-- Form xác nhận xóa -->
+        <div class="form-container">
+          <div class="form-card delete-confirmation-card">
+            <div class="form-header">
+              <h2>
+                <i class="fas fa-trash-alt text-danger"></i>
+                Xác nhận xóa withdrawal
+              </h2>
+            </div>
+
+            <!-- Thông tin withdrawal cần xóa -->
+            <div class="withdrawal-info-section">
+              <h3>
+                <i class="fas fa-info-circle"></i> Thông tin withdrawal sẽ bị
+                xóa
+              </h3>
+
+              <div class="info-grid">
+                <!-- Thông tin cơ bản -->
+                <div class="info-section">
+                  <h4>Thông tin cơ bản</h4>
+                  <div class="info-row">
+                    <label>Mã withdrawal:</label>
+                    <span
+                      class="value code-value"
+                      th:text="${withdrawal.code}"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Số tiền:</label>
+                    <span
+                      class="value amount-value"
+                      th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Trạng thái:</label>
+                    <span
+                      class="value status-value"
+                      th:classappend="${'status-' + withdrawal.status.value}"
+                    >
+                      <i class="fas fa-circle"></i>
+                      <span th:text="${withdrawal.status.displayName}"></span>
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <label>Phương thức thanh toán:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.paymentMethod}"
+                    ></span>
+                  </div>
+                </div>
+
+                <!-- Thông tin người dùng -->
+                <div class="info-section">
+                  <h4>Thông tin người dùng</h4>
+                  <div class="info-row">
+                    <label>Tên đầy đủ:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.user.fullName}"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Email:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.user.email}"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Username:</label>
+                    <span
+                      class="value"
+                      th:text="${withdrawal.user.username}"
+                    ></span>
+                  </div>
+                </div>
+
+                <!-- Thông tin thời gian -->
+                <div class="info-section">
+                  <h4>Thông tin thời gian</h4>
+                  <div class="info-row">
+                    <label>Ngày tạo:</label>
+                    <span
+                      class="value"
+                      th:text="${#temporals.format(withdrawal.createdAt, 'dd/MM/yyyy HH:mm:ss')}"
+                    ></span>
+                  </div>
+                  <div class="info-row" th:if="${withdrawal.updatedAt}">
+                    <label>Cập nhật lần cuối:</label>
+                    <span
+                      class="value"
+                      th:text="${#temporals.format(withdrawal.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"
+                    ></span>
+                  </div>
+                </div>
+
+                <!-- Ghi chú hiện tại -->
+                <div
+                  class="info-section full-width"
+                  th:if="${withdrawal.notes}"
+                >
+                  <h4>Ghi chú hiện tại</h4>
+                  <div
+                    class="notes-content"
+                    th:utext="${#strings.replace(withdrawal.notes, '&#10;', '<br>')}"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form xác nhận với lý do xóa -->
+            <form
+              class="delete-form"
+              th:action="@{/admin/withdrawals/{id}/delete(id=${withdrawal.id})}"
+              method="post"
+              onsubmit="return confirmDeleteWithdrawal(event)"
+            >
+              <div class="form-section">
+                <h3><i class="fas fa-clipboard-list"></i> Thông tin xóa</h3>
+
+                <!-- Lý do xóa - Bắt buộc -->
+                <div class="form-group">
+                  <label for="deleteReason">Lý do xóa *</label>
+                  <select id="deleteReason" name="deleteReason" required>
+                    <option value="">-- Chọn lý do xóa --</option>
+                    <option value="DUPLICATE">Withdrawal trùng lặp</option>
+                    <option value="FRAUD">Phát hiện gian lận</option>
+                    <option value="USER_REQUEST">Yêu cầu từ người dùng</option>
+                    <option value="SYSTEM_ERROR">Lỗi hệ thống</option>
+                    <option value="POLICY_VIOLATION">Vi phạm chính sách</option>
+                    <option value="INCORRECT_AMOUNT">
+                      Số tiền không chính xác
+                    </option>
+                    <option value="CANCELLED_BY_USER">Người dùng hủy</option>
+                    <option value="ADMIN_DECISION">Quyết định của admin</option>
+                    <option value="OTHER">Lý do khác</option>
+                  </select>
+                  <small class="form-help"
+                    >Vui lòng chọn lý do xóa withdrawal này</small
+                  >
+                </div>
+
+                <!-- Ghi chú bổ sung -->
+                <div class="form-group">
+                  <label for="deleteNote">Ghi chú bổ sung</label>
+                  <textarea
+                    id="deleteNote"
+                    name="deleteNote"
+                    rows="4"
+                    placeholder="Nhập ghi chú chi tiết về việc xóa withdrawal này..."
+                  ></textarea>
+                  <small class="form-help">
+                    Ghi chú này sẽ được lưu vào lịch sử và có thể được sử dụng
+                    cho việc kiểm toán
+                  </small>
+                </div>
+
+                <!-- Tùy chọn bổ sung -->
+                <div class="form-group">
+                  <label>Tùy chọn bổ sung</label>
+                  <div class="checkbox-group">
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="notifyUser"
+                        name="notifyUser"
+                        value="true"
+                      />
+                      <label for="notifyUser">
+                        <i class="fas fa-envelope"></i>
+                        Gửi email thông báo cho người dùng
+                      </label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="backupData"
+                        name="backupData"
+                        value="true"
+                        checked
+                      />
+                      <label for="backupData">
+                        <i class="fas fa-database"></i>
+                        Sao lưu dữ liệu trước khi xóa
+                      </label>
+                    </div>
+                    <div class="checkbox-item" th:if="${isCompleted}">
+                      <input
+                        type="checkbox"
+                        id="updateReports"
+                        name="updateReports"
+                        value="true"
+                      />
+                      <label for="updateReports">
+                        <i class="fas fa-chart-bar"></i>
+                        Cập nhật báo cáo tài chính (khuyến nghị cho withdrawal
+                        đã hoàn thành)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Xác nhận cuối cùng -->
+                <div class="form-group">
+                  <div class="confirmation-checkbox">
+                    <input type="checkbox" id="finalConfirmation" required />
+                    <label for="finalConfirmation" class="text-danger">
+                      <strong>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Tôi hiểu rằng việc xóa withdrawal này không thể hoàn tác
+                        và có thể ảnh hưởng đến dữ liệu hệ thống
+                      </strong>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Cảnh báo đặc biệt cho withdrawal completed -->
+                <div th:if="${isCompleted}" class="form-group">
+                  <div class="confirmation-checkbox">
+                    <input
+                      type="checkbox"
+                      id="completedConfirmation"
+                      required
+                    />
+                    <label for="completedConfirmation" class="text-danger">
+                      <strong>
+                        <i class="fas fa-shield-alt"></i>
+                        Tôi xác nhận đã cân nhắc kỹ việc xóa withdrawal đã hoàn
+                        thành và chấp nhận mọi rủi ro
+                      </strong>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <div class="action-group secondary-actions">
+                  <a th:href="@{/admin/withdrawals}" class="secondary-btn">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                  </a>
+                  <a
+                    th:href="@{/admin/withdrawals/{id}/detail(id=${withdrawal.id})}"
+                    class="secondary-btn"
+                  >
+                    <i class="fas fa-eye"></i> Xem chi tiết
+                  </a>
+                  <a
+                    th:href="@{/admin/withdrawals/{id}/edit(id=${withdrawal.id})}"
+                    class="secondary-btn edit-alternative"
+                    th:unless="${isCompleted}"
+                  >
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                  </a>
+                </div>
+                <div class="action-group primary-actions">
+                  <button
+                    type="submit"
+                    class="danger-btn"
+                    th:classappend="${isCompleted} ? 'completed-withdrawal' : ''"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                    <span
+                      th:text="${isCompleted} ? 'XÓA WITHDRAWAL ĐÃ HOÀN THÀNH' : 'Xác nhận xóa'"
+                    ></span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
+    <script th:src="@{/js/admin/withdrawals.js}"></script>
+
+    <script>
+      // Page-specific initialization for delete form
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeDeleteForm();
+        console.log("Withdrawal delete page loaded successfully");
+      });
+
+      // Initialize delete form
+      function initializeDeleteForm() {
+        const isCompleted = /*[[${isCompleted}]]*/ false;
+
+        // Show additional warnings for completed withdrawals
+        if (isCompleted) {
+          showCompletedWithdrawalDeleteWarning();
+        }
+
+        // Handle delete reason change
+        const deleteReasonSelect = document.getElementById("deleteReason");
+        deleteReasonSelect.addEventListener("change", function () {
+          const deleteNoteTextarea = document.getElementById("deleteNote");
+          const selectedReason = this.value;
+
+          // Auto-suggest notes based on reason
+          if (selectedReason && !deleteNoteTextarea.value) {
+            let suggestedNote = "";
+            switch (selectedReason) {
+              case "DUPLICATE":
+                suggestedNote =
+                  "Withdrawal này là bản sao của một giao dịch khác đã tồn tại trong hệ thống.";
+                break;
+              case "FRAUD":
+                suggestedNote =
+                  "Phát hiện dấu hiệu gian lận trong withdrawal này. Cần điều tra thêm.";
+                break;
+              case "USER_REQUEST":
+                suggestedNote = "Người dùng đã yêu cầu hủy/xóa withdrawal này.";
+                break;
+              case "SYSTEM_ERROR":
+                suggestedNote =
+                  "Withdrawal này được tạo do lỗi hệ thống và cần được xóa.";
+                break;
+              case "POLICY_VIOLATION":
+                suggestedNote =
+                  "Withdrawal này vi phạm chính sách của hệ thống.";
+                break;
+              case "INCORRECT_AMOUNT":
+                suggestedNote = "Số tiền trong withdrawal này không chính xác.";
+                break;
+              case "CANCELLED_BY_USER":
+                suggestedNote = "Người dùng đã hủy withdrawal này.";
+                break;
+              case "ADMIN_DECISION":
+                suggestedNote =
+                  "Quyết định xóa withdrawal này dựa trên đánh giá của admin.";
+                break;
+            }
+
+            if (suggestedNote) {
+              deleteNoteTextarea.value = suggestedNote;
+              deleteNoteTextarea.focus();
+            }
+          }
+        });
+      }
+
+      // Confirm delete withdrawal with multiple checks
+      function confirmDeleteWithdrawal(event) {
+        const isCompleted = /*[[${isCompleted}]]*/ false;
+        const withdrawalCode = /*[[${withdrawal.code}]]*/ "";
+        const withdrawalAmount =
+          /*[[${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')}]]*/ "";
+
+        // Check if all required fields are filled
+        const deleteReason = document.getElementById("deleteReason").value;
+        const finalConfirmation =
+          document.getElementById("finalConfirmation").checked;
+
+        if (!deleteReason) {
+          showToast("Vui lòng chọn lý do xóa", "error");
+          event.preventDefault();
+          return false;
+        }
+
+        if (!finalConfirmation) {
+          showToast("Vui lòng xác nhận hiểu rõ hậu quả của việc xóa", "error");
+          event.preventDefault();
+          return false;
+        }
+
+        // Additional confirmation for completed withdrawals
+        if (isCompleted) {
+          const completedConfirmation = document.getElementById(
+            "completedConfirmation"
+          ).checked;
+          if (!completedConfirmation) {
+            showToast(
+              "Vui lòng xác nhận đã cân nhắc kỹ việc xóa withdrawal đã hoàn thành",
+              "error"
+            );
+            event.preventDefault();
+            return false;
+          }
+        }
+
+        // Final confirmation dialog
+        let confirmMessage = `Bạn có chắc chắn muốn xóa withdrawal ${withdrawalCode} với số tiền ${withdrawalAmount} VND?`;
+
+        if (isCompleted) {
+          confirmMessage +=
+            "\n\nĐÂY LÀ WITHDRAWAL ĐÃ HOÀN THÀNH - VIỆC XÓA CÓ THỂ GÂY ẢNH HƯỞNG NGHIÊM TRỌNG!";
+        }
+
+        confirmMessage += "\n\nThao tác này không thể hoàn tác!";
+
+        const confirmed = confirm(confirmMessage);
+        if (!confirmed) {
+          event.preventDefault();
+          return false;
+        }
+
+        // Show loading state
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
+
+        // Re-enable button after a delay in case of error
+        setTimeout(() => {
+          if (submitBtn.disabled) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+          }
+        }, 10000);
+
+        return true;
+      }
+
+      // Show additional warnings for completed withdrawals
+      function showCompletedWithdrawalDeleteWarning() {
+        // Add visual emphasis to completed withdrawal warnings
+        const completedWarnings = document.querySelectorAll(
+          ".alert-danger, .danger-section"
+        );
+        completedWarnings.forEach((warning) => {
+          warning.style.animation = "pulse 2s infinite";
+        });
+
+        // Show a modal warning after page load
+        setTimeout(() => {
+          if (
+            confirm(
+              "CẢNH BÁO: Bạn đang chuẩn bị xóa một withdrawal đã hoàn thành!\n\n" +
+                "Điều này có thể gây ảnh hưởng nghiêm trọng đến hệ thống.\n\n" +
+                "Bạn có muốn tiếp tục?"
+            )
+          ) {
+            // User confirmed, continue
+          } else {
+            // User cancelled, redirect back
+            window.location.href =
+              /*[[@{/admin/withdrawals/{id}/detail(id=${withdrawal.id})}]]*/ "/admin/withdrawals";
+          }
+        }, 1000);
+      }
+
+      // Add pulse animation for warnings
+      const pulseStyles = `
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.7; }
+          100% { opacity: 1; }
+        }
+      `;
+
+      const styleSheet = document.createElement("style");
+      styleSheet.type = "text/css";
+      styleSheet.innerText = pulseStyles;
+      document.head.appendChild(styleSheet);
+    </script>
+  </body>
+</html>

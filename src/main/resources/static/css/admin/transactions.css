@@ -188,7 +188,7 @@
 }
 
 .transaction-info-card .info-label {
-  width: 140px;
+  /* width: 140px; */
   color: #666;
   font-weight: 500;
 }

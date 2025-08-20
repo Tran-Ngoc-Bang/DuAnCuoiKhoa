@@ -77,9 +77,30 @@ public class DataInitializer implements CommandLineRunner {
 
                 if (!transactionRepository.existsByCodeAndDeletedAtIsNull("TXN000001")) {
                         createSampleTransactions();
-                        System.out.println("Sample transactions created successfully!");
+                        System.out.println("Sample transactions and withdrawals created successfully!");
                 } else {
                         System.out.println("Sample transactions already exist, skipping transaction initialization.");
+                }
+
+                // Check and create withdrawals separately
+                if (!transactionRepository.existsByCodeAndDeletedAtIsNull("WD000001")) {
+                        // Get users for withdrawals
+                        User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
+                        User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
+                        User user3 = userRepository.findByUsernameAndDeletedAtIsNull("user3").orElse(null);
+                        User user4 = userRepository.findByUsernameAndDeletedAtIsNull("user4").orElse(null);
+                        User user5 = userRepository.findByUsernameAndDeletedAtIsNull("user5").orElse(null);
+                        User contributor1 = userRepository.findByUsernameAndDeletedAtIsNull("contributor1")
+                                        .orElse(null);
+                        User contributor2 = userRepository.findByUsernameAndDeletedAtIsNull("contributor2")
+                                        .orElse(null);
+
+                        if (user1 != null && user2 != null) {
+                                createSampleWithdrawals(user1, user2, user3, user4, user5, contributor1, contributor2);
+                                System.out.println("Sample withdrawals created successfully!");
+                        }
+                } else {
+                        System.out.println("Sample withdrawals already exist, skipping withdrawal initialization.");
                 }
 
                 if (!categoryRepository.existsByNameAndDeletedAtIsNull("Công nghệ")) {
@@ -296,9 +317,14 @@ public class DataInitializer implements CommandLineRunner {
                 // Get users for transactions
                 User user1 = userRepository.findByUsernameAndDeletedAtIsNull("user1").orElse(null);
                 User user2 = userRepository.findByUsernameAndDeletedAtIsNull("user2").orElse(null);
+                User user3 = userRepository.findByUsernameAndDeletedAtIsNull("user3").orElse(null);
+                User user4 = userRepository.findByUsernameAndDeletedAtIsNull("user4").orElse(null);
+                User user5 = userRepository.findByUsernameAndDeletedAtIsNull("user5").orElse(null);
+                User contributor1 = userRepository.findByUsernameAndDeletedAtIsNull("contributor1").orElse(null);
+                User contributor2 = userRepository.findByUsernameAndDeletedAtIsNull("contributor2").orElse(null);
 
                 if (user1 != null && user2 != null) {
-                        // Create sample transactions
+                        // Create sample purchase transactions
                         createTransaction("TXN000001", Transaction.TransactionType.PURCHASE,
                                         new BigDecimal("50000.00"), Transaction.TransactionStatus.COMPLETED,
                                         "VNPay", user1, "Mua xu gói starter");
@@ -307,10 +333,6 @@ public class DataInitializer implements CommandLineRunner {
                                         new BigDecimal("100000.00"), Transaction.TransactionStatus.COMPLETED,
                                         "VNPay", user1, "Mua xu gói premium");
 
-                        createTransaction("TXN000003", Transaction.TransactionType.WITHDRAWAL,
-                                        new BigDecimal("25000.00"), Transaction.TransactionStatus.PENDING,
-                                        "Bank Transfer", user1, "Rút tiền về tài khoản ngân hàng");
-
                         createTransaction("TXN000004", Transaction.TransactionType.PURCHASE,
                                         new BigDecimal("50000.00"), Transaction.TransactionStatus.COMPLETED,
                                         "VNPay", user2, "Mua xu gói starter");
@@ -318,6 +340,124 @@ public class DataInitializer implements CommandLineRunner {
                         createTransaction("TXN000005", Transaction.TransactionType.REFUND,
                                         new BigDecimal("25000.00"), Transaction.TransactionStatus.COMPLETED,
                                         "VNPay", user1, "Hoàn tiền giao dịch lỗi");
+
+                        // Create comprehensive withdrawal sample data
+                        createSampleWithdrawals(user1, user2, user3, user4, user5, contributor1, contributor2);
+                }
+        }
+
+        private void createSampleWithdrawals(User user1, User user2, User user3, User user4, User user5,
+                        User contributor1, User contributor2) {
+                LocalDateTime now = LocalDateTime.now();
+
+                // Withdrawal 1: Pending - Chờ duyệt
+                createWithdrawalTransaction("WD000001", new BigDecimal("25000.00"),
+                                Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", user1,
+                                "Rút tiền về tài khoản ngân hàng Vietcombank", now.minusDays(1));
+
+                // Withdrawal 2: Completed - Đã hoàn thành (tháng này)
+                createWithdrawalTransaction("WD000002", new BigDecimal("150000.00"),
+                                Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", contributor1,
+                                "Rút tiền từ doanh thu bán tài liệu - Đã chuyển khoản thành công", now.minusDays(3));
+
+                // Withdrawal 3: Completed - Đã hoàn thành (tháng này)
+                createWithdrawalTransaction("WD000003", new BigDecimal("75000.00"),
+                                Transaction.TransactionStatus.COMPLETED, "E_WALLET", user2,
+                                "Rút tiền về ví MoMo - Giao dịch thành công", now.minusDays(5));
+
+                // Withdrawal 4: Pending - Chờ duyệt (số tiền lớn)
+                createWithdrawalTransaction("WD000004", new BigDecimal("500000.00"),
+                                Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", contributor2,
+                                "Rút tiền doanh thu tháng - Cần xác minh thông tin ngân hàng", now.minusDays(2));
+
+                // Withdrawal 5: Failed - Thất bại
+                createWithdrawalTransaction("WD000005", new BigDecimal("80000.00"),
+                                Transaction.TransactionStatus.FAILED, "BANK_TRANSFER", user3,
+                                "Rút tiền thất bại - Thông tin tài khoản không chính xác", now.minusDays(7));
+
+                // Withdrawal 6: Cancelled - Đã hủy
+                createWithdrawalTransaction("WD000006", new BigDecimal("30000.00"),
+                                Transaction.TransactionStatus.CANCELLED, "E_WALLET", user4,
+                                "Hủy yêu cầu rút tiền theo yêu cầu của người dùng", now.minusDays(4));
+
+                // Withdrawal 7: Completed - Đã hoàn thành (tháng trước)
+                createWithdrawalTransaction("WD000007", new BigDecimal("120000.00"),
+                                Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", contributor1,
+                                "Rút tiền tháng trước - Đã chuyển khoản", now.minusDays(35));
+
+                // Withdrawal 8: Pending - Chờ duyệt (quá hạn xử lý)
+                createWithdrawalTransaction("WD000008", new BigDecimal("45000.00"),
+                                Transaction.TransactionStatus.PENDING, "E_WALLET", user5,
+                                "Rút tiền về ví ZaloPay - Đang chờ xử lý quá 5 ngày", now.minusDays(6));
+
+                // Withdrawal 9: Completed - Đã hoàn thành (tháng này)
+                createWithdrawalTransaction("WD000009", new BigDecimal("200000.00"),
+                                Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", contributor2,
+                                "Rút tiền doanh thu - Chuyển khoản ACB thành công", now.minusDays(8));
+
+                // Withdrawal 10: Pending - Chờ duyệt (mới)
+                createWithdrawalTransaction("WD000010", new BigDecimal("60000.00"),
+                                Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", user1,
+                                "Rút tiền về tài khoản Techcombank", now.minusDays(1));
+
+                // Withdrawal 11: Failed - Thất bại (lỗi hệ thống)
+                createWithdrawalTransaction("WD000011", new BigDecimal("90000.00"),
+                                Transaction.TransactionStatus.FAILED, "E_WALLET", user2,
+                                "Rút tiền thất bại - Lỗi kết nối với nhà cung cấp dịch vụ", now.minusDays(10));
+
+                // Withdrawal 12: Completed - Đã hoàn thành (tháng này)
+                createWithdrawalTransaction("WD000012", new BigDecimal("35000.00"),
+                                Transaction.TransactionStatus.COMPLETED, "E_WALLET", user3,
+                                "Rút tiền về ví Momo - Giao dịch hoàn tất", now.minusDays(12));
+
+                // Withdrawal 13: Pending - Chờ duyệt (cần xác minh)
+                createWithdrawalTransaction("WD000013", new BigDecimal("300000.00"),
+                                Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", contributor1,
+                                "Rút tiền số lượng lớn - Cần xác minh danh tính", now.minusDays(1));
+
+                // Withdrawal 14: Completed - Đã hoàn thành (tháng trước)
+                createWithdrawalTransaction("WD000014", new BigDecimal("85000.00"),
+                                Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", user4,
+                                "Rút tiền tháng trước - Đã chuyển khoản BIDV", now.minusDays(40));
+
+                // Withdrawal 15: Cancelled - Đã hủy (do user)
+                createWithdrawalTransaction("WD000015", new BigDecimal("55000.00"),
+                                Transaction.TransactionStatus.CANCELLED, "E_WALLET", user5,
+                                "Hủy yêu cầu rút tiền - Người dùng thay đổi ý định", now.minusDays(3));
+
+                // Withdrawal 16: Processing - Đang xử lý
+                createWithdrawalTransaction("WD000016", new BigDecimal("180000.00"),
+                                Transaction.TransactionStatus.PROCESSING, "BANK_TRANSFER", contributor1,
+                                "Đang xử lý chuyển khoản - Đã xác minh thông tin", now.minusHours(6));
+
+                // Withdrawal 17: Processing - Đang xử lý (ví điện tử)
+                createWithdrawalTransaction("WD000017", new BigDecimal("95000.00"),
+                                Transaction.TransactionStatus.PROCESSING, "E_WALLET", user2,
+                                "Đang xử lý chuyển tiền về ví MoMo", now.minusHours(2));
+        }
+
+        private void createWithdrawalTransaction(String code, BigDecimal amount,
+                        Transaction.TransactionStatus status, String paymentMethod, User user,
+                        String notes, LocalDateTime createdAt) {
+                try {
+                        Transaction transaction = new Transaction();
+                        transaction.setCode(code);
+                        transaction.setType(Transaction.TransactionType.WITHDRAWAL);
+                        transaction.setAmount(amount);
+                        transaction.setStatus(status);
+                        transaction.setPaymentMethod(paymentMethod);
+                        transaction.setUser(user);
+                        transaction.setNotes(notes);
+                        transaction.setCreatedAt(createdAt);
+                        transaction.setUpdatedAt(createdAt);
+
+                        // Save directly to repository to bypass validation during initialization
+                        transactionRepository.save(transaction);
+                        System.out.println("Created withdrawal: " + code + " - " + amount + " VND");
+
+                } catch (Exception e) {
+                        System.err.println("Failed to create withdrawal " + code + ": " + e.getMessage());
+                        e.printStackTrace();
                 }
         }
 

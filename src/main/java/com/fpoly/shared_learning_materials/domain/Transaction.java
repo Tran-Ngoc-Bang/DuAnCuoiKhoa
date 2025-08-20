@@ -1,6 +1,7 @@
 package com.fpoly.shared_learning_materials.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -12,6 +13,8 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Mã giao dịch không được để trống")
+    @Pattern(regexp = "^(WD|PU|TXN|RF)[A-Z0-9]{6,20}$", message = "Mã giao dịch không đúng định dạng")
     @Column(name = "code", unique = true, nullable = false)
     private String code;
 
@@ -19,6 +22,9 @@ public class Transaction {
     @Column(name = "type", nullable = false)
     private TransactionType type;
 
+    @NotNull(message = "Số tiền không được để trống")
+    @DecimalMin(value = "0.01", message = "Số tiền phải lớn hơn 0")
+    @Digits(integer = 10, fraction = 2, message = "Số tiền không đúng định dạng")
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
@@ -26,12 +32,15 @@ public class Transaction {
     @Column(name = "status", nullable = false)
     private TransactionStatus status;
 
+    @NotBlank(message = "Phương thức thanh toán không được để trống")
     @Column(name = "payment_method")
     private String paymentMethod;
 
+    @Size(max = 1000, message = "Ghi chú không được vượt quá 1000 ký tự")
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
+    @NotNull(message = "Người dùng không được để trống")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -70,6 +79,7 @@ public class Transaction {
 
     public enum TransactionStatus {
         PENDING("pending", "Chờ xử lý"),
+        PROCESSING("processing", "Đang xử lý"),
         COMPLETED("completed", "Hoàn thành"),
         FAILED("failed", "Thất bại"),
         CANCELLED("cancelled", "Đã hủy");

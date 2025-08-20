@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tạo withdrawal mới - Admin</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals-form.css}" />
+  </head>
+
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">Tạo withdrawal mới</h1>
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin}">Admin</a>
+            <span>/</span>
+            <a th:href="@{/admin/withdrawals}">Quản lý doanh thu</a>
+            <span>/</span>
+            <a th:href="@{/admin/withdrawals}">Withdrawals</a>
+            <span>/</span>
+            <span>Tạo mới</span>
+          </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+          <i class="fas fa-check-circle"></i>
+          <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Form tạo withdrawal -->
+        <div class="form-container">
+          <div class="form-card">
+            <div class="form-header">
+              <h2>
+                <i class="fas fa-money-bill-wave"></i> Thông tin withdrawal
+              </h2>
+              <p>Điền đầy đủ thông tin để tạo yêu cầu rút tiền mới</p>
+            </div>
+
+            <form
+              class="withdrawal-form"
+              th:action="@{/admin/withdrawals/create}"
+              method="post"
+              th:object="${transaction}"
+              onsubmit="return validateWithdrawalForm(event)"
+            >
+              <!-- Hidden field for type -->
+              <input type="hidden" name="type" value="WITHDRAWAL" />
+
+              <!-- Form Fields using Fragment -->
+              <div
+                th:replace="~{fragments/admin/withdrawals/withdrawal-form :: withdrawal-form-fields(${transaction}, ${users}, ${statusOptions}, ${paymentMethods})}"
+              ></div>
+
+              <!-- Form Actions using Fragment -->
+              <div
+                th:replace="~{fragments/admin/withdrawals/withdrawal-form :: withdrawal-form-actions(@{/admin/withdrawals})}"
+              ></div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
+    <script th:src="@{/js/admin/withdrawals.js}"></script>
+
+    <script>
+      // Page-specific initialization
+      // Most functionality is handled by withdrawals.js
+      console.log("Withdrawal create page loaded successfully");
+    </script>
+  </body>
+</html>

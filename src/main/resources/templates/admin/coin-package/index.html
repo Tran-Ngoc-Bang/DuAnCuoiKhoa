@@ -51,7 +51,7 @@
 
         <!-- Coin Package Management -->
         <div class="section-header">
-          <h2>Quản lý gói xu</h2>
+          <!-- <h2>Quản lý gói xu</h2> -->
           <div class="section-actions">
             <a
               th:href="@{/admin/coin-packages/create}"
@@ -90,13 +90,7 @@
           <table class="packages-table">
             <thead>
               <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    class="select-all-checkbox"
-                    id="selectAll"
-                  />
-                </th>
+                <th>STT</th>
                 <th>Mã gói</th>
                 <th>Tên gói</th>
                 <th>Số xu</th>
@@ -111,17 +105,14 @@
               <!-- Hiển thị dữ liệu từ server -->
               <tr
                 th:if="${packages != null and !packages.isEmpty()}"
-                th:each="package : ${packages}"
+                th:each="package, iterStat : ${packages}"
                 th:data-package-id="${package.id}"
                 th:with="packageId=${package.id}, packageCode=${package.code}, packageName=${package.name}"
                 th:title="${'Package: ' + package.name + ' (' + package.code + ')'}"
+                th:classappend="${package.deletedAt != null ? 'deleted-row' : ''}"
               >
-                <td>
-                  <input
-                    type="checkbox"
-                    class="row-checkbox"
-                    th:value="${package.id}"
-                  />
+                <td th:text="${(currentPage * size) + iterStat.index + 1}">
+                  1
                 </td>
                 <td
                   th:text="${package.code}"
@@ -148,34 +139,57 @@
                   </span>
                 </td>
                 <td>
-                  <div class="action-buttons">
-                    <a
-                      th:href="@{/admin/coin-packages/{id}/detail(id=${package.id})}"
-                      class="action-btn view-package"
-                      title="Xem chi tiết"
+                  <div>
+                    <!-- Actions for active packages -->
+                    <div
+                      th:if="${package.deletedAt == null}"
+                      class="action-buttons"
                     >
-                      <i class="fas fa-eye"></i>
-                    </a>
-                    <a
-                      th:href="@{/admin/coin-packages/{id}/edit(id=${package.id})}"
-                      class="action-btn edit-package"
-                      title="Chỉnh sửa"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </a>
-                    <button
-                      class="action-btn delete-package"
-                      title="Xóa"
-                      th:data-package-id="${package.id}"
-                      th:data-package-name="${package.name}"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
+                      <a
+                        th:href="@{/admin/coin-packages/{id}/detail(id=${package.id})}"
+                        class="action-btn view-package"
+                        title="Xem chi tiết"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a
+                        th:href="@{/admin/coin-packages/{id}/edit(id=${package.id})}"
+                        class="action-btn edit-package"
+                        title="Chỉnh sửa"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a
+                        th:href="@{/admin/coin-packages/{id}/delete(id=${package.id})}"
+                        class="action-btn delete-package"
+                        title="Xóa"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </a>
+                    </div>
+
+                    <!-- Actions for deleted packages -->
+                    <div th:if="${package.deletedAt != null}">
+                      <form
+                        th:action="@{/admin/coin-packages/{id}/restore(id=${package.id})}"
+                        method="post"
+                        style="display: inline"
+                      >
+                        <button
+                          type="submit"
+                          class="action-btn restore-package"
+                          title="Khôi phục"
+                        >
+                          <i class="fas fa-undo"></i>
+                        </button>
+                      </form>
+                      <span class="deleted-label">Đã xóa</span>
+                    </div>
                   </div>
                 </td>
               </tr>
               <tr th:if="${packages == null or packages.isEmpty()}">
-                <td colspan="9" class="no-data">
+                <td colspan="10" class="no-data">
                   <div class="no-data-content">
                     <i class="fas fa-box-open"></i>
                     <p>Không có gói xu nào</p>
@@ -185,68 +199,41 @@
             </tbody>
           </table>
 
-          <!-- Table Actions -->
-          <div class="table-actions">
-            <div class="bulk-actions">
-              <form
-                id="bulkActionForm"
-                method="POST"
-                action="/admin/coin-packages/bulk-action"
-              >
-                <select
-                  class="bulk-action-select"
-                  id="bulkActionSelect"
-                  name="action"
-                >
-                  <option value="">Chọn hành động</option>
-                  <option value="activate">Kích hoạt</option>
-                  <option value="deactivate">Tắt kích hoạt</option>
-                  <option value="promotion">Đánh dấu khuyến mãi</option>
-                  <option value="delete">Xóa</option>
-                </select>
+          <!-- Pagination -->
+          <div class="pagination">
+            <button
+              type="button"
+              class="pagination-btn prev-btn"
+              th:disabled="${isFirst}"
+              th:attr="data-url='?page=' + (${currentPage} - 1) + '&size=' + ${size}"
+              onclick="window.location.href=this.dataset.url"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="pagination-pages">
+              <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
                 <button
-                  type="submit"
-                  class="apply-action"
-                  id="applyBulkAction"
-                  disabled
-                >
-                  Áp dụng
-                </button>
-              </form>
+                  type="button"
+                  class="pagination-btn page-btn"
+                  th:classappend="${i} == ${currentPage} ? ' active' : ''"
+                  th:text="${i + 1}"
+                  th:attr="data-url='?page=' + ${i} + '&size=' + ${size}"
+                  onclick="window.location.href=this.dataset.url"
+                ></button>
+              </span>
             </div>
+            <button
+              type="button"
+              class="pagination-btn next-btn"
+              th:disabled="${isLast}"
+              th:attr="data-url='?page=' + (${currentPage} + 1) + '&size=' + ${size}"
+              onclick="window.location.href=this.dataset.url"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
           </div>
         </div>
       </main>
-    </div>
-
-    <!-- Confirm Delete Package Modal -->
-    <div class="modal" id="deletePackageModal">
-      <div class="modal-overlay"></div>
-      <div class="modal-container">
-        <div class="modal-header">
-          <h3>Xác nhận xóa gói xu</h3>
-          <button class="modal-close"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="modal-body">
-          <div class="refund-confirmation">
-            <div class="warning-icon">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <p class="confirmation-text">
-              Bạn chắc chắn muốn xóa gói xu
-              <strong id="deletePackageName">Starter</strong> (<strong
-                id="deletePackageId"
-                >COIN-S</strong
-              >)?
-            </p>
-            <p>Hành động này không thể hoàn tác.</p>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="secondary-btn cancel-btn">Hủy bỏ</button>
-          <button class="danger-btn" id="confirmDeleteBtn">Xác nhận xóa</button>
-        </div>
-      </div>
     </div>
 
     <!-- Scripts -->

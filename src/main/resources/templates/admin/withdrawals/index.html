@@ -24,6 +24,7 @@
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals-index.css}" />
   </head>
 
   <body class="admin-body">
@@ -44,325 +45,333 @@
             <div class="admin-breadcrumbs">
               <a th:href="@{/admin}">Admin</a>
               <span class="breadcrumb-separator">/</span>
+              <a href="index.html">Quản lý doanh thu</a>
+              <span class="breadcrumb-separator">/</span>
               <span>Yêu cầu rút tiền</span>
             </div>
           </div>
         </div>
 
         <!-- Statistics Overview -->
-        <div class="revenue-overview">
-          <div class="stat-card primary">
-            <div class="stat-content">
-              <div class="stat-info">
-                <h3>Tổng yêu cầu</h3>
-                <p class="stat-number">156</p>
-                <span class="stat-change positive"
-                  >+12% so với tháng trước</span
-                >
-              </div>
-              <div class="stat-icon">
-                <i class="fas fa-money-bill-wave"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="stat-card secondary">
-            <div class="stat-content">
-              <div class="stat-info">
-                <h3>Chờ duyệt</h3>
-                <p class="stat-number">23</p>
-                <span class="stat-change neutral">Cần xử lý</span>
-              </div>
-              <div class="stat-icon">
-                <i class="fas fa-clock"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="stat-card tertiary">
-            <div class="stat-content">
-              <div class="stat-info">
-                <h3>Đã hoàn thành</h3>
-                <p class="stat-number">98</p>
-                <span class="stat-change positive">+8% so với tháng trước</span>
-              </div>
-              <div class="stat-icon">
-                <i class="fas fa-check-circle"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="stat-card quaternary">
-            <div class="stat-content">
-              <div class="stat-info">
-                <h3>Tổng tiền rút</h3>
-                <p class="stat-number">45.2M ₫</p>
-                <span class="stat-change positive"
-                  >+15% so với tháng trước</span
-                >
-              </div>
-              <div class="stat-icon">
-                <i class="fas fa-coins"></i>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- <div
+          th:replace="~{fragments/admin/withdrawals/withdrawal-stats :: withdrawal-stats}"
+        ></div> -->
 
         <!-- Filters and Search -->
-        <div class="management-tools">
-          <div class="search-filters">
-            <div class="tool-item">
-              <input
-                type="text"
-                class="search-input"
-                placeholder="Tìm kiếm theo tên người dùng, email..."
-                id="searchInput"
-              />
+        <!-- <div
+          th:replace="~{fragments/admin/withdrawals/withdrawal-filters :: withdrawal-filters}"
+        ></div> -->
+
+        <!-- Date Range Presets -->
+        <!-- <div
+          th:replace="~{fragments/admin/withdrawals/withdrawal-filters :: date-range-presets}"
+        ></div> -->
+
+        <!-- Bulk Actions -->
+        <!-- <div
+          th:replace="~{fragments/admin/withdrawals/withdrawal-actions :: bulk-actions}"
+        ></div> -->
+        <!-- Coin Package Management -->
+        <div class="section-header">
+          <!-- <h2>Quản lý gói xu</h2> -->
+          <div class="section-actions">
+            <div class="admin-content-actions">
+              <a th:href="@{/admin/withdrawals/create}" class="primary-btn">
+                <i class="fas fa-plus"></i>
+                Tạo withdrawal mới
+              </a>
             </div>
-            <div class="tool-item">
-              <select class="filter-select" id="statusFilter">
-                <option value="">Tất cả trạng thái</option>
-                <option value="pending">Chờ duyệt</option>
-                <option value="approved">Đã duyệt</option>
-                <option value="processing">Đang xử lý</option>
-                <option value="completed">Đã hoàn thành</option>
-                <option value="rejected">Đã từ chối</option>
-              </select>
-            </div>
-            <div class="tool-item">
-              <select class="filter-select" id="amountFilter">
-                <option value="">Tất cả số tiền</option>
-                <option value="0-1000000">Dưới 1 triệu</option>
-                <option value="1000000-5000000">1-5 triệu</option>
-                <option value="5000000-10000000">5-10 triệu</option>
-                <option value="10000000+">Trên 10 triệu</option>
-              </select>
-            </div>
-          </div>
-          <div class="action-buttons">
-            <button class="export-btn" id="exportBtn">
-              <i class="fas fa-download"></i>
-              Xuất Excel
-            </button>
           </div>
         </div>
-
-        <!-- Date Range Filter -->
-        <div class="date-range-selector">
-          <div class="date-preset-btns">
-            <button class="date-btn active" data-range="today">Hôm nay</button>
-            <button class="date-btn" data-range="week">Tuần này</button>
-            <button class="date-btn" data-range="month">Tháng này</button>
-            <button class="date-btn" data-range="quarter">Quý này</button>
-            <button class="date-btn" data-range="year">Năm này</button>
-            <button class="date-btn" data-range="custom">Tùy chọn</button>
-          </div>
-          <div class="custom-date-range" style="display: none">
-            <div class="date-inputs">
-              <input type="date" id="startDate" />
-              <span>đến</span>
-              <input type="date" id="endDate" />
-            </div>
-            <button class="apply-date-btn">Áp dụng</button>
-          </div>
-        </div>
-
         <!-- Withdrawals Table -->
         <div class="data-container">
-          <div class="table-header">
-            <h3>Danh sách yêu cầu rút tiền</h3>
-            <div class="table-actions">
-              <button class="secondary-btn" id="refreshBtn">
-                <i class="fas fa-sync-alt"></i>
-                Làm mới
-              </button>
-            </div>
-          </div>
-
-          <div class="table-container">
-            <table class="data-table withdrawals-table">
-              <thead>
-                <tr>
-                  <th>
-                    <div class="checkbox-wrapper">
-                      <input type="checkbox" id="selectAll" />
-                      <label for="selectAll"></label>
-                    </div>
-                  </th>
-                  <th>ID</th>
-                  <th>Người dùng</th>
-                  <th>Số tiền</th>
-                  <th>Phương thức</th>
-                  <th>Ngày tạo</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="checkbox-wrapper">
-                      <input type="checkbox" id="select1" />
-                      <label for="select1"></label>
-                    </div>
-                  </td>
-                  <td>#WD001</td>
-                  <td>
-                    <div class="user-info">
-                      <img
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt="User"
-                        class="user-avatar"
-                      />
-                      <div class="user-details">
-                        <span class="user-name">Nguyễn Văn A</span>
-                        <span class="user-email">nguyenvana@email.com</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="amount">2.500.000 ₫</td>
-                  <td>
-                    <div class="payment-method">
-                      <i class="fas fa-university"></i>
-                      <span>Ngân hàng</span>
-                    </div>
-                  </td>
-                  <td>15/01/2024 14:30</td>
-                  <td>
-                    <span class="status-badge pending">Chờ duyệt</span>
-                  </td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="action-btn approve" title="Duyệt">
-                        <i class="fas fa-check"></i>
-                      </button>
-                      <button class="action-btn reject" title="Từ chối">
-                        <i class="fas fa-times"></i>
-                      </button>
-                      <button
-                        class="action-btn view-withdrawal"
-                        title="Xem chi tiết"
-                      >
-                        <i class="fas fa-eye"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="checkbox-wrapper">
-                      <input type="checkbox" id="select2" />
-                      <label for="select2"></label>
-                    </div>
-                  </td>
-                  <td>#WD002</td>
-                  <td>
-                    <div class="user-info">
-                      <img
-                        src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt="User"
-                        class="user-avatar"
-                      />
-                      <div class="user-details">
-                        <span class="user-name">Trần Thị B</span>
-                        <span class="user-email">tranthib@email.com</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="amount">1.200.000 ₫</td>
-                  <td>
-                    <div class="payment-method">
-                      <i class="fas fa-credit-card"></i>
-                      <span>Ví điện tử</span>
-                    </div>
-                  </td>
-                  <td>14/01/2024 09:15</td>
-                  <td>
-                    <span class="status-badge processing">Đang xử lý</span>
-                  </td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="action-btn complete" title="Hoàn thành">
-                        <i class="fas fa-check-double"></i>
-                      </button>
-                      <button
-                        class="action-btn view-withdrawal"
-                        title="Xem chi tiết"
-                      >
-                        <i class="fas fa-eye"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="checkbox-wrapper">
-                      <input type="checkbox" id="select3" />
-                      <label for="select3"></label>
-                    </div>
-                  </td>
-                  <td>#WD003</td>
-                  <td>
-                    <div class="user-info">
-                      <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt="User"
-                        class="user-avatar"
-                      />
-                      <div class="user-details">
-                        <span class="user-name">Lê Văn C</span>
-                        <span class="user-email">levanc@email.com</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="amount">5.000.000 ₫</td>
-                  <td>
-                    <div class="payment-method">
-                      <i class="fas fa-university"></i>
-                      <span>Ngân hàng</span>
-                    </div>
-                  </td>
-                  <td>13/01/2024 16:45</td>
-                  <td>
-                    <span class="status-badge completed">Đã hoàn thành</span>
-                  </td>
-                  <td>
-                    <div class="action-buttons">
-                      <button
-                        class="action-btn view-withdrawal"
-                        title="Xem chi tiết"
-                      >
-                        <i class="fas fa-eye"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <!-- Table with fragments -->
+          <div
+            th:replace="~{fragments/admin/withdrawals/withdrawal-table :: withdrawal-table}"
+          ></div>
 
           <!-- Pagination -->
-          <div class="pagination">
-            <button class="pagination-btn" disabled>
+          <div class="pagination" th:if="${totalPages > 1}">
+            <a
+              th:href="@{/admin/withdrawals(page=${currentPage - 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+              class="pagination-btn"
+              th:classappend="${isFirst ? 'disabled' : ''}"
+              th:if="${!isFirst}"
+            >
               <i class="fas fa-chevron-left"></i>
-            </button>
+            </a>
+            <span class="pagination-btn disabled" th:if="${isFirst}">
+              <i class="fas fa-chevron-left"></i>
+            </span>
+
             <div class="pagination-pages">
-              <button class="pagination-btn active">1</button>
-              <button class="pagination-btn">2</button>
-              <button class="pagination-btn">3</button>
-              <span class="pagination-ellipsis">...</span>
-              <button class="pagination-btn">10</button>
+              <!-- First page -->
+              <a
+                th:if="${currentPage > 2}"
+                th:href="@{/admin/withdrawals(page=0, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+                class="pagination-btn"
+                >1</a
+              >
+
+              <!-- Ellipsis before current page -->
+              <span th:if="${currentPage > 3}" class="pagination-ellipsis"
+                >...</span
+              >
+
+              <!-- Previous page -->
+              <a
+                th:if="${currentPage > 0}"
+                th:href="@{/admin/withdrawals(page=${currentPage - 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+                class="pagination-btn"
+                th:text="${currentPage}"
+                >1</a
+              >
+
+              <!-- Current page -->
+              <span class="pagination-btn active" th:text="${currentPage + 1}"
+                >2</span
+              >
+
+              <!-- Next page -->
+              <a
+                th:if="${currentPage < totalPages - 1}"
+                th:href="@{/admin/withdrawals(page=${currentPage + 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, keyword=${keyword}, status=${status}, startDate=${endDate})}"
+                class="pagination-btn"
+                th:text="${currentPage + 2}"
+                >3</a
+              >
+
+              <!-- Ellipsis after current page -->
+              <span
+                th:if="${currentPage < totalPages - 4}"
+                class="pagination-ellipsis"
+                >...</span
+              >
+
+              <!-- Last page -->
+              <a
+                th:if="${currentPage < totalPages - 3}"
+                th:href="@{/admin/withdrawals(page=${totalPages - 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+                class="pagination-btn"
+                th:text="${totalPages}"
+                >10</a
+              >
             </div>
-            <button class="pagination-btn">
+
+            <a
+              th:href="@{/admin/withdrawals(page=${currentPage + 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+              class="pagination-btn"
+              th:classappend="${isLast ? 'disabled' : ''}"
+              th:if="${!isLast}"
+            >
               <i class="fas fa-chevron-right"></i>
-            </button>
+            </a>
+            <span class="pagination-btn disabled" th:if="${isLast}">
+              <i class="fas fa-chevron-right"></i>
+            </span>
           </div>
+
+          <!-- Page size selector -->
+          <!-- <div class="page-size-selector">
+            <label>Hiển thị:</label>
+            <select
+              onchange="changePageSize(this.value)"
+              class="page-size-select"
+            >
+              <option value="10" th:selected="${size == 10}">10</option>
+              <option value="25" th:selected="${size == 25}">25</option>
+              <option value="50" th:selected="${size == 50}">50</option>
+              <option value="100" th:selected="${size == 100}">100</option>
+            </select>
+            <span>mục mỗi trang</span>
+          </div> -->
         </div>
       </main>
+    </div>
+
+    <!-- Flash Messages -->
+    <div
+      th:if="${successMessage}"
+      class="toast toast-success"
+      id="successToast"
+    >
+      <div class="toast-content">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}">Thành công!</span>
+      </div>
+      <button class="toast-close" onclick="closeToast('successToast')">
+        &times;
+      </button>
+    </div>
+
+    <div th:if="${errorMessage}" class="toast toast-error" id="errorToast">
+      <div class="toast-content">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}">Có lỗi xảy ra!</span>
+      </div>
+      <button class="toast-close" onclick="closeToast('errorToast')">
+        &times;
+      </button>
+    </div>
+
+    <div
+      th:if="${warningMessage}"
+      class="toast toast-warning"
+      id="warningToast"
+    >
+      <div class="toast-content">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span th:text="${warningMessage}">Cảnh báo!</span>
+      </div>
+      <button class="toast-close" onclick="closeToast('warningToast')">
+        &times;
+      </button>
     </div>
 
     <!-- Scripts -->
     <div th:replace="~{fragments/admin/layout :: scripts}"></div>
     <script th:src="@{/js/admin/withdrawals-index.js}"></script>
+
+    <script th:inline="javascript">
+      // JavaScript functions for the page
+      function toggleSelectAll() {
+        const selectAll = document.getElementById("selectAll");
+        const checkboxes = document.querySelectorAll(".withdrawal-checkbox");
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = selectAll.checked;
+        });
+        updateBulkActions();
+      }
+
+      function updateBulkActions() {
+        const checkboxes = document.querySelectorAll(
+          ".withdrawal-checkbox:checked"
+        );
+        const bulkActions = document.getElementById("bulkActions");
+        const selectedCount = document.getElementById("selectedCount");
+
+        if (checkboxes.length > 0) {
+          bulkActions.style.display = "block";
+          selectedCount.textContent = checkboxes.length;
+
+          // Add selected IDs to bulk form
+          const form = document.getElementById("bulkActionForm");
+          // Remove existing hidden inputs
+          form
+            .querySelectorAll('input[name="withdrawalIds"]')
+            .forEach((input) => input.remove());
+
+          // Add new hidden inputs
+          checkboxes.forEach((checkbox) => {
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "withdrawalIds";
+            hiddenInput.value = checkbox.value;
+            form.appendChild(hiddenInput);
+          });
+        } else {
+          bulkActions.style.display = "none";
+        }
+
+        // Update select all checkbox
+        const selectAll = document.getElementById("selectAll");
+        const allCheckboxes = document.querySelectorAll(".withdrawal-checkbox");
+        selectAll.checked =
+          allCheckboxes.length > 0 &&
+          checkboxes.length === allCheckboxes.length;
+      }
+
+      function clearSelection() {
+        document
+          .querySelectorAll(".withdrawal-checkbox")
+          .forEach((checkbox) => {
+            checkbox.checked = false;
+          });
+        document.getElementById("selectAll").checked = false;
+        updateBulkActions();
+      }
+
+      function changePageSize(size) {
+        const url = new URL(window.location);
+        url.searchParams.set("size", size);
+        url.searchParams.set("page", "0"); // Reset to first page
+        window.location.href = url.toString();
+      }
+
+      function closeToast(toastId) {
+        document.getElementById(toastId).style.display = "none";
+      }
+
+      // Auto-hide toasts after 5 seconds
+      document.addEventListener("DOMContentLoaded", function () {
+        const toasts = document.querySelectorAll(".toast");
+        toasts.forEach((toast) => {
+          setTimeout(() => {
+            toast.style.display = "none";
+          }, 5000);
+        });
+      });
+
+      // Date range preset functionality
+      document.querySelectorAll(".date-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const range = this.dataset.range;
+          const today = new Date();
+          let startDate = "";
+          let endDate = "";
+
+          switch (range) {
+            case "today":
+              startDate = endDate = today.toISOString().split("T")[0];
+              break;
+            case "week":
+              const weekStart = new Date(
+                today.setDate(today.getDate() - today.getDay())
+              );
+              startDate = weekStart.toISOString().split("T")[0];
+              endDate = new Date().toISOString().split("T")[0];
+              break;
+            case "month":
+              startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+                .toISOString()
+                .split("T")[0];
+              endDate = new Date().toISOString().split("T")[0];
+              break;
+            case "quarter":
+              const quarter = Math.floor(today.getMonth() / 3);
+              startDate = new Date(today.getFullYear(), quarter * 3, 1)
+                .toISOString()
+                .split("T")[0];
+              endDate = new Date().toISOString().split("T")[0];
+              break;
+            case "year":
+              startDate = new Date(today.getFullYear(), 0, 1)
+                .toISOString()
+                .split("T")[0];
+              endDate = new Date().toISOString().split("T")[0];
+              break;
+            case "all":
+              startDate = endDate = "";
+              break;
+          }
+
+          // Update form and submit
+          const form = document.querySelector(".management-tools");
+          const startInput = form.querySelector('input[name="startDate"]');
+          const endInput = form.querySelector('input[name="endDate"]');
+
+          if (startInput) startInput.value = startDate;
+          if (endInput) endInput.value = endDate;
+
+          // Update active button
+          document
+            .querySelectorAll(".date-btn")
+            .forEach((b) => b.classList.remove("active"));
+          this.classList.add("active");
+
+          form.submit();
+        });
+      });
+    </script>
   </body>
 </html>

@@ -1,615 +1,739 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Xóa Danh mục - EduShare Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/main.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
-    <link rel="stylesheet" th:href="@{/css/admin/categories.css}">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/categories.css}" />
     <style>
-        .delete-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .delete-card {
-            background: #ffffff;
-            border: 1px solid #e0e4e8;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .delete-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .warning-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            color: white;
-            font-size: 24px;
-        }
-        .delete-header h2 {
-            color: #2d3748;
-            margin-bottom: 8px;
-            font-size: 1.5rem;
-        }
-        .delete-header p {
-            color: #718096;
-            font-size: 1rem;
-        }
-        .category-info-section {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .category-info-section h3 {
-            color: #2d3748;
-            margin-bottom: 16px;
-            font-size: 1.1rem;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .info-label {
-            font-weight: 500;
-            color: #64748b;
-        }
-        .info-value {
-            font-weight: 600;
-            color: #1e293b;
-        }
-        .warning-section {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .warning-message h3 {
-            color: #dc2626;
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-        }
-        .warning-message ul {
-            color: #7f1d1d;
-            margin: 0;
-            padding-left: 20px;
-        }
-        .warning-message li {
-            margin-bottom: 8px;
-        }
-        .alternatives-section {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .alternatives-section h3 {
-            color: #16a34a;
-            margin-bottom: 16px;
-            font-size: 1.1rem;
-        }
-        .alternatives-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        .alternative-item {
-            background: white;
-            border: 1px solid #d1fae5;
-            border-radius: 6px;
-            padding: 16px;
-            text-align: center;
-        }
-        .alternative-item h4 {
-            color: #16a34a;
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-        .alternative-item p {
-            color: #15803d;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-        }
-        .form-section {
-            border-top: 1px solid #e2e8f0;
-            padding-top: 24px;
-        }
-        .form-section h3 {
-            color: #2d3748;
-            margin-bottom: 16px;
-            font-size: 1.1rem;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-        .form-textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            resize: vertical;
-        }
-        .form-textarea:focus {
-            outline: none;
-            border-color: #4361ee;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        }
-        .form-help {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: #374151;
-        }
-        .checkbox-label input[type="checkbox"] {
-            margin-right: 8px;
-        }
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-        }
-        .secondary-btn, .danger-btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .secondary-btn {
-            background: #f8f9fa;
-            color: #6c757d;
-            border: 1px solid #dee2e6;
-        }
-        .secondary-btn:hover {
-            background: #e9ecef;
-        }
-        .danger-btn {
-            background: #dc3545;
-            color: white;
-        }
-        .danger-btn:hover:not(:disabled) {
-            background: #c82333;
-        }
-        .danger-btn:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-        }
-        .required {
-            color: #dc2626;
-        }
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        .status-badge.active {
-            background: #d1fae5;
-            color: #16a34a;
-        }
-        .status-badge.inactive {
-            background: #fee2e2;
-            color: #dc2626;
-        }
+      .delete-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .delete-card {
+        background: #ffffff;
+        border: 1px solid #e0e4e8;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .delete-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .warning-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        color: white;
+        font-size: 24px;
+      }
+      .delete-header h2 {
+        color: #2d3748;
+        margin-bottom: 8px;
+        font-size: 1.5rem;
+      }
+      .delete-header p {
+        color: #718096;
+        font-size: 1rem;
+      }
+      .category-info-section {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+      .category-info-section h3 {
+        color: #2d3748;
+        margin-bottom: 16px;
+        font-size: 1.1rem;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .info-label {
+        font-weight: 500;
+        color: #64748b;
+      }
+      .info-value {
+        font-weight: 600;
+        color: #1e293b;
+      }
+      .warning-section {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+      .warning-message h3 {
+        color: #dc2626;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+      }
+      .warning-message ul {
+        color: #7f1d1d;
+        margin: 0;
+        padding-left: 20px;
+      }
+      .warning-message li {
+        margin-bottom: 8px;
+      }
+      .alternatives-section {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+      .alternatives-section h3 {
+        color: #16a34a;
+        margin-bottom: 16px;
+        font-size: 1.1rem;
+      }
+      .alternatives-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .alternative-item {
+        background: white;
+        border: 1px solid #d1fae5;
+        border-radius: 6px;
+        padding: 16px;
+        text-align: center;
+      }
+      .alternative-item h4 {
+        color: #16a34a;
+        margin-bottom: 8px;
+        font-size: 1rem;
+      }
+      .alternative-item p {
+        color: #15803d;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+      }
+      .form-section {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 24px;
+      }
+      .form-section h3 {
+        color: #2d3748;
+        margin-bottom: 16px;
+        font-size: 1.1rem;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        display: block;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 6px;
+      }
+      .form-textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        resize: vertical;
+      }
+      .form-textarea:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+      }
+      .form-help {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: #374151;
+      }
+      .checkbox-label input[type="checkbox"] {
+        margin-right: 8px;
+      }
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+      }
+      .secondary-btn,
+      .danger-btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .secondary-btn {
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+      }
+      .secondary-btn:hover {
+        background: #e9ecef;
+      }
+      .danger-btn {
+        background: #dc3545;
+        color: white;
+      }
+      .danger-btn:hover:not(:disabled) {
+        background: #c82333;
+      }
+      .danger-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+      }
+      .required {
+        color: #dc2626;
+      }
+      .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+      .status-badge.active {
+        background: #d1fae5;
+        color: #16a34a;
+      }
+      .status-badge.inactive {
+        background: #fee2e2;
+        color: #dc2626;
+      }
     </style>
-</head>
-<body class="admin-body">
+  </head>
+  <body class="admin-body">
     <!-- Admin Header -->
     <header class="admin-header">
-        <div class="admin-header-content">
-            <div class="admin-logo">
-                <a th:href="@{/admin/dashboard}" class="logo">
-                    <div class="logo-icon">E</div>
-                    <div class="logo-text">EduShare</div>
-                </a>
-            </div>
-            <div class="admin-header-actions">
-                <div class="admin-search">
-                    <input type="text" placeholder="Tìm kiếm...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-                <div class="dark-mode-toggle" id="darkModeToggle">
-                    <button><i class="dark-theme"></i></button>
-                </div>
-                <div class="admin-notifications">
-                    <a th:href="@{/admin/notifications}">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">5</span>
-                    </a>
-                </div>
-                <div class="admin-profile">
-                    <div class="admin-avatar">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
-                    </div>
-                    <div class="admin-info">
-                        <span class="admin-name">Nguyễn Văn A</span>
-                        <span class="admin-role">Quản trị viên</span>
-                    </div>
-                    <div class="admin-dropdown">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </div>
+      <div class="admin-header-content">
+        <div class="admin-logo">
+          <a th:href="@{/admin/dashboard}" class="logo">
+            <div class="logo-icon">E</div>
+            <div class="logo-text">EduShare</div>
+          </a>
         </div>
+        <div class="admin-header-actions">
+          <div class="admin-search">
+            <input type="text" placeholder="Tìm kiếm..." />
+            <button><i class="fas fa-search"></i></button>
+          </div>
+          <div class="dark-mode-toggle" id="darkModeToggle">
+            <button><i class="dark-theme"></i></button>
+          </div>
+          <div class="admin-notifications">
+            <a th:href="@{/admin/notifications}">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">5</span>
+            </a>
+          </div>
+          <div class="admin-profile">
+            <div class="admin-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                alt="Admin"
+              />
+            </div>
+            <div class="admin-info">
+              <span class="admin-name">Nguyễn Văn A</span>
+              <span class="admin-role">Quản trị viên</span>
+            </div>
+            <div class="admin-dropdown">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <!-- Admin Container -->
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
-            <nav class="admin-nav">
-                <ul class="admin-menu">
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/dashboard}">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Bảng điều khiển</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/users}">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý người dùng</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/documents}">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Quản lý tài liệu</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item active">
-                        <a th:href="@{/admin/categories}">
-                            <i class="fas fa-folder"></i>
-                            <span>Quản lý danh mục</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/tags}">
-                            <i class="fas fa-tags"></i>
-                            <span>Quản lý tags</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/comments}">
-                            <i class="fas fa-comments"></i>
-                            <span>Quản lý bình luận</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/reports}">
-                            <i class="fas fa-flag"></i>
-                            <span>Báo cáo vi phạm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/ip-bans}">
-                            <i class="fas fa-ban"></i>
-                            <span>IP bị cấm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/statistics}">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Thống kê</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item has-submenu">
-                        <a href="javascript:void(0)">
-                            <i class="fas fa-coins"></i>
-                            <span>Quản lý doanh thu</span>
-                            <i class="fas fa-chevron-down submenu-icon"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/revenue/coin-packages}">
-                                    <i class="fas fa-box"></i>
-                                    <span>Gói xu</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/revenue/transactions}">
-                                    <i class="fas fa-exchange-alt"></i>
-                                    <span>Giao dịch</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/revenue/withdrawals}">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                    <span>Yêu cầu rút tiền</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/settings}">
-                            <i class="fas fa-cog"></i>
-                            <span>Cài đặt</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/logout}">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Đăng xuất</span>
-                        </a>
-                    </li>
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <nav class="admin-nav">
+          <ul class="admin-menu">
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/dashboard}">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Bảng điều khiển</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/users}">
+                <i class="fas fa-users"></i>
+                <span>Quản lý người dùng</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/documents}">
+                <i class="fas fa-file-alt"></i>
+                <span>Quản lý tài liệu</span>
+              </a>
+            </li>
+            <li class="admin-menu-item active">
+              <a th:href="@{/admin/categories}">
+                <i class="fas fa-folder"></i>
+                <span>Quản lý danh mục</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/tags}">
+                <i class="fas fa-tags"></i>
+                <span>Quản lý tags</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/comments}">
+                <i class="fas fa-comments"></i>
+                <span>Quản lý bình luận</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/reports}">
+                <i class="fas fa-flag"></i>
+                <span>Báo cáo vi phạm</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/ip-bans}">
+                <i class="fas fa-ban"></i>
+                <span>IP bị cấm</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/statistics}">
+                <i class="fas fa-chart-bar"></i>
+                <span>Thống kê</span>
+              </a>
+            </li>
+            <li class="admin-menu-item has-submenu">
+              <a href="javascript:void(0)">
+                <i class="fas fa-coins"></i>
+                <span>Quản lý doanh thu</span>
+                <i class="fas fa-chevron-down submenu-icon"></i>
+              </a>
+              <ul class="submenu">
+                <li class="submenu-item">
+                  <a th:href="@{/admin/coin-packages}">
+                    <i class="fas fa-box"></i>
+                    <span>Gói xu</span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a th:href="@{/admin/transactions}">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Giao dịch</span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a th:href="@{/admin/withdrawals}">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Yêu cầu rút tiền</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/admin/settings}">
+                <i class="fas fa-cog"></i>
+                <span>Cài đặt</span>
+              </a>
+            </li>
+            <li class="admin-menu-item">
+              <a th:href="@{/logout}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Đăng xuất</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <!-- Error Message -->
+        <div th:if="${error}" class="error-message">
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}">Lỗi</span>
+          </div>
+        </div>
+
+        <!-- Admin Content Header -->
+        <div class="admin-content-header">
+          <div>
+            <h1 class="admin-page-title">Xóa Danh mục</h1>
+            <div class="admin-breadcrumbs">
+              <a th:href="@{/admin/dashboard}">Admin</a>
+              <span>/</span>
+              <a th:href="@{/admin/categories}">Quản lý Danh mục</a>
+              <span>/</span>
+              <span th:text="${category != null ? category.name : 'Danh mục'}"
+                >Category Name</span
+              >
+              <span>/</span>
+              <span>Xóa</span>
+            </div>
+          </div>
+          <div class="dashboard-actions">
+            <a th:href="@{/admin/categories}" class="secondary-btn">
+              <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation -->
+        <div class="delete-container" th:if="${category != null}">
+          <div class="delete-card">
+            <div class="delete-header">
+              <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <h2>Xác nhận xóa danh mục</h2>
+              <p>
+                Bạn sắp xóa danh mục
+                <strong th:text="${category.name}">Category Name</strong>
+              </p>
+            </div>
+
+            <!-- Category Information -->
+            <div class="category-info-section">
+              <h3>Thông tin danh mục sẽ bị xóa:</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Tên danh mục:</span>
+                  <span class="info-value" th:text="${category.name}"
+                    >Category Name</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Số tài liệu:</span>
+                  <span class="info-value" th:text="${category.documents ?: 0}"
+                    >0</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Số danh mục con:</span>
+                  <span
+                    class="info-value"
+                    th:text="${category.subcategories ?: 0}"
+                    >0</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Trạng thái:</span>
+                  <span
+                    class="status-badge"
+                    th:classappend="${category.status}"
+                  >
+                    <span
+                      th:text="${category.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}"
+                      >Hoạt động</span
+                    >
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Người tạo:</span>
+                  <span
+                    class="info-value"
+                    th:text="${category.createdByName ?: 'Không xác định'}"
+                    >Admin</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Ngày tạo:</span>
+                  <span
+                    class="info-value"
+                    th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')}"
+                    >01/01/2024 10:30</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Warning Messages -->
+            <div class="warning-section">
+              <div class="warning-message">
+                <h3>
+                  <i class="fas fa-exclamation-circle"></i> Cảnh báo quan trọng
+                </h3>
+                <ul>
+                  <li>
+                    Hành động này sẽ xóa vĩnh viễn danh mục và không thể hoàn
+                    tác
+                  </li>
+                  <li>Tài liệu thuộc danh mục này sẽ bị ảnh hưởng</li>
+                  <li>Danh mục con (nếu có) cũng sẽ bị xóa</li>
+                  <li>Báo cáo thống kê có thể bị ảnh hưởng</li>
                 </ul>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="admin-content">
-            <!-- Error Message -->
-            <div th:if="${error}" class="error-message">
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span th:text="${error}">Lỗi</span>
-                </div>
+              </div>
             </div>
 
-            <!-- Admin Content Header -->
-            <div class="admin-content-header">
-                <div>
-                    <h1 class="admin-page-title">Xóa Danh mục</h1>
-                    <div class="admin-breadcrumbs">
-                        <a th:href="@{/admin/dashboard}">Admin</a>
-                        <span>/</span>
-                        <a th:href="@{/admin/categories}">Quản lý Danh mục</a>
-                        <span>/</span>
-                        <span th:text="${category != null ? category.name : 'Danh mục'}">Category Name</span>
-                        <span>/</span>
-                        <span>Xóa</span>
-                    </div>
+            <!-- Alternative Actions -->
+            <div class="alternatives-section">
+              <h3>Hành động thay thế:</h3>
+              <div class="alternatives-grid">
+                <div class="alternative-item">
+                  <h4><i class="fas fa-pause"></i> Vô hiệu hóa</h4>
+                  <p>Vô hiệu hóa danh mục thay vì xóa vĩnh viễn</p>
+                  <form
+                    th:action="@{/admin/categories/{id}/toggle-status(id=${category.id})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button type="submit" class="secondary-btn">
+                      Vô hiệu hóa
+                    </button>
+                  </form>
                 </div>
-                <div class="dashboard-actions">
-                    <a th:href="@{/admin/categories}" class="secondary-btn">
-                        <i class="fas fa-arrow-left"></i> Quay lại
-                    </a>
+                <div class="alternative-item">
+                  <h4><i class="fas fa-edit"></i> Chỉnh sửa</h4>
+                  <p>Chỉnh sửa thông tin danh mục thay vì xóa</p>
+                  <a
+                    th:href="@{/admin/categories/edit/{id}(id=${category.id})}"
+                    class="secondary-btn"
+                    >Chỉnh sửa</a
+                  >
                 </div>
+              </div>
             </div>
 
-            <!-- Delete Confirmation -->
-            <div class="delete-container" th:if="${category != null}">
-                <div class="delete-card">
-                    <div class="delete-header">
-                        <div class="warning-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <h2>Xác nhận xóa danh mục</h2>
-                        <p>
-                            Bạn sắp xóa danh mục <strong th:text="${category.name}">Category Name</strong>
-                        </p>
-                    </div>
-
-                    <!-- Category Information -->
-                    <div class="category-info-section">
-                        <h3>Thông tin danh mục sẽ bị xóa:</h3>
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <span class="info-label">Tên danh mục:</span>
-                                <span class="info-value" th:text="${category.name}">Category Name</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Số tài liệu:</span>
-                                <span class="info-value" th:text="${category.documents ?: 0}">0</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Số danh mục con:</span>
-                                <span class="info-value" th:text="${category.subcategories ?: 0}">0</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Trạng thái:</span>
-                                <span class="status-badge" th:classappend="${category.status}">
-                                    <span th:text="${category.status == 'active' ? 'Hoạt động' : 'Vô hiệu hóa'}">Hoạt động</span>
-                                </span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Người tạo:</span>
-                                <span class="info-value" th:text="${category.createdByName ?: 'Không xác định'}">Admin</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Ngày tạo:</span>
-                                <span class="info-value" th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:30</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Warning Messages -->
-                    <div class="warning-section">
-                        <div class="warning-message">
-                            <h3><i class="fas fa-exclamation-circle"></i> Cảnh báo quan trọng</h3>
-                            <ul>
-                                <li>Hành động này sẽ xóa vĩnh viễn danh mục và không thể hoàn tác</li>
-                                <li>Tài liệu thuộc danh mục này sẽ bị ảnh hưởng</li>
-                                <li>Danh mục con (nếu có) cũng sẽ bị xóa</li>
-                                <li>Báo cáo thống kê có thể bị ảnh hưởng</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Alternative Actions -->
-                    <div class="alternatives-section">
-                        <h3>Hành động thay thế:</h3>
-                        <div class="alternatives-grid">
-                            <div class="alternative-item">
-                                <h4><i class="fas fa-pause"></i> Vô hiệu hóa</h4>
-                                <p>Vô hiệu hóa danh mục thay vì xóa vĩnh viễn</p>
-                                <form th:action="@{/admin/categories/{id}/toggle-status(id=${category.id})}" method="post" style="display: inline;">
-                                    <button type="submit" class="secondary-btn">Vô hiệu hóa</button>
-                                </form>
-                            </div>
-                            <div class="alternative-item">
-                                <h4><i class="fas fa-edit"></i> Chỉnh sửa</h4>
-                                <p>Chỉnh sửa thông tin danh mục thay vì xóa</p>
-                                <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="secondary-btn">Chỉnh sửa</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Delete Form -->
-                    <form th:action="@{/admin/categories/{id}/delete(id=${category.id})}" method="post" id="deleteCategoryForm">
-                        <div class="form-section">
-                            <h3>Xác nhận xóa</h3>
-                            <div class="form-group">
-                                <label for="reason">Lý do xóa <span class="required">*</span></label>
-                                <textarea id="reason" name="reason" class="form-textarea" 
-                                    placeholder="Nhập lý do xóa danh mục..." rows="3" required></textarea>
-                                <div class="form-help">Lý do xóa sẽ được ghi lại trong lịch sử</div>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="confirmDelete" required>
-                                    Tôi hiểu rằng hành động này không thể hoàn tác và đồng ý xóa danh mục
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Form Actions -->
-                        <div class="form-actions">
-                            <button type="button" class="secondary-btn" id="cancelBtn">
-                                <i class="fas fa-times"></i> Hủy bỏ
-                            </button>
-                            <button type="submit" class="danger-btn" id="confirmDeleteBtn" disabled>
-                                <i class="fas fa-trash"></i> Xác nhận xóa
-                            </button>
-                        </div>
-                    </form>
+            <!-- Delete Form -->
+            <form
+              th:action="@{/admin/categories/{id}/delete(id=${category.id})}"
+              method="post"
+              id="deleteCategoryForm"
+            >
+              <div class="form-section">
+                <h3>Xác nhận xóa</h3>
+                <div class="form-group">
+                  <label for="reason"
+                    >Lý do xóa <span class="required">*</span></label
+                  >
+                  <textarea
+                    id="reason"
+                    name="reason"
+                    class="form-textarea"
+                    placeholder="Nhập lý do xóa danh mục..."
+                    rows="3"
+                    required
+                  ></textarea>
+                  <div class="form-help">
+                    Lý do xóa sẽ được ghi lại trong lịch sử
+                  </div>
                 </div>
-            </div>
-        </main>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="confirmDelete" required />
+                    Tôi hiểu rằng hành động này không thể hoàn tác và đồng ý xóa
+                    danh mục
+                  </label>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <button type="button" class="secondary-btn" id="cancelBtn">
+                  <i class="fas fa-times"></i> Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  class="danger-btn"
+                  id="confirmDeleteBtn"
+                  disabled
+                >
+                  <i class="fas fa-trash"></i> Xác nhận xóa
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/admin/admin.js}"></script>
     <script th:src="@{/js/admin/categories.js}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const confirmCheckbox = document.getElementById('confirmDelete');
-            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const reasonTextarea = document.getElementById('reason');
+      document.addEventListener("DOMContentLoaded", function () {
+        const confirmCheckbox = document.getElementById("confirmDelete");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const reasonTextarea = document.getElementById("reason");
 
-            // Enable/disable delete button based on checkbox and reason
-            function updateDeleteButton() {
-                const isChecked = confirmCheckbox.checked;
-                const hasReason = reasonTextarea.value.trim().length > 0;
-                confirmDeleteBtn.disabled = !(isChecked && hasReason);
-            }
+        // Enable/disable delete button based on checkbox and reason
+        function updateDeleteButton() {
+          const isChecked = confirmCheckbox.checked;
+          const hasReason = reasonTextarea.value.trim().length > 0;
+          confirmDeleteBtn.disabled = !(isChecked && hasReason);
+        }
 
-            confirmCheckbox.addEventListener('change', updateDeleteButton);
-            reasonTextarea.addEventListener('input', updateDeleteButton);
+        confirmCheckbox.addEventListener("change", updateDeleteButton);
+        reasonTextarea.addEventListener("input", updateDeleteButton);
 
-            // Cancel button
-            cancelBtn.addEventListener('click', function() {
-                window.location.href = '/admin/categories';
-            });
-
-            // Form submission confirmation
-            document.getElementById('deleteCategoryForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                showConfirmModal();
-            });
+        // Cancel button
+        cancelBtn.addEventListener("click", function () {
+          window.location.href = "/admin/categories";
         });
 
-        // Global functions for modal
-        let isSubmitting = false;
-        
-        function showConfirmModal() {
-            document.getElementById("confirmModal").style.display = "flex";
-        }
+        // Form submission confirmation
+        document
+          .getElementById("deleteCategoryForm")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+            showConfirmModal();
+          });
+      });
 
-        function hideConfirmModal() {
-            document.getElementById("confirmModal").style.display = "none";
-        }
+      // Global functions for modal
+      let isSubmitting = false;
 
-        function confirmDelete() {
-            if (isSubmitting) return;
-            
-            isSubmitting = true;
-            hideConfirmModal();
-            
-            const form = document.getElementById("deleteCategoryForm");
-            const formData = new FormData(form);
-            
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
-                    window.location.href = '/admin/categories';
-                } else {
-                    alert('Có lỗi xảy ra khi xóa danh mục!');
-                    isSubmitting = false;
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi xóa danh mục!');
-                isSubmitting = false;
-            });
-        }
+      function showConfirmModal() {
+        document.getElementById("confirmModal").style.display = "flex";
+      }
+
+      function hideConfirmModal() {
+        document.getElementById("confirmModal").style.display = "none";
+      }
+
+      function confirmDelete() {
+        if (isSubmitting) return;
+
+        isSubmitting = true;
+        hideConfirmModal();
+
+        const form = document.getElementById("deleteCategoryForm");
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              window.location.href = "/admin/categories";
+            } else {
+              alert("Có lỗi xảy ra khi xóa danh mục!");
+              isSubmitting = false;
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Có lỗi xảy ra khi xóa danh mục!");
+            isSubmitting = false;
+          });
+      }
     </script>
 
     <!-- Modal xác nhận xóa -->
-    <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <div style="color: #f59e0b; font-size: 48px; margin-bottom: 20px;">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 style="color: #1f2937; margin-bottom: 16px; font-size: 20px;">Xác nhận xóa danh mục</h3>
-            <p style="color: #6b7280; margin-bottom: 24px; line-height: 1.5;">
-                Bạn có chắc chắn muốn xóa danh mục này không?<br>
-                Hành động này không thể hoàn tác.
-            </p>
-            <div style="display: flex; gap: 12px; justify-content: center;">
-                <button type="button" onclick="hideConfirmModal()" style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                    <i class="fas fa-times"></i> Hủy
-                </button>
-                <button type="button" onclick="confirmDelete()" style="padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                    <i class="fas fa-trash"></i> Xóa danh mục
-                </button>
-            </div>
+    <div
+      id="confirmModal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          max-width: 500px;
+          width: 90%;
+          text-align: center;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        "
+      >
+        <div style="color: #f59e0b; font-size: 48px; margin-bottom: 20px">
+          <i class="fas fa-exclamation-triangle"></i>
         </div>
+        <h3 style="color: #1f2937; margin-bottom: 16px; font-size: 20px">
+          Xác nhận xóa danh mục
+        </h3>
+        <p style="color: #6b7280; margin-bottom: 24px; line-height: 1.5">
+          Bạn có chắc chắn muốn xóa danh mục này không?<br />
+          Hành động này không thể hoàn tác.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center">
+          <button
+            type="button"
+            onclick="hideConfirmModal()"
+            style="
+              padding: 10px 20px;
+              background: #f3f4f6;
+              color: #374151;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: 500;
+            "
+          >
+            <i class="fas fa-times"></i> Hủy
+          </button>
+          <button
+            type="button"
+            onclick="confirmDelete()"
+            style="
+              padding: 10px 20px;
+              background: #ef4444;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: 500;
+            "
+          >
+            <i class="fas fa-trash"></i> Xóa danh mục
+          </button>
+        </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

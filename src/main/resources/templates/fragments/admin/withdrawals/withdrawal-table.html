@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <!-- Withdrawals Table Fragment -->
+    <div th:fragment="withdrawal-table" class="table-container">
+      <table class="data-table withdrawals-table">
+        <thead>
+          <tr>
+            <th>
+              <a
+                th:href="@{/admin/withdrawals(page=${currentPage}, size=${size}, sortBy='code', sortDir=${sortBy == 'code' and sortDir == 'asc' ? 'desc' : 'asc'}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+                class="sortable-header"
+                th:classappend="${sortBy == 'code' ? (sortDir == 'asc' ? 'sort-asc' : 'sort-desc') : ''}"
+              >
+                Mã withdrawal
+                <i class="fas fa-sort"></i>
+              </a>
+            </th>
+            <th>Tên tài khoản</th>
+            <th>
+              <a
+                th:href="@{/admin/withdrawals(page=${currentPage}, size=${size}, sortBy='amount', sortDir=${sortBy == 'amount' and sortDir == 'asc' ? 'desc' : 'asc'}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+                class="sortable-header"
+                th:classappend="${sortBy == 'amount' ? (sortDir == 'asc' ? 'sort-asc' : 'sort-desc') : ''}"
+              >
+                Số tiền
+                <i class="fas fa-sort"></i>
+              </a>
+            </th>
+            <th>Phương thức</th>
+            <th>
+              <a
+                th:href="@{/admin/withdrawals(page=${currentPage}, size=${size}, sortBy='createdAt', sortDir=${sortBy == 'createdAt' and sortDir == 'asc' ? 'desc' : 'asc'}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+                class="sortable-header"
+                th:classappend="${sortBy == 'createdAt' ? (sortDir == 'asc' ? 'sort-asc' : 'sort-desc') : ''}"
+              >
+                Ngày tạo
+                <i class="fas fa-sort"></i>
+              </a>
+            </th>
+            <th>
+              <a
+                th:href="@{/admin/withdrawals(page=${currentPage}, size=${size}, sortBy='status', sortDir=${sortBy == 'status' and sortDir == 'asc' ? 'desc' : 'asc'}, keyword=${keyword}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
+                class="sortable-header"
+                th:classappend="${sortBy == 'status' ? (sortDir == 'asc' ? 'sort-asc' : 'sort-desc') : ''}"
+              >
+                Trạng thái
+                <i class="fas fa-sort"></i>
+              </a>
+            </th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="withdrawal, iterStat : ${withdrawals}">
+            <td>
+              <span class="withdrawal-code" th:text="${withdrawal.code}"
+                >WD001</span
+              >
+            </td>
+            <td>
+              <div class="user-info">
+                <div class="user-details">
+                  <span class="user-name" th:text="${withdrawal.user.username}"
+                    >Nguyễn Văn A</span
+                  >
+                </div>
+              </div>
+            </td>
+            <td
+              class="amount"
+              th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+            >
+              2.500.000 ₫
+            </td>
+            <td>
+              <div class="payment-method">
+                <i
+                  th:class="${withdrawal.paymentMethod == 'BANK_TRANSFER' ? 'fas fa-university' : 'fas fa-credit-card'}"
+                ></i>
+                <span th:text="${withdrawal.paymentMethod}">Ngân hàng</span>
+              </div>
+            </td>
+            <td
+              th:text="${#temporals.format(withdrawal.createdAt, 'dd/MM/yyyy HH:mm')}"
+            >
+              15/01/2024 14:30
+            </td>
+            <td>
+              <span
+                class="status-badge"
+                th:classappend="${withdrawal.status.name().toLowerCase()}"
+                th:text="${withdrawal.status.displayName}"
+              >
+                Chờ duyệt
+              </span>
+            </td>
+            <td>
+              <div
+                th:replace="~{fragments/admin/withdrawals/withdrawal-actions :: withdrawal-actions(withdrawal=${withdrawal})}"
+              ></div>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(withdrawals)}">
+            <td colspan="8" class="text-center empty-state">
+              <div class="empty-content">
+                <i class="fas fa-money-bill-wave empty-icon"></i>
+                <h4>Không có withdrawal nào</h4>
+                <p>
+                  Chưa có yêu cầu rút tiền nào được tạo hoặc không có kết quả
+                  phù hợp với bộ lọc.
+                </p>
+                <a th:href="@{/admin/withdrawals/create}" class="primary-btn">
+                  <i class="fas fa-plus"></i>
+                  Tạo withdrawal mới
+                </a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

@@ -51,7 +51,7 @@ public class CoinPackageController {
             }
         }
 
-        packagePage = coinPackageService.searchAndFilterPackages(keyword, statusEnum, pageable);
+        packagePage = coinPackageService.getAllPackagesIncludingDeleted(pageable);
 
         // Thêm dữ liệu vào model
         model.addAttribute("packages", packagePage.getContent());
@@ -176,75 +176,59 @@ public class CoinPackageController {
      * Xóa gói xu (soft delete)
      */
     @PostMapping("/{id}/delete")
-    public String deletePackage(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deletePackage(@PathVariable Long id,
+            @RequestParam(required = false) String reason,
+            RedirectAttributes redirectAttributes) {
+        System.out.println("=== DELETE PACKAGE START ===");
+        System.out.println("Package ID: " + id);
+        System.out.println("Reason: " + reason);
+
+        try {
+            System.out.println("Finding package...");
+            Optional<CoinPackage> packageOpt = coinPackageService.getPackageById(id);
+            if (packageOpt.isPresent()) {
+                System.out.println("Package found: " + packageOpt.get().getName());
+                System.out.println("Calling delete service...");
+                coinPackageService.deletePackage(id);
+                System.out.println("Delete service completed");
+
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Xóa gói xu thành công: " + packageOpt.get().getName());
+            } else {
+                System.out.println("Package not found");
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy gói xu");
+            }
+        } catch (Exception e) {
+            System.out.println("ERROR: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Lỗi khi xóa gói xu: " + e.getMessage());
+        }
+
+        System.out.println("Redirecting to /admin/coin-packages");
+        System.out.println("=== DELETE PACKAGE END ===");
+        return "redirect:/admin/coin-packages";
+    }
+
+    /**
+     * Khôi phục gói xu đã xóa mềm
+     */
+    @PostMapping("/{id}/restore")
+    public String restorePackage(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             Optional<CoinPackage> packageOpt = coinPackageService.getPackageById(id);
             if (packageOpt.isPresent()) {
-                coinPackageService.deletePackage(id);
+                coinPackageService.restorePackage(id);
                 redirectAttributes.addFlashAttribute("successMessage",
-                        "Xóa gói xu thành công: " + packageOpt.get().getName());
+                        "Khôi phục gói xu thành công: " + packageOpt.get().getName());
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy gói xu");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Lỗi khi xóa gói xu: " + e.getMessage());
+                    "Lỗi khi khôi phục gói xu: " + e.getMessage());
         }
         return "redirect:/admin/coin-packages";
     }
 
-    /**
-     * Xử lý bulk actions
-     */
-    @PostMapping("/bulk-action")
-    public String bulkAction(@RequestParam String action,
-            @RequestParam(value = "packageIds", required = false) List<Long> packageIds,
-            RedirectAttributes redirectAttributes) {
-
-        if (packageIds == null || packageIds.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn ít nhất một gói xu");
-            return "redirect:/admin/coin-packages";
-        }
-
-        try {
-            switch (action) {
-                case "activate":
-                    coinPackageService.updatePackagesStatus(packageIds, CoinPackage.PackageStatus.ACTIVE);
-                    redirectAttributes.addFlashAttribute("successMessage",
-                            "Đã kích hoạt " + packageIds.size() + " gói xu");
-                    break;
-                case "deactivate":
-                    coinPackageService.updatePackagesStatus(packageIds, CoinPackage.PackageStatus.INACTIVE);
-                    redirectAttributes.addFlashAttribute("successMessage",
-                            "Đã tắt kích hoạt " + packageIds.size() + " gói xu");
-                    break;
-                case "promotion":
-                    coinPackageService.updatePackagesStatus(packageIds, CoinPackage.PackageStatus.PROMOTION);
-                    redirectAttributes.addFlashAttribute("successMessage",
-                            "Đã đánh dấu khuyến mãi " + packageIds.size() + " gói xu");
-                    break;
-                case "delete":
-                    coinPackageService.deletePackages(packageIds);
-                    redirectAttributes.addFlashAttribute("successMessage",
-                            "Đã xóa " + packageIds.size() + " gói xu");
-                    break;
-                default:
-                    redirectAttributes.addFlashAttribute("errorMessage", "Hành động không hợp lệ");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Lỗi khi thực hiện hành động: " + e.getMessage());
-        }
-
-        return "redirect:/admin/coin-packages";
-    }
-
-    /**
-     * API endpoint để generate code tự động
-     */
-    @PostMapping("/generate-code")
-    @ResponseBody
-    public String generateCode(@RequestParam String name) {
-        return coinPackageService.generatePackageCode(name);
-    }
 }

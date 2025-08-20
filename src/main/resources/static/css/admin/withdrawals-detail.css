@@ -1,0 +1,966 @@
+/**
+ * Withdrawal Detail Page Styles
+ * Specific styles for the withdrawal detail view
+ */
+
+/* Detail Container */
+.detail-container {
+  display: grid;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Detail Cards */
+.detail-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.detail-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.detail-card .card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-card .card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-card .card-content {
+  padding: 24px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.status-badge.status-pending {
+  background: rgba(255, 193, 7, 0.2);
+  color: #fff3cd;
+}
+
+.status-badge.status-completed {
+  background: rgba(40, 167, 69, 0.2);
+  color: #d4edda;
+}
+
+.status-badge.status-failed {
+  background: rgba(220, 53, 69, 0.2);
+  color: #f8d7da;
+}
+
+.status-badge.status-cancelled {
+  background: rgba(108, 117, 125, 0.2);
+  color: #e2e3e5;
+}
+
+/* Main Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+}
+
+.info-section h3 {
+  color: #495057;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row label {
+  font-weight: 500;
+  color: #6c757d;
+  min-width: 140px;
+}
+
+.info-row .value {
+  font-weight: 500;
+  color: #495057;
+  text-align: right;
+  flex: 1;
+}
+
+.info-row .value.code-value {
+  font-family: "Courier New", monospace;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.info-row .value.amount-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.info-row .value.deleted-value {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.info-row .value.status-value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+}
+
+.info-row .value.status-value.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.info-row .value.status-value.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.info-row .value.status-value.status-failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.info-row .value.status-value.status-cancelled {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+/* Timeline Styles */
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e9ecef;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -22px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  background: #6c757d;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 8px;
+}
+
+.timeline-item.current .timeline-marker {
+  background: #28a745;
+  width: 20px;
+  height: 20px;
+  left: -24px;
+  font-size: 10px;
+}
+
+.timeline-content {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #e9ecef;
+}
+
+.timeline-item.current .timeline-content {
+  background: #d4edda;
+  border-left-color: #28a745;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.timeline-status {
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+
+.timeline-status.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.timeline-status.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.timeline-status.status-failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.timeline-status.status-cancelled {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.timeline-status.status-created {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.timeline-time {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.timeline-description {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Notes Section */
+.existing-notes {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border-left: 4px solid #007bff;
+}
+
+.notes-content {
+  line-height: 1.6;
+  color: #495057;
+  white-space: pre-wrap;
+}
+
+.no-notes {
+  text-align: center;
+  padding: 32px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.no-notes i {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Add Note Form */
+.add-note-form {
+  border-top: 1px solid #e9ecef;
+  padding-top: 24px;
+}
+
+.add-note-form h4 {
+  color: #495057;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.add-note-form .form-group {
+  margin-bottom: 16px;
+}
+
+.add-note-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.add-note-form textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.add-note-form .form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Action Buttons */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #545b62;
+  transform: translateY(-1px);
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-info:hover {
+  background: #138496;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #1e7e34;
+  transform: translateY(-1px);
+}
+
+.btn-disabled {
+  background: #e9ecef !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+  border-top: 1px solid #e9ecef;
+  padding-top: 24px;
+}
+
+.quick-actions h4 {
+  color: #495057;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.status-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Withdrawal Code in Header */
+.withdrawal-code {
+  font-family: "Courier New", monospace;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-left: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .detail-container {
+    gap: 16px;
+    margin: 0 16px;
+  }
+
+  .detail-card .card-header {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .detail-card .card-content {
+    padding: 16px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .info-row label {
+    min-width: auto;
+  }
+
+  .info-row .value {
+    text-align: left;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    justify-content: center;
+  }
+
+  .timeline {
+    padding-left: 20px;
+  }
+
+  .timeline::before {
+    left: 10px;
+  }
+
+  .timeline-marker {
+    left: -17px;
+  }
+
+  .timeline-item.current .timeline-marker {
+    left: -19px;
+  }
+
+  .timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .status-buttons {
+    flex-direction: column;
+  }
+
+  .add-note-form .form-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-container {
+    margin: 0 8px;
+  }
+
+  .detail-card .card-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .withdrawal-code {
+    display: block;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .detail-container {
+    box-shadow: none;
+    max-width: none;
+    margin: 0;
+  }
+
+  .detail-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+    margin-bottom: 20px;
+  }
+
+  .detail-card .card-header {
+    background: #f8f9fa !important;
+    color: #495057 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .action-buttons,
+  .add-note-form,
+  .quick-actions {
+    display: none;
+  }
+
+  .btn {
+    display: none;
+  }
+}
+
+/* Animation for status changes */
+@keyframes statusChange {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.status-value.status-updated {
+  animation: statusChange 0.5s ease-in-out;
+}
+
+/* Loading states */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn .fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* Enhanced Mobile/Tablet Responsive Design */
+@media (max-width: 1024px) {
+  .detail-container {
+    max-width: 100%;
+    margin: 0 1rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .detail-container {
+    margin: 0 0.5rem;
+    gap: 1rem;
+  }
+
+  .detail-card .card-header {
+    padding: 1rem;
+  }
+
+  .detail-card .card-header h2 {
+    font-size: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .withdrawal-code {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .detail-card .card-content {
+    padding: 1rem;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.75rem 0;
+  }
+
+  .info-row label {
+    min-width: auto;
+    font-size: 0.85rem;
+  }
+
+  .info-row .value {
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  .timeline {
+    padding-left: 15px;
+  }
+
+  .timeline::before {
+    left: 7px;
+  }
+
+  .timeline-marker {
+    left: -12px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .timeline-item.current .timeline-marker {
+    left: -14px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .timeline-content {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .timeline-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-status {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+
+  .timeline-time {
+    font-size: 0.75rem;
+  }
+
+  .add-note-form textarea {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .detail-container {
+    margin: 0;
+    gap: 0.75rem;
+  }
+
+  .detail-card {
+    border-radius: 8px;
+  }
+
+  .detail-card .card-header {
+    padding: 0.75rem;
+  }
+
+  .detail-card .card-content {
+    padding: 0.75rem;
+  }
+
+  .info-section h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .info-row {
+    padding: 0.5rem 0;
+  }
+
+  .timeline-content {
+    padding: 0.5rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .status-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .detail-container {
+    gap: 1rem;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .timeline-content {
+    padding: 0.75rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .action-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .timeline-marker {
+    width: 20px;
+    height: 20px;
+  }
+
+  .timeline-item.current .timeline-marker {
+    width: 24px;
+    height: 24px;
+  }
+
+  .add-note-form textarea {
+    min-height: 120px;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .timeline-marker,
+  .status-badge {
+    border-width: 0.5px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .detail-card,
+  .btn,
+  .timeline-marker,
+  .status-value.status-updated {
+    transition: none;
+    animation: none;
+  }
+
+  .btn .fa-spinner {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .detail-card {
+    border: 2px solid;
+  }
+
+  .status-badge,
+  .timeline-status {
+    border: 2px solid;
+    font-weight: 700;
+  }
+
+  .btn {
+    border: 2px solid;
+    font-weight: 600;
+  }
+
+  .timeline-marker {
+    border: 2px solid;
+  }
+
+  .info-row .value.code-value {
+    border: 1px solid;
+  }
+}
+
+/* Focus management for accessibility */
+.detail-card:focus-within {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
+
+.add-note-form textarea:focus {
+  outline: none;
+}
+
+.btn:focus {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
+
+/* Loading states for mobile */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Utility classes for mobile */
+.mobile-hidden {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+}
+
+/* Sticky elements for mobile */
+@media (max-width: 768px) {
+  .detail-card .card-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .quick-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid #dee2e6;
+    margin: 0 -1rem -1rem -1rem;
+    padding: 1rem;
+  }
+}
+
+/* Safe area adjustments for mobile devices with notches */
+@supports (padding: max(0px)) {
+  @media (max-width: 768px) {
+    .detail-container {
+      padding-left: max(0.5rem, env(safe-area-inset-left));
+      padding-right: max(0.5rem, env(safe-area-inset-right));
+    }
+
+    .quick-actions {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+  }
+}

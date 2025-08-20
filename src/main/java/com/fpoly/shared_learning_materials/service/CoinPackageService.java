@@ -20,10 +20,17 @@ public class CoinPackageService {
     private CoinPackageRepository coinPackageRepository;
 
     /**
-     * Lấy tất cả gói xu với phân trang
+     * Lấy tất cả gói xu với phân trang (chỉ active)
      */
     public Page<CoinPackage> getAllPackages(Pageable pageable) {
         return coinPackageRepository.findAllActive(pageable);
+    }
+
+    /**
+     * Lấy tất cả gói xu bao gồm cả đã xóa mềm
+     */
+    public Page<CoinPackage> getAllPackagesIncludingDeleted(Pageable pageable) {
+        return coinPackageRepository.findAll(pageable);
     }
 
     /**
@@ -100,6 +107,18 @@ public class CoinPackageService {
         if (packageOpt.isPresent()) {
             CoinPackage coinPackage = packageOpt.get();
             coinPackage.setDeletedAt(LocalDateTime.now());
+            coinPackageRepository.save(coinPackage);
+        }
+    }
+
+    /**
+     * Khôi phục gói xu đã xóa mềm
+     */
+    public void restorePackage(Long id) {
+        Optional<CoinPackage> packageOpt = coinPackageRepository.findById(id);
+        if (packageOpt.isPresent()) {
+            CoinPackage coinPackage = packageOpt.get();
+            coinPackage.setDeletedAt(null);
             coinPackageRepository.save(coinPackage);
         }
     }

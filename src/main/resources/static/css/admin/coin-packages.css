@@ -2128,7 +2128,7 @@ body.dark-mode .avatar-placeholder {
 .package-info-section {
   padding: 2rem 2.5rem;
   border-bottom: 1px solid #e5e7eb;
-  background: #f8faff;
+  /* background: #f8faff; */
   border-radius: 12px 12px 0 0;
 }
 
@@ -2847,8 +2847,9 @@ body.dark-mode .avatar-placeholder {
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(1000px, 1fr));
   gap: 1rem;
+  justify-items: stretch;
 }
 
 .impact-section {
@@ -3366,4 +3367,183 @@ body.dark-mode .avatar-placeholder {
 
 .input-group .secondary-btn i {
   font-size: 0.875rem;
+}
+
+/* Pagination Styles */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.pagination-info strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.page-link:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.page-link.current {
+  background: #4361ee;
+  border-color: #4361ee;
+  color: white;
+  cursor: default;
+}
+
+.page-link.current:hover {
+  background: #4361ee;
+  border-color: #4361ee;
+}
+
+.page-link i {
+  font-size: 0.75rem;
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+
+  .pagination-info {
+    text-align: center;
+  }
+}
+/* Pagination Buttons */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  background: #4361ee;
+  border-color: #4361ee;
+  color: white;
+}
+
+.pagination-btn.active:hover {
+  background: #3b5bdb;
+  border-color: #3b5bdb;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.prev-btn,
+.next-btn {
+  font-size: 0.75rem;
+}
+/* Deleted Row Styles */
+.deleted-row {
+  opacity: 0.6;
+  background-color: #f9f9f9;
+}
+
+.deleted-row td {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.deleted-row .action-buttons {
+  text-decoration: none; /* Don't strike through buttons */
+}
+
+.restore-package {
+  background-color: #10b981;
+  color: white;
+  border: 1px solid #10b981;
+}
+
+.restore-package:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.deleted-label {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  text-decoration: none;
+}
+
+/* Override line-through for specific elements in deleted rows */
+.deleted-row .action-buttons,
+.deleted-row .status-badge,
+.deleted-row .deleted-label {
+  text-decoration: none;
 }

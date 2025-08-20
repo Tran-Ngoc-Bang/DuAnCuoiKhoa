@@ -202,6 +202,7 @@
   border-collapse: separate;
   border-spacing: 0 8px;
   background: transparent;
+  height: 500px;
 }
 
 .transactions-table th {
@@ -213,7 +214,7 @@
   border: none;
   font-size: 0.875rem;
   letter-spacing: 0.025em;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
 }
 
 .transactions-table tr {
@@ -562,4 +563,61 @@
 .apply-action:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+}
+/* Pagination Buttons */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  background: #4361ee;
+  border-color: #4361ee;
+  color: white;
+}
+
+.pagination-btn.active:hover {
+  background: #3b5bdb;
+  border-color: #3b5bdb;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.prev-btn,
+.next-btn {
+  font-size: 0.75rem;
 }

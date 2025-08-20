@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chỉnh sửa withdrawal - Admin</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/withdrawals-form.css}" />
+  </head>
+
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <div class="admin-content-header">
+          <h1 class="admin-page-title">
+            Chỉnh sửa withdrawal
+            <!-- <span
+              class="withdrawal-code"
+              th:text="'#' + ${withdrawal.code}"
+            ></span> -->
+          </h1>
+          <div class="admin-breadcrumbs">
+            <a th:href="@{/admin}">Admin</a>
+            <span>/</span>
+            <a th:href="@{/admin/withdrawals}">Quản lý doanh thu</a>
+            <span>/</span>
+            <a th:href="@{/admin/withdrawals}">Withdrawals</a>
+            <span>/</span>
+            <span>Chỉnh sửa</span>
+          </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+          <i class="fas fa-check-circle"></i>
+          <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div th:if="${warningMessage}" class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span th:text="${warningMessage}"></span>
+        </div>
+
+        <!-- Completed Withdrawal Warning -->
+        <div th:if="${isCompleted}" class="alert alert-warning">
+          <i class="fas fa-lock"></i>
+          <strong>Lưu ý:</strong> Withdrawal này đã hoàn thành. Một số trường sẽ
+          bị hạn chế chỉnh sửa để đảm bảo tính toàn vẹn dữ liệu.
+        </div>
+
+        <!-- Form chỉnh sửa withdrawal -->
+        <div class="form-container">
+          <div class="form-card">
+            <div class="form-header">
+              <h2 style="color: #fff">
+                <i class="fas fa-edit"></i> Chỉnh sửa thông tin withdrawal
+              </h2>
+              <p>
+                Cập nhật thông tin withdrawal. Các trường có dấu (*) là bắt
+                buộc.
+              </p>
+            </div>
+
+            <form
+              class="withdrawal-form"
+              th:action="@{/admin/withdrawals/{id}/edit(id=${withdrawal.id})}"
+              method="post"
+              th:object="${withdrawal}"
+              onsubmit="return validateWithdrawalEditForm(event)"
+            >
+              <!-- Hidden field for type -->
+              <input type="hidden" name="type" value="WITHDRAWAL" />
+
+              <!-- Form Fields using Fragment with edit-specific modifications -->
+              <div class="form-grid">
+                <!-- Thông tin cơ bản -->
+                <div class="form-group full-width">
+                  <h3><i class="fas fa-info-circle"></i> Thông tin cơ bản</h3>
+                </div>
+
+                <!-- Mã withdrawal - Read only for edit -->
+                <div class="form-group">
+                  <label for="code">Mã withdrawal</label>
+                  <input
+                    type="text"
+                    id="code"
+                    name="code"
+                    th:field="*{code}"
+                    readonly
+                    class="readonly-field"
+                  />
+                  <small class="form-help"
+                    >Mã withdrawal không thể thay đổi</small
+                  >
+                </div>
+
+                <!-- Người dùng - Restricted for completed withdrawals -->
+                <div class="form-group">
+                  <label for="userId">Người dùng *</label>
+                  <select
+                    id="userId"
+                    name="user.id"
+                    required
+                    th:disabled="${isCompleted}"
+                    th:class="${isCompleted} ? 'disabled-field' : ''"
+                  >
+                    <option value="">-- Chọn người dùng --</option>
+                    <option
+                      th:each="user : ${users}"
+                      th:value="${user.id}"
+                      th:text="${user.fullName + ' (' + user.email + ')' + ' - Số xu: ' + #numbers.formatDecimal(user.coinBalance, 0, 'COMMA', 0, 'POINT') + ' xu'}"
+                      th:selected="${withdrawal.user != null && withdrawal.user.id == user.id}"
+                    >
+                      Nguyễn Văn A (user@example.com) - Số dư: 1,000,000 VND
+                    </option>
+                  </select>
+                  <small th:if="${isCompleted}" class="form-help text-warning">
+                    <i class="fas fa-lock"></i> Không thể thay đổi người dùng
+                    cho withdrawal đã hoàn thành
+                  </small>
+                  <span
+                    th:if="${#fields.hasErrors('user')}"
+                    class="error-message"
+                    th:errors="*{user}"
+                  ></span>
+                </div>
+
+                <!-- Số tiền - Restricted for completed withdrawals -->
+                <div class="form-group">
+                  <label for="amount">Số tiền (VNĐ) *</label>
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    th:field="*{amount}"
+                    placeholder="Nhập số tiền rút"
+                    step="1000"
+                    min="50000"
+                    max="50000000"
+                    required
+                    th:disabled="${isCompleted}"
+                    th:class="${isCompleted} ? 'disabled-field' : ''"
+                  />
+                  <small class="form-help">
+                    Tối thiểu: 50,000 VND - Tối đa: 50,000,000 VND
+                    <span th:if="${isCompleted}" class="text-warning">
+                      <br /><i class="fas fa-lock"></i> Không thể thay đổi số
+                      tiền cho withdrawal đã hoàn thành
+                    </span>
+                  </small>
+                  <span
+                    th:if="${#fields.hasErrors('amount')}"
+                    class="error-message"
+                    th:errors="*{amount}"
+                  ></span>
+                </div>
+
+                <!-- Phương thức thanh toán - Restricted for completed withdrawals -->
+                <div class="form-group">
+                  <label for="paymentMethod">Phương thức thanh toán *</label>
+                  <select
+                    id="paymentMethod"
+                    name="paymentMethod"
+                    th:field="*{paymentMethod}"
+                    required
+                    th:disabled="${isCompleted}"
+                    th:class="${isCompleted} ? 'disabled-field' : ''"
+                  >
+                    <option value="">-- Chọn phương thức --</option>
+                    <option
+                      value="BANK_TRANSFER"
+                      th:selected="${withdrawal.paymentMethod == 'BANK_TRANSFER'}"
+                    >
+                      Chuyển khoản ngân hàng
+                    </option>
+                    <option
+                      value="E_WALLET"
+                      th:selected="${withdrawal.paymentMethod == 'E_WALLET'}"
+                    >
+                      Ví điện tử
+                    </option>
+                    <option
+                      value="CREDIT_CARD"
+                      th:selected="${withdrawal.paymentMethod == 'CREDIT_CARD'}"
+                    >
+                      Thẻ tín dụng/ghi nợ
+                    </option>
+                    <option
+                      value="CASH"
+                      th:selected="${withdrawal.paymentMethod == 'CASH'}"
+                    >
+                      Tiền mặt
+                    </option>
+                  </select>
+                  <small th:if="${isCompleted}" class="form-help text-warning">
+                    <i class="fas fa-lock"></i> Không thể thay đổi phương thức
+                    thanh toán cho withdrawal đã hoàn thành
+                  </small>
+                  <span
+                    th:if="${#fields.hasErrors('paymentMethod')}"
+                    class="error-message"
+                    th:errors="*{paymentMethod}"
+                  ></span>
+                </div>
+
+                <!-- Trạng thái - Always editable but with restrictions -->
+                <div class="form-group">
+                  <label for="status">Trạng thái *</label>
+                  <select
+                    id="status"
+                    name="status"
+                    th:field="*{status}"
+                    required
+                  >
+                    <option value="">-- Chọn trạng thái --</option>
+                    <option
+                      th:each="statusOption : ${statusOptions}"
+                      th:value="${statusOption}"
+                      th:text="${statusOption.displayName}"
+                      th:selected="${withdrawal.status == statusOption}"
+                      th:disabled="${isCompleted && statusOption != withdrawal.status && statusOption.name() != 'CANCELLED'}"
+                    >
+                      Chờ xử lý
+                    </option>
+                  </select>
+                  <small th:if="${isCompleted}" class="form-help text-info">
+                    <i class="fas fa-info-circle"></i> Withdrawal đã hoàn thành
+                    chỉ có thể chuyển sang trạng thái "Hủy" nếu cần thiết
+                  </small>
+                  <span
+                    th:if="${#fields.hasErrors('status')}"
+                    class="error-message"
+                    th:errors="*{status}"
+                  ></span>
+                </div>
+
+                <!-- Ngày tạo - Read only for edit -->
+                <div class="form-group">
+                  <label for="createdAt">Ngày tạo</label>
+                  <input
+                    type="datetime-local"
+                    id="createdAt"
+                    name="createdAt"
+                    th:field="*{createdAt}"
+                    readonly
+                    class="readonly-field"
+                  />
+                  <small class="form-help">Ngày tạo không thể thay đổi</small>
+                </div>
+
+                <!-- Ghi chú - Always editable -->
+                <div class="form-group full-width">
+                  <label for="notes">Ghi chú</label>
+                  <textarea
+                    id="notes"
+                    name="notes"
+                    th:field="*{notes}"
+                    rows="4"
+                    placeholder="Nhập ghi chú bổ sung về withdrawal này..."
+                  ></textarea>
+                  <small class="form-help">
+                    Ghi chú có thể được cập nhật để theo dõi quá trình xử lý
+                    withdrawal
+                  </small>
+                  <span
+                    th:if="${#fields.hasErrors('notes')}"
+                    class="error-message"
+                    th:errors="*{notes}"
+                  ></span>
+                </div>
+
+                <!-- Thông tin bổ sung cho withdrawal đã hoàn thành -->
+                <div th:if="${isCompleted}" class="form-group full-width">
+                  <div class="completed-withdrawal-info">
+                    <h4>
+                      <i class="fas fa-check-circle text-success"></i> Thông tin
+                      withdrawal đã hoàn thành
+                    </h4>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <label>Ngày hoàn thành:</label>
+                        <span
+                          th:text="${#temporals.format(withdrawal.updatedAt, 'dd/MM/yyyy HH:mm')}"
+                          >01/01/2024 10:30</span
+                        >
+                      </div>
+                      <div class="info-item">
+                        <label>Số tiền đã rút:</label>
+                        <span
+                          class="amount-success"
+                          th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                          >1,000,000 VND</span
+                        >
+                      </div>
+                    </div>
+                    <div class="warning-box">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <strong>Lưu ý quan trọng:</strong> Việc thay đổi thông tin
+                      withdrawal đã hoàn thành có thể ảnh hưởng đến báo cáo tài
+                      chính và dữ liệu thống kê. Vui lòng cân nhắc kỹ trước khi
+                      thực hiện.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions">
+                <a th:href="@{/admin/withdrawals}" class="secondary-btn">
+                  <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
+                <a
+                  th:href="@{/admin/withdrawals/{id}/detail(id=${withdrawal.id})}"
+                  class="secondary-btn"
+                >
+                  <i class="fas fa-eye"></i> Xem chi tiết
+                </a>
+                <button
+                  type="button"
+                  class="secondary-btn"
+                  onclick="resetWithdrawalEditForm()"
+                >
+                  <i class="fas fa-undo"></i> Khôi phục
+                </button>
+                <button type="submit" class="primary-btn">
+                  <i class="fas fa-save"></i> Cập nhật withdrawal
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Audit Log Section -->
+          <div class="form-card mt-4">
+            <div class="form-header">
+              <h3><i class="fas fa-history"></i> Lịch sử thay đổi</h3>
+              <p>Theo dõi các thay đổi được thực hiện trên withdrawal này</p>
+            </div>
+            <div class="audit-log">
+              <div class="log-entry">
+                <div class="log-time">
+                  <i class="fas fa-clock"></i>
+                  <span
+                    th:text="${#temporals.format(withdrawal.createdAt, 'dd/MM/yyyy HH:mm')}"
+                    >01/01/2024 10:00</span
+                  >
+                </div>
+                <div class="log-action">
+                  <i class="fas fa-plus-circle text-success"></i>
+                  <span>Withdrawal được tạo</span>
+                </div>
+              </div>
+              <div
+                th:if="${withdrawal.updatedAt != null && withdrawal.updatedAt != withdrawal.createdAt}"
+                class="log-entry"
+              >
+                <div class="log-time">
+                  <i class="fas fa-clock"></i>
+                  <span
+                    th:text="${#temporals.format(withdrawal.updatedAt, 'dd/MM/yyyy HH:mm')}"
+                    >01/01/2024 10:30</span
+                  >
+                </div>
+                <div class="log-action">
+                  <i class="fas fa-edit text-info"></i>
+                  <span>Withdrawal được cập nhật lần cuối</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
+    <script th:src="@{/js/admin/withdrawals.js}"></script>
+
+    <script>
+      // Page-specific initialization for edit form
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize edit form validation
+        initializeWithdrawalEditForm();
+
+        // Show warning for completed withdrawals
+        const isCompleted = /*[[${isCompleted}]]*/ false;
+        if (isCompleted) {
+          showCompletedWithdrawalWarning();
+        }
+
+        console.log("Withdrawal edit page loaded successfully");
+      });
+
+      // Validate edit form with business rules
+      function validateWithdrawalEditForm(event) {
+        const isCompleted = /*[[${isCompleted}]]*/ false;
+
+        // Basic validation
+        if (!validateWithdrawalForm(event)) {
+          return false;
+        }
+
+        // Additional validation for completed withdrawals
+        if (isCompleted) {
+          const confirmation = confirm(
+            "Bạn có chắc chắn muốn cập nhật withdrawal đã hoàn thành? " +
+              "Điều này có thể ảnh hưởng đến báo cáo tài chính."
+          );
+          if (!confirmation) {
+            event.preventDefault();
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      // Reset form to original values
+      function resetWithdrawalEditForm() {
+        {
+          location.reload();
+        }
+      }
+
+      // Initialize edit form specific features
+      function initializeWithdrawalEditForm() {
+        // Add change tracking
+        const form = document.querySelector(".withdrawal-form");
+        const originalData = new FormData(form);
+
+        // Track changes
+        form.addEventListener("change", function () {
+          const currentData = new FormData(form);
+          let hasChanges = false;
+
+          for (let [key, value] of currentData.entries()) {
+            if (originalData.get(key) !== value) {
+              hasChanges = true;
+              break;
+            }
+          }
+
+          // Show unsaved changes indicator
+          if (hasChanges) {
+            document.body.classList.add("has-unsaved-changes");
+          } else {
+            document.body.classList.remove("has-unsaved-changes");
+          }
+        });
+
+        // Warn before leaving with unsaved changes
+        window.addEventListener("beforeunload", function (e) {
+          if (document.body.classList.contains("has-unsaved-changes")) {
+            e.preventDefault();
+            e.returnValue =
+              "Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn rời khỏi trang?";
+          }
+        });
+      }
+
+      // Show warning for completed withdrawals
+      function showCompletedWithdrawalWarning() {
+        // Add visual indicators for restricted fields
+        const restrictedFields = document.querySelectorAll(".disabled-field");
+        restrictedFields.forEach((field) => {
+          field.style.backgroundColor = "#f8f9fa";
+          field.style.borderColor = "#dee2e6";
+        });
+      }
+    </script>
+  </body>
+</html>
