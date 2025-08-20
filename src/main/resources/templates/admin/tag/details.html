@@ -13,6 +13,7 @@
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
     <link rel="stylesheet" th:href="@{/css/admin/tags.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
        <style type="text/css">
         /* Compact tag details */
         .data-container {
@@ -116,150 +117,12 @@
 
 <body class="admin-body">
     <!-- Admin Header -->
-    <header class="admin-header">
-        <div class="admin-header-content">
-            <div class="admin-logo">
-                <a th:href="@{/admin/index}" class="logo">
-                    <div class="logo-icon">E</div>
-                    <div class="logo-text">EduShare</div>
-                </a>
-            </div>
-
-            <div class="admin-header-actions">
-                <div class="admin-search">
-                    <input type="text" placeholder="Tìm kiếm...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-
-                <div class="dark-mode-toggle" id="darkModeToggle"></div>
-
-                <div class="admin-notifications">
-                    <button class="notification-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">5</span>
-                    </button>
-                </div>
-
-                <div class="admin-profile">
-                    <div class="admin-avatar">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
-                    </div>
-                    <div class="admin-info">
-                        <span class="admin-name">Nguyễn Văn Anh</span>
-                        <span class="admin-role">Quản trị viên</span>
-                    </div>
-                    <div class="admin-dropdown">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
 
     <!-- Admin Container -->
     <div class="admin-container">
         <!-- Sidebar -->
-        <aside class="admin-sidebar">
-            <nav class="admin-nav">
-                <ul class="admin-menu">
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/index}">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Bảng điều khiển</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/users}">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý người dùng</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/documents}">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Quản lý tài liệu</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/categories}">
-                            <i class="fas fa-folder"></i>
-                            <span>Quản lý danh mục</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item active">
-                        <a th:href="@{/admin/tags}">
-                            <i class="fas fa-tags"></i>
-                            <span>Quản lý tags</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/comments}">
-                            <i class="fas fa-comments"></i>
-                            <span>Quản lý bình luận</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/reports}">
-                            <i class="fas fa-flag"></i>
-                            <span>Báo cáo vi phạm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/ip-bans}">
-                            <i class="fas fa-ban"></i>
-                            <span>IP bị cấm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/statistics}">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Thống kê</span>
-                        </a>
-                    </li>
-                    <!-- Revenue Management Dropdown -->
-                    <li class="admin-menu-item has-submenu">
-                        <a href="javascript:void(0)">
-                            <i class="fas fa-coins"></i>
-                            <span>Quản lý doanh thu</span>
-                            <i class="fas fa-chevron-down submenu-icon"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/coin-packages}">
-                                    <i class="fas fa-box"></i>
-                                    <span>Gói xu</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/transactions}">
-                                    <i class="fas fa-exchange-alt"></i>
-                                    <span>Giao dịch</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/withdrawals}">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                    <span>Yêu cầu rút tiền</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/settings}">
-                            <i class="fas fa-cog"></i>
-                            <span>Cài đặt</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/}">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Đăng xuất</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+        <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
 
         <!-- Main Content -->
         <main class="admin-content">
@@ -320,10 +183,20 @@
                         </div>
                     </div>
                     <div class="tag-action-buttons">
-                        <a th:href="'/admin/tags/' + ${tag.id} + '/edit'" class="btn btn-primary">Chỉnh sửa</a>
-                        <!-- Chỉ hiển thị button xóa nếu tag chưa bị xóa vĩnh viễn -->
-                        <a th:if="${tag.deletedAt == null}" th:href="'/admin/tags/' + ${tag.id} + '/delete'" class="btn btn-danger">Xóa vĩnh viễn</a>
-                        <span th:if="${tag.deletedAt != null}" class="btn btn-secondary" style="cursor: not-allowed; opacity: 0.6;">Đã xóa</span>
+                        <a th:href="@{/admin/tags}" class="btn btn-secondary">Quay lại</a>
+                        
+                        <!-- Actions cho tag chưa bị xóa (deletedAt == null) -->
+                        <th:block th:if="${tag.deletedAt == null}">
+                            <a th:href="'/admin/tags/' + ${tag.id} + '/edit'" class="btn btn-primary">Chỉnh sửa</a>
+                            <a th:href="'/admin/tags/' + ${tag.id} + '/delete'" class="btn btn-danger">Xóa</a>
+                        </th:block>
+                        
+                        <!-- Actions cho tag đã bị xóa (deletedAt != null) -->
+                        <th:block th:if="${tag.deletedAt != null}">
+                            <form th:action="@{/admin/tags/{id}/permanent-delete(id=${tag.id})}" method="post" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn tag này? Hành động này không thể hoàn tác!')">
+                                <button type="submit" class="btn btn-danger">Xóa vĩnh viễn</button>
+                            </form>
+                        </th:block>
                     </div>
                 </div>
             </div>
@@ -333,6 +206,7 @@
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/admin/admin.js}"></script>
     <script th:src="@{/js/admin/tags.js}"></script>
+    <script th:src="@{/js/admin/notifications.js}"></script>
     <script>
         function confirmDelete() {
             if (confirm('Bạn có chắc chắn muốn xóa tag này?')) {

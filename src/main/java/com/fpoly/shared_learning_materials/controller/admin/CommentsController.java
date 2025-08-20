@@ -16,16 +16,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.dto.CommentDTO;
 import com.fpoly.shared_learning_materials.dto.ReplyDTO;
+
+import com.fpoly.shared_learning_materials.repository.UserRepository;
+
 import com.fpoly.shared_learning_materials.service.CommentService;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/admin/comments")
-public class CommentsController {
+public class CommentsController extends BaseAdminController {
 	@Autowired
 	CommentService commentService;
 
+	public CommentsController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 	@GetMapping
 	public String showComments(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size,
 			@RequestParam(defaultValue = "all") String tab, @RequestParam(required = false) String keyword,

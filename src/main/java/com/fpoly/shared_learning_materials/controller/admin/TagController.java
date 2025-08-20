@@ -26,17 +26,19 @@ import jakarta.validation.Valid;
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.TagDTO;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 
 
 @Controller
 @RequestMapping("/admin/tags")
-public class TagController {
+public class TagController extends BaseAdminController {
 
 	@Autowired
 	private TagService tagService;
-
-	@Autowired
-	private UserRepository userRepository;
+	
+	public TagController(NotificationService notificationService, UserRepository userRepository) {
+		super(notificationService, userRepository);
+	}
 
 	@GetMapping
 	public String listTags(
@@ -61,7 +63,9 @@ public class TagController {
 
 		model.addAttribute("tags", tags);
 		model.addAttribute("filteredTags", filteredTags);
-		model.addAttribute("currentPage", page);
+		model.addAttribute("currentPageNumber", page);
+		model.addAttribute("currentPage", "tags"); // For sidebar active menu
+		// Page number for pagination
 		model.addAttribute("pageSize", size);
 		model.addAttribute("totalPages", tags.getTotalPages());
 		model.addAttribute("totalItems", tags.getTotalElements());
@@ -82,6 +86,7 @@ public class TagController {
 			tagDTO.setColor("#4361ee"); // Mặc định màu
 			tagDTO.setStatus("active"); // Mặc định trạng thái
 			model.addAttribute("tagDTO", tagDTO);
+			model.addAttribute("currentPage", "tags");
 		}
 		return "admin/tag/create";
 	}
@@ -119,7 +124,7 @@ public class TagController {
 		}
 		try {
 			tagService.createTag(tagDTO);
-			redirectAttributes.addFlashAttribute("success", "Tag đã được tạo thành công");
+			redirectAttributes.addFlashAttribute("successMessage", "Tag đã được tạo thành công");
 		} catch (Exception e) {
 			model.addAttribute("errorMessage", "Lỗi khi tạo tag: " + e.getMessage());
 			return "admin/tag/create";
@@ -132,6 +137,7 @@ public class TagController {
 		TagDTO tagDTO = tagService.getTagById(id)
 				.orElseThrow(() -> new RuntimeException("Tag not found with id: " + id));
 		model.addAttribute("tagDTO", tagDTO);
+		model.addAttribute("currentPage", "tags");
 		return "admin/tag/edit";
 	}
 
@@ -144,7 +150,7 @@ public class TagController {
 		try {
 			tagDTO.setId(id);
 			tagService.updateTag(tagDTO);
-			redirectAttributes.addFlashAttribute("success", "Tag đã được cập nhật thành công");
+			redirectAttributes.addFlashAttribute("successMessage", "Tag đã được cập nhật thành công");
 			return "redirect:/admin/tags";
 		} catch (IllegalArgumentException e) {
 			model.addAttribute("errorMessage", e.getMessage());
@@ -160,11 +166,13 @@ public class TagController {
 		TagDTO tag = tagService.getTagById(id)
 				.orElseThrow(() -> new RuntimeException("Tag not found"));
 		model.addAttribute("tag", tag);
+		model.addAttribute("currentPage", "tags");
 		return "admin/tag/details";
 	}
 
 	@GetMapping("/{id}/delete")
 	public String showDeleteForm(@PathVariable Long id, Model model) {
+		model.addAttribute("currentPage", "tags");
 		try {
 			TagDTO tag = tagService.getTagById(id)
 					.orElseThrow(() -> new RuntimeException("Tag not found"));
@@ -191,7 +199,7 @@ public class TagController {
 			System.out.println("Deleting tag: " + tag.getName() + " - Reason: " + reason);
 
 			tagService.deleteTag(id);
-			redirectAttributes.addFlashAttribute("success", "Tag đã được xóa thành công");
+			redirectAttributes.addFlashAttribute("successMessage", "Tag đã được xóa thành công");
 			return "redirect:/admin/tags";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa tag: " + e.getMessage());
@@ -222,10 +230,37 @@ public class TagController {
 
 			// Khôi phục tag bằng cách set status = 'active'
 			tagService.restoreTag(id);
-			redirectAttributes.addFlashAttribute("success", "Tag '" + tag.getName() + "' đã được khôi phục thành công");
+			redirectAttributes.addFlashAttribute("successMessage", "Tag '" + tag.getName() + "' đã được khôi phục thành công");
 			return "redirect:/admin/tags";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("error", "Lỗi khi khôi phục tag: " + e.getMessage());
+			return "redirect:/admin/tags";
+		}
+	}
+
+	@PostMapping("/{id}/permanent-delete")
+	public String permanentDeleteTag(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+		try {
+			Optional<TagDTO> tagOpt = tagService.getTagById(id);
+			if (!tagOpt.isPresent()) {
+				redirectAttributes.addFlashAttribute("error", "Tag không tồn tại");
+				return "redirect:/admin/tags";
+			}
+
+			TagDTO tag = tagOpt.get();
+
+			// Kiểm tra xem tag đã bị xóa mềm chưa
+			if (tag.getDeletedAt() == null) {
+				redirectAttributes.addFlashAttribute("error", "Chỉ có thể xóa vĩnh viễn tag đã bị xóa mềm");
+				return "redirect:/admin/tags";
+			}
+
+			String tagName = tag.getName();
+			tagService.permanentDeleteTag(id);
+			redirectAttributes.addFlashAttribute("successMessage", "Tag '" + tagName + "' đã được xóa vĩnh viễn khỏi hệ thống");
+			return "redirect:/admin/tags";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa vĩnh viễn tag: " + e.getMessage());
 			return "redirect:/admin/tags";
 		}
 	}

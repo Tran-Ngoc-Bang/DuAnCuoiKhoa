@@ -1,6 +1,7 @@
 package com.fpoly.shared_learning_materials.controller.admin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.service.CategoryService;
@@ -31,20 +33,24 @@ import jakarta.validation.Valid;
 import com.fpoly.shared_learning_materials.domain.CategoryHierarchy;
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.CategoryDTO;
+import com.fpoly.shared_learning_materials.dto.CategoryTreeDTO;
 import com.fpoly.shared_learning_materials.repository.CategoryHierarchyRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 
 @Controller
 @RequestMapping("/admin/categories")
-public class CategoryController {
+public class CategoryController extends BaseAdminController {
 
     @Autowired
     private CategoryService categoryService;
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private CategoryHierarchyRepository categoryHierarchyRepository;
+    
+    public CategoryController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
     // @Autowired
     // private UserService userService;
 
@@ -52,7 +58,7 @@ public class CategoryController {
     public String getCategories(
             Model model,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String filter,
             @RequestParam(defaultValue = "all") String status,
             @RequestParam(defaultValue = "none") String sort,
@@ -62,31 +68,22 @@ public class CategoryController {
 
         List<CategoryDTO> allCategories;
 
-        // Lấy danh mục theo tab
+        // Lấy ONLY ROOT CATEGORIES cho grid view (không hiển thị child categories)
         switch (tab) {
             case "deleted":
-                allCategories = categoryService.getDeletedCategories();
-                System.out.println("Controller: Retrieved " + allCategories.size() + " deleted categories");
+                allCategories = categoryService.getDeletedRootCategories();
+                System.out.println("Controller: Retrieved " + allCategories.size() + " deleted root categories");
                 break;
             case "all":
-                allCategories = categoryService.getAllCategories();
+                allCategories = categoryService.getRootCategories();
                 break;
             default: // "active"
-                allCategories = categoryService.getActiveCategories();
+                allCategories = categoryService.getActiveRootCategories();
                 break;
         }
 
-        // Hiển thị tất cả danh mục với cấu trúc phân cấp cho active/all tab
-        // Nhưng với deleted tab, hiển thị flat list để tránh missing items
-        List<CategoryDTO> displayCategories;
-        if ("deleted".equals(tab)) {
-            // Deleted tab: hiển thị flat list, không hierarchy
-            displayCategories = allCategories;
-            System.out.println("Deleted tab: showing " + displayCategories.size() + " categories as flat list");
-        } else {
-            // Active/All tab: hiển thị với hierarchy
-            displayCategories = buildHierarchicalStructure(allCategories);
-        }
+        // Chỉ hiển thị root categories, không cần hierarchy structure
+        List<CategoryDTO> displayCategories = allCategories;
 
         if (!filter.isEmpty()) {
             String searchTerm = filter.toLowerCase();
@@ -151,7 +148,9 @@ public class CategoryController {
         int totalCount = categoryService.getAllCategories().size();
 
         model.addAttribute("categories", pagedCategories);
-        model.addAttribute("currentPage", page);
+        model.addAttribute("currentPageNumber", page);
+        model.addAttribute("currentPage", "categories"); // For sidebar active menu
+        // Page number for pagination
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("totalItems", totalItems);
         model.addAttribute("pageSize", size);
@@ -169,6 +168,7 @@ public class CategoryController {
     public String showCreateForm(Model model) {
         model.addAttribute("category", new CategoryDTO());
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("currentPage", "categories");
         return "admin/categories/create";
     }
 
@@ -203,7 +203,7 @@ public class CategoryController {
             }
             categoryDTO.setCreatedById(userId);
             categoryService.createCategory(categoryDTO);
-            redirectAttributes.addFlashAttribute("success", "Danh mục đã được tạo thành công");
+            redirectAttributes.addFlashAttribute("successMessage", "Danh mục đã được tạo thành công");
             return "redirect:/admin/categories";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
@@ -224,8 +224,18 @@ public class CategoryController {
         List<CategoryDTO> availableCategories = categoryService.getAllCategories().stream()
                 .filter(c -> !c.getId().equals(id) && !descendantIds.contains(c.getId()))
                 .collect(Collectors.toList());
+
+                String parentName = category.getParentId() != null 
+        ? availableCategories.stream()
+            .filter(c -> c.getId().equals(category.getParentId()))
+            .findFirst()
+            .map(CategoryDTO::getName)
+            .orElse("Danh mục gốc")
+        : "Danh mục gốc";
+        model.addAttribute("parentName", parentName);
         model.addAttribute("category", category);
         model.addAttribute("categories", availableCategories);
+        model.addAttribute("currentPage", "categories");
         return "admin/categories/edit";
     }
 
@@ -240,7 +250,7 @@ public class CategoryController {
         try {
             System.out.println("Updating category ID: " + id + ", New parentId: " + categoryDTO.getParentId());
             categoryService.updateCategory(id, categoryDTO);
-            redirectAttributes.addFlashAttribute("success", "Danh mục đã được cập nhật thành công");
+            redirectAttributes.addFlashAttribute("successMessage", "Danh mục đã được cập nhật thành công");
             return "redirect:/admin/categories";
         } catch (Exception e) {
             System.out.println("Error updating category ID: " + id + ", Error: " + e.getMessage());
@@ -259,6 +269,7 @@ public class CategoryController {
         model.addAttribute("category", category);
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("categoryHierarchyRepository", categoryHierarchyRepository);
+        model.addAttribute("currentPage", "categories");
         return "admin/categories/details";
     }
 
@@ -271,6 +282,7 @@ public class CategoryController {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
             model.addAttribute("category", category);
+            model.addAttribute("currentPage", "categories");
             return "admin/categories/delete";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy danh mục: " + e.getMessage());
@@ -293,7 +305,7 @@ public class CategoryController {
             }
 
             categoryService.deleteCategory(id);
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Danh mục '" + category.getName() + "' đã được xóa thành công");
             return "redirect:/admin/categories";
         } catch (Exception e) {
@@ -316,7 +328,7 @@ public class CategoryController {
             categoryService.updateCategory(id, category);
 
             String statusText = "active".equals(newStatus) ? "kích hoạt" : "vô hiệu hóa";
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Đã " + statusText + " danh mục '" + category.getName() + "' thành công");
             return "redirect:/admin/categories";
         } catch (Exception e) {
@@ -339,7 +351,7 @@ public class CategoryController {
             System.out.println("Found category: " + category.getName());
             
             categoryService.restoreCategory(id);
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Danh mục '" + category.getName() + "' đã được khôi phục thành công");
             return "redirect:/admin/categories?tab=active";
         } catch (Exception e) {
@@ -359,7 +371,7 @@ public class CategoryController {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
 
             categoryService.permanentDeleteCategory(id);
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Danh mục '" + category.getName() + "' đã được xóa vĩnh viễn");
             return "redirect:/admin/categories?tab=deleted";
         } catch (Exception e) {
@@ -367,6 +379,30 @@ public class CategoryController {
             return "redirect:/admin/categories?tab=deleted";
         }
     }
+
+    @PostMapping("/bulk-permanent-delete")
+    public String bulkPermanentDelete(@RequestParam("categoryIds") String categoryIds, RedirectAttributes redirectAttributes) {
+        try {
+            // Chuyển chuỗi categoryIds thành danh sách Long
+            List<Long> ids = Arrays.stream(categoryIds.split(","))
+                    .map(String::trim)
+                    .filter(str -> !str.isEmpty())
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            
+            if (ids.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Không có danh mục nào được chọn để xóa vĩnh viễn!");
+                return "redirect:/admin/categories?tab=deleted";
+            }
+
+            categoryService.bulkPermanentDelete(ids);
+            redirectAttributes.addFlashAttribute("successMessage", String.format("Xóa vĩnh viễn %d danh mục thành công!", ids.size()));
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Không thể xóa vĩnh viễn các danh mục: " + e.getMessage());
+        }
+        return "redirect:/admin/categories?tab=deleted";
+    }
+    
 
     @PostMapping("/delete-multiple")
     public String deleteMultipleCategories(HttpServletRequest request, RedirectAttributes redirectAttributes) {
@@ -396,7 +432,7 @@ public class CategoryController {
             }
 
             categoryService.deleteCategories(categoryIds);
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Đã xóa thành công " + categoryIds.size() + " danh mục");
             return "redirect:/admin/categories";
         } catch (Exception e) {
@@ -474,6 +510,13 @@ public class CategoryController {
         }
     }
 
+    // API endpoint to get subcategories tree
+    @GetMapping("/{id}/subcategories")
+    @ResponseBody
+    public List<CategoryTreeDTO> getSubcategories(@PathVariable Long id) {
+        return categoryService.getSubcategoriesTree(id);
+    }
+
     // Bulk restore deleted categories
     @PostMapping("/restore-multiple")
     public String restoreMultipleCategories(HttpServletRequest request, RedirectAttributes redirectAttributes) {
@@ -514,7 +557,7 @@ public class CategoryController {
             }
 
             if (restoredCount > 0) {
-                redirectAttributes.addFlashAttribute("success",
+                redirectAttributes.addFlashAttribute("successMessage",
                         "Đã khôi phục thành công " + restoredCount + " danh mục");
             } else {
                 redirectAttributes.addFlashAttribute("error", "Không thể khôi phục danh mục nào");
@@ -528,4 +571,27 @@ public class CategoryController {
             return "redirect:/admin/categories?tab=deleted";
         }
     }
+
+    @GetMapping("/{id}/path")
+  @ResponseBody
+  public List<CategoryDTO> getCategoryPath(@PathVariable Long id) {
+      List<CategoryDTO> path = new ArrayList<>();
+      CategoryDTO current = categoryService.getAllCategories().stream()
+              .filter(c -> c.getId().equals(id))
+              .findFirst()
+              .orElse(null);
+      
+      while (current != null) {
+          path.add(0, current);
+          Long parentId = current.getParentId();
+          current = parentId != null 
+              ? categoryService.getAllCategories().stream()
+                  .filter(c -> c.getId().equals(parentId))
+                  .findFirst()
+                  .orElse(null)
+              : null;
+      }
+      
+      return path;
+  }
 }

@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý yêu cầu rút tiền - Admin</title>
-
+   <meta name="flash-success" th:content="${successMessage}" th:if="${successMessage}"/>
+    <meta name="flash-error" th:content="${errorMessage}" th:if="${errorMessage}"/>
+    <meta name="flash-warning" th:content="${warning}" th:if="${warning}"/>
+    <meta name="flash-info" th:content="${info}" th:if="${info}"/>
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
@@ -25,6 +28,9 @@
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals-index.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+     <script th:src="@{/js/admin/notifications.js}"></script>
+     <script th:src="@{/js/admin/flash-toast.js}"></script>
   </head>
 
   <body class="admin-body">
@@ -189,7 +195,7 @@
       </main>
     </div>
 
-    <!-- Flash Messages -->
+    <!-- Flash Messages 
     <div
       th:if="${successMessage}"
       class="toast toast-success"
@@ -226,7 +232,7 @@
       <button class="toast-close" onclick="closeToast('warningToast')">
         &times;
       </button>
-    </div>
+    </div>-->
 
     <!-- Scripts -->
     <div th:replace="~{fragments/admin/layout :: scripts}"></div>

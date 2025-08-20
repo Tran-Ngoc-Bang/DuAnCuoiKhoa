@@ -18,10 +18,14 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 public class DocumentService {
@@ -58,6 +62,28 @@ public class DocumentService {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    @Autowired
+    private FileService fileService;
+
+    // Get total documents count (excluding deleted ones)
+    public long getTotalDocuments() {
+        return documentRepository.countByDeletedAtIsNull();
+    }
+
+    // Export all documents as JSON string for backup
+    
+    // Import documents from backup file
+    
+
+    // Helper method to escape JSON strings
+    private String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
+    }
 
     // Get document by ID
     public DocumentDTO getDocumentById(Long id) {
@@ -270,6 +296,122 @@ public class DocumentService {
         }
     }
 
+    // Permanent delete document
+    @Transactional
+    public void permanentDeleteDocument(Long id) {
+        System.out.println("=== PERMANENT DELETE DOCUMENT SERVICE ===");
+        System.out.println("Permanently deleting document with ID: " + id);
+
+        Optional<Document> documentOpt = documentRepository.findById(id);
+        if (!documentOpt.isPresent()) {
+            throw new IllegalArgumentException("Tài liệu không tồn tại với ID: " + id);
+        }
+
+        Document document = documentOpt.get();
+        System.out.println("Found document: " + document.getTitle());
+
+        // Kiểm tra xem tài liệu đã bị xóa mềm chưa
+        if (document.getDeletedAt() == null) {
+            throw new IllegalArgumentException("Chỉ có thể xóa vĩnh viễn tài liệu đã bị xóa mềm");
+        }
+
+        try {
+            System.out.println("Step 1: Finding and deleting document categories...");
+            // Tìm và xóa các liên kết với categories bằng JPA
+            List<DocumentCategory> documentCategories = documentCategoryRepository.findByDocumentId(id);
+            System.out.println("Found " + documentCategories.size() + " document categories to delete");
+            for (DocumentCategory dc : documentCategories) {
+                documentCategoryRepository.delete(dc);
+                System.out.println("Deleted document category: " + dc.getId());
+            }
+            System.out.println("Step 1: Completed - Categories deleted");
+            
+            System.out.println("Step 2: Finding and deleting document tags...");
+            // Tìm và xóa các liên kết với tags bằng JPA
+            List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(id);
+            System.out.println("Found " + documentTags.size() + " document tags to delete");
+            for (DocumentTag dt : documentTags) {
+                documentTagRepository.delete(dt);
+                System.out.println("Deleted document tag: " + dt.getId());
+            }
+            System.out.println("Step 2: Completed - Tags deleted");
+            
+            System.out.println("Step 3: Deleting document owners...");
+            // Xóa document owners
+            List<DocumentOwner> documentOwners = documentOwnerRepository.findByDocumentId(id);
+            System.out.println("Found " + documentOwners.size() + " document owners to delete");
+            for (DocumentOwner owner : documentOwners) {
+                documentOwnerRepository.delete(owner);
+                System.out.println("Deleted document owner: " + owner.getId());
+            }
+            System.out.println("Step 3: Completed - Document owners deleted");
+            
+            System.out.println("Step 4: Deleting comments...");
+            // Xóa comments liên quan (tất cả status)
+            List<Comment> comments = commentRepository.findByDocumentIdAndStatusIn(id, 
+                Arrays.asList("APPROVED", "PENDING", "REJECTED"), PageRequest.of(0, 1000)).getContent();
+            System.out.println("Found " + comments.size() + " comments to delete");
+            for (Comment comment : comments) {
+                commentRepository.delete(comment);
+                System.out.println("Deleted comment: " + comment.getId());
+            }
+            System.out.println("Step 4: Completed - Comments deleted");
+            
+            System.out.println("Step 5: Deleting reports...");
+            // Xóa reports liên quan - tìm và xóa thủ công
+            try {
+                List<Report> reports = reportRepository.findAll().stream()
+                    .filter(r -> r.getDocument() != null && r.getDocument().getId().equals(id))
+                    .collect(Collectors.toList());
+                System.out.println("Found " + reports.size() + " reports to delete");
+                for (Report report : reports) {
+                    reportRepository.delete(report);
+                    System.out.println("Deleted report: " + report.getId());
+                }
+                System.out.println("Step 5: Completed - Reports deleted");
+            } catch (Exception e) {
+                System.out.println("Step 5: No reports to delete or error: " + e.getMessage());
+            }
+            
+            // Xóa file vật lý nếu có
+            if (document.getFile() != null && document.getFile().getFilePath() != null && !document.getFile().getFilePath().isEmpty()) {
+                try {
+                    System.out.println("Step 6: Deleting physical file...");
+                    fileService.deleteFile(document.getFile().getFilePath());
+                    System.out.println("Step 6: Completed - Physical file deleted: " + document.getFile().getFilePath());
+                } catch (Exception e) {
+                    System.err.println("Warning: Could not delete physical file: " + e.getMessage());
+                    // Không throw exception vì việc xóa file có thể thất bại nhưng vẫn muốn xóa record
+                }
+            }
+            
+            System.out.println("Step 7: Deleting document from database...");
+            System.out.println("Document ID before delete: " + document.getId());
+            System.out.println("Document title before delete: " + document.getTitle());
+            
+            // Xóa document khỏi database
+            documentRepository.delete(document);
+            documentRepository.flush();
+            
+            System.out.println("Step 7: Completed - Document deleted from database");
+            
+            // Kiểm tra xem document có còn tồn tại không
+            Optional<Document> checkDocument = documentRepository.findById(id);
+            if (checkDocument.isPresent()) {
+                System.err.println("ERROR: Document still exists after deletion!");
+                throw new RuntimeException("Document was not deleted from database");
+            } else {
+                System.out.println("VERIFIED: Document successfully deleted from database");
+            }
+            
+            System.out.println("Transaction completed - Document permanently deleted successfully");
+        } catch (Exception e) {
+            System.err.println("Error during permanent document deletion: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi xóa vĩnh viễn tài liệu: " + e.getMessage(), e);
+        }
+    }
+
     // Get deleted documents
     public Page<DocumentDTO> getDeletedDocuments(Pageable pageable) {
         System.out.println("=== GET DELETED DOCUMENTS SERVICE ===");
@@ -335,8 +477,7 @@ public class DocumentService {
 
         // Apply filters to the list (sử dụng cùng logic filter như active documents)
         List<DocumentDTO> filteredList = allDtoList.stream()
-                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,
-                        dateTo, size, views))
+                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,dateTo, size, views))
                 .collect(Collectors.toList());
 
         System.out.println(
@@ -574,7 +715,7 @@ public class DocumentService {
                 return false;
         }
 
-        // Date range filter
+        // Date range filter (created date)
         if ((dateFrom != null && !dateFrom.trim().isEmpty()) || (dateTo != null && !dateTo.trim().isEmpty())) {
             if (!matchesDateRange(dto.getCreatedAt(), dateFrom, dateTo)) {
                 return false;
@@ -705,6 +846,43 @@ public class DocumentService {
             System.err.println("Invalid views range format: " + viewsRange);
         }
         return false;
+    }
+
+    // Get recent documents for email notifications
+    public List<Document> getRecentDocuments(int limit) {
+        try {
+            PageRequest pageRequest = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Page<Document> documentsPage = documentRepository.findByDeletedAtIsNull(pageRequest);
+            return documentsPage.getContent();
+        } catch (Exception e) {
+            System.err.println("Error getting recent documents: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    // Find document by ID for notifications
+    public Document findById(Long id) {
+        try {
+            return documentRepository.findById(id).orElse(null);
+        } catch (Exception e) {
+            System.err.println("Error finding document by ID: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // Get document author name for notifications
+    public String getDocumentAuthorName(Long documentId) {
+        try {
+            List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(documentId);
+            if (!owners.isEmpty() && owners.get(0).getUser() != null) {
+                User user = owners.get(0).getUser();
+                return user.getFullName() != null ? user.getFullName() : user.getUsername();
+            }
+            return "Không xác định";
+        } catch (Exception e) {
+            System.err.println("Error getting document author name: " + e.getMessage());
+            return "Không xác định";
+        }
     }
 
     // Get ALL documents for export (both active and deleted)
@@ -1315,6 +1493,153 @@ public class DocumentService {
             System.err.println("Error updating document status: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi cập nhật trạng thái tài liệu: " + e.getMessage());
+        }
+    }
+
+    // Export all documents as JSON for backup
+    public String exportAllDocuments() {
+        try {
+            List<Document> allDocuments = documentRepository.findAll();
+            
+            // Convert to a simplified format for export
+            List<Map<String, Object>> exportData = new ArrayList<>();
+            
+            for (Document doc : allDocuments) {
+                Map<String, Object> docData = new HashMap<>();
+                docData.put("id", doc.getId());
+                docData.put("title", doc.getTitle());
+                docData.put("description", doc.getDescription());
+                docData.put("slug", doc.getSlug());
+                docData.put("price", doc.getPrice());
+                docData.put("status", doc.getStatus());
+                docData.put("visibility", doc.getVisibility());
+                docData.put("viewsCount", doc.getViewsCount());
+                docData.put("downloadsCount", doc.getDownloadsCount());
+                docData.put("createdAt", doc.getCreatedAt());
+                docData.put("updatedAt", doc.getUpdatedAt());
+                
+                // Add file info
+                if (doc.getFile() != null) {
+                    Map<String, Object> fileData = new HashMap<>();
+                    fileData.put("fileName", doc.getFile().getFileName());
+                    fileData.put("fileSize", doc.getFile().getFileSize());
+                    fileData.put("fileType", doc.getFile().getFileType());
+                    fileData.put("mimeType", doc.getFile().getMimeType());
+                    docData.put("file", fileData);
+                }
+                
+                // Add categories
+                List<DocumentCategory> categories = documentCategoryRepository.findByDocumentId(doc.getId());
+                List<String> categoryNames = categories.stream()
+                    .map(dc -> dc.getCategory().getName())
+                    .collect(Collectors.toList());
+                docData.put("categories", categoryNames);
+                
+                // Add tags
+                List<DocumentTag> tags = documentTagRepository.findByDocumentId(doc.getId());
+                List<String> tagNames = tags.stream()
+                    .map(dt -> dt.getTag().getName())
+                    .collect(Collectors.toList());
+                docData.put("tags", tagNames);
+                
+                // Add author
+                List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(doc.getId());
+                if (!owners.isEmpty()) {
+                    docData.put("authorName", owners.get(0).getUser().getFullName());
+                    docData.put("authorUsername", owners.get(0).getUser().getUsername());
+                }
+                
+                exportData.add(docData);
+            }
+            
+            // Convert to JSON string
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("exportDate", LocalDateTime.now());
+            result.put("totalDocuments", exportData.size());
+            result.put("documents", exportData);
+            
+            return mapper.writeValueAsString(result);
+            
+        } catch (Exception e) {
+            System.err.println("Error exporting documents: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi export tài liệu: " + e.getMessage());
+        }
+    }
+    
+    // Import documents from backup file
+    public String importDocuments(MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File backup trống!");
+            }
+            
+            // Read file content
+            String content = new String(file.getBytes());
+            
+            // Parse JSON
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            
+            com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>> typeRef = 
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {};
+            Map<String, Object> backupData = mapper.readValue(content, typeRef);
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> documents = (List<Map<String, Object>>) backupData.get("documents");
+            
+            int importedCount = 0;
+            int skippedCount = 0;
+            
+            for (Map<String, Object> docData : documents) {
+                try {
+                    // Check if document already exists by slug
+                    String slug = (String) docData.get("slug");
+                    if (slug != null && documentRepository.findBySlug(slug).isPresent()) {
+                        skippedCount++;
+                        continue; // Skip existing documents
+                    }
+                    
+                    // Create new document (simplified import - without file upload)
+                    Document document = new Document();
+                    document.setTitle((String) docData.get("title"));
+                    document.setDescription((String) docData.get("description"));
+                    document.setSlug(slug);
+                    
+                    // Handle price
+                    Object priceObj = docData.get("price");
+                    if (priceObj != null) {
+                        if (priceObj instanceof Number) {
+                            document.setPrice(BigDecimal.valueOf(((Number) priceObj).doubleValue()));
+                        }
+                    }
+                    
+                    document.setStatus((String) docData.get("status"));
+                    document.setVisibility((String) docData.get("visibility"));
+                    document.setViewsCount(0L); // Reset counters for imported docs
+                    document.setDownloadsCount(0L);
+                    
+                    // Save document
+                    Document savedDoc = documentRepository.save(document);
+                    importedCount++;
+                    
+                    // Note: Categories, tags, and file associations would need more complex logic
+                    // This is a simplified import focusing on basic document data
+                    
+                } catch (Exception e) {
+                    System.err.println("Error importing document: " + docData.get("title") + " - " + e.getMessage());
+                    skippedCount++;
+                }
+            }
+            
+            return String.format("Import hoàn thành: %d tài liệu được import, %d bị bỏ qua",  importedCount, skippedCount);
+            
+        } catch (Exception e) {
+            System.err.println("Error importing documents: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi import tài liệu: " + e.getMessage());
         }
     }
 }

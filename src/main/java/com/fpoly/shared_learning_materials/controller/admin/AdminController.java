@@ -26,10 +26,11 @@ import com.fpoly.shared_learning_materials.repository.DocumentCategoryRepository
 import com.fpoly.shared_learning_materials.repository.DocumentRepository;
 import com.fpoly.shared_learning_materials.repository.TransactionRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 
 @Controller
 @RequestMapping("/admin")
-public class AdminController {
+public class AdminController extends BaseAdminController {
 
     @Autowired
     private DocumentRepository documentRepository;
@@ -43,6 +44,9 @@ public class AdminController {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    public AdminController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
     /**
      * Trang chủ admin dashboard
      */

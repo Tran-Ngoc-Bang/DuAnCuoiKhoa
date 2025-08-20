@@ -1,7 +1,9 @@
 package com.fpoly.shared_learning_materials.controller.admin;
 
 import com.fpoly.shared_learning_materials.domain.Transaction;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
 import com.fpoly.shared_learning_materials.service.WithdrawalService;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 import com.fpoly.shared_learning_materials.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,13 +24,17 @@ import java.util.LinkedHashMap;
 
 @Controller
 @RequestMapping("/admin/withdrawals")
-public class WithdrawalController {
+public class WithdrawalController extends BaseAdminController {
 
     @Autowired
     private WithdrawalService withdrawalService;
 
     @Autowired
     private UserService userService;
+
+     public WithdrawalController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 
     /**
      * Hiển thị danh sách withdrawals với phân trang và tìm kiếm

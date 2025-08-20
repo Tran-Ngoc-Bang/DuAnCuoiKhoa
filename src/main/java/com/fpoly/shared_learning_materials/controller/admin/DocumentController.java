@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +28,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.service.DocumentService;
 import com.fpoly.shared_learning_materials.service.CategoryService;
+import com.fpoly.shared_learning_materials.service.DocumentNotificationService;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
@@ -38,7 +40,7 @@ import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/admin/documents")
-public class DocumentController {
+public class DocumentController extends BaseAdminController {
 
     @Autowired
     private DocumentService documentService;
@@ -47,7 +49,11 @@ public class DocumentController {
     private CategoryService categoryService;
 
     @Autowired
-    private UserRepository userRepository;
+    private DocumentNotificationService documentNotificationService;
+    
+    public DocumentController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 
     @PostConstruct
     public void checkUploadDir() {
@@ -112,7 +118,7 @@ public class DocumentController {
         } else {
             // Hiển thị documents active (chưa xóa)
             documentPage = documentService.getFilteredDocuments(
-                    customPageable, search, status, categoryId, type, price, author, tags, dateFrom, dateTo, fileSize,
+                    customPageable, search, status, categoryId, type, price, author, tags, dateFrom, dateTo,fileSize,
                     views);
 
             // Lấy thống kê từ kết quả đã lọc
@@ -143,6 +149,7 @@ public class DocumentController {
         model.addAttribute("currentTab", tab);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
+      
 
         // Handle export request
         if ("true".equals(request.getParameter("export"))) {
@@ -150,7 +157,16 @@ public class DocumentController {
             model.addAttribute("documents", allDocuments);
         }
 
+        // For sidebar active menu
+        model.addAttribute("currentPage", "documents");
+
         return "admin/documents/list";
+    }
+
+    @GetMapping("/export-data")
+    @ResponseBody
+    public List<DocumentDTO> exportDocumentsData() {
+        return documentService.getAllDocumentsForExport();
     }
 
     @GetMapping("/create")
@@ -160,6 +176,7 @@ public class DocumentController {
         }
         if (!model.containsAttribute("categories")) {
             model.addAttribute("categories", categoryService.getAllCategories());
+            model.addAttribute("currentPage", "documents");
         }
         return "admin/documents/create";
     }
@@ -204,8 +221,8 @@ public class DocumentController {
             return "redirect:/admin/documents/create";
         }
 
-        if (categoryIds.size() > 3) {
-            redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 3 danh mục");
+        if (categoryIds.size() > 15) {
+            redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 15 danh mục");
             redirectAttributes.addFlashAttribute("document", documentDTO);
             redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
             return "redirect:/admin/documents/create";
@@ -262,7 +279,36 @@ public class DocumentController {
             documentDTO.setUserId(userId);
             DocumentDTO createdDocument = documentService.createDocument(documentDTO, file, categoryIds, tagList,
                     documentDTO.getUserId());
-            redirectAttributes.addFlashAttribute("success", "Thêm tài liệu thành công");
+            
+            // Tạo notification cho admin khi có document mới
+            try {
+                String uploaderName = "Admin"; // Default name
+                if (userId != null) {
+                    User uploader = userRepository.findById(userId).orElse(null);
+                    if (uploader != null) {
+                        uploaderName = uploader.getFullName() != null ? uploader.getFullName() : uploader.getUsername();
+                    }
+                }
+                notificationService.notifyAdminsNewDocument(documentDTO.getTitle(), uploaderName);
+                System.out.println("Created notification for new document: " + documentDTO.getTitle());
+            } catch (Exception e) {
+                System.err.println("Error creating notification for new document: " + e.getMessage());
+            }
+
+            // Gửi email thông báo tài liệu mới cho users (nếu bật chế độ immediate)
+            try {
+                // Tìm document vừa tạo để gửi thông báo
+                com.fpoly.shared_learning_materials.domain.Document newDocument = 
+                    documentService.findById(createdDocument.getId());
+                if (newDocument != null) {
+                    documentNotificationService.sendImmediateNotification(newDocument);
+                    System.out.println("Sent immediate document notification for: " + documentDTO.getTitle());
+                }
+            } catch (Exception e) {
+                System.err.println("Error sending immediate document notification: " + e.getMessage());
+            }
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm tài liệu thành công");
             return "redirect:/admin/documents";
         } catch (Exception e) {
             System.err.println("Error creating document: " + e.getMessage());
@@ -288,6 +334,7 @@ public class DocumentController {
         System.out.println("Document categoryNames: " + document.getCategoryNames());
         model.addAttribute("document", document);
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("currentPage", "documents");
         return "admin/documents/edit";
     }
 
@@ -339,8 +386,8 @@ public class DocumentController {
             return "redirect:/admin/documents/" + id + "/edit";
         }
 
-        if (categoryIds.size() > 3) {
-            redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 3 danh mục");
+        if (categoryIds.size() > 15) {
+            redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 15 danh mục");
             redirectAttributes.addFlashAttribute("document", documentDTO);
             redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
             return "redirect:/admin/documents/" + id + "/edit";
@@ -391,7 +438,7 @@ public class DocumentController {
 
             documentDTO.setUserId(userId);
             DocumentDTO updatedDocument = documentService.updateDocument(id, documentDTO, file, categoryIds, tagList);
-            redirectAttributes.addFlashAttribute("success", "Cập nhật tài liệu thành công");
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật tài liệu thành công");
             return "redirect:/admin/documents";
         } catch (Exception e) {
             System.err.println("Error updating document: " + e.getMessage());
@@ -415,6 +462,7 @@ public class DocumentController {
         System.out.println(
                 "Document has " + (document.getComments() != null ? document.getComments().size() : 0) + " comments");
         model.addAttribute("document", document);
+        model.addAttribute("currentPage", "documents");
         return "admin/documents/details";
     }
 
@@ -428,6 +476,7 @@ public class DocumentController {
         }
         System.out.println("Showing delete form for document: id=" + document.getId());
         model.addAttribute("document", document);
+        model.addAttribute("currentPage", "documents");
         return "admin/documents/delete";
     }
 
@@ -479,7 +528,7 @@ public class DocumentController {
                 System.out.println("TODO: Send notification to author: " + document.getAuthorName());
             }
 
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Đã chuyển tài liệu '" + document.getTitle() + "' vào thùng rác");
             return "redirect:/admin/documents";
         } catch (Exception e) {
@@ -501,12 +550,40 @@ public class DocumentController {
 
             documentService.restoreDocument(id);
 
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Đã khôi phục tài liệu '" + document.getTitle() + "' thành công");
             return "redirect:/admin/documents?tab=deleted";
         } catch (Exception e) {
             System.err.println("Error restoring document: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Lỗi khi khôi phục tài liệu: " + e.getMessage());
+            return "redirect:/admin/documents?tab=deleted";
+        }
+    }
+
+    @PostMapping("/{id}/permanent-delete")
+    public String permanentDeleteDocument(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            DocumentDTO document = documentService.getDocumentById(id);
+            if (document == null) {
+                redirectAttributes.addFlashAttribute("error", "Tài liệu không tồn tại");
+                return "redirect:/admin/documents?tab=deleted";
+            }
+
+            // Kiểm tra xem tài liệu đã bị xóa mềm chưa
+            if (document.getDeletedAt() == null) {
+                redirectAttributes.addFlashAttribute("error", "Chỉ có thể xóa vĩnh viễn tài liệu đã bị xóa mềm");
+                return "redirect:/admin/documents";
+            }
+
+            String documentTitle = document.getTitle();
+            documentService.permanentDeleteDocument(id);
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Đã xóa vĩnh viễn tài liệu '" + documentTitle + "' thành công");
+            return "redirect:/admin/documents?tab=deleted";
+        } catch (Exception e) {
+            System.err.println("Error permanently deleting document: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa vĩnh viễn tài liệu: " + e.getMessage());
             return "redirect:/admin/documents?tab=deleted";
         }
     }
@@ -523,7 +600,7 @@ public class DocumentController {
             // Set status to ARCHIVED
             documentService.updateDocumentStatus(id, "ARCHIVED");
 
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Đã lưu trữ tài liệu '" + document.getTitle() + "' thành công");
             return "redirect:/admin/documents";
         } catch (Exception e) {
@@ -545,7 +622,7 @@ public class DocumentController {
             // Set status to SUSPENDED
             documentService.updateDocumentStatus(id, "SUSPENDED");
 
-            redirectAttributes.addFlashAttribute("success",
+            redirectAttributes.addFlashAttribute("successMessage",
                     "Đã tạm ngưng tài liệu '" + document.getTitle() + "' thành công");
             return "redirect:/admin/documents";
         } catch (Exception e) {

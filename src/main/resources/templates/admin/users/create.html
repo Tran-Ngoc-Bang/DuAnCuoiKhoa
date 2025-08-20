@@ -22,6 +22,7 @@
   <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
   <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
   <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
+  <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
 
 
   <style>
@@ -168,6 +169,7 @@
   <!-- Scripts -->
   <div th:replace="~{fragments/admin/layout :: scripts}"></div>
   <script th:src="@{/js/admin/coin-packages-create.js}"></script>
+  <script th:src="@{/js/admin/notifications.js}"></script>
   <script>
     function validateEmail(email) {
       const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;

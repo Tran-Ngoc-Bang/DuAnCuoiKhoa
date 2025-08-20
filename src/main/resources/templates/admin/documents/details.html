@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Chi tiết tài liệu - EduShare Admin</title>
     <!-- Bootstrap CSS -->
     <link
@@ -23,6 +25,7 @@
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/admin_documents.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <style>
@@ -356,139 +359,354 @@
         resize: vertical;
         min-height: 80px;
       }
+
+      /* 🎨 New Document Overview Styles */
+      .document-overview {
+        padding: 0;
+      }
+
+      .document-header-card {
+        background: linear-gradient(135deg, #667eea 0%, #4f46e5 100%);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 24px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+      }
+
+      .document-icon {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+      }
+
+      .document-icon i {
+        font-size: 2.5rem;
+        color: white;
+      }
+
+      .document-title-section {
+        flex: 1;
+      }
+
+      .document-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0 0 12px 0;
+        color: white;
+      }
+
+      .document-description {
+        font-size: 1.1rem;
+        margin: 0 0 16px 0;
+        opacity: 0.9;
+        line-height: 1.5;
+      }
+
+      .document-status-badge {
+        display: inline-block;
+      }
+
+      .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .status-draft {
+        background: rgba(156, 163, 175, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .status-pending {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+      }
+
+      .status-published {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+
+      .status-archived {
+        background: rgba(107, 114, 128, 0.2);
+        color: #9ca3af;
+        border: 1px solid rgba(107, 114, 128, 0.3);
+      }
+
+      .status-rejected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .status-suspended {
+        background: rgba(249, 115, 22, 0.2);
+        color: #f97316;
+        border: 1px solid rgba(249, 115, 22, 0.3);
+      }
+
+      .info-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+      }
+
+      .info-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .info-card.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .info-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .info-card-header i {
+        color: #6366f1;
+        font-size: 1.1rem;
+      }
+
+      .info-card-header h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .info-card-body {
+        padding: 20px;
+      }
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        gap: 16px;
+      }
+
+      .info-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 0.9rem;
+        min-width: 80px;
+        flex-shrink: 0;
+      }
+
+      .info-value {
+        color: #374151;
+        font-weight: 500;
+        text-align: right;
+        flex: 1;
+      }
+
+      .info-value.file-type {
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .info-value.price {
+        color: #059669;
+        font-weight: 600;
+      }
+
+      .category-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+      }
+
+      .category-tag {
+        background: #f3f4f6;
+        color: #374151;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid #e5e7eb;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #f3f4f6;
+      }
+
+      .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+      }
+
+      .stat-icon.views {
+        background: #dbeafe;
+        color: #2563eb;
+      }
+
+      .stat-icon.downloads {
+        background: #dcfce7;
+        color: #16a34a;
+      }
+
+      .stat-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .stat-number {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag-badge {
+        background: linear-gradient(135deg, #667eea, #4f46e5);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .tag-badge:before {
+        content: "#";
+        opacity: 0.7;
+      }
+
+      .timestamps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+
+      .timestamp-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .timestamp-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 600;
+      }
+
+      .timestamp-value {
+        font-size: 0.95rem;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .document-header-card {
+          flex-direction: column;
+          text-align: center;
+          padding: 24px;
+        }
+
+        .info-cards-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .timestamps-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .info-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+        }
+
+        .info-value {
+          text-align: left;
+        }
+
+        .category-tags {
+          justify-content: flex-start;
+        }
+      }
     </style>
   </head>
   <body class="admin-page">
     <!-- Admin Header -->
-    <header class="admin-header">
-      <div class="admin-header-content">
-        <div class="admin-logo">
-          <a href="/admin" class="logo">
-            <div class="logo-icon">E</div>
-            <div class="logo-text">EduShare</div>
-          </a>
-        </div>
-        <div class="admin-header-actions">
-          <div class="admin-search">
-            <input type="text" placeholder="Tìm kiếm..." />
-            <button><i class="fas fa-search"></i></button>
-          </div>
-          <div class="dark-mode-toggle" id="darkModeToggle"></div>
-          <div class="admin-notifications">
-            <button type="button" class="notification-btn">
-              <i class="fas fa-bell"></i>
-              <span class="notification-badge">5</span>
-            </button>
-          </div>
-          <div class="admin-profile">
-            <div class="admin-avatar">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt="Admin"
-              />
-            </div>
-            <div class="admin-info">
-              <span class="admin-name">Nguyễn Văn A</span>
-              <span>Quản trị viên</span>
-            </div>
-            <div class="admin-dropdown">
-              <i class="fas fa-chevron-down"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
     <!-- Admin Container -->
     <div class="admin-container">
       <!-- Sidebar -->
-      <aside class="admin-sidebar">
-        <nav class="admin-nav">
-          <ul class="admin-menu">
-            <li class="admin-menu-item">
-              <a href="/admin"
-                ><i class="fas fa-tachometer-alt"></i
-                ><span>Bảng điều khiển</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/users"
-                ><i class="fas fa-users"></i><span>Quản lý người dùng</span></a
-              >
-            </li>
-            <li class="admin-menu-item active">
-              <a href="/admin/documents"
-                ><i class="fas fa-file-alt"></i><span>Quản lý tài liệu</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/categories"
-                ><i class="fas fa-folder"></i><span>Quản lý danh mục</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/tags"
-                ><i class="fas fa-tags"></i><span>Quản lý tags</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/comments"
-                ><i class="fas fa-comments"></i
-                ><span>Quản lý bình luận</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/reports"
-                ><i class="fas fa-flag"></i><span>Báo cáo vi phạm</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/ip-bans"
-                ><i class="fas fa-ban"></i><span>IP bị cấm</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/statistics"
-                ><i class="fas fa-chart-bar"></i><span>Thống kê</span></a
-              >
-            </li>
-            <li class="admin-menu-item has-submenu">
-              <a href="javascript:void(0)">
-                <i class="fas fa-coins"></i><span>Quản lý doanh thu</span>
-                <i class="fas fa-chevron-down submenu-icon"></i>
-              </a>
-              <ul class="submenu">
-                <li class="submenu-item">
-                  <a href="/admin/coin-packages"
-                    ><i class="fas fa-box"></i><span>Gói xu</span></a
-                  >
-                </li>
-                <li class="submenu-item">
-                  <a href="/admin/transactions"
-                    ><i class="fas fa-exchange-alt"></i
-                    ><span>Giao dịch</span></a
-                  >
-                </li>
-                <li class="submenu-item">
-                  <a href="/admin/withdrawals"
-                    ><i class="fas fa-money-bill-wave"></i
-                    ><span>Yêu cầu rút tiền</span></a
-                  >
-                </li>
-              </ul>
-            </li>
-            <li class="admin-menu-item">
-              <a href="/admin/settings"
-                ><i class="fas fa-cog"></i><span>Cài đặt</span></a
-              >
-            </li>
-            <li class="admin-menu-item">
-              <a href="/logout"
-                ><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a
-              >
-            </li>
-          </ul>
-        </nav>
-      </aside>
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
       <!-- Main Content -->
       <main class="admin-content">
         <div class="admin-content-header">
@@ -538,101 +756,193 @@
             <div class="tab-content">
               <!-- Tab 1: General Information -->
               <div class="tab-panel active" id="tab-general">
-                <div class="row" id="documentDetailsContent">
-                  <!--<div class="col-md-4">
-                    <img
-                      th:src="${document.thumbnail != null ? document.thumbnail : 'https://via.placeholder.com/400x300'}"
-                      class="img-fluid rounded"
-                      alt="Thumbnail"
-                    />
-                  </div>-->
-                  <div class="col-md-16">
-                    <h4 th:text="${document.title} ?: 'Không có tiêu đề'"></h4>
-                    <p
-                      class="text-muted"
-                      th:text="${document.description != null and !document.description.trim().isEmpty()} ? ${document.description} : 'Không có mô tả'"
-                    ></p>
-                    <div class="row mb-3">
-                      <div class="col-sm-6">
-                        <strong>Tác giả:</strong>
+                <div class="document-overview">
+                  <!-- Document Header -->
+                  <div class="document-header-card">
+                    <div class="document-icon">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="document-title-section">
+                      <h3
+                        class="document-title"
+                        th:text="${document.title} ?: 'Không có tiêu đề'"
+                      ></h3>
+                      <p
+                        class="document-description"
+                        th:text="${document.description != null and !document.description.trim().isEmpty()} ? ${document.description} : 'Không có mô tả'"
+                      ></p>
+                      <div class="document-status-badge">
                         <span
-                          th:text="${document.authorName != null ? document.authorName : 'Không xác định'}"
-                        ></span
-                        ><br />
-                        <strong>Danh mục:</strong>
-                        <span
-                          th:text="${document.categoryNames != null and !document.categoryNames.isEmpty()} ? ${#strings.listJoin(document.categoryNames, ', ')} : 'Không có danh mục'"
-                        ></span
-                        ><br />
-                        <strong>Loại file:</strong>
-                        <span
-                          th:text="${document.fileType != null ? document.fileType : 'Không xác định'}"
-                        ></span
-                        ><br />
-                        <strong>Giá:</strong>
-                        <span
-                          th:text="${document.price != null and document.price.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? (${#numbers.formatDecimal(document.price, 0, 0)} + ' coin') : 'Miễn phí'"
-                        ></span>
-                      </div>
-                      <div class="col-sm-6">
-                        <strong>Lượt xem:</strong>
-                        <span
-                          th:text="${document.viewsCount != null ? document.viewsCount : '0'}"
-                        ></span
-                        ><br />
-                        <strong>Lượt tải:</strong>
-                        <span
-                          th:text="${document.downloadsCount != null ? document.downloadsCount : '0'}"
-                        ></span
-                        ><br />
-                        <strong>Đánh giá:</strong> <span>Chưa có đánh giá</span
-                        ><br />
-                        <strong>Kích thước:</strong>
-                        <span
-                          th:text="${document.fileSize != null ? (#numbers.formatDecimal(document.fileSize / 1024, 1, 2) + ' MB') : '0.00 MB'}"
-                        ></span>
+                          th:class="|status-badge status-${document.status != null ? document.status.toLowerCase() : 'draft'}|"
+                          th:text="${document.status == 'DRAFT' ? 'Bản nháp' : 
+                                       document.status == 'PENDING' ? 'Chờ duyệt' : 
+                                       document.status == 'PUBLISHED' ? 'Đã xuất bản' : 
+                                       document.status == 'ARCHIVED' ? 'Đã lưu trữ' : 
+                                       document.status == 'REJECTED' ? 'Bị từ chối' : 
+                                       document.status == 'SUSPENDED' ? 'Đã tạm ngưng' : 'Bản nháp'}"
+                        >
+                        </span>
                       </div>
                     </div>
-                    <div class="mb-3">
-                      <strong>Tags:</strong><br />
-                      <div
-                        th:text="${document.tagNames != null and !document.tagNames.isEmpty()} ? ${#strings.listJoin(document.tagNames, ', ')} : 'Không có tag'"
-                      ></div>
-                    </div>
-                    <div class="mb-3">
-                      <strong>Trạng thái:</strong>
-                      <span
-                        th:class="|status-badge ${document.status != null ? document.status : 'DRAFT'}|"
-                        th:text="${document.status == 'DRAFT' ? 'Bản nháp' : 
-                                                        document.status == 'PENDING' ? 'Chờ duyệt' : 
-                                                        document.status == 'PUBLISHED' ? 'Đã xuất bản' : 
-                                                        document.status == 'ARCHIVED' ? 'Đã lưu trữ' : 
-                                                        document.status == 'REJECTED' ? 'Bị từ chối' : 
-                                                        document.status == 'SUSPENDED' ? 'Đã tạm ngưng' : 
-                                                        document.status != null ? document.status : 'Bản nháp'}"
-                      ></span>
-                    </div>
-                    <div class="row">
-                      <div class="col-sm-6">
-                        <strong>Ngày tạo:</strong>
-                        <span
-                          th:text="${document.createdAt != null} ? ${#temporals.format(document.createdAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"
-                        ></span>
+                  </div>
+
+                  <!-- Info Cards Grid -->
+                  <div class="info-cards-grid">
+                    <!-- Author & Categories Card -->
+                    <div class="info-card">
+                      <div class="info-card-header">
+                        <i class="fas fa-user-edit"></i>
+                        <h5>Thông tin tác giả</h5>
                       </div>
-                      <div class="col-sm-6">
-                        <strong>Ngày cập nhật:</strong>
-                        <span
-                          th:text="${document.updatedAt != null} ? ${#temporals.format(document.updatedAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"
-                        ></span>
+                      <div class="info-card-body">
+                        <div class="info-item">
+                          <span class="info-label">Tác giả:</span>
+                          <span
+                            class="info-value"
+                            th:text="${document.authorName != null ? document.authorName : 'Không xác định'}"
+                          ></span>
+                        </div>
+                        <div class="info-item">
+                          <span class="info-label">Danh mục:</span>
+                          <div class="category-tags">
+                            <span
+                              th:each="category : ${document.categoryNames}"
+                              th:if="${document.categoryNames != null and !document.categoryNames.isEmpty()}"
+                              class="category-tag"
+                              th:text="${category}"
+                            ></span>
+                            <span
+                              th:if="${document.categoryNames == null or document.categoryNames.isEmpty()}"
+                              class="text-muted"
+                              >Không có danh mục</span
+                            >
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="row" th:if="${document.deletedAt != null}">
-                      <div class="col-sm-12">
-                        <strong style="color: #dc3545">Ngày xóa:</strong>
-                        <span
-                          style="color: #dc3545"
-                          th:text="${#temporals.format(document.deletedAt, 'dd/MM/yyyy HH:mm')}"
-                        ></span>
+
+                    <!-- File Info Card -->
+                    <div class="info-card">
+                      <div class="info-card-header">
+                        <i class="fas fa-file-archive"></i>
+                        <h5>Thông tin file</h5>
+                      </div>
+                      <div class="info-card-body">
+                        <div class="info-item">
+                          <span class="info-label">Loại file:</span>
+                          <span
+                            class="info-value file-type"
+                            th:text="${document.fileType != null ? document.fileType.toUpperCase() : 'Không xác định'}"
+                          ></span>
+                        </div>
+                        <div class="info-item">
+                          <span class="info-label">Kích thước:</span>
+                          <span
+                            class="info-value"
+                            th:text="${document.fileSize != null ? (#numbers.formatDecimal(document.fileSize / 1024 / 1024, 1, 2) + ' MB') : '0.00 MB'}"
+                          ></span>
+                        </div>
+                        <div class="info-item">
+                          <span class="info-label">Giá:</span>
+                          <span
+                            class="info-value price"
+                            th:text="${document.price != null and document.price.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? (${#numbers.formatDecimal(document.price, 0, 0)} + ' coin') : 'Miễn phí'"
+                          ></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Statistics Card -->
+                    <div class="info-card">
+                      <div class="info-card-header">
+                        <i class="fas fa-chart-line"></i>
+                        <h5>Thống kê</h5>
+                      </div>
+                      <div class="info-card-body">
+                        <div class="stats-grid">
+                          <div class="stat-item">
+                            <div class="stat-icon views">
+                              <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="stat-content">
+                              <span
+                                class="stat-number"
+                                th:text="${document.viewsCount != null ? document.viewsCount : '0'}"
+                              ></span>
+                              <span class="stat-label">Lượt xem</span>
+                            </div>
+                          </div>
+                          <div class="stat-item">
+                            <div class="stat-icon downloads">
+                              <i class="fas fa-download"></i>
+                            </div>
+                            <div class="stat-content">
+                              <span
+                                class="stat-number"
+                                th:text="${document.downloadsCount != null ? document.downloadsCount : '0'}"
+                              ></span>
+                              <span class="stat-label">Lượt tải</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Tags Card -->
+                    <div
+                      class="info-card full-width"
+                      th:if="${document.tagNames != null and !document.tagNames.isEmpty()}"
+                    >
+                      <div class="info-card-header">
+                        <i class="fas fa-hashtag"></i>
+                        <h5>Tags</h5>
+                      </div>
+                      <div class="info-card-body">
+                        <div class="tags-container">
+                          <span
+                            th:each="tag : ${document.tagNames}"
+                            class="tag-badge"
+                            th:text="${tag}"
+                          ></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Timestamps Card -->
+                    <div class="info-card full-width">
+                      <div class="info-card-header">
+                        <i class="fas fa-clock"></i>
+                        <h5>Thời gian</h5>
+                      </div>
+                      <div class="info-card-body">
+                        <div class="timestamps-grid">
+                          <div class="timestamp-item">
+                            <span class="timestamp-label">Ngày tạo:</span>
+                            <span
+                              class="timestamp-value"
+                              th:text="${document.createdAt != null} ? ${#temporals.format(document.createdAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"
+                            ></span>
+                          </div>
+                          <div class="timestamp-item">
+                            <span class="timestamp-label">Ngày cập nhật:</span>
+                            <span
+                              class="timestamp-value"
+                              th:text="${document.updatedAt != null} ? ${#temporals.format(document.updatedAt, 'dd/MM/yyyy HH:mm')} : 'Chưa xác định'"
+                            ></span>
+                          </div>
+                          <div
+                            class="timestamp-item"
+                            th:if="${document.deletedAt != null}"
+                          >
+                            <span class="timestamp-label text-danger"
+                              >Ngày xóa:</span
+                            >
+                            <span
+                              class="timestamp-value text-danger"
+                              th:text="${#temporals.format(document.deletedAt, 'dd/MM/yyyy HH:mm')}"
+                            ></span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -831,7 +1141,7 @@
                             </div>
                           </div>
                           <div class="review-actions">
-                         <!--   <button
+                             <!--  <button
                               type="button"
                               class="btn btn-sm btn-outline-primary"
                               th:onclick="|replyToComment(${comment.id})|"
@@ -938,6 +1248,7 @@
           </div>
           <div class="modal-footer">
             <a th:href="@{/admin/documents}" class="btn btn-outline">Đóng</a>
+            <!-- Chỉ hiển thị nút chỉnh sửa khi tài liệu chưa bị xóa -->
             <a
               th:if="${document.deletedAt == null}"
               th:href="@{/admin/documents/{id}/edit(id=${document.id})}"
@@ -945,14 +1256,6 @@
             >
               <i class="fas fa-edit"></i><span>Chỉnh sửa</span>
             </a>
-            <button
-              th:if="${document.deletedAt != null}"
-              class="btn btn-secondary"
-              disabled
-              title="Không thể chỉnh sửa tài liệu đã xóa"
-            >
-              <i class="fas fa-edit"></i><span>Chỉnh sửa</span>
-            </button>
           </div>
         </div>
       </main>
@@ -1033,6 +1336,8 @@
     <div class="toast-container" id="toastContainer"></div>
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/admin/notifications.js}"></script>
+    <script th:src="@{/js/reply.js}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Tab switching

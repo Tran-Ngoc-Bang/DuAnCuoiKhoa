@@ -25,6 +25,8 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     Optional<Document> findFirstByDeletedAtIsNull();
 	List<Document> findTop5ByDeletedAtIsNullOrderByCreatedAtDesc();
 	long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
+	
+	List<Document> findByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 
     long countByStatus(String status);
 
