@@ -12,7 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
   initLightbox();
   initAuthorFollow();
   initReviewFilter();
+  initReviewLoadMore();
   initDocumentTypeSelection();
+  showToastFromFlash();
 });
 
 // Initialize tabs (Description, Reviews, etc.)
@@ -359,60 +361,119 @@ function initRatingStars() {
   }
 }
 
-// Initialize review form submission
+// Initialize review form submission with real backend integration
 function initReviewForm() {
+  console.log('Initializing review form with real backend integration');
+  
   const reviewForm = document.getElementById('reviewForm');
+  const ratingStars = document.querySelectorAll('.rate-star');
+  const ratingInput = document.getElementById('ratingInput');
+  const reviewText = document.getElementById('reviewText');
+  
+  console.log('Review form elements found:', {
+    reviewForm: !!reviewForm,
+    ratingStars: ratingStars.length,
+    ratingInput: !!ratingInput,
+    reviewText: !!reviewText
+  });
+
+  // Handle rating stars
+  ratingStars.forEach(star => {
+    star.addEventListener('click', function() {
+      const value = parseInt(this.getAttribute('data-value'));
+      console.log('Star clicked, value:', value);
+      
+      // Update hidden input
+      ratingInput.value = value;
+      console.log('Rating input updated to:', ratingInput.value);
+      
+      // Update star display
+      ratingStars.forEach((s, index) => {
+        const starIcon = s.querySelector('i');
+        if (index < value) {
+          starIcon.className = 'fas fa-star';
+          s.style.color = '#ffc107'; // Yellow color for filled stars
+        } else {
+          starIcon.className = 'far fa-star';
+          s.style.color = '#ccc'; // Gray color for empty stars
+        }
+      });
+    });
+
+    // Hover effects
+    star.addEventListener('mouseenter', function() {
+      const value = parseInt(this.getAttribute('data-value'));
+      ratingStars.forEach((s, index) => {
+        const starIcon = s.querySelector('i');
+        if (index < value) {
+          starIcon.className = 'fas fa-star';
+          s.style.color = '#ffc107';
+        }
+      });
+    });
+
+    star.addEventListener('mouseleave', function() {
+      const currentRating = parseInt(ratingInput.value) || 0;
+      ratingStars.forEach((s, index) => {
+        const starIcon = s.querySelector('i');
+        if (index < currentRating) {
+          starIcon.className = 'fas fa-star';
+          s.style.color = '#ffc107';
+        } else {
+          starIcon.className = 'far fa-star';
+          s.style.color = '#ccc';
+        }
+      });
+    });
+  });
   
   if (reviewForm) {
+    console.log('Adding submit listener to review form');
     reviewForm.addEventListener('submit', function(e) {
-      e.preventDefault();
+      console.log('Form submit triggered');
       
-      // Get form values
-      const rating = document.getElementById('ratingInput').value;
-      const reviewText = document.getElementById('reviewText').value;
-      
-      // Validate form
-      if (!rating) {
-        showToast('Vui lòng chọn số sao đánh giá', 'warning');
+      const rating = parseInt(ratingInput.value);
+      const review = reviewText.value.trim();
+
+      console.log('Form data:', { rating, review });
+
+      // Validation
+      if (!rating || rating < 1 || rating > 5) {
+        e.preventDefault();
+        console.log('Rating validation failed');
+        showToast('Vui lòng chọn đánh giá sao từ 1-5', 'warning');
         return;
       }
-      
-      if (!reviewText.trim()) {
+
+      if (!review) {
+        e.preventDefault();
+        console.log('Review content validation failed');
         showToast('Vui lòng nhập nội dung đánh giá', 'warning');
+        reviewText.focus();
         return;
       }
-      
+
+      if (review.length < 10) {
+        e.preventDefault();
+        console.log('Review length validation failed');
+        showToast('Nội dung đánh giá phải có ít nhất 10 ký tự', 'warning');
+        reviewText.focus();
+        return;
+      }
+
+      console.log('Form validation passed, submitting to backend...');
+
       // Show loading state
-      const submitButton = reviewForm.querySelector('button[type="submit"]');
-      const originalButtonText = submitButton.innerHTML;
-      submitButton.disabled = true;
-      submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+      const submitBtn = reviewForm.querySelector('.form-submit');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+      submitBtn.disabled = true;
       
-      // Simulate API call with timeout
-      setTimeout(() => {
-        // Reset form
-        reviewForm.reset();
-        document.querySelectorAll('.rate-star').forEach(star => star.classList.remove('active', 'selected'));
-        document.getElementById('ratingInput').value = '';
-        
-        // Reset button
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonText;
-        
-        // Show success message
-        showToast('Cảm ơn bạn đã gửi đánh giá!', 'success');
-        
-        // In a real application, this would reload reviews from the server
-        // For now, we'll just simulate adding a new review to the list
-        addNewReview({
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80',
-          name: 'Bạn',
-          date: 'Vừa xong',
-          rating: parseInt(rating),
-          text: reviewText
-        });
-      }, 1500);
+      // Form will submit normally to backend
+      // The backend will handle the submission and redirect back
     });
+  } else {
+    console.log('Review form not found!');
   }
 }
 
@@ -485,16 +546,15 @@ function addNewReview(review) {
             icon.classList.remove('far');
             icon.classList.add('fas');
             this.style.color = 'var(--primary)';
-            showToast('Cảm ơn bạn đã đánh giá', 'success');
+            // Toast will be shown by server flash message
           } else {
             icon.classList.remove('fas');
             icon.classList.add('far');
             this.style.color = '';
-            showToast('Đã hủy đánh giá', 'info');
+            // showToast('Đã hủy đánh giá', 'info');
           }
         } else {
-          // Report action
-          showToast('Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét đánh giá này.', 'info');
+          // Report action - toast will be shown by server flash message
         }
       });
     });
@@ -584,7 +644,7 @@ function initDocumentActions() {
               helpfulCount.textContent = `${count} người thấy hữu ích`;
             }
             
-            showToast('Cảm ơn bạn đã đánh giá', 'success');
+            // Toast will be shown by server flash message
           } else {
             icon.classList.remove('fas');
             icon.classList.add('far');
@@ -597,11 +657,10 @@ function initDocumentActions() {
               helpfulCount.textContent = `${count} người thấy hữu ích`;
             }
             
-            showToast('Đã hủy đánh giá', 'info');
+            // showToast('Đã hủy đánh giá', 'info');
           }
         } else {
-          // Report action
-          showToast('Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét đánh giá này.', 'info');
+          // Report action - toast will be shown by server flash message
         }
       });
     });
@@ -760,84 +819,48 @@ function initAuthorFollow() {
 
 // Initialize review filter functionality
 function initReviewFilter() {
-  const filterSelect = document.querySelector('.filter-select');
-  const sortSelect = document.querySelector('.sort-select');
-  const reviewItems = document.querySelectorAll('.review-item');
+  const filterForm = document.querySelector('.review-filter');
   
-  if (filterSelect && reviewItems.length) {
-    filterSelect.addEventListener('change', function() {
-      const rating = this.value;
-      
-      reviewItems.forEach(item => {
-        if (rating === 'all') {
-          item.style.display = '';
-        } else {
-          // Count stars in this review
-          const stars = item.querySelectorAll('.review-rating .fas.fa-star').length;
-          
-          if (stars === parseInt(rating)) {
-            item.style.display = '';
-          } else {
-            item.style.display = 'none';
-          }
-        }
+  if (filterForm) {
+    // Auto-submit form when select values change
+    const filterSelect = filterForm.querySelector('.filter-select');
+    const sortSelect = filterForm.querySelector('.sort-select');
+    
+    if (filterSelect) {
+      filterSelect.addEventListener('change', function() {
+        filterForm.submit();
       });
-      
-      showToast(`Hiển thị đánh giá: ${rating === 'all' ? 'Tất cả' : rating + ' sao'}`, 'info');
-    });
+    }
+    
+    if (sortSelect) {
+      sortSelect.addEventListener('change', function() {
+        filterForm.submit();
+      });
+    }
   }
+}
+
+// Initialize review load more functionality
+function initReviewLoadMore() {
+  const loadMoreButton = document.querySelector('.review-load-more');
   
-  if (sortSelect && reviewItems.length) {
-    sortSelect.addEventListener('change', function() {
-      const sortBy = this.value;
-      const reviewList = document.querySelector('.review-list');
+  if (loadMoreButton) {
+    loadMoreButton.addEventListener('click', function() {
+      // Show loading state
+      const originalText = this.innerHTML;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+      this.disabled = true;
       
-      if (reviewList) {
-        const reviewsArray = Array.from(reviewItems);
+      // Simulate loading more reviews
+      setTimeout(() => {
+        // In a real application, this would make an API call to load more reviews
+        // For demo purposes, we'll just show a message
+        showToast('Tính năng xem thêm đánh giá sẽ được cập nhật sớm!', 'info');
         
-        // Sort reviews based on selected option
-        reviewsArray.sort((a, b) => {
-          if (sortBy === 'recent') {
-            // Sort by date (newest first)
-            const dateA = a.querySelector('.review-date').textContent;
-            const dateB = b.querySelector('.review-date').textContent;
-            
-            // For demo purposes, we'll just reverse the current order
-            return -1;
-          } else if (sortBy === 'helpful') {
-            // Sort by helpfulness (most helpful first)
-            const helpfulA = parseInt(a.querySelector('.review-helpful').textContent);
-            const helpfulB = parseInt(b.querySelector('.review-helpful').textContent);
-            
-            return helpfulB - helpfulA;
-          } else if (sortBy === 'highest') {
-            // Sort by rating (highest first)
-            const starsA = a.querySelectorAll('.review-rating .fas.fa-star').length;
-            const starsB = b.querySelectorAll('.review-rating .fas.fa-star').length;
-            
-            return starsB - starsA;
-          } else if (sortBy === 'lowest') {
-            // Sort by rating (lowest first)
-            const starsA = a.querySelectorAll('.review-rating .fas.fa-star').length;
-            const starsB = b.querySelectorAll('.review-rating .fas.fa-star').length;
-            
-            return starsA - starsB;
-          }
-          
-          return 0;
-        });
-        
-        // Remove all reviews from the DOM
-        reviewItems.forEach(item => item.remove());
-        
-        // Append sorted reviews back to the list
-        reviewsArray.forEach(item => reviewList.appendChild(item));
-        
-        showToast(`Đã sắp xếp đánh giá: ${sortBy === 'recent' ? 'Mới nhất' : 
-                                         sortBy === 'helpful' ? 'Hữu ích nhất' : 
-                                         sortBy === 'highest' ? 'Đánh giá cao nhất' : 
-                                         'Đánh giá thấp nhất'}`, 'info');
-      }
+        // Restore button state
+        this.innerHTML = originalText;
+        this.disabled = false;
+      }, 1500);
     });
   }
 }
@@ -1025,169 +1048,16 @@ function initLightbox() {
   }
 }
 
-// Show toast message
-function showToast(message, type = 'info') {
-  // Check if toast container exists, if not create it
-  let toastContainer = document.querySelector('.toast-container');
-  
-  if (!toastContainer) {
-    toastContainer = document.createElement('div');
-    toastContainer.className = 'toast-container';
-    document.body.appendChild(toastContainer);
-    
-    // Add toast container styles if they don't exist
-    if (!document.getElementById('toast-styles')) {
-      const toastStyles = document.createElement('style');
-      toastStyles.id = 'toast-styles';
-      toastStyles.textContent = `
-        .toast-container {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          z-index: 9999;
-        }
-        
-        .toast {
-          min-width: 250px;
-          margin-top: 10px;
-          padding: 15px 20px;
-          border-radius: 4px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          font-size: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          transform: translateX(100%);
-          opacity: 0;
-          transition: transform 0.3s, opacity 0.3s;
-        }
-        
-        .toast.show {
-          transform: translateX(0);
-          opacity: 1;
-        }
-        
-        .toast-icon {
-          margin-right: 10px;
-          font-size: 16px;
-        }
-        
-        .toast-message {
-          flex-grow: 1;
-        }
-        
-        .toast-close {
-          margin-left: 10px;
-          cursor: pointer;
-          font-size: 16px;
-          opacity: 0.7;
-          transition: opacity 0.2s;
-        }
-        
-        .toast-close:hover {
-          opacity: 1;
-        }
-        
-        .toast-info {
-          background-color: #f0f7ff;
-          color: #0066cc;
-          border-left: 4px solid #0066cc;
-        }
-        
-        .toast-success {
-          background-color: #f0fff4;
-          color: #38a169;
-          border-left: 4px solid #38a169;
-        }
-        
-        .toast-warning {
-          background-color: #fffbeb;
-          color: #d97706;
-          border-left: 4px solid #d97706;
-        }
-        
-        .toast-error {
-          background-color: #fff5f5;
-          color: #e53e3e;
-          border-left: 4px solid #e53e3e;
-        }
-        
-        @media (max-width: 576px) {
-          .toast-container {
-            bottom: 0;
-            right: 0;
-            left: 0;
-          }
-          
-          .toast {
-            min-width: auto;
-            width: calc(100% - 20px);
-            margin: 10px;
-            border-radius: 4px;
-          }
-        }
-      `;
-      document.head.appendChild(toastStyles);
+// Show toast from flash message (using showToast from comment-actions.js)
+function showToastFromFlash() {
+  // Check if we have toast message from server
+  const toastMessageElement = document.querySelector('[data-toast-message]');
+  if (toastMessageElement) {
+    const message = toastMessageElement.getAttribute('data-toast-message');
+    const type = toastMessageElement.getAttribute('data-toast-type') || 'info';
+    // Use showToast from comment-actions.js
+    if (typeof window.showToast === 'function') {
+      window.showToast(message, type);
     }
   }
-  
-  // Create toast element
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  
-  // Icon based on type
-  let icon;
-  switch (type) {
-    case 'success':
-      icon = 'fas fa-check-circle';
-      break;
-    case 'warning':
-      icon = 'fas fa-exclamation-triangle';
-      break;
-    case 'error':
-      icon = 'fas fa-times-circle';
-      break;
-    case 'info':
-    default:
-      icon = 'fas fa-info-circle';
-      break;
-  }
-  
-  // Set toast content
-  toast.innerHTML = `
-    <div class="toast-icon"><i class="${icon}"></i></div>
-    <div class="toast-message">${message}</div>
-    <div class="toast-close"><i class="fas fa-times"></i></div>
-  `;
-  
-  // Add to container
-  toastContainer.appendChild(toast);
-  
-  // Show toast with animation
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 10);
-  
-  // Add close button event
-  const closeBtn = toast.querySelector('.toast-close');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
-      toast.classList.remove('show');
-      setTimeout(() => {
-        toastContainer.removeChild(toast);
-      }, 300);
-    });
-  }
-  
-  // Auto remove after 4 seconds
-  setTimeout(() => {
-    if (toast.parentNode === toastContainer) {
-      toast.classList.remove('show');
-      setTimeout(() => {
-        if (toast.parentNode === toastContainer) {
-          toastContainer.removeChild(toast);
-        }
-      }, 300);
-    }
-  }, 4000);
 }

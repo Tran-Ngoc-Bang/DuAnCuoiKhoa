@@ -17,10 +17,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.fpoly.shared_learning_materials.domain.Comment;
+import com.fpoly.shared_learning_materials.domain.CommentLike;
 import com.fpoly.shared_learning_materials.domain.Report;
+import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.CommentDTO;
+import com.fpoly.shared_learning_materials.dto.CommentFilterDTO;
 import com.fpoly.shared_learning_materials.dto.ReplyDTO;
 import com.fpoly.shared_learning_materials.repository.CommentRepository;
+import com.fpoly.shared_learning_materials.repository.CommentLikeRepository;
 import com.fpoly.shared_learning_materials.repository.ReplyRepository;
 import com.fpoly.shared_learning_materials.repository.ReportRepository;
 
@@ -35,6 +39,9 @@ public class CommentService {
 
 	@Autowired
 	private ReplyRepository replyRepository;
+
+	@Autowired
+	private CommentLikeRepository commentLikeRepository;
 
 	public Page<CommentDTO> getCommentsWithPendingReports(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -196,6 +203,122 @@ public class CommentService {
 		commentRepository.save(c);
 	}
 
+	// Like/Dislike methods
+	public Map<String, Object> likeComment(Long commentId, Long userId) {
+		Map<String, Object> result = new java.util.HashMap<>();
+
+		try {
+			Comment comment = commentRepository.findById(commentId)
+					.orElseThrow(() -> new RuntimeException("Comment not found"));
+
+			User user = new User();
+			user.setId(userId);
+
+			// Check if user already liked this comment
+			Optional<CommentLike> existingLike = commentLikeRepository.findByCommentIdAndUserId(commentId, userId);
+
+			if (existingLike.isPresent()) {
+				CommentLike like = existingLike.get();
+				if (like.getLikeType() == CommentLike.LikeType.LIKE) {
+					// User already liked, remove the like
+					commentLikeRepository.delete(like);
+					result.put("action", "removed");
+					result.put("success", true);
+				} else {
+					// User disliked before, change to like
+					like.setLikeType(CommentLike.LikeType.LIKE);
+					commentLikeRepository.save(like);
+					result.put("action", "liked");
+					result.put("success", true);
+				}
+			} else {
+				// Create new like
+				CommentLike newLike = new CommentLike();
+				newLike.setId(new com.fpoly.shared_learning_materials.domain.CommentLikeId(commentId, userId));
+				newLike.setComment(comment);
+				newLike.setUser(user);
+				newLike.setLikeType(CommentLike.LikeType.LIKE);
+				commentLikeRepository.save(newLike);
+				result.put("action", "liked");
+				result.put("success", true);
+			}
+
+			// Update counts
+			result.put("likesCount", commentLikeRepository.countLikesByCommentId(commentId));
+			result.put("dislikesCount", commentLikeRepository.countDislikesByCommentId(commentId));
+
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("error", e.getMessage());
+		}
+
+		return result;
+	}
+
+	public Map<String, Object> dislikeComment(Long commentId, Long userId) {
+		Map<String, Object> result = new java.util.HashMap<>();
+
+		try {
+			Comment comment = commentRepository.findById(commentId)
+					.orElseThrow(() -> new RuntimeException("Comment not found"));
+
+			User user = new User();
+			user.setId(userId);
+
+			// Check if user already disliked this comment
+			Optional<CommentLike> existingLike = commentLikeRepository.findByCommentIdAndUserId(commentId, userId);
+
+			if (existingLike.isPresent()) {
+				CommentLike like = existingLike.get();
+				if (like.getLikeType() == CommentLike.LikeType.DISLIKE) {
+					// User already disliked, remove the dislike
+					commentLikeRepository.delete(like);
+					result.put("action", "removed");
+					result.put("success", true);
+				} else {
+					// User liked before, change to dislike
+					like.setLikeType(CommentLike.LikeType.DISLIKE);
+					commentLikeRepository.save(like);
+					result.put("action", "disliked");
+					result.put("success", true);
+				}
+			} else {
+				// Create new dislike
+				CommentLike newLike = new CommentLike();
+				newLike.setId(new com.fpoly.shared_learning_materials.domain.CommentLikeId(commentId, userId));
+				newLike.setComment(comment);
+				newLike.setUser(user);
+				newLike.setLikeType(CommentLike.LikeType.DISLIKE);
+				commentLikeRepository.save(newLike);
+				result.put("action", "disliked");
+				result.put("success", true);
+			}
+
+			// Update counts
+			result.put("likesCount", commentLikeRepository.countLikesByCommentId(commentId));
+			result.put("dislikesCount", commentLikeRepository.countDislikesByCommentId(commentId));
+
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("error", e.getMessage());
+		}
+
+		return result;
+	}
+
+	public void populateLikeInfo(CommentDTO dto, Long currentUserId) {
+		if (currentUserId != null) {
+			Optional<CommentLike> userLike = commentLikeRepository.findByCommentIdAndUserId(dto.getId(), currentUserId);
+			if (userLike.isPresent()) {
+				dto.setIsLikedByCurrentUser(userLike.get().getLikeType() == CommentLike.LikeType.LIKE);
+				dto.setIsDislikedByCurrentUser(userLike.get().getLikeType() == CommentLike.LikeType.DISLIKE);
+			}
+		}
+
+		dto.setLikesCount(commentLikeRepository.countLikesByCommentId(dto.getId()));
+		dto.setDislikesCount(commentLikeRepository.countDislikesByCommentId(dto.getId()));
+	}
+
 	public Page<CommentDTO> searchAll(String keyword, int page, int size) {
 		Pageable pg = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		Specification<Comment> spec = Specification.where((r, q, cb) -> cb.isNull(r.get("deletedAt")));
@@ -290,5 +413,42 @@ public class CommentService {
 						r.getStatus(),
 						r.getCreatedAt()))
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Get filtered and paginated comments for a document (MVC approach)
+	 */
+	public Page<CommentDTO> getFilteredComments(Long documentId, Integer rating, String sortBy, int page, int size) {
+		// Create pageable with sorting
+		Sort sort = Sort.by("createdAt").descending();
+		if ("helpful".equals(sortBy)) {
+			sort = Sort.by("likesCount").descending().and(Sort.by("createdAt").descending());
+		} else if ("high".equals(sortBy)) {
+			sort = Sort.by("rating").descending().and(Sort.by("createdAt").descending());
+		} else if ("low".equals(sortBy)) {
+			sort = Sort.by("rating").ascending().and(Sort.by("createdAt").descending());
+		}
+
+		Pageable pageable = PageRequest.of(page, size, sort);
+
+		// Build specification for filtering
+		Specification<Comment> spec = Specification.where(
+				(root, query, cb) -> cb.and(
+						cb.isNull(root.get("deletedAt")),
+						cb.equal(root.get("document").get("id"), documentId),
+						cb.equal(root.get("status"), "active")));
+
+		// Add rating filter if specified
+		if (rating != null && rating >= 1 && rating <= 5) {
+			spec = spec.and((root, query, cb) -> cb.equal(root.get("rating"), rating));
+		}
+
+		// Get comments with filtering
+		Page<Comment> commentPage = commentRepository.findAll(spec, pageable);
+
+		// Convert to DTOs and add like/dislike info
+		Page<CommentDTO> dtoPage = commentPage.map(this::mapToDto);
+
+		return dtoPage;
 	}
 }

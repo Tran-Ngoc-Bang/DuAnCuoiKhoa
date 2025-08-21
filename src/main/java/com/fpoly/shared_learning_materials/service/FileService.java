@@ -16,14 +16,17 @@ import com.fpoly.shared_learning_materials.repository.FileRepository;
 
 @Service
 public class FileService {
-	
-	@Autowired
+
+    @Autowired
     private FileRepository fileRepository;
 
     public File saveFile(MultipartFile file, User uploadedBy) throws IOException {
         File newFile = new File();
-        newFile.setFileName(file.getOriginalFilename());
-        newFile.setFilePath("uploads/" + file.getOriginalFilename()); // Đường dẫn tương đối
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        String relativePath = "uploads/documents/" + fileName;
+
+        newFile.setFileName(fileName);
+        newFile.setFilePath(relativePath); // Đường dẫn tương đối phục vụ từ static/
         newFile.setFileType(file.getContentType());
         newFile.setFileSize(file.getSize());
         newFile.setMimeType(file.getContentType());
@@ -32,11 +35,11 @@ public class FileService {
         newFile.setCreatedAt(LocalDateTime.now());
         newFile.setUpdatedAt(LocalDateTime.now());
 
-        // Lưu file vào thư mục
-        String uploadDir = "src/main/resources/static/uploads/";
-        Path filePath = Paths.get(uploadDir + file.getOriginalFilename());
-        Files.createDirectories(filePath.getParent());
-        Files.write(filePath, file.getBytes());
+        // Lưu file vào thư mục đúng trong static
+        String uploadDir = "src/main/resources/static/uploads/documents/";
+        Path target = Paths.get(uploadDir + fileName);
+        Files.createDirectories(target.getParent());
+        Files.write(target, file.getBytes());
 
         return fileRepository.save(newFile);
     }

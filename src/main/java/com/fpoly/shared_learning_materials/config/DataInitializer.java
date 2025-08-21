@@ -69,21 +69,24 @@ public class DataInitializer implements CommandLineRunner {
                         createSampleUsers();
                         System.out.println("Sample users created successfully!");
                 } else {
-                        System.out.println("Sample users already exist, skipping user initialization.");
+                        // System.out.println("Sample users already exist, skipping user
+                        // initialization.");
                 }
 
                 if (!coinPackageRepository.existsByCodeAndDeletedAtIsNull("CP001")) {
                         createSampleCoinPackages();
                         System.out.println("Sample coin packages created successfully!");
                 } else {
-                        System.out.println("Sample coin packages already exist, skipping package initialization.");
+                        // System.out.println("Sample coin packages already exist, skipping package
+                        // initialization.");
                 }
 
                 if (!transactionRepository.existsByCodeAndDeletedAtIsNull("TXN000001")) {
                         createSampleTransactions();
                         System.out.println("Sample transactions and withdrawals created successfully!");
                 } else {
-                        System.out.println("Sample transactions already exist, skipping transaction initialization.");
+                        // System.out.println("Sample transactions already exist, skipping transaction
+                        // initialization.");
                 }
 
                 // Check and create withdrawals separately
@@ -104,49 +107,56 @@ public class DataInitializer implements CommandLineRunner {
                                 System.out.println("Sample withdrawals created successfully!");
                         }
                 } else {
-                        System.out.println("Sample withdrawals already exist, skipping withdrawal initialization.");
+                        // System.out.println("Sample withdrawals already exist, skipping withdrawal
+                        // initialization.");
                 }
 
                 if (!categoryRepository.existsByNameAndDeletedAtIsNull("Công nghệ")) {
                         createSampleCategories();
                         System.out.println("Sample categories created successfully!");
                 } else {
-                        System.out.println("Sample categories already exist, skipping category initialization.");
+                        // System.out.println("Sample categories already exist, skipping category
+                        // initialization.");
                 }
 
                 if (!tagRepository.existsByName("beginner")) {
                         createSampleTags();
                         System.out.println("Sample tags created successfully!");
                 } else {
-                        System.out.println("Sample tags already exist, skipping tag initialization.");
+                        // System.out.println("Sample tags already exist, skipping tag
+                        // initialization.");
                 }
 
                 if (!documentRepository.existsBySlug("java-programming-guide")) {
                         createSampleDocuments();
                         System.out.println("Sample documents created successfully!");
                 } else {
-                        System.out.println("Sample documents already exist, skipping document initialization.");
+                        // System.out.println("Sample documents already exist, skipping document
+                        // initialization.");
                 }
 
                 if (commentRepository.count() == 0) {
                         createSampleComments();
                         System.out.println("Sample comments created successfully!");
                 } else {
-                        System.out.println("Sample comments already exist, skipping comment initialization.");
+                        // System.out.println("Sample comments already exist, skipping comment
+                        // initialization.");
                 }
 
                 if (replyRepository.count() == 0) {
                         createSampleReplies();
                         System.out.println("Sample replies created successfully!");
                 } else {
-                        System.out.println("Sample replies already exist, skipping reply initialization.");
+                        // System.out.println("Sample replies already exist, skipping reply
+                        // initialization.");
                 }
 
                 if (reportRepository.count() == 0) {
                         createSampleReports();
                         System.out.println("Sample reports created successfully!");
                 } else {
-                        System.out.println("Sample reports already exist, skipping comment initialization.");
+                        // System.out.println("Sample reports already exist, skipping comment
+                        // initialization.");
                 }
 
         }

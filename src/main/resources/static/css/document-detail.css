@@ -1,7 +1,15 @@
 :root {
-  --detail-primary-gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  --detail-accent-gradient: linear-gradient(135deg, var(--accent) 0%, #d31775 100%);
-  
+  --detail-primary-gradient: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--secondary) 100%
+  );
+  --detail-accent-gradient: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    #d31775 100%
+  );
+
   /* Preview colors */
   --preview-background: #f8f9fa;
   --preview-text: #333;
@@ -20,7 +28,7 @@
 }
 
 .document-hero::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -67,7 +75,7 @@
 
 .document-header {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 400px;
   gap: var(--spacing-8);
   align-items: start;
 }
@@ -112,6 +120,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
+  color: black;
 }
 
 .meta-item i {
@@ -122,6 +131,7 @@
   display: flex;
   align-items: center;
   margin-top: var(--spacing-4);
+  border-radius: var(--radius-lg);
 }
 
 .author-avatar {
@@ -311,6 +321,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: black;
 }
 
 .download-title {
@@ -385,11 +396,11 @@
 }
 
 .document-price.free {
-  color: #2ED573;
+  color: #2ed573;
 }
 
 .document-price.premium {
-  color: #FFD700;
+  color: #ffd700;
 }
 
 .document-price i {
@@ -723,7 +734,7 @@
 .rating-stars {
   display: flex;
   gap: var(--spacing-1);
-  color: #FFB800;
+  color: #ffb800;
   margin-bottom: var(--spacing-1);
 }
 
@@ -755,7 +766,7 @@
 }
 
 .bar-label i {
-  color: #FFB800;
+  color: #ffb800;
 }
 
 .bar-container {
@@ -818,7 +829,7 @@
 
 .rate-star:hover,
 .rate-star.active {
-  color: #FFB800;
+  color: #ffb800;
 }
 
 .form-control {
@@ -923,7 +934,7 @@
 .review-rating {
   display: flex;
   gap: var(--spacing-1);
-  color: #FFB800;
+  color: #ffb800;
   font-size: 0.9rem;
 }
 
@@ -1058,7 +1069,6 @@
 
 .widget-header {
   padding: var(--spacing-4) var(--spacing-6);
-  background-color: var(--gray-50);
   border-bottom: 1px solid var(--gray-200);
 }
 
@@ -1257,7 +1267,7 @@
 }
 
 .document-price-small.free {
-  color: #2ED573;
+  color: #2ed573;
 }
 
 /* Tags Widget */
@@ -1287,6 +1297,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-2);
+  color: black;
   margin-top: var(--spacing-4);
 }
 
@@ -1380,7 +1391,7 @@
 }
 
 .recommendation-rating i {
-  color: #FFB800;
+  color: #ffb800;
 }
 
 /* Share Modal */
@@ -1740,7 +1751,7 @@
 }
 
 .download-cost-value.free {
-  color: #2ED573;
+  color: #2ed573;
 }
 
 .download-cost-value i {
@@ -1947,19 +1958,19 @@
     grid-template-columns: 1fr;
     gap: var(--spacing-6);
   }
-  
+
   .document-content-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .document-sidebar {
     position: static;
   }
-  
+
   .document-title {
     font-size: 2rem;
   }
-  
+
   .share-options {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1970,44 +1981,45 @@
     flex-direction: column;
     gap: var(--spacing-3);
     align-items: flex-start;
+    color: black;
   }
-  
+
   .document-hero {
     padding: var(--spacing-6) 0;
   }
-  
+
   .rating-overview {
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-4);
     padding: var(--spacing-4);
   }
-  
+
   .rating-distribution {
     width: 100%;
   }
-  
+
   .details-list {
     grid-template-columns: 1fr;
   }
-  
+
   .content-tab {
     padding: var(--spacing-3);
     font-size: 0.9rem;
   }
-  
+
   .tab-content {
     padding: var(--spacing-4);
   }
-  
+
   .download-info {
     grid-template-columns: 1fr;
   }
-  
+
   .share-options {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .author-stats {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -2017,45 +2029,45 @@
   .document-title {
     font-size: 1.5rem;
   }
-  
+
   .preview-pages {
     justify-content: flex-start;
   }
-  
+
   .content-tabs {
     flex-wrap: wrap;
   }
-  
+
   .content-tab {
     flex-grow: 1;
     text-align: center;
   }
-  
+
   .reviewer-info {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-2);
   }
-  
+
   .review-header {
     flex-direction: column;
     gap: var(--spacing-2);
   }
-  
+
   .review-footer {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-3);
   }
-  
+
   .share-options {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .share-link-container {
     flex-direction: column;
   }
-  
+
   .download-modal-title {
     font-size: 1.2rem;
   }

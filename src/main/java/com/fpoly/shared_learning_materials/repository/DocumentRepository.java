@@ -1,6 +1,5 @@
 package com.fpoly.shared_learning_materials.repository;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -17,14 +15,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
 
-
 import com.fpoly.shared_learning_materials.domain.Document;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSpecificationExecutor<Document> {
     Optional<Document> findFirstByDeletedAtIsNull();
-	List<Document> findTop5ByDeletedAtIsNullOrderByCreatedAtDesc();
-	long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
+
+    List<Document> findTop5ByDeletedAtIsNullOrderByCreatedAtDesc();
+
+    long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 
     long countByStatus(String status);
 
@@ -49,7 +48,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     List<Document> findByDeletedAtIsNullOrderByCreatedAtDesc();
 
     List<Document> findByDeletedAtIsNotNull();
-    
+
     List<Document> findByDeletedAtIsNotNullOrderByDeletedAtDesc();
 
     // Đếm documents chưa xóa
@@ -57,5 +56,16 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
 
     // Đếm documents đã xóa
     long countByDeletedAtIsNotNull();
-}
 
+    // Tăng lượt xem
+    @Query("UPDATE Document d SET d.viewsCount = COALESCE(d.viewsCount, 0) + 1 WHERE d.id = :documentId")
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    int incrementViewCount(@Param("documentId") Long documentId);
+
+    // Tăng lượt tải
+    @Query("UPDATE Document d SET d.downloadsCount = COALESCE(d.downloadsCount, 0) + 1 WHERE d.id = :documentId")
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    int incrementDownloadCount(@Param("documentId") Long documentId);
+}

@@ -25,16 +25,23 @@ public class CommentDTO {
 	private String userAvatar;
 	private String status; // active, hidden...
 	private LocalDateTime createdAt;
+	private Integer rating;
 
 	private boolean reported;
 	private Long reportId;
 	private String reporterName;
 	private String reportReason;
 	private LocalDateTime reportTime;
-	
+
 	private List<ReplyDTO> replies;
 
-    private String reportStatus;
+	private String reportStatus;
+
+	// Like information
+	private Long likesCount = 0L;
+	private Long dislikesCount = 0L;
+	private Boolean isLikedByCurrentUser = false;
+	private Boolean isDislikedByCurrentUser = false;
 
 	public CommentDTO(Long id, Long documentId, String documentTitle, Long userId, String userFullName, String content,
 			String userAvatar, String status, LocalDateTime createdAt) {
@@ -50,7 +57,7 @@ public class CommentDTO {
 	}
 
 	public void setReportInfo(Report report) {
-		this.reported = true;			
+		this.reported = true;
 		this.reported = true;
 		this.reportId = report.getId();
 		this.reporterName = report.getReporter().getFullName();
@@ -177,6 +184,5 @@ public class CommentDTO {
 	public void setReplies(List<ReplyDTO> replies) {
 		this.replies = replies;
 	}
-	
 
 }

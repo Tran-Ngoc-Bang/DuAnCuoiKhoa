@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <title>Chi tiết tài liệu - EduShare</title>
+  <title th:text="${document != null ? document.title + ' - EduShare' : 'Chi tiết tài liệu - EduShare'}">Chi tiết tài liệu - EduShare</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -17,6 +17,28 @@
   <link rel="stylesheet" th:href="@{/css/footer-modern.css}">
   <link rel="stylesheet" th:href="@{/css/client-header.css}">
   <link rel="stylesheet" th:href="@{/css/client-footer.css}">
+  <link rel="stylesheet" th:href="@{/css/comment-actions.css}">
+  <meta name="_csrf" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+  
+  <!-- Hidden data for JavaScript updates -->
+  <div th:if="${updatedCommentId}" 
+       th:attr="data-updated-comment-id=${updatedCommentId},
+                data-updated-likes-count=${updatedLikesCount},
+                data-updated-dislikes-count=${updatedDislikesCount},
+                data-updated-action=${updatedAction}"
+       style="display: none;"></div>
+  
+  <!-- Hidden data for toast messages -->
+  <div th:if="${toastMessage}" 
+       th:attr="data-toast-message=${toastMessage},
+                data-toast-type=${toastType}"
+       style="display: none;"></div>
+  
+  <!-- Hidden data for new comment -->
+  <div th:if="${newCommentId}" 
+       th:attr="data-new-comment-id=${newCommentId}"
+       style="display: none;"></div>
 </head>
 <body>
     <!-- Header -->
@@ -76,7 +98,7 @@
     </header>
 
   <!-- Document Hero -->
-  <section class="document-hero">
+  <section class="document-hero" th:attr="data-document-id=${document.id}">
     <div class="container">
       <div class="document-hero-content">
         <div class="document-breadcrumbs">
@@ -84,45 +106,59 @@
           <span class="separator">/</span>
           <a href="categories.html">Danh mục</a>
           <span class="separator">/</span>
-          <a href="search.html?category=it">Công nghệ thông tin</a>
+          <a th:if="${document.categoryNames != null and !document.categoryNames.isEmpty()}" 
+             th:href="@{/search(category=${document.categoryNames[0]})}" 
+             th:text="${document.categoryNames[0]}">Công nghệ thông tin</a>
+          <a th:if="${document.categoryNames == null or document.categoryNames.isEmpty()}" 
+             href="categories.html">Tài liệu</a>
           <span class="separator">/</span>
-          <span class="current">Lập trình ứng dụng web với React và NodeJS</span>
+          <span class="current" th:text="${document.title}">Lập trình ứng dụng web với React và NodeJS</span>
         </div>
         
         <div class="document-header">
           <div class="document-info">
             <div class="document-category">
-              <i class="fas fa-folder"></i> Công nghệ thông tin
+              <i class="fas fa-folder"></i> 
+              <span th:if="${document.categoryNames != null and !document.categoryNames.isEmpty()}" 
+                    th:text="${document.categoryNames[0]}">Công nghệ thông tin</span>
+              <span th:if="${document.categoryNames == null or document.categoryNames.isEmpty()}">Tài liệu</span>
             </div>
-            
-            <h1 class="document-title">Lập trình ứng dụng web với React và NodeJS: Từ cơ bản đến nâng cao</h1>
+            <hr>
+            <h1 class="document-title" th:text="${document.title}">Lập trình ứng dụng web với React và NodeJS: Từ cơ bản đến nâng cao</h1>
             
             <div class="document-meta">
-              <div class="meta-item">
-                <i class="fas fa-calendar-alt"></i> Cập nhật: 15/05/2023
+              <div class="meta-item" th:if="${document.createdAt != null}">
+                <i class="fas fa-calendar-alt"></i> Cập nhật: <span th:text="${#temporals.format(document.createdAt, 'dd/MM/yyyy')}">15/05/2023</span>
+              </div>
+              <div class="meta-item" th:if="${document.createdAt == null}">
+                <i class="fas fa-calendar-alt"></i> Cập nhật: Không có thông tin
               </div>
               <div class="meta-item">
-                <i class="fas fa-eye"></i> 3,245 lượt xem
+                <i class="fas fa-eye"></i> <span th:text="${document.viewsCount != null ? document.viewsCount : 0}">0</span> lượt xem
               </div>
               <div class="meta-item">
-                <i class="fas fa-download"></i> 875 lượt tải
+                <i class="fas fa-download"></i> <span th:text="${document.downloadsCount != null ? document.downloadsCount : 0}">0</span> lượt tải
               </div>
               <div class="meta-item">
-                <i class="fas fa-star"></i> 4.8/5 (120 đánh giá)
+                <i class="fas fa-star"></i> 
+                <span th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) : '0.0'}">0.0</span>/5 
+                (<span th:text="${document.comments != null ? document.comments.size() : 0}">0</span> đánh giá)
               </div>
             </div>
             
-            <p class="document-description">
+            <p class="document-description" th:text="${document.description}">
               Tài liệu này cung cấp hướng dẫn toàn diện về cách phát triển ứng dụng web full-stack
               hiện đại sử dụng React cho phần giao diện và NodeJS cho phần backend. Bao gồm các kiến thức
               từ căn bản đến nâng cao, giúp bạn làm chủ hai công nghệ phổ biến nhất hiện nay.
             </p>
             
             <div class="document-tags-inline">
-              <a href="search.html?tag=react" class="document-tag-badge">React</a>
-              <a href="search.html?tag=nodejs" class="document-tag-badge">NodeJS</a>
-              <a href="search.html?tag=javascript" class="document-tag-badge">JavaScript</a>
-              <a href="search.html?tag=web-development" class="document-tag-badge">Web Development</a>
+              <a th:each="tag : ${document.tagNames}" 
+                 th:href="@{/search(tag=${tag})}" 
+                 th:text="${tag}" 
+                 class="document-tag-badge">React</a>
+              <span th:if="${document.tagNames == null or document.tagNames.isEmpty()}" 
+                    class="no-tags">Chưa có thẻ</span>
             </div>
             
             <div class="document-author">
@@ -131,7 +167,7 @@
               </div>
               <div class="author-info">
                 <div class="author-label">Tác giả</div>
-                <div class="author-name">Nguyễn Văn A</div>
+                <div class="author-name" th:text="${document.authorName != null ? document.authorName : 'Admin'}">Nguyễn Văn A</div>
               </div>
             </div>
           </div>
@@ -139,8 +175,13 @@
           <div class="document-preview">
             <div class="preview-image">
               <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document Preview">
-              <div class="document-badge premium">
-                <i class="fas fa-coins"></i> 25 xu
+              <!-- Conditional price badge display -->
+              <div th:if="${document.price != null and document.price > 0}" class="document-badge premium">
+                <i class="fas fa-coins"></i> 
+                <span th:text="${#numbers.formatDecimal(document.price, 1, 'COMMA', 0, 'POINT')}"></span> xu
+              </div>
+              <div th:if="${document.price == null or document.price == 0}" class="document-badge free">
+                <i class="fas fa-gift"></i> Miễn phí
               </div>
             </div>
             
@@ -169,42 +210,79 @@
             <div class="download-card">
               <div class="download-header">
                 <div class="download-title">Thông tin tài liệu</div>
-                <div class="document-format pdf">
-                  <i class="fas fa-file-pdf"></i> PDF
+                <div class="document-format" th:if="${document.fileType != null}" th:classappend="${document.fileType != null ? document.fileType.toLowerCase() : 'pdf'}">
+                  <i class="fas" th:classappend="${document.fileType != null and document.fileType.toLowerCase() == 'pdf' ? 'fa-file-pdf' : 'fa-file'}"></i>
+                  <span th:text="${document.fileType != null ? document.fileType.toUpperCase() : 'PDF'}">PDF</span>
+                </div>
+                <div class="document-format" th:if="${document.fileType == null and document.fileName != null}">
+                  <i class="fas fa-file"></i> Không xác định
+                </div>
+                <div class="document-format" th:if="${document.fileType == null and document.fileName == null}">
+                  <i class="fas fa-exclamation-triangle"></i> Không có file đính kèm
                 </div>
               </div>
               
               <div class="download-info">
-                <div class="download-info-item">
-                  <div class="info-value" data-info="size">5.2 MB</div>
+                <div class="download-info-item" th:if="${document.fileSize != null}">
+                  <div class="info-value" data-info="size" th:text="${document.fileSize + ' KB'}">5.2 MB</div>
+                  <div class="info-label">Kích thước</div>
+                </div>
+                <div class="download-info-item" th:if="${document.fileSize == null}">
+                  <div class="info-value" data-info="size">Không có thông tin</div>
                   <div class="info-label">Kích thước</div>
                 </div>
                 <div class="download-info-item">
-                  <div class="info-value" data-info="pages">120 trang</div>
-                  <div class="info-label">Số trang</div>
+                  <div class="info-value" data-info="rating" th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) + '/5' : '0.0/5'}">0.0/5</div>
+                  <div class="info-label">Đánh giá</div>
                 </div>
-                <div class="download-info-item">
-                  <div class="info-value" data-info="date">15/05/2023</div>
+                <div class="download-info-item" th:if="${document.createdAt != null}">
+                  <div class="info-value" data-info="date" th:text="${#temporals.format(document.createdAt, 'dd/MM/yyyy')}">15/05/2023</div>
                   <div class="info-label">Cập nhật</div>
                 </div>
                 <div class="download-info-item">
-                  <div class="info-value" data-info="downloads">875</div>
+                  <div class="info-value" data-info="views" th:text="${document.viewsCount != null ? document.viewsCount : 0}">0</div>
+                  <div class="info-label">Lượt xem</div>
+                </div>
+                <div class="download-info-item">
+                  <div class="info-value" data-info="downloads" th:text="${document.downloadsCount != null ? document.downloadsCount : 0}">0</div>
                   <div class="info-label">Lượt tải</div>
                 </div>
               </div>
               
-              <div class="document-price premium">
-                <i class="fas fa-coins"></i> 25 xu
-                <span class="price-original">35 xu</span>
+              <!-- Conditional price display in download card -->
+              <div th:if="${document.price != null and document.price > 0}" class="document-price premium">
+    <i class="fas fa-coins"></i>
+    <span th:text="${#numbers.formatDecimal(document.price, 1, 'COMMA', 0, 'POINT')}"></span> xu
+
+</div>
+              <div th:if="${document.price == null or document.price == 0}" class="document-price free">
+                <i class="fas fa-gift"></i> Miễn phí
               </div>
               
               <div class="download-actions">
-                <button class="action-button download-button" data-premium="true">
-                  <i class="fas fa-download"></i> Tải xuống
-                </button>
-                <a href="pdf-viewer.html?doc=master-spring-boot" class="action-button preview-button">
-                  <i class="fas fa-eye"></i> Đọc thử
-                </a>
+                <!-- Conditional download button text based on price -->
+                <form th:if="${document.price != null and document.price > 0}" 
+                      th:action="@{/documents/{id}/download(id=${document.id})}" 
+                      method="post" style="display: inline;">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                  <button type="submit" class="action-button download-button" data-premium="true">
+                    <i class="fas fa-shopping-cart"></i> Mua ngay
+                  </button>
+                </form>
+                <form th:if="${document.price == null or document.price == 0}" 
+                      th:action="@{/documents/{id}/download(id=${document.id})}" 
+                      method="post" style="display: inline;">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                  <button type="submit" class="action-button download-button" data-premium="false">
+                    <i class="fas fa-download"></i> Tải xuống
+                  </button>
+                </form>
+                <form th:action="@{/documents/{id}/view(id=${document.id})}" method="post" style="display: inline;">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                  <button type="submit" class="action-button preview-button">
+                    <i class="fas fa-eye"></i> Đọc thử
+                  </button>
+                </form>
                 <div class="secondary-actions">
                   <button class="action-button bookmark-button">
                     <i class="far fa-bookmark"></i> <span>Lưu</span>
@@ -229,10 +307,17 @@
     <div class="container">
       <div class="document-content-grid">
         <div class="document-content-tab">
+          <!-- Flash Messages -->
+          <div th:if="${viewCountUpdated}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> Đã cập nhật lượt xem thành công!
+          </div>
+          <div th:if="${downloadCountUpdated}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> Đã cập nhật lượt tải thành công!
+          </div>
+          
           <div class="content-tabs">
             <div class="content-tab active" data-tab="description">Mô tả</div>
             <div class="content-tab" data-tab="preview">Xem trước</div>
-            <div class="content-tab" data-tab="contents">Mục lục</div>
             <div class="content-tab" data-tab="reviews">Đánh giá</div>
             <div class="content-tab" data-tab="details">Chi tiết</div>
           </div>
@@ -240,143 +325,21 @@
           <!-- Description Tab -->
           <div id="description-content" class="tab-content active">
             <div class="document-description">
-              <p>
-                Tài liệu "Lập trình ứng dụng web với React và NodeJS: Từ cơ bản đến nâng cao" cung cấp một hướng dẫn toàn diện về cách phát triển ứng dụng web hiện đại, sử dụng hai công nghệ phổ biến nhất hiện nay: React và NodeJS.
+              <p th:text="${document.description}">
+                Tài liệu "Lập trình ứng dụng web với React và NodeJS: Từ cơ bản đến nâng cao" cung cấp 
               </p>
-              
-              <p>
-                Với sự phát triển nhanh chóng của công nghệ web, việc nắm vững các công cụ và framework hiện đại là điều cần thiết đối với mọi lập trình viên. React - thư viện JavaScript do Facebook phát triển, đã trở thành một trong những công cụ phổ biến nhất để xây dựng giao diện người dùng. Trong khi đó, NodeJS đã cách mạng hóa phía backend bằng cách cho phép sử dụng JavaScript ở phía server.
-              </p>
-              
-              <h2>Nội dung tài liệu</h2>
-              
-              <p>
-                Tài liệu này được tổ chức theo một lộ trình từ cơ bản đến nâng cao, giúp người đọc xây dựng nền tảng kiến thức vững chắc trước khi đi vào các khái niệm phức tạp hơn:
-              </p>
-              
-              <h3>Phần 1: Nền tảng React</h3>
-              <p>
-                Phần này giới thiệu về React, bao gồm các khái niệm cốt lõi như components, props, state, và lifecycle. Bạn sẽ học cách tạo ra các components có thể tái sử dụng và xây dựng một ứng dụng React đơn giản từ đầu.
-              </p>
-              
-              <h3>Phần 2: React Hooks và Patterns hiện đại</h3>
-              <p>
-                Tìm hiểu về React Hooks - một tính năng mạnh mẽ được giới thiệu từ React 16.8, giúp bạn sử dụng state và các tính năng React khác mà không cần viết class. Phần này cũng bao gồm các patterns hiện đại trong React như Context API, Render Props, và HOCs.
-              </p>
-              
-              <h3>Phần 3: State Management với Redux</h3>
-              <p>
-                Học cách quản lý state trong ứng dụng lớn với Redux - một thư viện JavaScript predictable state container. Bạn sẽ hiểu về concepts như actions, reducers, store và middleware, cũng như cách tích hợp Redux với React.
-              </p>
-              
-              <h3>Phần 4: Phát triển Backend với NodeJS</h3>
-              <p>
-                Phần này giới thiệu về NodeJS và cách xây dựng RESTful API sử dụng Express - framework phổ biến nhất cho NodeJS. Bạn sẽ học cách xử lý requests, response, middleware, và kết nối với cơ sở dữ liệu.
-              </p>
-              
-              <h3>Phần 5: Tích hợp Frontend và Backend</h3>
-              <p>
-                Học cách kết nối ứng dụng React với backend NodeJS. Phần này bao gồm cách gọi API từ React, xử lý authentication, và deployment ứng dụng full-stack.
-              </p>
-              
-              <h3>Phần 6: Các kỹ thuật nâng cao</h3>
-              <p>
-                Đi sâu vào các kỹ thuật nâng cao như server-side rendering với Next.js, testing, và optimizing performance cho cả React và NodeJS.
-              </p>
-              
-              <h2>Ai nên đọc tài liệu này?</h2>
-              <p>
-                Tài liệu này phù hợp với:
-              </p>
-              <ul>
-                <li>Sinh viên CNTT muốn bổ sung kiến thức thực tế về web development</li>
-                <li>Lập trình viên frontend muốn mở rộng sang backend với NodeJS</li>
-                <li>Lập trình viên backend muốn học React để phát triển toàn stack</li>
-                <li>Những người đã có kiến thức cơ bản về JavaScript và muốn nâng cao kỹ năng</li>
-              </ul>
-              
-              <h2>Yêu cầu kiến thức</h2>
-              <p>
-                Để tận dụng tối đa tài liệu này, bạn nên có:
-              </p>
-              <ul>
-                <li>Kiến thức cơ bản về HTML, CSS và JavaScript</li>
-                <li>Hiểu biết về ES6+ features (arrow functions, destructuring, etc.)</li>
-                <li>Kiến thức cơ bản về npm và môi trường development</li>
-              </ul>
-              
-              <p>
-                Mỗi phần của tài liệu đều đi kèm với các ví dụ code đầy đủ và bài tập thực hành giúp bạn củng cố kiến thức. Cuối mỗi chương có phần tóm tắt và câu hỏi ôn tập để đảm bảo bạn nắm vững nội dung trước khi tiếp tục.
-              </p>
-              
-              <div class="document-highlights">
-                <h3>Điểm nổi bật của tài liệu</h3>
-                <div class="highlights-grid">
-                  <div class="highlight-item">
-                    <div class="highlight-icon">
-                      <i class="fas fa-code"></i>
-                    </div>
-                    <div class="highlight-text">
-                      <h4>Code thực tế</h4>
-                      <p>Hơn 50 ví dụ code thực tế, sẵn sàng để áp dụng</p>
-                    </div>
-                  </div>
-                  <div class="highlight-item">
-                    <div class="highlight-icon">
-                      <i class="fas fa-tasks"></i>
-                    </div>
-                    <div class="highlight-text">
-                      <h4>Bài tập thực hành</h4>
-                      <p>30+ bài tập thực hành để củng cố kiến thức</p>
-                    </div>
-                  </div>
-                  <div class="highlight-item">
-                    <div class="highlight-icon">
-                      <i class="fas fa-project-diagram"></i>
-                    </div>
-                    <div class="highlight-text">
-                      <h4>Dự án thực tế</h4>
-                      <p>Xây dựng 5 dự án hoàn chỉnh từ đầu đến cuối</p>
-                    </div>
-                  </div>
-                  <div class="highlight-item">
-                    <div class="highlight-icon">
-                      <i class="fas fa-sync-alt"></i>
-                    </div>
-                    <div class="highlight-text">
-                      <h4>Cập nhật thường xuyên</h4>
-                      <p>Nội dung được cập nhật theo công nghệ mới nhất</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
           
           <!-- Preview Tab -->
           <div id="preview-content" class="tab-content">
             <div class="document-preview-reader">
-              <div class="preview-header">
-                <h3 class="preview-title">Xem trước tài liệu</h3>
-                <div class="preview-pagination">
-                  <span class="current-page">1</span> / <span class="total-pages">10</span>
-                </div>
-              </div>
+                             <!-- Hidden PDF source for real preview -->
+               <div id="pdfSource" th:if="${document != null and document.fileName != null}"
+                    th:attr="data-src=@{/documents/{file}(file=${document.filePath})}"
+                    style="display:none"></div>
               
-              <div class="preview-controls">
-                <button class="preview-control-btn" id="prevPage" disabled>
-                  <i class="fas fa-chevron-left"></i> Trang trước
-                </button>
-                <div class="preview-page-input">
-                  <input type="number" id="pageInput" min="1" max="10" value="1">
-                  <button id="goToPage"><i class="fas fa-arrow-right"></i></button>
-                </div>
-                <button class="preview-control-btn" id="nextPage">
-                  Trang sau <i class="fas fa-chevron-right"></i>
-                </button>
-              </div>
-              
-              <div class="preview-container">
+              <div class="preview-container" th:attr="data-has-file=${document != null and document.fileName != null ? '1' : '0'}">
                 <div class="preview-page-view active" data-page="1">
                   <div class="preview-page-content">
                     <div class="preview-page-header">
@@ -386,22 +349,6 @@
                     </div>
                     <div class="preview-page-image">
                       <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Cover">
-                    </div>
-                    <div class="watermark">Bản xem trước</div>
-                  </div>
-                </div>
-                
-                <div class="preview-page-view" data-page="2">
-                  <div class="preview-page-content">
-                    <h2>Mục lục</h2>
-                    <div class="preview-toc">
-                      <p class="toc-item">Phần 1: Nền tảng React <span class="toc-page">6</span></p>
-                      <p class="toc-item">Phần 2: React Hooks và Patterns hiện đại <span class="toc-page">26</span></p>
-                      <p class="toc-item">Phần 3: State Management với Redux <span class="toc-page">46</span></p>
-                      <p class="toc-item">Phần 4: Phát triển Backend với NodeJS <span class="toc-page">66</span></p>
-                      <p class="toc-item">Phần 5: Tích hợp Frontend và Backend <span class="toc-page">86</span></p>
-                      <p class="toc-item">Phần 6: Các kỹ thuật nâng cao <span class="toc-page">106</span></p>
-                      <p class="toc-item">Tham khảo và tài liệu bổ sung <span class="toc-page">116</span></p>
                     </div>
                     <div class="watermark">Bản xem trước</div>
                   </div>
@@ -552,133 +499,12 @@ npm start</code></pre>
               </div>
               
               <div class="preview-footer">
-                <p class="preview-notice">Đây là bản xem trước, chỉ hiển thị 10 trang đầu tiên của tài liệu. Để xem toàn bộ tài liệu, vui lòng tải xuống.</p>
+                <p class="preview-notice">
+                  Đây là bản xem trước, chỉ hiển thị <span id="preview-limit-count">5</span> trang đầu tiên của tài liệu.
+                  Để xem toàn bộ <span id="preview-total-pages">?</span> trang, vui lòng tải xuống.
+                </p>
                 <button class="download-button-small" data-premium="true">
                   <i class="fas fa-download"></i> Tải xuống đầy đủ
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Contents Tab -->
-          <div id="contents-content" class="tab-content">
-            <div class="table-of-contents">
-              <h3>Mục lục tài liệu</h3>
-              <div class="toc-list">
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-book"></i>
-                    </div>
-                    <div class="toc-text">Giới thiệu</div>
-                    <div class="toc-page">1-5</div>
-                  </a>
-                </div>
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-code"></i>
-                    </div>
-                    <div class="toc-text">Phần 1: Nền tảng React</div>
-                    <div class="toc-page">6-25</div>
-                  </a>
-                </div>
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-code"></i>
-                    </div>
-                    <div class="toc-text">Phần 2: React Hooks và Patterns hiện đại</div>
-                    <div class="toc-page">26-45</div>
-                  </a>
-                </div>
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-database"></i>
-                    </div>
-                    <div class="toc-text">Phần 3: State Management với Redux</div>
-                    <div class="toc-page">46-65</div>
-                  </a>
-                </div>
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-server"></i>
-                    </div>
-                    <div class="toc-text">Phần 4: Phát triển Backend với NodeJS</div>
-                    <div class="toc-page">66-85</div>
-                  </a>
-                </div>
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-plug"></i>
-                    </div>
-                    <div class="toc-text">Phần 5: Tích hợp Frontend và Backend</div>
-                    <div class="toc-page">86-105</div>
-                  </a>
-                </div>
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-rocket"></i>
-                    </div>
-                    <div class="toc-text">Phần 6: Các kỹ thuật nâng cao</div>
-                    <div class="toc-page">106-115</div>
-                  </a>
-                </div>
-                <div class="toc-item">
-                  <a href="#" class="toc-link">
-                    <div class="toc-icon">
-                      <i class="fas fa-book-open"></i>
-                    </div>
-                    <div class="toc-text">Tham khảo và tài liệu bổ sung</div>
-                    <div class="toc-page">116-120</div>
-                  </a>
-                </div>
-              </div>
-              
-              <div class="toc-details">
-                <div class="toc-detail-section">
-                  <h4 class="toc-detail-title">Phần 1: Nền tảng React (trang 6-25)</h4>
-                  <ul class="toc-detail-list">
-                    <li>1.1 Giới thiệu về React</li>
-                    <li>1.2 Cài đặt và cấu hình môi trường phát triển</li>
-                    <li>1.3 JSX và biểu thức JavaScript</li>
-                    <li>1.4 Components và Props</li>
-                    <li>1.5 State và Lifecycle</li>
-                    <li>1.6 Xử lý sự kiện trong React</li>
-                    <li>1.7 Rendering có điều kiện</li>
-                    <li>1.8 Lists và Keys</li>
-                    <li>1.9 Forms và xử lý dữ liệu đầu vào</li>
-                    <li>1.10 Nâng state lên (Lifting State Up)</li>
-                    <li>1.11 Composition vs Inheritance</li>
-                  </ul>
-                </div>
-                
-                <div class="toc-detail-section">
-                  <h4 class="toc-detail-title">Phần 2: React Hooks và Patterns hiện đại (trang 26-45)</h4>
-                  <ul class="toc-detail-list">
-                    <li>2.1 Giới thiệu về Hooks</li>
-                    <li>2.2 useState hook</li>
-                    <li>2.3 useEffect hook</li>
-                    <li>2.4 useContext hook</li>
-                    <li>2.5 useReducer hook</li>
-                    <li>2.6 useCallback và useMemo</li>
-                    <li>2.7 useRef hook</li>
-                    <li>2.8 Custom Hooks</li>
-                    <li>2.9 Context API</li>
-                    <li>2.10 Render Props pattern</li>
-                    <li>2.11 Higher-Order Components (HOCs)</li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div class="toc-download-notice">
-                <p>Mục lục đầy đủ có sẵn trong tài liệu. Tải xuống để xem chi tiết toàn bộ nội dung.</p>
-                <button class="download-button-small" data-premium="true">
-                  <i class="fas fa-download"></i> Tải xuống tài liệu
                 </button>
               </div>
             </div>
@@ -696,15 +522,12 @@ npm start</code></pre>
               
               <div class="rating-overview">
                 <div class="rating-score">
-                  <div class="rating-value">4.8</div>
+                  <div class="rating-value" th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) : '0.0'}">0.0</div>
                   <div class="rating-stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
+                    <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                       th:class="${i <= (document.averageRating != null ? document.averageRating : 0) ? 'fas fa-star' : 'far fa-star'}"></i>
                   </div>
-                  <div class="rating-count">120 đánh giá</div>
+                  <div class="rating-count" th:text="${document.comments != null ? document.comments.size() : 0} + ' đánh giá'">0 đánh giá</div>
                 </div>
                 
                 <div class="rating-distribution">
@@ -713,54 +536,74 @@ npm start</code></pre>
                       <i class="fas fa-star"></i> 5
                     </div>
                     <div class="bar-container">
-                      <div class="bar-fill" style="width: 75%"></div>
+                      <div class="bar-fill" th:style="'width: ' + ${document.ratingDistribution != null and document.ratingDistribution.containsKey('5') ? document.ratingDistribution.get('5') : 0} + '%'"></div>
                     </div>
-                    <div class="bar-percent">75%</div>
+                    <div class="bar-percent" th:text="${document.ratingDistribution != null and document.ratingDistribution.containsKey('5') ? document.ratingDistribution.get('5') : 0} + '%'">0%</div>
                   </div>
                   <div class="rating-bar">
                     <div class="bar-label">
                       <i class="fas fa-star"></i> 4
                     </div>
                     <div class="bar-container">
-                      <div class="bar-fill" style="width: 20%"></div>
+                      <div class="bar-fill" th:style="'width: ' + ${document.ratingDistribution != null and document.ratingDistribution.containsKey('4') ? document.ratingDistribution.get('4') : 0} + '%'"></div>
                     </div>
-                    <div class="bar-percent">20%</div>
+                    <div class="bar-percent" th:text="${document.ratingDistribution != null and document.ratingDistribution.containsKey('4') ? document.ratingDistribution.get('4') : 0} + '%'">0%</div>
                   </div>
                   <div class="rating-bar">
                     <div class="bar-label">
                       <i class="fas fa-star"></i> 3
                     </div>
                     <div class="bar-container">
-                      <div class="bar-fill" style="width: 3%"></div>
+                      <div class="bar-fill" th:style="'width: ' + ${document.ratingDistribution != null and document.ratingDistribution.containsKey('3') ? document.ratingDistribution.get('3') : 0} + '%'"></div>
                     </div>
-                    <div class="bar-percent">3%</div>
+                    <div class="bar-percent" th:text="${document.ratingDistribution != null and document.ratingDistribution.containsKey('3') ? document.ratingDistribution.get('3') : 0} + '%'">0%</div>
                   </div>
                   <div class="rating-bar">
                     <div class="bar-label">
                       <i class="fas fa-star"></i> 2
                     </div>
                     <div class="bar-container">
-                      <div class="bar-fill" style="width: 1%"></div>
+                      <div class="bar-fill" th:style="'width: ' + ${document.ratingDistribution != null and document.ratingDistribution.containsKey('2') ? document.ratingDistribution.get('2') : 0} + '%'"></div>
                     </div>
-                    <div class="bar-percent">1%</div>
+                    <div class="bar-percent" th:text="${document.ratingDistribution != null and document.ratingDistribution.containsKey('2') ? document.ratingDistribution.get('2') : 0} + '%'">0%</div>
                   </div>
                   <div class="rating-bar">
                     <div class="bar-label">
                       <i class="fas fa-star"></i> 1
                     </div>
                     <div class="bar-container">
-                      <div class="bar-fill" style="width: 1%"></div>
+                      <div class="bar-fill" th:style="'width: ' + ${document.ratingDistribution != null and document.ratingDistribution.containsKey('1') ? document.ratingDistribution.get('1') : 0} + '%'"></div>
                     </div>
-                    <div class="bar-percent">1%</div>
+                    <div class="bar-percent" th:text="${document.ratingDistribution != null and document.ratingDistribution.containsKey('1') ? document.ratingDistribution.get('1') : 0} + '%'">0%</div>
                   </div>
                 </div>
               </div>
               
-              <form id="reviewForm" class="review-form">
+              <!-- Comment Permission Check -->
+              <div th:if="${commentPermission != null and !commentPermission.canComment}" class="comment-permission-alert">
+                <div class="alert alert-warning">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span th:text="${commentPermission.message}">Bạn cần mua tài liệu này để có thể bình luận</span>
+                  <div th:if="${commentPermission.action == 'purchase'}" class="permission-actions">
+                    <a th:href="@{/documents/{id}/purchase(id=${document.id})}" class="btn btn-primary btn-sm">
+                      <i class="fas fa-shopping-cart"></i> Mua tài liệu
+                    </a>
+                  </div>
+                  <div th:if="${commentPermission.action == 'login'}" class="permission-actions">
+                    <a href="/login" class="btn btn-primary btn-sm">
+                      <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <form id="reviewForm" class="review-form" th:action="@{/documents/{id}/review(id=${document.id})}" method="post" 
+                    th:class="${commentPermission != null and !commentPermission.canComment ? 'review-form disabled' : 'review-form'}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <h4 class="form-title">Đánh giá của bạn</h4>
                 <div class="form-group">
                   <label class="form-label">Đánh giá sao</label>
-                  <div class="form-rating">
+                  <div class="form-rating" th:class="${commentPermission != null and !commentPermission.canComment ? 'form-rating disabled' : 'form-rating'}">
                     <div class="rate-star" data-value="1">
                       <i class="far fa-star"></i>
                     </div>
@@ -781,170 +624,122 @@ npm start</code></pre>
                 </div>
                 
                 <div class="form-group">
-                  <label for="reviewText" class="form-label">Nội dung đánh giá</label>
-                  <textarea id="reviewText" name="review" class="form-control" rows="4" placeholder="Chia sẻ ý kiến của bạn về tài liệu này..."></textarea>
+                  <label for="reviewText" class="form-label" >Nội dung đánh giá</label>
+                  <textarea id="reviewText" name="review" class="form-control" rows="4" 
+                           placeholder="Chia sẻ ý kiến của bạn về tài liệu này..."
+                           th:disabled="${commentPermission != null and !commentPermission.canComment}"></textarea>
                   <span class="form-text">Đánh giá của bạn sẽ giúp người khác quyết định có nên tải tài liệu này hay không.</span>
                 </div>
                 
-                <button type="submit" class="form-submit">
-                  <i class="fas fa-paper-plane"></i> Gửi đánh giá
+                <button type="submit" class="form-submit" 
+                        th:disabled="${commentPermission != null and !commentPermission.canComment}">
+                  <i class="fas fa-paper-plane" id="reviews"></i> Gửi đánh giá
                 </button>
               </form>
               
-              <div class="review-filter">
-                <span class="filter-label">Lọc đánh giá:</span>
-                <select class="filter-select">
-                  <option value="all">Tất cả</option>
-                  <option value="5">5 sao</option>
-                  <option value="4">4 sao</option>
-                  <option value="3">3 sao</option>
-                  <option value="2">2 sao</option>
-                  <option value="1">1 sao</option>
+              <form class="review-filter" th:action="@{/documents/{id}/filter(id=${document.id})}" method="get">
+                <span class="filter-label" >Lọc đánh giá:</span>
+                <select name="rating" class="filter-select">
+                  <option value="">Tất cả</option>
+                  <option value="5" th:selected="${currentRating == 5}">5 sao</option>
+                  <option value="4" th:selected="${currentRating == 4}">4 sao</option>
+                  <option value="3" th:selected="${currentRating == 3}">3 sao</option>
+                  <option value="2" th:selected="${currentRating == 2}">2 sao</option>
+                  <option value="1" th:selected="${currentRating == 1}">1 sao</option>
                 </select>
-                <select class="sort-select">
-                  <option value="recent">Mới nhất</option>
-                  <option value="helpful">Hữu ích nhất</option>
-                  <option value="high">Đánh giá cao nhất</option>
-                  <option value="low">Đánh giá thấp nhất</option>
+                <select name="sortBy" class="sort-select">
+                  <option value="recent" th:selected="${currentSortBy == 'recent'}">Mới nhất</option>
+                  <option value="helpful" th:selected="${currentSortBy == 'helpful'}">Hữu ích nhất</option>
+                  <option value="high" th:selected="${currentSortBy == 'high'}">Đánh giá cao nhất</option>
+                  <option value="low" th:selected="${currentSortBy == 'low'}">Đánh giá thấp nhất</option>
                 </select>
-              </div>
+                <input type="hidden" name="page" value="0">
+                <input type="hidden" name="size" th:value="${currentSize != null ? currentSize : 10}">
+                <button type="submit" class="filter-submit">
+                  <i class="fas fa-filter"></i> Lọc
+                </button>
+              </form>
               
               <div class="review-list">
-                <div class="review-item">
+                <!-- Dynamic comments from database -->
+                <div th:each="comment : ${comments != null ? comments : document.comments}" class="review-item" th:data-comment-id="${comment.id}" th:id="'comment-' + ${comment.id}">
                   <div class="review-header">
                     <div class="reviewer-info">
                       <div class="reviewer-avatar">
                         <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80" alt="Reviewer">
                       </div>
                       <div class="reviewer-details">
-                        <div class="reviewer-name">Trần Thị B</div>
-                        <div class="review-date">15/05/2023</div>
+                        <div class="reviewer-name" th:text="${comment.userName}">Tên người dùng</div>
+                        <div class="review-date" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy')}">Ngày bình luận</div>
                       </div>
                     </div>
                     <div class="review-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
+                      <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                         th:class="${i <= (comment.rating != null ? comment.rating : 0) ? 'fas fa-star' : 'far fa-star'}"></i>
                     </div>
                   </div>
                   
                   <div class="review-body">
-                    <p>
-                      Tài liệu rất đầy đủ và chi tiết, giúp tôi hiểu sâu hơn về React và NodeJS. 
-                      Các bài tập thực hành rất hữu ích và thực tế. Cảm ơn tác giả đã chia sẻ 
-                      kiến thức bổ ích này! Đặc biệt là phần Redux giúp tôi hiểu rõ hơn về cách 
-                      quản lý state trong ứng dụng lớn, và phần xây dựng RESTful API với NodeJS 
-                      rất dễ hiểu với người mới học.
+                    <p th:text="${comment.content}">
+                      Nội dung bình luận sẽ hiển thị ở đây
                     </p>
                   </div>
                   
                   <div class="review-footer">
                     <div class="review-actions">
-                      <div class="review-action">
-                        <i class="far fa-thumbs-up"></i> Hữu ích
+                      <div class="review-action like-action" th:data-comment-id="${comment.id}">
+                        <i th:class="${comment.isLikedByCurrentUser ? 'fas fa-thumbs-up liked' : 'far fa-thumbs-up'}"></i> 
+                        <span class="like-text" th:text="${comment.isLikedByCurrentUser ? 'Đã thích' : 'Hữu ích'}">Hữu ích</span>
+                        <span class="like-count" th:text="${comment.likesCount != null ? comment.likesCount : 0}">0</span>
                       </div>
-                      <div class="review-action">
+                      <div class="review-action dislike-action" th:data-comment-id="${comment.id}">
+                        <i th:class="${comment.isDislikedByCurrentUser ? 'fas fa-thumbs-down disliked' : 'far fa-thumbs-down'}"></i> 
+                        <span class="dislike-text" th:text="${comment.isDislikedByCurrentUser ? 'Đã không thích' : 'Không hữu ích'}">Không hữu ích</span>
+                        <span class="dislike-count" th:text="${comment.dislikesCount != null ? comment.dislikesCount : 0}">0</span>
+                      </div>
+                      <div class="review-action report-action" th:data-comment-id="${comment.id}">
                         <i class="far fa-flag"></i> Báo cáo
                       </div>
                     </div>
                     <div class="review-helpful">
-                      12 người thấy hữu ích
+                      <span th:text="${comment.likesCount != null ? comment.likesCount : 0}">0</span> người thấy hữu ích
                     </div>
                   </div>
                 </div>
                 
-                <div class="review-item">
-                  <div class="review-header">
-                    <div class="reviewer-info">
-                      <div class="reviewer-avatar">
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80" alt="Reviewer">
-                      </div>
-                      <div class="reviewer-details">
-                        <div class="reviewer-name">Lê Văn C</div>
-                        <div class="review-date">10/05/2023</div>
-                      </div>
-                    </div>
-                    <div class="review-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="far fa-star"></i>
-                    </div>
+                <!-- Empty state when no comments -->
+                <div th:if="${(comments == null or comments.isEmpty()) and (document.comments == null or document.comments.isEmpty())}" class="no-comments">
+                  <div class="no-comments-icon">
+                    <i class="far fa-comment"></i>
                   </div>
-                  
-                  <div class="review-body">
-                    <p>
-                      Tài liệu viết rất dễ hiểu, đặc biệt là phần về Redux và cách tích hợp với React.
-                      Tôi đã có kiến thức cơ bản về JavaScript và React trước đó, nhưng tài liệu này
-                      đã giúp tôi hiểu sâu hơn rất nhiều. Tuy nhiên, phần về Node.js có thể cần bổ sung thêm
-                      một số ví dụ thực tế. Đặc biệt là phần về authentication và authorization còn khá sơ sài.
-                    </p>
-                  </div>
-                  
-                  <div class="review-footer">
-                    <div class="review-actions">
-                      <div class="review-action">
-                        <i class="far fa-thumbs-up"></i> Hữu ích
-                      </div>
-                      <div class="review-action">
-                        <i class="far fa-flag"></i> Báo cáo
-                      </div>
-                    </div>
-                    <div class="review-helpful">
-                      8 người thấy hữu ích
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="review-item">
-                  <div class="review-header">
-                    <div class="reviewer-info">
-                      <div class="reviewer-avatar">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80" alt="Reviewer">
-                      </div>
-                      <div class="reviewer-details">
-                        <div class="reviewer-name">Phạm Văn D</div>
-                        <div class="review-date">01/05/2023</div>
-                      </div>
-                    </div>
-                    <div class="review-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star-half-alt"></i>
-                    </div>
-                  </div>
-                  
-                  <div class="review-body">
-                    <p>
-                      Tài liệu giúp tôi tiết kiệm rất nhiều thời gian tìm hiểu. Thay vì phải đọc nhiều 
-                      tài liệu rời rạc, giờ đây mọi thứ đã được tổng hợp trong một tài liệu duy nhất.
-                      Tôi đặc biệt thích phần về SSR với Next.js và các kỹ thuật tối ưu hóa hiệu suất.
-                      Các dự án thực tế trong tài liệu cũng rất hữu ích và dễ dàng theo dõi.
-                    </p>
-                  </div>
-                  
-                  <div class="review-footer">
-                    <div class="review-actions">
-                      <div class="review-action">
-                        <i class="far fa-thumbs-up"></i> Hữu ích
-                      </div>
-                      <div class="review-action">
-                        <i class="far fa-flag"></i> Báo cáo
-                      </div>
-                    </div>
-                    <div class="review-helpful">
-                      5 người thấy hữu ích
-                    </div>
+                  <div class="no-comments-text">
+                    <h4>Chưa có bình luận nào</h4>
+                    <p>Hãy là người đầu tiên chia sẻ ý kiến về tài liệu này!</p>
                   </div>
                 </div>
               </div>
               
-              <button class="review-load-more">
+              <!-- Pagination controls -->
+              <div th:if="${totalPages != null and totalPages > 1}" class="review-pagination">
+                <div class="pagination-info">
+                  <span th:text="'Trang ' + ${currentPage != null ? currentPage + 1 : 1} + ' / ' + ${totalPages} + ' (' + ${totalElements != null ? totalElements : 0} + ' đánh giá)'">Trang 1 / 1 (0 đánh giá)</span>
+                </div>
+                <div class="pagination-controls">
+                  <a th:if="${hasPrevious != null and hasPrevious}" 
+                     th:href="@{/documents/{id}/filter(id=${document.id}, rating=${currentRating}, sortBy=${currentSortBy}, page=${currentPage != null ? currentPage - 1 : 0}, size=${currentSize != null ? currentSize : 10})}"
+                     class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i> Trước
+                  </a>
+                  <a th:if="${hasNext != null and hasNext}" 
+                     th:href="@{/documents/{id}/filter(id=${document.id}, rating=${currentRating}, sortBy=${currentSortBy}, page=${currentPage != null ? currentPage + 1 : 1}, size=${currentSize != null ? currentSize : 10})}"
+                     class="pagination-btn">
+                    Sau <i class="fas fa-chevron-right"></i>
+                  </a>
+                </div>
+              </div>
+              
+              <!-- Load more button (for backward compatibility) -->
+              <button th:if="${hasNext != null and hasNext and totalPages != null and totalPages > 1}" class="review-load-more">
                 <i class="fas fa-plus"></i> Xem thêm đánh giá
               </button>
             </div>
@@ -955,143 +750,75 @@ npm start</code></pre>
             <div class="document-details-tab">
               <h3>Thông tin chi tiết</h3>
               <div class="details-list">
-                <div class="details-item">
+                <div class="details-item" th:if="${document.authorName != null}">
                   <div class="details-label">Tác giả</div>
-                  <div class="details-value">Nguyễn Văn A</div>
+                  <div class="details-value" th:text="${document.authorName}">Tác giả</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Ngày xuất bản</div>
-                  <div class="details-value">10/01/2023</div>
+                <div class="details-item" th:if="${document.createdAt != null}">
+                  <div class="details-label">Ngày tạo</div>
+                  <div class="details-value" th:text="${#temporals.format(document.createdAt, 'dd/MM/yyyy')}">Ngày tạo</div>
                 </div>
-                <div class="details-item">
+                <div class="details-item" th:if="${document.updatedAt != null}">
                   <div class="details-label">Cập nhật lần cuối</div>
-                  <div class="details-value">15/05/2023</div>
+                  <div class="details-value" th:text="${#temporals.format(document.updatedAt, 'dd/MM/yyyy')}">Cập nhật lần cuối</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Ngôn ngữ</div>
-                  <div class="details-value">Tiếng Việt</div>
+                <div class="details-item" th:if="${document.publishedAt != null}">
+                  <div class="details-label">Ngày xuất bản</div>
+                  <div class="details-value" th:text="${#temporals.format(document.publishedAt, 'dd/MM/yyyy')}">Ngày xuất bản</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Số trang</div>
-                  <div class="details-value">120 trang</div>
-                </div>
-                <div class="details-item">
+                <div class="details-item" th:if="${document.fileType != null}">
                   <div class="details-label">Định dạng</div>
-                  <div class="details-value">PDF</div>
+                  <div class="details-value" th:text="${document.fileType.toUpperCase()}">Định dạng</div>
                 </div>
-                <div class="details-item">
+                <div class="details-item" th:if="${document.fileSize != null}">
                   <div class="details-label">Dung lượng</div>
-                  <div class="details-value">5.2 MB</div>
+                  <div class="details-value" th:text="${#numbers.formatDecimal(document.fileSize, 1, 2)} + ' KB'">Dung lượng</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Phân loại</div>
-                  <div class="details-value">Tài liệu cao cấp</div>
+                <div class="details-item" th:if="${document.fileName != null}">
+                  <div class="details-label">Tên file</div>
+                  <div class="details-value" th:text="${document.fileName}">Tên file</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Mã tài liệu</div>
-                  <div class="details-value">DOC-20230510-142</div>
+                <div class="details-item" th:if="${document.status != null}">
+                  <div class="details-label">Trạng thái</div>
+                  <div class="details-value" th:text="${document.status}">Trạng thái</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Chuyên ngành</div>
-                  <div class="details-value">Công nghệ thông tin</div>
-                </div>
-                <div class="details-item">
-                  <div class="details-label">Danh mục</div>
-                  <div class="details-value">Lập trình web</div>
-                </div>
-                <div class="details-item">
-                  <div class="details-label">Cấp độ</div>
-                  <div class="details-value">Trung cấp đến cao cấp</div>
+                <div class="details-item" th:if="${document.visibility != null}">
+                  <div class="details-label">Quyền truy cập</div>
+                  <div class="details-value" th:text="${document.visibility}">Quyền truy cập</div>
                 </div>
                 <div class="details-item">
                   <div class="details-label">Lượt xem</div>
-                  <div class="details-value">3,245</div>
+                  <div class="details-value" th:text="${document.viewsCount != null ? document.viewsCount : 0}">0</div>
                 </div>
                 <div class="details-item">
                   <div class="details-label">Lượt tải</div>
-                  <div class="details-value">875</div>
+                  <div class="details-value" th:text="${document.downloadsCount != null ? document.downloadsCount : 0}">0</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Đánh giá</div>
-                  <div class="details-value">4.8/5 (120 đánh giá)</div>
+                <div class="details-item" th:if="${document.averageRating != null}">
+                  <div class="details-label">Đánh giá trung bình</div>
+                  <div class="details-value" th:text="${#numbers.formatDecimal(document.averageRating, 1, 1)} + '/5 (' + ${document.comments != null ? document.comments.size() : 0} + ' đánh giá)'">0.0/5 (0 đánh giá)</div>
                 </div>
-                <div class="details-item">
-                  <div class="details-label">Giấy phép</div>
-                  <div class="details-value">Bản quyền © 2023</div>
+                <div class="details-item" th:if="${document.categoryNames != null and !document.categoryNames.isEmpty()}">
+                  <div class="details-label">Danh mục</div>
+                  <div class="details-value" th:text="${#strings.listJoin(document.categoryNames, ', ')}">Danh mục</div>
                 </div>
-              </div>
-              
-              <h3 class="tags-header">Tags</h3>
-              <div class="details-tags">
-                <a href="search.html?tag=react" class="details-tag">React</a>
-                <a href="search.html?tag=nodejs" class="details-tag">NodeJS</a>
-                <a href="search.html?tag=javascript" class="details-tag">JavaScript</a>
-                <a href="search.html?tag=frontend" class="details-tag">Frontend</a>
-                <a href="search.html?tag=backend" class="details-tag">Backend</a>
-                <a href="search.html?tag=web-development" class="details-tag">Web Development</a>
-                <a href="search.html?tag=full-stack" class="details-tag">Full Stack</a>
-                <a href="search.html?tag=redux" class="details-tag">Redux</a>
-                <a href="search.html?tag=express" class="details-tag">Express</a>
-                <a href="search.html?tag=nextjs" class="details-tag">Next.js</a>
-                <a href="search.html?tag=mongodb" class="details-tag">MongoDB</a>
-                <a href="search.html?tag=api" class="details-tag">API</a>
-                <a href="search.html?tag=rest" class="details-tag">RESTful</a>
-                <a href="search.html?tag=hooks" class="details-tag">React Hooks</a>
-              </div>
-              
-              <h3 class="requirements-header">Yêu cầu</h3>
-              <div class="requirements-list">
-                <div class="requirement-item">
-                  <div class="requirement-icon"><i class="fas fa-check-circle"></i></div>
-                  <div class="requirement-text">Kiến thức cơ bản về HTML, CSS và JavaScript</div>
-                </div>
-                <div class="requirement-item">
-                  <div class="requirement-icon"><i class="fas fa-check-circle"></i></div>
-                  <div class="requirement-text">Hiểu biết về ES6+ features (arrow functions, destructuring, etc.)</div>
-                </div>
-                <div class="requirement-item">
-                  <div class="requirement-icon"><i class="fas fa-check-circle"></i></div>
-                  <div class="requirement-text">Kiến thức cơ bản về npm và môi trường development</div>
-                </div>
-                <div class="requirement-item">
-                  <div class="requirement-icon"><i class="fas fa-check-circle"></i></div>
-                  <div class="requirement-text">Editor code như VS Code hoặc tương tự</div>
+                <div class="details-item" th:if="${document.id != null}">
+                  <div class="details-label">Mã tài liệu</div>
+                  <div class="details-value" th:text="'DOC-' + ${document.id}">Mã tài liệu</div>
                 </div>
               </div>
               
-              <h3 class="for-who-header">Dành cho ai?</h3>
-              <div class="for-who-list">
-                <div class="for-who-item">
-                  <div class="for-who-icon"><i class="fas fa-user-graduate"></i></div>
-                  <div class="for-who-text">Sinh viên CNTT muốn bổ sung kiến thức thực tế về web development</div>
-                </div>
-                <div class="for-who-item">
-                  <div class="for-who-icon"><i class="fas fa-laptop-code"></i></div>
-                  <div class="for-who-text">Lập trình viên frontend muốn mở rộng sang backend với NodeJS</div>
-                </div>
-                <div class="for-who-item">
-                  <div class="for-who-icon"><i class="fas fa-server"></i></div>
-                  <div class="for-who-text">Lập trình viên backend muốn học React để phát triển toàn stack</div>
-                </div>
-                <div class="for-who-item">
-                  <div class="for-who-icon"><i class="fas fa-code"></i></div>
-                  <div class="for-who-text">Những người đã có kiến thức cơ bản về JavaScript và muốn nâng cao kỹ năng</div>
-                </div>
+              <h3 class="tags-header" th:if="${document.tagNames != null and !document.tagNames.isEmpty()}">Tags</h3>
+              <div class="details-tags" th:if="${document.tagNames != null and !document.tagNames.isEmpty()}">
+                <a th:each="tag : ${document.tagNames}" 
+                   th:href="@{/search(tag=${tag})}" 
+                   th:text="${tag}" 
+                   class="details-tag">Tag</a>
               </div>
               
-              <div class="download-box">
-                <div class="download-box-content">
-                  <div class="download-box-icon">
-                    <i class="fas fa-download"></i>
-                  </div>
-                  <div class="download-box-text">
-                    <h4>Tải xuống ngay hôm nay</h4>
-                    <p>Truy cập toàn bộ nội dung với giá chỉ <strong>25 xu</strong></p>
-                  </div>
-                  <button class="download-box-button" data-premium="true">
-                    Tải xuống
-                  </button>
-                </div>
+              <!-- Hiển thị thông báo nếu không có tags -->
+              <div th:if="${document.tagNames == null or document.tagNames.isEmpty()}" class="no-tags">
+                <p>Chưa có tags cho tài liệu này.</p>
               </div>
             </div>
           </div>
@@ -1110,30 +837,32 @@ npm start</code></pre>
               <div class="author-large-avatar">
                 <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80" alt="Author">
               </div>
-              <h3 class="author-name-large">Nguyễn Văn A</h3>
+              <h3 class="author-name-large" th:text="${document.authorName != null ? document.authorName : 'Admin'}">Tác giả</h3>
               <p class="author-bio">
-                Chuyên gia phát triển web với hơn 10 năm kinh nghiệm. Là người dẫn dắt nhiều dự án lớn và đào tạo hàng trăm lập trình viên full-stack.
+                Tác giả của tài liệu này. Chia sẻ kiến thức và kinh nghiệm để giúp cộng đồng học tập.
               </p>
               
               <div class="author-stats">
                 <div class="author-stat">
-                  <div class="stat-number">42</div>
+                  <div class="stat-number">1</div>
                   <div class="stat-label">Tài liệu</div>
                 </div>
                 <div class="author-stat">
-                  <div class="stat-number">4.9</div>
+                  <div class="stat-number" th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) : '0.0'}">0.0</div>
                   <div class="stat-label">Đánh giá</div>
                 </div>
                 <div class="author-stat">
-                  <div class="stat-number">15k+</div>
+                  <div class="stat-number" th:text="${document.downloadsCount != null ? document.downloadsCount : 0}">0</div>
                   <div class="stat-label">Lượt tải</div>
                 </div>
               </div>
               
+              <!--
               <button class="author-follow-btn">
                 <i class="fas fa-user-plus"></i> Theo dõi tác giả
-              </button>
+              </button>-->
               
+              <!-- Contact Widget 
               <div class="author-contact">
                 <a href="#" class="author-contact-link">
                   <i class="fab fa-facebook-f"></i>
@@ -1148,46 +877,7 @@ npm start</code></pre>
                   <i class="fas fa-globe"></i>
                 </a>
               </div>
-            </div>
-          </div>
-          
-          <!-- Document Types Widget -->
-          <div class="sidebar-widget">
-            <div class="widget-header">
-              <h3 class="widget-title">
-                <i class="fas fa-file-alt"></i> Định dạng có sẵn
-              </h3>
-            </div>
-            <div class="widget-content">
-              <div class="document-types">
-                <div class="document-type active">
-                  <div class="document-type-icon pdf">
-                    <i class="fas fa-file-pdf"></i>
-                  </div>
-                  <div class="document-type-info">
-                    <div class="document-type-name">PDF</div>
-                    <div class="document-type-size">5.2 MB</div>
-                  </div>
-                </div>
-                <div class="document-type">
-                  <div class="document-type-icon doc">
-                    <i class="fas fa-file-word"></i>
-                  </div>
-                  <div class="document-type-info">
-                    <div class="document-type-name">DOCX</div>
-                    <div class="document-type-size">4.8 MB</div>
-                  </div>
-                </div>
-                <div class="document-type">
-                  <div class="document-type-icon code">
-                    <i class="fas fa-file-code"></i>
-                  </div>
-                  <div class="document-type-info">
-                    <div class="document-type-name">Source Code</div>
-                    <div class="document-type-size">12.5 MB</div>
-                  </div>
-                </div>
-              </div>
+              -->
             </div>
           </div>
           
@@ -1200,64 +890,30 @@ npm start</code></pre>
             </div>
             <div class="widget-content">
               <div class="related-documents">
-                <div class="related-document">
+                <div th:each="relatedDoc : ${relatedDocuments}" class="related-document">
                   <div class="related-document-thumbnail">
                     <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document">
                   </div>
                   <div class="related-document-info">
-                    <a href="#" class="related-document-title">React Hooks: Hướng dẫn toàn diện</a>
+                    <a th:href="@{/documents/{id}(id=${relatedDoc.id})}" 
+                       th:text="${relatedDoc.title}" 
+                       class="related-document-title">Tài liệu liên quan</a>
                     <div class="related-document-meta">
                       <div class="document-rating">
-                        <i class="fas fa-star"></i> 4.9
+                        <i class="fas fa-star"></i> 
+                        <span th:text="${relatedDoc.averageRating != null ? #numbers.formatDecimal(relatedDoc.averageRating, 1, 1) : '0.0'}">0.0</span>
                       </div>
-                      <div class="document-price-small free">Miễn phí</div>
+                      <div th:if="${relatedDoc.price != null and relatedDoc.price > 0}" 
+                           class="document-price-small" 
+                           th:text="${#numbers.formatDecimal(relatedDoc.price, 1, 'COMMA', 0, 'POINT')} + ' xu'">0 xu</div>
+                      <div th:if="${relatedDoc.price == null or relatedDoc.price == 0}" 
+                           class="document-price-small free">Miễn phí</div>
                     </div>
                   </div>
                 </div>
                 
-                <div class="related-document">
-                  <div class="related-document-thumbnail">
-                    <img src="https://images.unsplash.com/photo-1555952517-2e8e729e0b44?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document">
-                  </div>
-                  <div class="related-document-info">
-                    <a href="#" class="related-document-title">NodeJS và Express: Xây dựng RESTful API</a>
-                    <div class="related-document-meta">
-                      <div class="document-rating">
-                        <i class="fas fa-star"></i> 4.7
-                      </div>
-                      <div class="document-price-small">15 xu</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="related-document">
-                  <div class="related-document-thumbnail">
-                    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document">
-                  </div>
-                  <div class="related-document-info">
-                    <a href="#" class="related-document-title">Redux và State Management trong React</a>
-                    <div class="related-document-meta">
-                      <div class="document-rating">
-                        <i class="fas fa-star"></i> 4.8
-                      </div>
-                      <div class="document-price-small">20 xu</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="related-document">
-                  <div class="related-document-thumbnail">
-                    <img src="https://images.unsplash.com/photo-1593642532973-d31b6557fa68?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document">
-                  </div>
-                  <div class="related-document-info">
-                    <a href="#" class="related-document-title">Next.js: Server-Side Rendering với React</a>
-                    <div class="related-document-meta">
-                      <div class="document-rating">
-                        <i class="fas fa-star"></i> 4.6
-                      </div>
-                      <div class="document-price-small">25 xu</div>
-                    </div>
-                  </div>
+                <div th:if="${relatedDocuments == null or relatedDocuments.isEmpty()}" class="no-related-documents">
+                  <p>Chưa có tài liệu liên quan</p>
                 </div>
               </div>
             </div>
@@ -1272,16 +928,12 @@ npm start</code></pre>
             </div>
             <div class="widget-content">
               <div class="document-tags">
-                <a href="search.html?tag=react" class="document-tag">React</a>
-                <a href="search.html?tag=nodejs" class="document-tag">NodeJS</a>
-                <a href="search.html?tag=javascript" class="document-tag">JavaScript</a>
-                <a href="search.html?tag=frontend" class="document-tag">Frontend</a>
-                <a href="search.html?tag=backend" class="document-tag">Backend</a>
-                <a href="search.html?tag=web-development" class="document-tag">Web Development</a>
-                <a href="search.html?tag=full-stack" class="document-tag">Full Stack</a>
-                <a href="search.html?tag=redux" class="document-tag">Redux</a>
-                <a href="search.html?tag=express" class="document-tag">Express</a>
-                <a href="search.html?tag=nextjs" class="document-tag">Next.js</a>
+                <a th:each="tag : ${document.tagNames}" 
+                   th:href="@{/search(tag=${tag})}" 
+                   th:text="${tag}" 
+                   class="document-tag">Tag</a>
+                <span th:if="${document.tagNames == null or document.tagNames.isEmpty()}" 
+                      class="no-tags">Chưa có tags</span>
               </div>
             </div>
           </div>
@@ -1295,40 +947,34 @@ npm start</code></pre>
             </div>
             <div class="widget-content">
               <div class="recommendation-list">
-                <div class="recommendation-item">
+                <div th:each="relatedDoc : ${relatedDocuments}" class="recommendation-item">
                   <div class="recommendation-image">
                     <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document">
                   </div>
                   <div class="recommendation-info">
                     <div class="recommendation-category">
-                      <i class="fas fa-folder"></i> Công nghệ thông tin
+                      <i class="fas fa-folder"></i> 
+                      <span th:text="${relatedDoc.categoryNames != null and !relatedDoc.categoryNames.isEmpty() ? relatedDoc.categoryNames[0] : 'Tài liệu'}">Công nghệ thông tin</span>
                     </div>
-                    <a href="#" class="recommendation-title">Hệ thống quản lý học tập với MERN Stack</a>
+                    <a th:href="@{/documents/{id}(id=${relatedDoc.id})}" 
+                       th:text="${relatedDoc.title}" 
+                       class="recommendation-title">Tài liệu đề xuất</a>
                     <div class="recommendation-meta">
                       <div class="recommendation-rating">
-                        <i class="fas fa-star"></i> 4.7
+                        <i class="fas fa-star"></i> 
+                        <span th:text="${relatedDoc.averageRating != null ? #numbers.formatDecimal(relatedDoc.averageRating, 1, 1) : '0.0'}">0.0</span>
                       </div>
-                      <div class="document-price-small">30 xu</div>
+                      <div th:if="${relatedDoc.price != null and relatedDoc.price > 0}" 
+                           class="document-price-small" 
+                           th:text="${#numbers.formatDecimal(relatedDoc.price, 1, 'COMMA', 0, 'POINT')} + ' xu'">0 xu</div>
+                      <div th:if="${relatedDoc.price == null or relatedDoc.price == 0}" 
+                           class="document-price-small free">Miễn phí</div>
                     </div>
                   </div>
                 </div>
                 
-                <div class="recommendation-item">
-                  <div class="recommendation-image">
-                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document">
-                  </div>
-                  <div class="recommendation-info">
-                    <div class="recommendation-category">
-                      <i class="fas fa-folder"></i> Công nghệ thông tin
-                    </div>
-                    <a href="#" class="recommendation-title">Docker và Kubernetes cho ứng dụng JavaScript</a>
-                    <div class="recommendation-meta">
-                      <div class="recommendation-rating">
-                        <i class="fas fa-star"></i> 4.9
-                      </div>
-                      <div class="document-price-small">40 xu</div>
-                    </div>
-                  </div>
+                <div th:if="${relatedDocuments == null or relatedDocuments.isEmpty()}" class="no-recommendations">
+                  <p>Chưa có tài liệu đề xuất</p>
                 </div>
               </div>
             </div>
@@ -1411,6 +1057,14 @@ npm start</code></pre>
   <script th:src="@{/js/document-detail.js}"></script>
   <script th:src="@{/js/document-detail-enhanced.js}"></script>
   <script th:src="@{/js/client-header.js}"></script>
+  <script th:src="@{/js/comment-actions.js}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js';
+    }
+  </script>
+  <script th:src="@{/js/document-detail-preview.js}"></script>
   <script>
     // Document Detail Preview Page JavaScript
     document.addEventListener('DOMContentLoaded', function() {
@@ -1577,8 +1231,46 @@ npm start</code></pre>
             mainDownloadBtn.click();
           });
         }
+
+        // Comment actions are now handled by comment-actions.js
+        console.log('Document preview initialized');
       }
     });
   </script>
+
+  <!-- Report Modal -->
+  <div id="reportModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Báo cáo bình luận</h3>
+        <span class="close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="reportForm" method="post" th:action="@{/documents/{documentId}/comments/{commentId}/report(documentId=${document.id}, commentId='__COMMENT_ID__')}">
+          <div class="form-group">
+            <label for="reportReason">Lý do báo cáo:</label>
+            <select id="reportReason" name="reason" required>
+              <option value="">Chọn lý do báo cáo</option>
+              <option value="spam">Spam</option>
+              <option value="inappropriate">Nội dung không phù hợp</option>
+              <option value="harassment">Quấy rối</option>
+              <option value="hate_speech">Ngôn từ thù địch</option>
+              <option value="copyright">Vi phạm bản quyền</option>
+              <option value="misinformation">Thông tin sai lệch</option>
+              <option value="other">Khác</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reportNote">Ghi chú (tùy chọn):</label>
+            <textarea id="reportNote" name="note" rows="3" placeholder="Mô tả chi tiết lý do báo cáo..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeReportModal()">Hủy</button>
+            <button type="submit" class="btn btn-danger">Gửi báo cáo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

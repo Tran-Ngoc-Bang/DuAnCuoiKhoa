@@ -19,7 +19,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -49,7 +51,7 @@ public class DocumentService {
 
     @Autowired
     private DocumentOwnerRepository documentOwnerRepository;
-    
+
     @Autowired
     private UploadConfig uploadConfig;
 
@@ -61,8 +63,8 @@ public class DocumentService {
 
     // Get document by ID
     public DocumentDTO getDocumentById(Long id) {
-        System.out.println("=== GET DOCUMENT BY ID SERVICE ===");
-        System.out.println("Getting document with ID: " + id);
+        // System.out.println("=== GET DOCUMENT BY ID SERVICE ===");
+        // System.out.println("Getting document with ID: " + id);
 
         Optional<Document> documentOpt = documentRepository.findById(id);
         if (!documentOpt.isPresent()) {
@@ -71,8 +73,8 @@ public class DocumentService {
         }
 
         Document document = documentOpt.get();
-        System.out.println("Found document: " + document.getTitle());
-        System.out.println("Document deletedAt: " + document.getDeletedAt());
+        // System.out.println("Found document: " + document.getTitle());
+        // System.out.println("Document deletedAt: " + document.getDeletedAt());
 
         // Convert to DTO
         DocumentDTO dto = convertToDTO(document);
@@ -115,6 +117,7 @@ public class DocumentService {
                 commentDTO.setContent(comment.getContent());
                 commentDTO.setStatus(comment.getStatus());
                 commentDTO.setCreatedAt(comment.getCreatedAt());
+                commentDTO.setRating(comment.getRating());
 
                 // Set user info
                 if (comment.getUser() != null) {
@@ -143,7 +146,8 @@ public class DocumentService {
             }
 
             dto.setComments(commentDTOs);
-            System.out.println("Comments loaded: " + commentDTOs.size() + " (from database)");
+            // System.out.println("Comments loaded: " + commentDTOs.size() + " (from
+            // database)");
         } catch (Exception e) {
             System.out.println("Could not load comments: " + e.getMessage());
             e.printStackTrace();
@@ -175,10 +179,50 @@ public class DocumentService {
         if (document.getFile() != null) {
             dto.setFileId(document.getFile().getId());
             dto.setFileName(document.getFile().getFileName());
+            dto.setFilePath(document.getFile().getFilePath()); // Add filePath to DTO
             // Convert bytes to KB (divide by 1024)
             double fileSizeInKB = document.getFile().getFileSize().doubleValue() / 1024.0;
             dto.setFileSize(Math.round(fileSizeInKB * 10.0) / 10.0); // Round to 1 decimal place
             dto.setFileType(document.getFile().getFileType());
+
+            // Debug: log file info
+            // System.out.println("File info from DB:");
+            // System.out.println("- File ID: " + document.getFile().getId());
+            // System.out.println("- File Name: " + document.getFile().getFileName());
+            // System.out.println("- File Path: " + document.getFile().getFilePath());
+            // System.out.println("- File Type: " + document.getFile().getFileType());
+        }
+
+        // Calculate average rating and rating distribution
+        try {
+            List<Comment> comments = commentRepository.findByDocumentIdAndStatus(document.getId(), "active");
+            if (!comments.isEmpty()) {
+                // Calculate average rating
+                double totalRating = comments.stream()
+                        .mapToDouble(comment -> comment.getRating() != null ? comment.getRating() : 0.0)
+                        .sum();
+                double averageRating = totalRating / comments.size();
+                dto.setAverageRating(Math.round(averageRating * 10.0) / 10.0); // Round to 1 decimal
+
+                // Calculate rating distribution
+                Map<String, Integer> distribution = new HashMap<>();
+                for (int i = 1; i <= 5; i++) {
+                    final int rating = i;
+                    long count = comments.stream()
+                            .filter(comment -> comment.getRating() != null && comment.getRating() == rating)
+                            .count();
+                    int percentage = (int) Math.round((double) count / comments.size() * 100);
+                    distribution.put(String.valueOf(i), percentage);
+                }
+                dto.setRatingDistribution(distribution);
+            } else {
+                dto.setAverageRating(0.0);
+                dto.setRatingDistribution(new HashMap<>());
+            }
+        } catch (Exception e) {
+            System.out.println("Error calculating ratings: " + e.getMessage());
+            dto.setAverageRating(0.0);
+            dto.setRatingDistribution(new HashMap<>());
         }
 
         return dto;
@@ -303,23 +347,26 @@ public class DocumentService {
         System.out.println("Filters - Search: " + search + ", Status: " + status + ", CategoryId: " + categoryId);
         System.out.println("Pageable - Page: " + pageable.getPageNumber() + ", Size: " + pageable.getPageSize());
 
-        // For deleted documents, always use in-memory filtering if there are filters or sorting
+        // For deleted documents, always use in-memory filtering if there are filters or
+        // sorting
         // This ensures all sort fields work properly
-        boolean hasFiltersOrSort = !isNoFiltersApplied(search, status, categoryId, type, price, author, tags, dateFrom, dateTo, size, views) 
-                                   || !pageable.getSort().isUnsorted();
+        boolean hasFiltersOrSort = !isNoFiltersApplied(search, status, categoryId, type, price, author, tags, dateFrom,
+                dateTo, size, views)
+                || !pageable.getSort().isUnsorted();
 
         if (!hasFiltersOrSort) {
-            System.out.println("No filters and no sorting applied, using direct database pagination for deleted documents");
+            System.out.println(
+                    "No filters and no sorting applied, using direct database pagination for deleted documents");
             return getDeletedDocuments(pageable);
         }
 
         // Nếu có filter, lấy tất cả deleted documents rồi filter
         System.out.println("Filters applied, using in-memory filtering for deleted documents");
-        
+
         // Debug: Check total count first
         long totalDeletedCount = documentRepository.countByDeletedAtIsNotNull();
         System.out.println("Total deleted documents in DB: " + totalDeletedCount);
-        
+
         // Use query without hardcoded sort to avoid conflict with Pageable sort
         List<Document> allDeletedDocuments = documentRepository.findByDeletedAtIsNotNull();
         System.out.println("Retrieved deleted documents from query: " + allDeletedDocuments.size());
@@ -373,8 +420,10 @@ public class DocumentService {
         boolean needsAuthorSort = pageable.getSort().stream()
                 .anyMatch(order -> "author".equalsIgnoreCase(order.getProperty()));
 
-        // Nếu không có filter nào và không sort by author, sử dụng pagination trực tiếp từ database
-        if (isNoFiltersApplied(search, status, categoryId, type, price, author, tags, dateFrom, dateTo, size, views) && !needsAuthorSort) {
+        // Nếu không có filter nào và không sort by author, sử dụng pagination trực tiếp
+        // từ database
+        if (isNoFiltersApplied(search, status, categoryId, type, price, author, tags, dateFrom, dateTo, size, views)
+                && !needsAuthorSort) {
             System.out.println("No filters applied and no author sort, using direct database pagination");
             Page<Document> activeDocuments = documentRepository.findByDeletedAtIsNull(pageable);
 
@@ -821,6 +870,7 @@ public class DocumentService {
                 // Generate unique file path
                 String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                 String filePath = "uploads/documents/" + fileName;
+                fileEntity.setFileName(fileName);
                 fileEntity.setFilePath(filePath);
 
                 // Save file entity first
@@ -832,7 +882,8 @@ public class DocumentService {
 
                 // Save actual file to disk
                 try {
-                    java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/uploads/documents");
+                    java.nio.file.Path uploadPath = java.nio.file.Paths
+                            .get("src/main/resources/static/uploads/documents");
                     if (!java.nio.file.Files.exists(uploadPath)) {
                         java.nio.file.Files.createDirectories(uploadPath);
                         System.out.println("Created directory: " + uploadPath.toAbsolutePath());
@@ -1068,7 +1119,8 @@ public class DocumentService {
 
                 // Save actual file to disk
                 try {
-                    java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/uploads/documents");
+                    java.nio.file.Path uploadPath = java.nio.file.Paths
+                            .get("src/main/resources/static/uploads/documents");
                     if (!java.nio.file.Files.exists(uploadPath)) {
                         java.nio.file.Files.createDirectories(uploadPath);
                     }
@@ -1235,37 +1287,44 @@ public class DocumentService {
         }
 
         Comparator<DocumentDTO> comparator = null;
-        
+
         for (Sort.Order order : pageable.getSort()) {
             Comparator<DocumentDTO> fieldComparator = null;
-            
+
             switch (order.getProperty().toLowerCase()) {
                 case "title":
-                    fieldComparator = Comparator.comparing(doc -> doc.getTitle() != null ? doc.getTitle().toLowerCase() : "");
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getTitle() != null ? doc.getTitle().toLowerCase() : "");
                     break;
                 case "author":
-                    fieldComparator = Comparator.comparing(doc -> doc.getAuthorName() != null ? doc.getAuthorName().toLowerCase() : "");
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getAuthorName() != null ? doc.getAuthorName().toLowerCase() : "");
                     break;
                 case "price":
-                    fieldComparator = Comparator.comparing(doc -> doc.getPrice() != null ? doc.getPrice() : BigDecimal.ZERO);
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getPrice() != null ? doc.getPrice() : BigDecimal.ZERO);
                     break;
                 case "status":
                     fieldComparator = Comparator.comparing(doc -> doc.getStatus() != null ? doc.getStatus() : "");
                     break;
                 case "viewscount":
-                    fieldComparator = Comparator.comparing(doc -> doc.getViewsCount() != null ? doc.getViewsCount() : 0L);
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getViewsCount() != null ? doc.getViewsCount() : 0L);
                     break;
                 case "downloadscount":
-                    fieldComparator = Comparator.comparing(doc -> doc.getDownloadsCount() != null ? doc.getDownloadsCount() : 0L);
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getDownloadsCount() != null ? doc.getDownloadsCount() : 0L);
                     break;
                 case "deletedat":
                 case "deleted_at":
-                    fieldComparator = Comparator.comparing(doc -> doc.getDeletedAt() != null ? doc.getDeletedAt() : LocalDateTime.MIN);
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getDeletedAt() != null ? doc.getDeletedAt() : LocalDateTime.MIN);
                     break;
                 case "createdat":
                 case "created_at":
                 default:
-                    fieldComparator = Comparator.comparing(doc -> doc.getCreatedAt() != null ? doc.getCreatedAt() : LocalDateTime.MIN);
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getCreatedAt() != null ? doc.getCreatedAt() : LocalDateTime.MIN);
                     break;
             }
 
@@ -1301,20 +1360,159 @@ public class DocumentService {
 
             Document document = documentOpt.get();
             String oldStatus = document.getStatus();
-            
+
             // Update status
             document.setStatus(newStatus);
             document.setUpdatedAt(LocalDateTime.now());
-            
+
             // Save document
             documentRepository.save(document);
-            
+
             System.out.println("Document status updated successfully: " + oldStatus + " -> " + newStatus);
-            
+
         } catch (Exception e) {
             System.err.println("Error updating document status: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi cập nhật trạng thái tài liệu: " + e.getMessage());
         }
+    }
+
+    // Submit review for a document
+    @Transactional
+    public Comment submitReview(Long documentId, Long userId, Integer rating, String content) {
+        System.out.println("=== SUBMIT REVIEW ===");
+        System.out.println("Document ID: " + documentId + ", User ID: " + userId + ", Rating: " + rating + ", Content: "
+                + content);
+
+        try {
+            // Validate document exists
+            Optional<Document> documentOpt = documentRepository.findById(documentId);
+            if (!documentOpt.isPresent()) {
+                throw new IllegalArgumentException("Tài liệu không tồn tại với ID: " + documentId);
+            }
+
+            Document document = documentOpt.get();
+
+            // Validate user exists
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (!userOpt.isPresent()) {
+                throw new IllegalArgumentException("Người dùng không tồn tại với ID: " + userId);
+            }
+
+            User user = userOpt.get();
+
+            // Create new comment/review
+            Comment comment = new Comment();
+            comment.setDocument(document);
+            comment.setUser(user);
+            comment.setContent(content);
+            comment.setRating(rating);
+            comment.setStatus("active");
+            comment.setCreatedAt(LocalDateTime.now());
+            comment.setUpdatedAt(LocalDateTime.now());
+
+            // Save comment
+            Comment savedComment = commentRepository.save(comment);
+
+            System.out.println("Review submitted successfully with ID: " + savedComment.getId());
+
+            return savedComment;
+
+        } catch (Exception e) {
+            System.err.println("Error submitting review: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi gửi đánh giá: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get related documents based on categories and tags
+     */
+    public List<DocumentDTO> getRelatedDocuments(Long documentId, int limit) {
+        try {
+            DocumentDTO currentDocument = getDocumentById(documentId);
+            if (currentDocument == null) {
+                return new ArrayList<>();
+            }
+
+            // Get all documents except current one
+            List<Document> allDocuments = documentRepository.findAll();
+            List<DocumentDTO> relatedDocuments = new ArrayList<>();
+
+            for (Document doc : allDocuments) {
+                if (doc.getId().equals(documentId) || doc.getDeletedAt() != null) {
+                    continue;
+                }
+
+                DocumentDTO docDto = convertToDTO(doc);
+                setAdditionalFields(docDto);
+
+                // Calculate similarity score based on categories and tags
+                int similarityScore = 0;
+
+                // Category similarity
+                if (currentDocument.getCategoryIds() != null && docDto.getCategoryIds() != null) {
+                    for (Long currentCategoryId : currentDocument.getCategoryIds()) {
+                        if (docDto.getCategoryIds().contains(currentCategoryId)) {
+                            similarityScore += 3; // Higher weight for category matches
+                        }
+                    }
+                }
+
+                // Tag similarity
+                if (currentDocument.getTagNames() != null && docDto.getTagNames() != null) {
+                    for (String currentTag : currentDocument.getTagNames()) {
+                        if (docDto.getTagNames().contains(currentTag)) {
+                            similarityScore += 1; // Lower weight for tag matches
+                        }
+                    }
+                }
+
+                // Only include documents with some similarity
+                if (similarityScore > 0) {
+                    relatedDocuments.add(docDto);
+                }
+            }
+
+            // Sort by similarity score and limit results
+            relatedDocuments.sort((a, b) -> {
+                int scoreA = calculateSimilarityScore(currentDocument, a);
+                int scoreB = calculateSimilarityScore(currentDocument, b);
+                return Integer.compare(scoreB, scoreA);
+            });
+
+            return relatedDocuments.stream()
+                    .limit(limit)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            System.err.println("Error getting related documents: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    private int calculateSimilarityScore(DocumentDTO current, DocumentDTO other) {
+        int score = 0;
+
+        // Category similarity
+        if (current.getCategoryIds() != null && other.getCategoryIds() != null) {
+            for (Long currentCategoryId : current.getCategoryIds()) {
+                if (other.getCategoryIds().contains(currentCategoryId)) {
+                    score += 3;
+                }
+            }
+        }
+
+        // Tag similarity
+        if (current.getTagNames() != null && other.getTagNames() != null) {
+            for (String currentTag : current.getTagNames()) {
+                if (other.getTagNames().contains(currentTag)) {
+                    score += 1;
+                }
+            }
+        }
+
+        return score;
     }
 }

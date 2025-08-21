@@ -30,17 +30,17 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
 
 	Page<Comment> findByDeletedAtIsNullAndIdIn(List<Long> ids, Pageable pageable);
 
-
 	List<Comment> findByDocumentIdAndStatus(Long documentId, String status);
- 
-    Page<Comment> findByDocumentIdAndStatusOrderByCreatedAtDesc(Long documentId, String status, Pageable pageable);
-    
-    Page<Comment> findByDocumentIdOrderByCreatedAtDesc(Long documentId, Pageable pageable);
-    
-    @Query("SELECT COUNT(c) FROM Comment c WHERE c.document.id = :documentId AND c.status = :status")
-    long countByDocumentIdAndStatus(@Param("documentId") Long documentId, @Param("status") String status);
-    
-    @Query("SELECT c FROM Comment c WHERE c.document.id = :documentId AND c.status IN :statuses ORDER BY c.createdAt DESC")
-    Page<Comment> findByDocumentIdAndStatusIn(@Param("documentId") Long documentId, @Param("statuses") List<String> statuses, Pageable pageable);
+
+	Page<Comment> findByDocumentIdAndStatusOrderByCreatedAtDesc(Long documentId, String status, Pageable pageable);
+
+	Page<Comment> findByDocumentIdOrderByCreatedAtDesc(Long documentId, Pageable pageable);
+
+	@Query("SELECT COUNT(c) FROM Comment c WHERE c.document.id = :documentId AND c.status = :status")
+	long countByDocumentIdAndStatus(@Param("documentId") Long documentId, @Param("status") String status);
+
+	@Query("SELECT c FROM Comment c WHERE c.document.id = :documentId AND c.status IN :statuses ORDER BY c.createdAt DESC")
+	Page<Comment> findByDocumentIdAndStatusIn(@Param("documentId") Long documentId,
+			@Param("statuses") List<String> statuses, Pageable pageable);
 
 }
