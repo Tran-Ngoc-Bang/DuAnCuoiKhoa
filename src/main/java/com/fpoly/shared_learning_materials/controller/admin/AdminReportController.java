@@ -2,6 +2,8 @@ package com.fpoly.shared_learning_materials.controller.admin;
 
 import com.fpoly.shared_learning_materials.domain.Report;
 import com.fpoly.shared_learning_materials.dto.ReportDTO;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 import com.fpoly.shared_learning_materials.service.ReportService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,10 +17,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin/reports")
-public class AdminReportController {
+public class AdminReportController extends BaseAdminController {
 
     @Autowired
     private ReportService reportService;
+
+    public AdminReportController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 
     @GetMapping
     public String showReports(

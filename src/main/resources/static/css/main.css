@@ -2608,9 +2608,9 @@ body.dark-mode .footer-bottom {
 }
 
 /* Document Details Page */
-.document-details {
+/* .document-details {
   padding: 6rem 0 4rem;
-}
+} */
 
 .document-details-container {
   display: grid;
@@ -2686,9 +2686,9 @@ body.dark-mode .footer-bottom {
 }
 
 .document-info {
-  background-color: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
+  /* background-color: var(--white); */
+  /* border-radius: var(--radius-lg); */
+  /* box-shadow: var(--shadow); */
   padding: 2rem;
 }
 

@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Tags - EduShare Admin</title>
+    
+    <!-- Flash Attributes for Toast -->
+    <meta name="flash-success" th:content="${successMessage}" th:if="${successMessage}"/>
+    <meta name="flash-error" th:content="${error}" th:if="${error}"/>
+    <meta name="flash-warning" th:content="${warning}" th:if="${warning}"/>
+    <meta name="flash-info" th:content="${info}" th:if="${info}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +18,8 @@
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}">
     <link rel="stylesheet" th:href="@{/css/admin/tags.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+     <script th:src="@{/js/admin/notifications.js}"></script>
     <style type="text/css">
     .tag-cloud {
             display: flex;
@@ -280,143 +288,11 @@
 </head>
 <body class="admin-body">
     <!-- Admin Header -->
-    <header class="admin-header">
-        <div class="admin-header-content">
-            <div class="admin-logo">
-                <a href="/admin/dashboard" class="logo">
-                    <div class="logo-icon">E</div>
-                    <div class="logo-text">EduShare</div>
-                </a>
-            </div>
-            <div class="admin-header-actions">
-                <div class="admin-search">
-                    <input type="text" placeholder="Tìm kiếm...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-                <div class="dark-mode-toggle" id="darkModeToggle"></div>
-                <div class="admin-notifications">
-                    <button class="notification-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">5</span>
-                    </button>
-                </div>
-                <div class="admin-profile">
-                    <div class="admin-avatar">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin">
-                    </div>
-                    <div class="admin-info">
-                        <span class="admin-name">Nguyễn Văn A</span>
-                        <span class="admin-role">Quản trị viên</span>
-                    </div>
-                    <div class="admin-dropdown">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
     <!-- Admin Container -->
     <div class="admin-container">
         <!-- Sidebar -->
-        <aside class="admin-sidebar">
-            <nav class="admin-nav">
-                <ul class="admin-menu">
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/dashboard}">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Bảng điều khiển</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/users}">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý người dùng</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/documents}">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Quản lý tài liệu</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/categories}">
-                            <i class="fas fa-folder"></i>
-                            <span>Quản lý danh mục</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item active">
-                        <a th:href="@{/admin/tags}">
-                            <i class="fas fa-tags"></i>
-                            <span>Quản lý tags</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/comments}">
-                            <i class="fas fa-comments"></i>
-                            <span>Quản lý bình luận</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/reports}">
-                            <i class="fas fa-flag"></i>
-                            <span>Báo cáo vi phạm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/ip-bans}">
-                            <i class="fas fa-ban"></i>
-                            <span>IP bị cấm</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/statistics}">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Thống kê</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item has-submenu">
-                        <a href="javascript:void(0)">
-                            <i class="fas fa-coins"></i>
-                            <span>Quản lý doanh thu</span>
-                            <i class="fas fa-chevron-down submenu-icon"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/coin-packages}">
-                                    <i class="fas fa-box"></i>
-                                    <span>Gói xu</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/revenue/transactions}">
-                                    <i class="fas fa-exchange-alt"></i>
-                                    <span>Giao dịch</span>
-                                </a>
-                            </li>
-                            <li class="submenu-item">
-                                <a th:href="@{/admin/revenue/withdrawals}">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                    <span>Yêu cầu rút tiền</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/admin/settings}">
-                            <i class="fas fa-cog"></i>
-                            <span>Cài đặt</span>
-                        </a>
-                    </li>
-                    <li class="admin-menu-item">
-                        <a th:href="@{/logout}">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Đăng xuất</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+        <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
         <!-- Main Content -->
         <main class="admin-content">
             <div class="admin-content-header">
@@ -462,7 +338,7 @@
                     </div>
                     <div class="tool-item">
                         <form id="sortForm" th:action="@{/admin/tags}" method="get">
-                            <input type="hidden" name="page" th:value="${currentPage}">
+                            <input type="hidden" name="page" th:value="${currentPageNumber}">
                             <input type="hidden" name="size" th:value="${pageSize}">
                             <input type="hidden" name="filter" th:value="${filter}">
                             <input type="hidden" name="search" th:value="${param.search}">
@@ -480,10 +356,10 @@
                     <a th:href="@{/admin/tags/create}" class="add-new-btn" id="addTagBtn">
                         <i class="fas fa-plus"></i> Thêm tag mới
                     </a>
-                    <button type="button" class="btn btn-outline" id="exportTagsBtn"
+                 <!--   <button type="button" class="btn btn-outline" id="exportTagsBtn"
                             style="background: transparent; color: #4b5563; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fas fa-download"></i><span>Export</span>
-                    </button>
+                    </button>-->
                 </div>
             </div>
             <!-- Tags Overview Cards -->
@@ -565,7 +441,7 @@
                                 <label th:for="'tag' + ${iterStat.count}"></label>
                             </div>
                         </td>--> 
-                        <td th:text="${iterStat.count + (currentPage * pageSize)}"></td>
+                        <td th:text="${iterStat.count + (currentPageNumber * pageSize)}"></td>
                         <td>
                             <div class="tag-preview">
                                 <span class="tag-label" th:text="${tag.name}" style="background-color: rgba(67, 97, 238, 0.1); color: var(--primary);"></span>
@@ -579,18 +455,26 @@
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <a th:href="@{/admin/tags/{id}/edit(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
-                                <a th:href="@{/admin/tags/{id}/details(id=${tag.id}, page=${currentPage}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Xem chi tiết"><i class="fas fa-file-alt"></i></a>
+                                <!-- Nút xem chi tiết - luôn hiển thị -->
+                                <a th:href="@{/admin/tags/{id}/details(id=${tag.id}, page=${currentPageNumber}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Xem chi tiết"><i class="fas fa-file-alt"></i></a>
                                 
-                                <!-- Nút khôi phục cho tags bị vô hiệu hóa -->
-                                <a th:if="${tag.status == 'inactive'}" th:href="@{/admin/tags/{id}/restore(id=${tag.id})}" class="action-btn restore-btn" title="Khôi phục tag">
-                                    <i class="fas fa-undo"></i>
-                                </a>
+                                <!-- Actions cho tag chưa bị xóa (deletedAt == null) -->
+                                <th:block th:if="${tag.deletedAt == null}">
+                                    <a th:href="@{/admin/tags/{id}/edit(id=${tag.id}, page=${currentPageNumber}, size=${pageSize}, filter=${filter}, sort=${sort}, search=${param.search})}" class="action-btn" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
+                                    <a th:href="@{/admin/tags/{id}/delete(id=${tag.id})}" class="action-btn delete-btn" title="Xóa tag"><i class="fas fa-trash"></i></a>
+                                </th:block>
                                 
-                                <!-- Chỉ hiển thị delete button cho tag chưa bị xóa vĩnh viễn -->
-                                <a th:if="${tag.deletedAt == null}" th:href="@{/admin/tags/{id}/delete(id=${tag.id})}" class="action-btn delete-btn" title="Xóa tag vĩnh viễn">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <!-- Actions cho tag đã bị xóa (deletedAt != null) -->
+                                <th:block th:if="${tag.deletedAt != null}">
+                                    <form th:action="@{/admin/tags/{id}/permanent-delete(id=${tag.id})}" method="post" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn tag này? Hành động này không thể hoàn tác!')">
+                                        <button type="submit" class="action-btn" style="background: #dc2626; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;" title="Xóa vĩnh viễn">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    <a th:href="@{/admin/tags/{id}/restore(id=${tag.id})}" class="action-btn restore-btn" title="Khôi phục tag">
+                                        <i class="fas fa-undo"></i>
+                                    </a>
+                                </th:block>
                             </div>
                         </td>
                     </tr>
@@ -615,12 +499,12 @@
             <!-- Pagination -->
            <div class="pagination" th:if="${totalPages > 0}">
     <!-- Nút Prev -->
-    <a th:if="${currentPage > 0}"
-       th:href="@{/admin/tags(page=${currentPage - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
+    <a th:if="${currentPageNumber > 0}"
+       th:href="@{/admin/tags(page=${currentPageNumber - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
        class="pagination-btn prev-btn">
         <i class="fas fa-chevron-left"></i>
     </a>
-    <a th:if="${currentPage == 0}" class="pagination-btn prev-btn disabled" href="javascript:void(0)">
+    <a th:if="${currentPageNumber == 0}" class="pagination-btn prev-btn disabled" href="javascript:void(0)">
         <i class="fas fa-chevron-left"></i>
     </a>
 
@@ -628,35 +512,35 @@
     <div class="pagination-pages">
         <!-- Trang đầu -->
         <a th:href="@{/admin/tags(page=0, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
-           th:class="${currentPage == 0 ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}">1</a>
+           th:class="${currentPageNumber == 0 ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}">1</a>
 
         <!-- Dấu chấm lửng nếu có hơn 4 trang và currentPage >= 3 -->
-        <span th:if="${totalPages > 4 and currentPage >= 3}" class="pagination-ellipsis">...</span>
+        <span th:if="${totalPages > 4 and currentPageNumber >= 3}" class="pagination-ellipsis">...</span>
 
         <!-- Các trang giữa (hiển thị 2 trang gần currentPage) -->
-        <a th:each="i : ${#numbers.sequence(currentPage - 1, currentPage + 1)}"
+        <a th:each="i : ${#numbers.sequence(currentPageNumber - 1, currentPageNumber + 1)}"
            th:if="${i > 0 and i < totalPages - 1}"
            th:href="@{/admin/tags(page=${i}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
-           th:class="${i == currentPage ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
+           th:class="${i == currentPageNumber ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
            th:text="${i + 1}"></a>
 
         <!-- Dấu chấm lửng nếu có hơn 4 trang và currentPage < totalPages - 2 -->
-        <span th:if="${totalPages > 4 and currentPage < totalPages - 2}" class="pagination-ellipsis">...</span>
+        <span th:if="${totalPages > 4 and currentPageNumber < totalPages - 2}" class="pagination-ellipsis">...</span>
 
         <!-- Trang cuối (hiển thị nếu totalPages > 1) -->
         <a th:if="${totalPages > 1}"
            th:href="@{/admin/tags(page=${totalPages - 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
-           th:class="${currentPage == totalPages - 1 ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
+           th:class="${currentPageNumber == totalPages - 1 ? 'pagination-btn page-btn active' : 'pagination-btn page-btn'}"
            th:text="${totalPages}"></a>
     </div>
 
     <!-- Nút Next -->
-    <a th:if="${currentPage < totalPages - 1}"
-       th:href="@{/admin/tags(page=${currentPage + 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
+    <a th:if="${currentPageNumber < totalPages - 1}"
+       th:href="@{/admin/tags(page=${currentPageNumber + 1}, size=${pageSize}, filter=${filter != null ? filter : ''}, sort=${sort != null ? sort : ''}, search=${param.search != null ? param.search : ''})}"
        class="pagination-btn next-btn">
         <i class="fas fa-chevron-right"></i>
     </a>
-    <a th:if="${currentPage == totalPages - 1}" class="pagination-btn next-btn disabled" href="javascript:void(0)">
+    <a th:if="${currentPageNumber == totalPages - 1}" class="pagination-btn next-btn disabled" href="javascript:void(0)">
         <i class="fas fa-chevron-right"></i>
     </a>
 </div>
@@ -697,9 +581,13 @@
             </form>
         </div>
     </div>
+    <div th:replace="~{fragments/admin/layout :: scripts}"></div>
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/admin/admin.js}"></script>
+    <script th:src="@{/js/admin/flash-toast.js}"></script>
     <script th:src="@{/js/admin/tags.js}"></script>
+    <script th:src="@{/js/admin/notifications.js}"></script>
+    <script th:src="@{/js/admin/toast.js}"></script>
     
     <script>
         function clearSearch() {

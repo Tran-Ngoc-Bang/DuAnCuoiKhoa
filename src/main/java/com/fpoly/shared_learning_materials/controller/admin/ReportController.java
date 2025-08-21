@@ -20,13 +20,14 @@ import com.fpoly.shared_learning_materials.repository.CommentRepository;
 import com.fpoly.shared_learning_materials.repository.DocumentRepository;
 import com.fpoly.shared_learning_materials.repository.ReportRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
-public class ReportController {
+public class ReportController extends BaseAdminController {
 
     @Autowired
     private ReportRepository reportRepository;
@@ -39,6 +40,10 @@ public class ReportController {
 
     @Autowired
     private DocumentRepository documentRepository;
+
+    public ReportController(NotificationService notificationService, UserRepository userRepository) {
+        super(notificationService, userRepository);
+    }
 
     @GetMapping("/reportcomment")
     public String showReportForm(
@@ -63,6 +68,7 @@ public class ReportController {
         }
 
         model.addAttribute("documentId", documentId);
+        model.addAttribute("currentPage", "reports");
         model.addAttribute("returnUrl", returnUrl != null ? returnUrl : "/admin/documents");
 
         return "admin/reportcomment";

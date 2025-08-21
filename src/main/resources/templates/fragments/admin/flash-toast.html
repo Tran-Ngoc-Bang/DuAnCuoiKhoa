@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <!-- Flash Toast Meta Tags Fragment -->
+    <div th:fragment="meta-tags">
+        <!-- Flash Attributes for Toast -->
+        <meta name="flash-success" th:content="${successMessage}" th:if="${successMessage}"/>
+        <meta name="flash-error" th:content="${errorMessage}" th:if="${errorMessage}"/>
+        <meta name="flash-warning" th:content="${warningMessage}" th:if="${warningMessage}"/>
+        <meta name="flash-info" th:content="${infoMessage}" th:if="${infoMessage}"/>
+    </div>
+</head>
+<body>
+    <!-- Flash Toast Scripts Fragment -->
+    <div th:fragment="scripts">
+        <script th:src="@{/js/admin/toast.js}"></script>
+        <script th:src="@{/js/admin/flash-toast.js}"></script>
+    </div>
+</body>
+</html>

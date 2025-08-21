@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fpoly.shared_learning_materials.domain.DocumentTag;
 import com.fpoly.shared_learning_materials.domain.DocumentTagId;
@@ -15,8 +16,14 @@ import com.fpoly.shared_learning_materials.domain.DocumentTagId;
 public interface DocumentTagRepository extends JpaRepository<DocumentTag, DocumentTagId> {
     
     @Modifying
+    @Transactional
     @Query("DELETE FROM DocumentTag dt WHERE dt.id.documentId = ?1")
     void deleteByDocumentId(Long documentId);
+    
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM DocumentTag dt WHERE dt.id.tagId = ?1")
+    void deleteByTagId(Long tagId);
     
     List<DocumentTag> findByDocumentId(Long documentId);
     

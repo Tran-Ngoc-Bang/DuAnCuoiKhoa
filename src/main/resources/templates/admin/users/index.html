@@ -12,10 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
   <!-- Bootstrap JS bundle (bao gồm Popper) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
     rel="stylesheet" />
@@ -23,6 +21,14 @@
   <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
   <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
   <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
+   <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+  <script th:src="@{/js/admin/notifications.js}"></script>
+   <script th:src="@{/js/admin/flash-toast.js}"></script>
+    <meta name="flash-success" th:content="${successMessage}" th:if="${successMessage}"/>
+    <meta name="flash-error" th:content="${errorMessage}" th:if="${errorMessage}"/>
+    <meta name="flash-warning" th:content="${warning}" th:if="${warning}"/>
+    <meta name="flash-info" th:content="${info}" th:if="${info}"/>
 
   <style>
     .action-buttons {
@@ -134,7 +140,6 @@
     .btn-confirm.lock {
       background-color: #ffc107;
     }
-
     /* vàng */
     .btn-confirm.unlock {
       background-color: #28a745;
@@ -207,11 +212,10 @@
           <span>Quản lý người dùng</span>
         </div>
       </div>
-      <div class="flash-messages">
+  <!--   <div class="flash-messages">
         <div th:if="${successMessage}" class="alert alert-success flash-alert" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-danger flash-alert" th:text="${errorMessage}"></div>
-      </div>
-
+      </div>--> 
       <script>
         setTimeout(function () {
           const alerts = document.querySelectorAll('.flash-alert');
