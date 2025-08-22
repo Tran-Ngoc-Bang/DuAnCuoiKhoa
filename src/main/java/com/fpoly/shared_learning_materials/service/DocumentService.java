@@ -19,11 +19,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 
@@ -66,23 +68,31 @@ public class DocumentService {
     @Autowired
     private FileService fileService;
 
+    public void save(Document document) {
+        documentRepository.save(document);
+    }
+
     // Get total documents count (excluding deleted ones)
     public long getTotalDocuments() {
         return documentRepository.countByDeletedAtIsNull();
     }
 
+    public boolean isUserOwnerOfDocument(User user, Document document) {
+        return documentOwnerRepository.existsByUserAndDocument(user, document);
+    }
+
     // Export all documents as JSON string for backup
-    
+
     // Import documents from backup file
-    
 
     // Helper method to escape JSON strings
     private String escapeJson(String str) {
-        if (str == null) return "";
+        if (str == null)
+            return "";
         return str.replace("\"", "\\\"")
-                  .replace("\n", "\\n")
-                  .replace("\r", "\\r")
-                  .replace("\t", "\\t");
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 
     // Get document by ID
@@ -310,6 +320,10 @@ public class DocumentService {
         }
     }
 
+    public Page<Document> searchDocuments(String q, String sort, String filter, String category, Pageable pageable) {
+        return documentRepository.findByTitleContainingIgnoreCase(q, pageable);
+    }
+
     // Restore document
     @Transactional
     public void restoreDocument(Long id) {
@@ -367,7 +381,7 @@ public class DocumentService {
                 System.out.println("Deleted document category: " + dc.getId());
             }
             System.out.println("Step 1: Completed - Categories deleted");
-            
+
             System.out.println("Step 2: Finding and deleting document tags...");
             // Tìm và xóa các liên kết với tags bằng JPA
             List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(id);
@@ -377,7 +391,7 @@ public class DocumentService {
                 System.out.println("Deleted document tag: " + dt.getId());
             }
             System.out.println("Step 2: Completed - Tags deleted");
-            
+
             System.out.println("Step 3: Deleting document owners...");
             // Xóa document owners
             List<DocumentOwner> documentOwners = documentOwnerRepository.findByDocumentId(id);
@@ -387,24 +401,24 @@ public class DocumentService {
                 System.out.println("Deleted document owner: " + owner.getId());
             }
             System.out.println("Step 3: Completed - Document owners deleted");
-            
+
             System.out.println("Step 4: Deleting comments...");
             // Xóa comments liên quan (tất cả status)
-            List<Comment> comments = commentRepository.findByDocumentIdAndStatusIn(id, 
-                Arrays.asList("APPROVED", "PENDING", "REJECTED"), PageRequest.of(0, 1000)).getContent();
+            List<Comment> comments = commentRepository.findByDocumentIdAndStatusIn(id,
+                    Arrays.asList("APPROVED", "PENDING", "REJECTED"), PageRequest.of(0, 1000)).getContent();
             System.out.println("Found " + comments.size() + " comments to delete");
             for (Comment comment : comments) {
                 commentRepository.delete(comment);
                 System.out.println("Deleted comment: " + comment.getId());
             }
             System.out.println("Step 4: Completed - Comments deleted");
-            
+
             System.out.println("Step 5: Deleting reports...");
             // Xóa reports liên quan - tìm và xóa thủ công
             try {
                 List<Report> reports = reportRepository.findAll().stream()
-                    .filter(r -> r.getDocument() != null && r.getDocument().getId().equals(id))
-                    .collect(Collectors.toList());
+                        .filter(r -> r.getDocument() != null && r.getDocument().getId().equals(id))
+                        .collect(Collectors.toList());
                 System.out.println("Found " + reports.size() + " reports to delete");
                 for (Report report : reports) {
                     reportRepository.delete(report);
@@ -414,29 +428,32 @@ public class DocumentService {
             } catch (Exception e) {
                 System.out.println("Step 5: No reports to delete or error: " + e.getMessage());
             }
-            
+
             // Xóa file vật lý nếu có
-            if (document.getFile() != null && document.getFile().getFilePath() != null && !document.getFile().getFilePath().isEmpty()) {
+            if (document.getFile() != null && document.getFile().getFilePath() != null
+                    && !document.getFile().getFilePath().isEmpty()) {
                 try {
                     System.out.println("Step 6: Deleting physical file...");
                     fileService.deleteFile(document.getFile().getFilePath());
-                    System.out.println("Step 6: Completed - Physical file deleted: " + document.getFile().getFilePath());
+                    System.out
+                            .println("Step 6: Completed - Physical file deleted: " + document.getFile().getFilePath());
                 } catch (Exception e) {
                     System.err.println("Warning: Could not delete physical file: " + e.getMessage());
-                    // Không throw exception vì việc xóa file có thể thất bại nhưng vẫn muốn xóa record
+                    // Không throw exception vì việc xóa file có thể thất bại nhưng vẫn muốn xóa
+                    // record
                 }
             }
-            
+
             System.out.println("Step 7: Deleting document from database...");
             System.out.println("Document ID before delete: " + document.getId());
             System.out.println("Document title before delete: " + document.getTitle());
-            
+
             // Xóa document khỏi database
             documentRepository.delete(document);
             documentRepository.flush();
-            
+
             System.out.println("Step 7: Completed - Document deleted from database");
-            
+
             // Kiểm tra xem document có còn tồn tại không
             Optional<Document> checkDocument = documentRepository.findById(id);
             if (checkDocument.isPresent()) {
@@ -445,7 +462,7 @@ public class DocumentService {
             } else {
                 System.out.println("VERIFIED: Document successfully deleted from database");
             }
-            
+
             System.out.println("Transaction completed - Document permanently deleted successfully");
         } catch (Exception e) {
             System.err.println("Error during permanent document deletion: " + e.getMessage());
@@ -522,7 +539,8 @@ public class DocumentService {
 
         // Apply filters to the list (sử dụng cùng logic filter như active documents)
         List<DocumentDTO> filteredList = allDtoList.stream()
-                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,dateTo, size, views))
+                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,
+                        dateTo, size, views))
                 .collect(Collectors.toList());
 
         System.out.println(
@@ -1691,4 +1709,189 @@ public class DocumentService {
 
         return score;
     }
+
+    public Page<Document> searchDocuments(String q,
+            List<String> categorySlugs,
+            List<String> formats,
+            List<String> priceFilters,
+            String ratingStr,
+            String time,
+            Pageable pageable) {
+
+        Page<Document> pageResult = documentRepository.findByKeyword(q, Pageable.unpaged());
+        System.out.println("Count of documents found: " + pageResult.getTotalElements());
+        List<Document> documents = pageResult.getContent();
+
+        // Filter: Category
+        if (categorySlugs != null && !categorySlugs.isEmpty()) {
+            documents = documents.stream()
+                    .filter(doc -> doc.getDocumentCategories().stream()
+                            .anyMatch(dc -> categorySlugs.contains(dc.getCategory().getSlug())))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter: File format
+        if (formats != null && !formats.isEmpty()) {
+            Set<String> lowerCaseFormats = formats.stream()
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+
+            documents = documents.stream()
+                    .filter(doc -> doc.getFile() != null
+                            && doc.getFile().getFileType() != null
+                            && lowerCaseFormats.contains(doc.getFile().getFileType().toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter: Price
+        if (priceFilters != null && !priceFilters.isEmpty()) {
+            documents = documents.stream()
+                    .filter(doc -> {
+                        if (priceFilters.contains("free") && doc.getPrice().compareTo(BigDecimal.ZERO) == 0)
+                            return true;
+                        if (priceFilters.contains("paid") && doc.getPrice().compareTo(BigDecimal.ZERO) > 0)
+                            return true;
+                        return false;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // Filter: Time (createdAt)
+        if (time != null && !time.equals("any")) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime after = switch (time) {
+                case "week" -> now.minusDays(7);
+                case "month" -> now.minusDays(30);
+                case "year" -> now.minusYears(1);
+                default -> null;
+            };
+
+            if (after != null) {
+                documents = documents.stream()
+                        .filter(doc -> doc.getCreatedAt() != null && doc.getCreatedAt().isAfter(after))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // Filter: Rating
+        if (ratingStr != null && !ratingStr.equals("any")) {
+            try {
+                int minRating = Integer.parseInt(ratingStr);
+                documents = documents.stream()
+                        .filter(doc -> {
+                            Double avgRating = commentRepository.getAverageRatingByDocumentId(doc.getId());
+                            return avgRating != null && avgRating >= minRating;
+                        })
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), documents.size());
+        List<Document> pagedList = (start <= end) ? documents.subList(start, end) : new ArrayList<>();
+
+        System.out.println("Count of documents final: " + pagedList.size());
+
+        return new PageImpl<>(pagedList, pageable, documents.size());
+    }
+
+    public Map<String, Long> countFormats(String q) {
+        List<Document> documents = documentRepository.findByKeyword(q, Pageable.unpaged()).getContent();
+
+        return documents.stream()
+                .filter(doc -> doc.getFile() != null && doc.getFile().getFileType() != null)
+                .collect(Collectors.groupingBy(
+                        doc -> doc.getFile().getFileType().toLowerCase(),
+                        Collectors.counting()));
+    }
+
+    public Map<String, Long> countDocumentsPerCategorySlug() {
+        List<Document> documents = documentRepository.findAll();
+
+        return documents.stream()
+                .flatMap(doc -> doc.getDocumentCategories().stream())
+                .filter(dc -> dc.getCategory() != null && dc.getCategory().getSlug() != null)
+                .collect(Collectors.groupingBy(
+                        dc -> dc.getCategory().getSlug(),
+                        Collectors.counting()));
+    }
+
+    public Map<String, Long> countByPrice(String q) {
+        List<Document> documents = documentRepository.findByKeyword(q, Pageable.unpaged()).getContent();
+
+        return documents.stream().collect(Collectors.groupingBy(
+                doc -> doc.getPrice().compareTo(BigDecimal.ZERO) == 0 ? "free" : "paid",
+                Collectors.counting()));
+    }
+
+    public Map<String, Long> countByRating(String q) {
+        List<Document> documents = documentRepository.findByKeyword(q, Pageable.unpaged()).getContent();
+
+        List<Long> docIds = documents.stream()
+                .map(Document::getId)
+                .collect(Collectors.toList());
+
+        List<Comment> comments = commentRepository.findByDocumentIdInAndStatus(docIds, "active");
+
+        Map<Long, Double> avgRatings = comments.stream()
+                .collect(Collectors.groupingBy(
+                        c -> c.getDocument().getId(),
+                        Collectors.averagingDouble(c -> c.getRating() != null ? c.getRating() : 0)));
+
+        long count4 = avgRatings.values().stream().filter(r -> r >= 4).count();
+        long count3 = avgRatings.values().stream().filter(r -> r >= 3).count();
+        long countAll = avgRatings.size();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("4", count4);
+        result.put("3", count3);
+        result.put("any", countAll);
+
+        return result;
+    }
+
+    public Map<String, Long> countByTime(String q) {
+        List<Document> documents = documentRepository.findByKeyword(q, Pageable.unpaged()).getContent();
+
+        LocalDateTime now = LocalDateTime.now();
+
+        long countWeek = documents.stream()
+                .filter(d -> d.getPublishedAt() != null)
+                .filter(d -> d.getPublishedAt().isAfter(now.minusDays(7)))
+                .count();
+
+        long countMonth = documents.stream()
+                .filter(d -> d.getPublishedAt() != null)
+                .filter(d -> d.getPublishedAt().isAfter(now.minusDays(30)))
+                .count();
+
+        long countYear = documents.stream()
+                .filter(d -> d.getPublishedAt() != null)
+                .filter(d -> d.getPublishedAt().isAfter(now.minusYears(1)))
+                .count();
+
+        long countAny = documents.size();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("week", countWeek);
+        result.put("month", countMonth);
+        result.put("year", countYear);
+        result.put("any", countAny);
+
+        return result;
+    }
+
+    public List<Document> getRelatedDocuments(Document document, int limit) {
+        List<Long> categoryIds = document.getDocumentCategories().stream()
+                .map(dc -> dc.getCategory().getId())
+                .collect(Collectors.toList());
+
+        if (categoryIds.isEmpty())
+            return Collections.emptyList();
+
+        return documentRepository.findRelatedDocuments(categoryIds, document.getId(), PageRequest.of(0, limit));
+    }
+
 }

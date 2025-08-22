@@ -1,5 +1,5 @@
 // Search JavaScript for EduShare
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   initSearchForm();
   initLayoutToggle();
   initFilterSections();
@@ -16,19 +16,20 @@ document.addEventListener('DOMContentLoaded', function() {
 function initSearchForm() {
   const searchForm = document.getElementById('searchForm');
   const searchInput = document.getElementById('searchInput');
-  
+
   if (searchForm) {
-    searchForm.addEventListener('submit', function(e) {
+    searchForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      
+
       const query = searchInput.value.trim();
       if (query.length > 0) {
         // Update URL with search query
-        updateURL({q: query});
-        
+        updateURL({ q: query });
+
         // In a real application, this would call an API to get search results
         // For now, we'll just update the UI to show our mock results with the query
         updateSearchDisplay(query);
+        window.location.href = '/search?q=' + query;
       }
     });
   }
@@ -38,13 +39,13 @@ function initSearchForm() {
 function initHeaderSearch() {
   const headerSearchBtn = document.getElementById('headerSearchBtn');
   const headerSearchInput = document.getElementById('headerSearchInput');
-  
+
   if (headerSearchBtn && headerSearchInput) {
-    headerSearchBtn.addEventListener('click', function() {
+    headerSearchBtn.addEventListener('click', function () {
       performHeaderSearch();
     });
-    
-    headerSearchInput.addEventListener('keypress', function(e) {
+
+    headerSearchInput.addEventListener('keypress', function (e) {
       if (e.key === 'Enter') {
         performHeaderSearch();
       }
@@ -56,7 +57,7 @@ function initHeaderSearch() {
 function performHeaderSearch() {
   const headerSearchInput = document.getElementById('headerSearchInput');
   const query = headerSearchInput.value.trim();
-  
+
   if (query.length > 0) {
     window.location.href = `search.html?q=${encodeURIComponent(query)}`;
   }
@@ -66,27 +67,27 @@ function performHeaderSearch() {
 function initLayoutToggle() {
   const layoutButtons = document.querySelectorAll('.layout-option');
   const searchResults = document.getElementById('searchResults');
-  
+
   if (layoutButtons.length && searchResults) {
     layoutButtons.forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         // Remove active class from all buttons
         layoutButtons.forEach(btn => btn.classList.remove('active'));
-        
+
         // Add active class to clicked button
         this.classList.add('active');
-        
+
         // Get the layout type (grid or list)
         const layout = this.getAttribute('data-layout');
-        
+
         // Update search results layout
         searchResults.className = `search-results ${layout}-view`;
-        
+
         // Save layout preference in localStorage for persistence
         localStorage.setItem('search_layout_preference', layout);
       });
     });
-    
+
     // Apply saved layout preference if available
     const savedLayout = localStorage.getItem('search_layout_preference');
     if (savedLayout) {
@@ -101,71 +102,71 @@ function initLayoutToggle() {
 // Initialize filter sections (collapse/expand)
 function initFilterSections() {
   const filterHeaders = document.querySelectorAll('.filter-header');
-  
+
   if (filterHeaders.length) {
     filterHeaders.forEach(header => {
       const filterToggle = header.querySelector('.filter-toggle');
       const filterBody = header.nextElementSibling;
-      
-      header.addEventListener('click', function() {
+
+      header.addEventListener('click', function () {
         filterToggle.classList.toggle('active');
         filterBody.classList.toggle('collapsed');
-        
+
         // Save filter state in localStorage
         const filterTitle = header.querySelector('.filter-title').textContent;
         const isCollapsed = filterBody.classList.contains('collapsed');
         localStorage.setItem(`filter_${filterTitle.toLowerCase().replace(/\s+/g, '_')}`, isCollapsed ? 'collapsed' : 'expanded');
       });
-      
+
       // Apply saved filter state if available
       const filterTitle = header.querySelector('.filter-title').textContent;
       const savedState = localStorage.getItem(`filter_${filterTitle.toLowerCase().replace(/\s+/g, '_')}`);
-      
+
       if (savedState === 'collapsed') {
         filterToggle.classList.add('active');
         filterBody.classList.add('collapsed');
       }
     });
   }
-  
+
   // Initialize "Show more" buttons
   const showMoreButtons = document.querySelectorAll('.show-more-btn');
-  
+
   if (showMoreButtons.length) {
     showMoreButtons.forEach(button => {
-      button.addEventListener('click', function(e) {
+      button.addEventListener('click', function (e) {
         e.stopPropagation();
-        
+
         const filterOptions = this.previousElementSibling;
         const hiddenOptions = filterOptions.querySelectorAll('.filter-option.hidden');
-        
+
         if (hiddenOptions.length) {
           // Show hidden options
           hiddenOptions.forEach(option => {
             option.classList.remove('hidden');
           });
-          
+
           this.innerHTML = 'Thu gọn <i class="fas fa-chevron-up"></i>';
           this.classList.add('show-less');
         } else {
           // Hide options after the first 5
           const allOptions = filterOptions.querySelectorAll('.filter-option');
-          
+
           if (allOptions.length > 5) {
             for (let i = 5; i < allOptions.length; i++) {
               allOptions[i].classList.add('hidden');
             }
-            
+
             this.innerHTML = 'Xem thêm <i class="fas fa-chevron-down"></i>';
             this.classList.remove('show-less');
           }
         }
       });
-      
+
       // Initially hide options after the first 5
       const filterOptions = button.previousElementSibling;
       const allOptions = filterOptions.querySelectorAll('.filter-option');
-      
+
       if (allOptions.length > 5) {
         for (let i = 5; i < allOptions.length; i++) {
           allOptions[i].classList.add('hidden');
@@ -182,15 +183,15 @@ function initFilterSections() {
 function initFilterActions() {
   const applyFiltersBtn = document.getElementById('applyFilters');
   const resetFiltersBtn = document.getElementById('resetFilters');
-  
+
   if (applyFiltersBtn) {
-    applyFiltersBtn.addEventListener('click', function() {
+    applyFiltersBtn.addEventListener('click', function () {
       applyFilters();
     });
   }
-  
+
   if (resetFiltersBtn) {
-    resetFiltersBtn.addEventListener('click', function() {
+    resetFiltersBtn.addEventListener('click', function () {
       resetFilters();
     });
   }
@@ -200,7 +201,7 @@ function initFilterActions() {
 function applyFilters() {
   // Collect all filter values
   const filterParams = {};
-  
+
   // Category filters
   const selectedCategories = [];
   document.querySelectorAll('input[name="category"]:checked').forEach(input => {
@@ -209,7 +210,7 @@ function applyFilters() {
   if (selectedCategories.length > 0) {
     filterParams.category = selectedCategories.join(',');
   }
-  
+
   // Format filters
   const selectedFormats = [];
   document.querySelectorAll('input[name="format"]:checked').forEach(input => {
@@ -218,7 +219,7 @@ function applyFilters() {
   if (selectedFormats.length > 0) {
     filterParams.format = selectedFormats.join(',');
   }
-  
+
   // Price filters
   const selectedPrices = [];
   document.querySelectorAll('input[name="price"]:checked').forEach(input => {
@@ -227,44 +228,44 @@ function applyFilters() {
   if (selectedPrices.length > 0) {
     filterParams.price = selectedPrices.join(',');
   }
-  
+
   // Rating filter
   const selectedRating = document.querySelector('input[name="rating"]:checked');
   if (selectedRating && selectedRating.value !== 'any') {
     filterParams.rating = selectedRating.value;
   }
-  
+
   // Time filter
   const selectedTime = document.querySelector('input[name="time"]:checked');
   if (selectedTime && selectedTime.value !== 'any') {
     filterParams.time = selectedTime.value;
   }
-  
+
   // Get current search query if any
   const searchInput = document.getElementById('searchInput');
   if (searchInput && searchInput.value.trim().length > 0) {
     filterParams.q = searchInput.value.trim();
   }
-  
+
   // Get current sort option
   const sortSelect = document.getElementById('sortSelect');
   if (sortSelect && sortSelect.value !== 'relevance') {
     filterParams.sort = sortSelect.value;
   }
-  
+
   // Update URL with filter parameters
   updateURL(filterParams);
-  
+
   // In a real application, this would fetch new results from an API
   // For now, we'll just simulate filtering by updating the UI
   const query = searchInput ? searchInput.value.trim() : '';
   updateSearchDisplay(query);
-  
+
   // If on mobile, close the filter panel
   if (window.innerWidth < 992) {
     const searchSidebar = document.querySelector('.search-sidebar');
     const mobileFilterToggle = document.getElementById('mobileFilterToggle');
-    
+
     if (searchSidebar && mobileFilterToggle) {
       searchSidebar.classList.remove('mobile-visible');
       mobileFilterToggle.classList.remove('active');
@@ -278,35 +279,35 @@ function resetFilters() {
   document.querySelectorAll('input[name="category"]').forEach(input => {
     input.checked = false;
   });
-  
+
   // Reset format filters
   document.querySelectorAll('input[name="format"]').forEach(input => {
     input.checked = false;
   });
-  
+
   // Reset price filters
   document.querySelectorAll('input[name="price"]').forEach(input => {
     input.checked = false;
   });
-  
+
   // Reset rating filter to "any"
   const anyRatingOption = document.querySelector('input[name="rating"][value="any"]');
   if (anyRatingOption) {
     anyRatingOption.checked = true;
   }
-  
+
   // Reset time filter to "any"
   const anyTimeOption = document.querySelector('input[name="time"][value="any"]');
   if (anyTimeOption) {
     anyTimeOption.checked = true;
   }
-  
+
   // Reset sort option to "relevance"
   const sortSelect = document.getElementById('sortSelect');
   if (sortSelect) {
     sortSelect.value = 'relevance';
   }
-  
+
   // Apply the reset filters (updates URL and UI)
   applyFilters();
 }
@@ -314,19 +315,19 @@ function resetFilters() {
 // Update URL with filter parameters
 function updateURL(params) {
   const urlParams = new URLSearchParams(window.location.search);
-  
+
   // Clear existing params that we control
   ['q', 'category', 'format', 'price', 'rating', 'time', 'sort', 'page'].forEach(param => {
     urlParams.delete(param);
   });
-  
+
   // Add new params
   Object.keys(params).forEach(key => {
     if (params[key]) {
       urlParams.set(key, params[key]);
     }
   });
-  
+
   // Update URL
   const newURL = window.location.pathname + (urlParams.toString() ? `?${urlParams.toString()}` : '');
   window.history.replaceState({}, '', newURL);
@@ -335,18 +336,18 @@ function updateURL(params) {
 // Initialize URL parameters
 function initURLParams() {
   const urlParams = new URLSearchParams(window.location.search);
-  
+
   // Set search query from URL
   if (urlParams.has('q')) {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
       searchInput.value = urlParams.get('q');
     }
-    
+
     // Update search display with the query
     updateSearchDisplay(urlParams.get('q'));
   }
-  
+
   // Set category filters from URL
   if (urlParams.has('category')) {
     const categories = urlParams.get('category').split(',');
@@ -357,7 +358,7 @@ function initURLParams() {
       }
     });
   }
-  
+
   // Set format filters from URL
   if (urlParams.has('format')) {
     const formats = urlParams.get('format').split(',');
@@ -368,7 +369,7 @@ function initURLParams() {
       }
     });
   }
-  
+
   // Set price filters from URL
   if (urlParams.has('price')) {
     const prices = urlParams.get('price').split(',');
@@ -379,7 +380,7 @@ function initURLParams() {
       }
     });
   }
-  
+
   // Set rating filter from URL
   if (urlParams.has('rating')) {
     const ratingInput = document.querySelector(`input[name="rating"][value="${urlParams.get('rating')}"]`);
@@ -387,7 +388,7 @@ function initURLParams() {
       ratingInput.checked = true;
     }
   }
-  
+
   // Set time filter from URL
   if (urlParams.has('time')) {
     const timeInput = document.querySelector(`input[name="time"][value="${urlParams.get('time')}"]`);
@@ -395,7 +396,7 @@ function initURLParams() {
       timeInput.checked = true;
     }
   }
-  
+
   // Set sort option from URL
   if (urlParams.has('sort')) {
     const sortSelect = document.getElementById('sortSelect');
@@ -408,21 +409,21 @@ function initURLParams() {
 // Initialize pagination
 function initPagination() {
   const paginationItems = document.querySelectorAll('.pagination-item:not(.disabled)');
-  
+
   if (paginationItems.length) {
     paginationItems.forEach(item => {
       const link = item.querySelector('a');
-      
+
       if (link) {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
           e.preventDefault();
-          
+
           // Remove active class from all pagination items
           paginationItems.forEach(item => item.classList.remove('active'));
-          
+
           // Add active class to clicked item
           item.classList.add('active');
-          
+
           // Get page number from link text or attribute
           let page = link.textContent.trim();
           if (link.getAttribute('aria-label') === 'Previous') {
@@ -430,14 +431,14 @@ function initPagination() {
           } else if (link.getAttribute('aria-label') === 'Next') {
             page = getCurrentPage() + 1;
           }
-          
+
           // Update URL with page number
           const urlParams = new URLSearchParams(window.location.search);
           urlParams.set('page', page);
-          
+
           const newURL = `${window.location.pathname}?${urlParams.toString()}`;
           window.history.replaceState({}, '', newURL);
-          
+
           // In a real application, this would fetch the specific page of results
           // For now, we'll just scroll to the top of the results
           const searchResultsSection = document.querySelector('.search-results-section');
@@ -453,7 +454,7 @@ function initPagination() {
 // Get current pagination page
 function getCurrentPage() {
   const activePaginationItem = document.querySelector('.pagination-item.active');
-  
+
   if (activePaginationItem) {
     const link = activePaginationItem.querySelector('a');
     if (link) {
@@ -461,7 +462,7 @@ function getCurrentPage() {
       return isNaN(page) ? 1 : page;
     }
   }
-  
+
   // Default to page 1 if no active pagination item found
   return 1;
 }
@@ -469,13 +470,13 @@ function getCurrentPage() {
 // Initialize bookmark buttons
 function initBookmarkButtons() {
   const bookmarkButtons = document.querySelectorAll('.result-bookmark-btn');
-  
+
   if (bookmarkButtons.length) {
     bookmarkButtons.forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         // Toggle active class
         this.classList.toggle('active');
-        
+
         // Toggle bookmark icon
         const icon = this.querySelector('i');
         if (icon) {
@@ -498,9 +499,9 @@ function initBookmarkButtons() {
 function initMobileFilterToggle() {
   const mobileFilterToggle = document.getElementById('mobileFilterToggle');
   const searchSidebar = document.querySelector('.search-sidebar');
-  
+
   if (mobileFilterToggle && searchSidebar) {
-    mobileFilterToggle.addEventListener('click', function() {
+    mobileFilterToggle.addEventListener('click', function () {
       this.classList.toggle('active');
       searchSidebar.classList.toggle('mobile-visible');
     });
@@ -510,21 +511,21 @@ function initMobileFilterToggle() {
 // Initialize sort select
 function initSortSelect() {
   const sortSelect = document.getElementById('sortSelect');
-  
+
   if (sortSelect) {
-    sortSelect.addEventListener('change', function() {
+    sortSelect.addEventListener('change', function () {
       // Update URL with new sort option
       const urlParams = new URLSearchParams(window.location.search);
-      
+
       if (this.value === 'relevance') {
         urlParams.delete('sort');
       } else {
         urlParams.set('sort', this.value);
       }
-      
+
       const newURL = `${window.location.pathname}?${urlParams.toString()}`;
       window.history.replaceState({}, '', newURL);
-      
+
       // In a real application, this would fetch sorted results from an API
       // For now, we'll just update the UI to simulate sorting
       sortSearchResults(this.value);
@@ -534,8 +535,56 @@ function initSortSelect() {
 
 // Sort search results
 function sortSearchResults(sortBy) {
-  // In a real application, this would fetch sorted results from an API
-  // For now, we'll just show a toast message to indicate sorting
+  const container = document.getElementById('searchResults');
+  const cards = Array.from(container.getElementsByClassName('search-result-card'));
+
+  const parseNumber = (text) => {
+    if (!text) return 0;
+    const cleaned = text.replace(/[^\d.]/g, '');
+    return parseFloat(cleaned) || 0;
+  };
+
+  const extractField = (card, selector) => {
+    const el = card.querySelector(selector);
+    return el ? el.textContent.trim() : '';
+  };
+
+  cards.sort((a, b) => {
+    switch (sortBy) {
+      case 'rating_desc': {
+        const ratingA = parseNumber(extractField(a, '.stat-item.rating span'));
+        const ratingB = parseNumber(extractField(b, '.stat-item.rating span'));
+        return ratingB - ratingA;
+      }
+      case 'downloads_desc': {
+        const downloadsA = parseNumber(extractField(a, '.stat-item i.fa-download + span'));
+        const downloadsB = parseNumber(extractField(b, '.stat-item i.fa-download + span'));
+        return downloadsB - downloadsA;
+      }
+      case 'price_asc': {
+        const priceA = parseNumber(extractField(a, '.result-price'));
+        const priceB = parseNumber(extractField(b, '.result-price'));
+        return priceA - priceB;
+      }
+      case 'price_desc': {
+        const priceA = parseNumber(extractField(a, '.result-price'));
+        const priceB = parseNumber(extractField(b, '.result-price'));
+        return priceB - priceA;
+      }
+      case 'date_desc': {
+        const dateA = new Date(a.getAttribute('data-created-at'));
+        const dateB = new Date(b.getAttribute('data-created-at'));
+        return dateB - dateA;
+      }
+      case 'relevance':
+      default:
+        return 0;
+    }
+  });
+
+  container.innerHTML = '';
+  cards.forEach(card => container.appendChild(card));
+
   showToast(`Đã sắp xếp kết quả theo: ${getSortLabel(sortBy)}`, 'info');
 }
 
@@ -569,9 +618,7 @@ function updateSearchDisplay(query) {
       searchQueryDisplay.innerHTML = `<span>Tất cả tài liệu</span>`;
     }
   }
-  
-  // In a real application, this would fetch results from an API and update the count
-  // For this demo, we'll just show a toast message indicating the search
+
   if (query) {
     showToast(`Đang tìm kiếm: "${query}"`, 'info');
   }
@@ -581,12 +628,12 @@ function updateSearchDisplay(query) {
 function showToast(message, type = 'info') {
   // Check if toast container exists, if not create it
   let toastContainer = document.querySelector('.toast-container');
-  
+
   if (!toastContainer) {
     toastContainer = document.createElement('div');
     toastContainer.className = 'toast-container';
     document.body.appendChild(toastContainer);
-    
+
     // Add toast container styles if they don't exist
     if (!document.getElementById('toast-styles')) {
       const toastStyles = document.createElement('style');
@@ -682,11 +729,11 @@ function showToast(message, type = 'info') {
       document.head.appendChild(toastStyles);
     }
   }
-  
+
   // Create toast element
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  
+
   // Icon based on type
   let icon;
   switch (type) {
@@ -704,33 +751,33 @@ function showToast(message, type = 'info') {
       icon = 'fas fa-info-circle';
       break;
   }
-  
+
   // Set toast content
   toast.innerHTML = `
     <div class="toast-icon"><i class="${icon}"></i></div>
     <div class="toast-message">${message}</div>
     <div class="toast-close"><i class="fas fa-times"></i></div>
   `;
-  
+
   // Add to container
   toastContainer.appendChild(toast);
-  
+
   // Show toast with animation
   setTimeout(() => {
     toast.classList.add('show');
   }, 10);
-  
+
   // Add close button event
   const closeBtn = toast.querySelector('.toast-close');
   if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
+    closeBtn.addEventListener('click', function () {
       toast.classList.remove('show');
       setTimeout(() => {
         toastContainer.removeChild(toast);
       }, 300);
     });
   }
-  
+
   // Auto remove after 4 seconds
   setTimeout(() => {
     if (toast.parentNode === toastContainer) {

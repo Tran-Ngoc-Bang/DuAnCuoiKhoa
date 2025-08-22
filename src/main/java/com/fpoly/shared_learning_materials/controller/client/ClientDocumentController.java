@@ -2,6 +2,9 @@ package com.fpoly.shared_learning_materials.controller.client;
 
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.domain.Comment;
+import com.fpoly.shared_learning_materials.domain.Document;
+import com.fpoly.shared_learning_materials.domain.DocumentOwner;
+import com.fpoly.shared_learning_materials.domain.DocumentOwnerId;
 import com.fpoly.shared_learning_materials.domain.Report;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;
 import com.fpoly.shared_learning_materials.dto.CommentDTO;
@@ -9,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.repository.DocumentOwnerRepository;
 import com.fpoly.shared_learning_materials.repository.ReportRepository;
 import com.fpoly.shared_learning_materials.service.DocumentService;
 import com.fpoly.shared_learning_materials.service.CommentService;
@@ -16,9 +20,11 @@ import com.fpoly.shared_learning_materials.service.DocumentAnalyticsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -33,7 +39,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Map;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -57,6 +66,9 @@ public class ClientDocumentController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private DocumentOwnerRepository documentOwnerRepository;
 
     @Autowired
     private ReportRepository reportRepository;
@@ -167,17 +179,128 @@ public class ClientDocumentController {
         }
     }
 
-    @GetMapping("/{id}/view")
+    @GetMapping("/{id}/pdf-view")
     public String viewDocument(@PathVariable Long id, Model model) {
+        Document document = documentService.findById(id);
+
+        List<Document> relatedDocuments = documentService.getRelatedDocuments(document, 3);
+
         model.addAttribute("pageTitle", "Xem tài liệu");
         model.addAttribute("documentId", id);
+        model.addAttribute("document", document);
+        model.addAttribute("relatedDocuments", relatedDocuments);
+
+        boolean isOwned = false;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            String username = auth.getName();
+            User user = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (user != null) {
+                isOwned = documentOwnerRepository.existsByUserAndDocument(user, document);
+            }
+        }
+
+        model.addAttribute("isOwned", isOwned);
+
         return "client/pdf-viewer";
     }
 
     @GetMapping("/{id}/download")
-    public String downloadDocument(@PathVariable Long id) {
-        // Logic for document download will be implemented later
-        return "redirect:/documents/" + id;
+    public ResponseEntity<?> downloadDocument(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Vui lòng đăng nhập để tải tài liệu");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy thông tin người dùng");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        }
+
+        Document document = documentService.findById(id);
+        if (document == null || document.getFile() == null) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy tài liệu");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        }
+
+        boolean isOwned = documentOwnerRepository.existsByUserAndDocument(currentUser, document);
+
+        if (!isOwned) {
+            BigDecimal docPrice = document.getPrice();
+            BigDecimal userCoins = currentUser.getCoinBalance();
+
+            if (docPrice.compareTo(BigDecimal.ZERO) > 0 && userCoins.compareTo(docPrice) < 0) {
+                redirectAttributes.addFlashAttribute("toastMessage", "Bạn không đủ xu để tải tài liệu này");
+                redirectAttributes.addFlashAttribute("toastType", "error");
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .header("Location", "/documents/" + id)
+                        .build();
+            }
+
+            if (docPrice.compareTo(BigDecimal.ZERO) > 0) {
+                currentUser.setCoinBalance(userCoins.subtract(docPrice));
+                userRepository.save(currentUser);
+
+                DocumentOwner owner = new DocumentOwner();
+                owner.setId(new DocumentOwnerId(currentUser.getId(), document.getId()));
+                owner.setUser(currentUser);
+                owner.setDocument(document);
+                owner.setOwnershipType("buyer");
+                owner.setCreatedAt(LocalDateTime.now());
+                documentOwnerRepository.save(owner);
+
+                redirectAttributes.addFlashAttribute("toastMessage",
+                        "Tải xuống thành công. Đã trừ " + docPrice + " xu từ tài khoản của bạn.");
+                redirectAttributes.addFlashAttribute("toastType", "success");
+            }
+
+            document.setDownloadsCount(document.getDownloadsCount() + 1);
+            documentService.save(document);
+        } else {
+            redirectAttributes.addFlashAttribute("toastMessage", "Bạn đã sở hữu tài liệu này. Bắt đầu tải xuống...");
+            redirectAttributes.addFlashAttribute("toastType", "info");
+        }
+
+        Path filePath = Paths.get("src/main/resources/static/uploads/documents")
+                .resolve(document.getFile().getFileName());
+        File file = filePath.toFile();
+
+        if (!file.exists()) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Tập tin không tồn tại trên hệ thống");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        }
+
+        try {
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .body(resource);
+        } catch (FileNotFoundException e) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Không thể mở file để tải về");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        }
     }
 
     /**
