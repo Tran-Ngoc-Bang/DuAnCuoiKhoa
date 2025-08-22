@@ -62,7 +62,7 @@
                 <a href="search.html" class="hero-button hero-button-primary">
                   <i class="fas fa-search"></i> Tìm tài liệu
                 </a>
-                <a href="upload.html" class="hero-button hero-button-secondary">
+                <a href="upload" class="hero-button hero-button-secondary">
                   <i class="fas fa-upload"></i> Đóng góp tài liệu
                 </a>
               </div>
@@ -100,760 +100,49 @@
           </div>
 
           <div class="category-filter-tabs">
-            <button class="category-tab active" data-filter="all">
+            <a href="/categories" th:classappend="${selectedCategory == null} ? 'active' : ''" class="category-tab" data-filter="all">
               Tất cả danh mục
-            </button>
-            <button class="category-tab" data-filter="education">
-              Giáo dục & Học thuật
-            </button>
-            <button class="category-tab" data-filter="tech">
-              Công nghệ & Kỹ thuật
-            </button>
-            <button class="category-tab" data-filter="business">
-              Kinh tế & Kinh doanh
-            </button>
-            <button class="category-tab" data-filter="science">
-              Khoa học & Y tế
-            </button>
-            <button class="category-tab" data-filter="arts">
-              Nghệ thuật & Xã hội
-            </button>
+            </a>
+            <a class="category-tab" data-filter="education" th:each="category : ${rootCategories}" th:href="@{/categories(category=${category.slug})}" th:classappend="${selectedCategory == category.slug} ? 'active' : ''" th:text="${category.name}"></a>
           </div>
 
           <div class="categories-container">
-            <!-- IT Category -->
-            <div class="category-card" data-group="tech">
+            <div class="category-card" th:each="category : ${displayCategories}" data-group="tech">
               <div class="category-header">
                 <div class="category-icon-container icon-it">
                   <i class="fas fa-laptop-code"></i>
                 </div>
-                <h3 class="category-title">Công nghệ thông tin</h3>
-                <span class="document-count">2,415 tài liệu</span>
+                <h3  th:text="${category.name}" class="category-title">Công nghệ thông tin</h3>
+                <span th:text="${category.documents} + ' tài liệu'" class="document-count">2,415 tài liệu</span>
               </div>
 
               <div class="category-content">
-                <p class="category-description">
+                <p th:text="${category.description}" class="category-description">
                   Khám phá các tài liệu về lập trình, phát triển ứng dụng, mạng
                   máy tính, trí tuệ nhân tạo và các lĩnh vực công nghệ khác.
                 </p>
-
-                <ul class="subcategories-list">
+                <div class="subcategories" th:if="${category.subcategories > 0}">
+                <ul class="subcategories-list" th:each="subcategory : ${subcategoriesMap.get(category.id)}" >
                   <li class="subcategory-item">
                     <i class="fas fa-angle-right"></i>
                     <a
-                      href="search.html?category=it&subcategory=programming"
+                    th:href="@{/categories(category=${subcategory.slug})}" th:text="${subcategory.name}"
                       class="subcategory-name"
                       >Lập trình & Phát triển phần mềm</a
                     >
                   </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=it&subcategory=database"
-                      class="subcategory-name"
-                      >Cơ sở dữ liệu & Data Science</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=it&subcategory=ai"
-                      class="subcategory-name"
-                      >AI & Machine Learning</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=it&subcategory=network"
-                      class="subcategory-name"
-                      >Mạng & Bảo mật</a
-                    >
-                  </li>
                 </ul>
-              </div>
-
-              <div class="category-footer">
-                <a href="search.html?category=it" class="category-view-all">
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Business Category -->
-            <div class="category-card" data-group="business">
-              <div class="category-header">
-                <div class="category-icon-container icon-business">
-                  <i class="fas fa-chart-line"></i>
                 </div>
-                <h3 class="category-title">Kinh tế - Quản trị</h3>
-                <span class="document-count">1,892 tài liệu</span>
               </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về marketing, tài chính, kế toán, quản trị kinh
-                  doanh, khởi nghiệp và các lĩnh vực kinh tế khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=business&subcategory=marketing"
-                      class="subcategory-name"
-                      >Marketing & Quảng cáo</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=business&subcategory=finance"
-                      class="subcategory-name"
-                      >Tài chính & Đầu tư</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=business&subcategory=accounting"
-                      class="subcategory-name"
-                      >Kế toán & Kiểm toán</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=business&subcategory=management"
-                      class="subcategory-name"
-                      >Quản trị & Lãnh đạo</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
               <div class="category-footer">
-                <a
-                  href="search.html?category=business"
-                  class="category-view-all"
-                >
+                <a th:href="@{/categories(category=${category.slug})}" class="category-view-all">
                   Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
                 </a>
               </div>
             </div>
-
-            <!-- Language Category -->
-            <div class="category-card" data-group="education">
-              <div class="category-header">
-                <div class="category-icon-container icon-language">
-                  <i class="fas fa-language"></i>
-                </div>
-                <h3 class="category-title">Ngoại ngữ</h3>
-                <span class="document-count">3,254 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu học tập và giảng dạy về tiếng Anh, Hàn, Nhật, Trung,
-                  Pháp, Đức và các ngôn ngữ khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=language&subcategory=english"
-                      class="subcategory-name"
-                      >Tiếng Anh (IELTS, TOEIC)</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=language&subcategory=asian"
-                      class="subcategory-name"
-                      >Tiếng Á (Hàn, Nhật, Trung)</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=language&subcategory=european"
-                      class="subcategory-name"
-                      >Tiếng Âu (Pháp, Đức, Ý)</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=language&subcategory=skills"
-                      class="subcategory-name"
-                      >Kỹ năng ngôn ngữ</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a
-                  href="search.html?category=language"
-                  class="category-view-all"
-                >
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Engineering Category -->
-            <div class="category-card" data-group="tech">
-              <div class="category-header">
-                <div class="category-icon-container icon-engineering">
-                  <i class="fas fa-cogs"></i>
-                </div>
-                <h3 class="category-title">Kỹ thuật - Công nghệ</h3>
-                <span class="document-count">1,548 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về các ngành kỹ thuật như cơ khí, điện, điện tử, xây
-                  dựng, kiến trúc và các lĩnh vực công nghệ khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=engineering&subcategory=mechanical"
-                      class="subcategory-name"
-                      >Cơ khí & Tự động hóa</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=engineering&subcategory=electronics"
-                      class="subcategory-name"
-                      >Điện & Điện tử</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=engineering&subcategory=civil"
-                      class="subcategory-name"
-                      >Xây dựng & Kiến trúc</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=engineering&subcategory=chemical"
-                      class="subcategory-name"
-                      >Hóa học công nghệ</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a
-                  href="search.html?category=engineering"
-                  class="category-view-all"
-                >
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Social Science Category -->
-            <div class="category-card" data-group="arts">
-              <div class="category-header">
-                <div class="category-icon-container icon-social">
-                  <i class="fas fa-users"></i>
-                </div>
-                <h3 class="category-title">Khoa học xã hội</h3>
-                <span class="document-count">1,245 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về tâm lý học, xã hội học, lịch sử, địa lý, triết học
-                  và các lĩnh vực khoa học xã hội khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=social&subcategory=psychology"
-                      class="subcategory-name"
-                      >Tâm lý học</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=social&subcategory=sociology"
-                      class="subcategory-name"
-                      >Xã hội học</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=social&subcategory=history"
-                      class="subcategory-name"
-                      >Lịch sử & Địa lý</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=social&subcategory=philosophy"
-                      class="subcategory-name"
-                      >Triết học & Chính trị</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a href="search.html?category=social" class="category-view-all">
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Health Category -->
-            <div class="category-card" data-group="science">
-              <div class="category-header">
-                <div class="category-icon-container icon-health">
-                  <i class="fas fa-heartbeat"></i>
-                </div>
-                <h3 class="category-title">Y dược</h3>
-                <span class="document-count">967 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về y học, dược học, điều dưỡng, sức khỏe cộng đồng và
-                  các lĩnh vực y tế khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=health&subcategory=medicine"
-                      class="subcategory-name"
-                      >Y học lâm sàng</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=health&subcategory=pharmacy"
-                      class="subcategory-name"
-                      >Dược học</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=health&subcategory=nursing"
-                      class="subcategory-name"
-                      >Điều dưỡng</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=health&subcategory=public"
-                      class="subcategory-name"
-                      >Sức khỏe cộng đồng</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a href="search.html?category=health" class="category-view-all">
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Law Category -->
-            <div class="category-card" data-group="business">
-              <div class="category-header">
-                <div class="category-icon-container icon-law">
-                  <i class="fas fa-gavel"></i>
-                </div>
-                <h3 class="category-title">Luật</h3>
-                <span class="document-count">856 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về luật dân sự, luật hình sự, luật kinh tế, luật quốc
-                  tế và các lĩnh vực pháp lý khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=law&subcategory=civil"
-                      class="subcategory-name"
-                      >Luật dân sự</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=law&subcategory=criminal"
-                      class="subcategory-name"
-                      >Luật hình sự</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=law&subcategory=business"
-                      class="subcategory-name"
-                      >Luật kinh tế & Thương mại</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=law&subcategory=international"
-                      class="subcategory-name"
-                      >Luật quốc tế</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a href="search.html?category=law" class="category-view-all">
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Education Category -->
-            <div class="category-card" data-group="education">
-              <div class="category-header">
-                <div class="category-icon-container icon-education">
-                  <i class="fas fa-graduation-cap"></i>
-                </div>
-                <h3 class="category-title">Giáo dục</h3>
-                <span class="document-count">1,125 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về phương pháp giảng dạy, tâm lý giáo dục, quản lý
-                  giáo dục và các lĩnh vực giáo dục khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=education&subcategory=teaching"
-                      class="subcategory-name"
-                      >Phương pháp giảng dạy</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=education&subcategory=psychology"
-                      class="subcategory-name"
-                      >Tâm lý giáo dục</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=education&subcategory=management"
-                      class="subcategory-name"
-                      >Quản lý giáo dục</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=education&subcategory=curriculum"
-                      class="subcategory-name"
-                      >Phát triển chương trình</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a
-                  href="search.html?category=education"
-                  class="category-view-all"
-                >
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Art Category -->
-            <div class="category-card" data-group="arts">
-              <div class="category-header">
-                <div class="category-icon-container icon-art">
-                  <i class="fas fa-palette"></i>
-                </div>
-                <h3 class="category-title">Nghệ thuật - Thiết kế</h3>
-                <span class="document-count">743 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về thiết kế đồ họa, mỹ thuật, âm nhạc, kiến trúc,
-                  thời trang và các lĩnh vực nghệ thuật khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=art&subcategory=graphic"
-                      class="subcategory-name"
-                      >Thiết kế đồ họa</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=art&subcategory=fine"
-                      class="subcategory-name"
-                      >Mỹ thuật</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=art&subcategory=music"
-                      class="subcategory-name"
-                      >Âm nhạc</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=art&subcategory=fashion"
-                      class="subcategory-name"
-                      >Thời trang</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a href="search.html?category=art" class="category-view-all">
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Science Category -->
-            <div class="category-card" data-group="science">
-              <div class="category-header">
-                <div class="category-icon-container icon-science">
-                  <i class="fas fa-atom"></i>
-                </div>
-                <h3 class="category-title">Khoa học tự nhiên</h3>
-                <span class="document-count">1,356 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về toán học, vật lý, hóa học, sinh học, thiên văn học
-                  và các lĩnh vực khoa học tự nhiên khác.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=science&subcategory=math"
-                      class="subcategory-name"
-                      >Toán học</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=science&subcategory=physics"
-                      class="subcategory-name"
-                      >Vật lý</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=science&subcategory=chemistry"
-                      class="subcategory-name"
-                      >Hóa học</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=science&subcategory=biology"
-                      class="subcategory-name"
-                      >Sinh học</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a
-                  href="search.html?category=science"
-                  class="category-view-all"
-                >
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Agriculture Category -->
-            <div class="category-card" data-group="science">
-              <div class="category-header">
-                <div class="category-icon-container icon-agriculture">
-                  <i class="fas fa-seedling"></i>
-                </div>
-                <h3 class="category-title">Nông - Lâm - Ngư</h3>
-                <span class="document-count">687 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về nông nghiệp, lâm nghiệp, thủy sản, chăn nuôi, thú
-                  y và các lĩnh vực liên quan.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=agriculture&subcategory=farming"
-                      class="subcategory-name"
-                      >Nông nghiệp & Trồng trọt</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=agriculture&subcategory=forestry"
-                      class="subcategory-name"
-                      >Lâm nghiệp</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=agriculture&subcategory=fishery"
-                      class="subcategory-name"
-                      >Thủy sản</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=agriculture&subcategory=veterinary"
-                      class="subcategory-name"
-                      >Chăn nuôi & Thú y</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a
-                  href="search.html?category=agriculture"
-                  class="category-view-all"
-                >
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Environment Category -->
-            <div class="category-card" data-group="science">
-              <div class="category-header">
-                <div class="category-icon-container icon-environment">
-                  <i class="fas fa-leaf"></i>
-                </div>
-                <h3 class="category-title">Môi trường</h3>
-                <span class="document-count">512 tài liệu</span>
-              </div>
-
-              <div class="category-content">
-                <p class="category-description">
-                  Tài liệu về bảo vệ môi trường, tài nguyên thiên nhiên, phát
-                  triển bền vững và các vấn đề môi trường.
-                </p>
-
-                <ul class="subcategories-list">
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=environment&subcategory=protection"
-                      class="subcategory-name"
-                      >Bảo vệ môi trường</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=environment&subcategory=resources"
-                      class="subcategory-name"
-                      >Tài nguyên thiên nhiên</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=environment&subcategory=sustainable"
-                      class="subcategory-name"
-                      >Phát triển bền vững</a
-                    >
-                  </li>
-                  <li class="subcategory-item">
-                    <i class="fas fa-angle-right"></i>
-                    <a
-                      href="search.html?category=environment&subcategory=climate"
-                      class="subcategory-name"
-                      >Biến đổi khí hậu</a
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div class="category-footer">
-                <a
-                  href="search.html?category=environment"
-                  class="category-view-all"
-                >
-                  Xem tất cả tài liệu <i class="fas fa-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
-      <!-- Popular Topics Section -->
+       <!-- Popular Topics Section -->
       <section class="topics-section">
         <div class="container">
           <div class="section-header">
@@ -864,67 +153,11 @@
           </div>
 
           <div class="topics-wrapper">
-            <a href="search.html?q=IELTS" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> IELTS</a
-            >
-            <a href="search.html?q=AI" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> AI & Machine Learning</a
-            >
-            <a href="search.html?q=React" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> React</a
-            >
-            <a href="search.html?q=Marketing" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Digital Marketing</a
-            >
-            <a href="search.html?q=Excel" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Excel</a
-            >
-            <a href="search.html?q=Python" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Python</a
-            >
-            <a href="search.html?q=Photoshop" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Photoshop</a
-            >
-            <a href="search.html?q=Tiếng%20Anh" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Tiếng Anh</a
-            >
-            <a href="search.html?q=SEO" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> SEO</a
-            >
-            <a href="search.html?q=Blockchain" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Blockchain</a
-            >
-            <a href="search.html?q=Luận%20văn" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Luận văn</a
-            >
-            <a href="search.html?q=Tài%20chính" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Tài chính</a
-            >
-            <a href="search.html?q=Khởi%20nghiệp" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Khởi nghiệp</a
-            >
-            <a href="search.html?q=Đề%20thi" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Đề thi</a
-            >
-            <a href="search.html?q=Giáo%20trình" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Giáo trình</a
-            >
-            <a href="search.html?q=Pháp%20luật" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Pháp luật</a
-            >
-            <a href="search.html?q=Tiếng%20Nhật" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Tiếng Nhật</a
-            >
-            <a href="search.html?q=Data%20Science" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Data Science</a
-            >
-            <a href="search.html?q=Kế%20toán" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Kế toán</a
-            >
-            <a href="search.html?q=Thiết%20kế" class="topic-tag"
-              ><i class="fas fa-hashtag"></i> Thiết kế</a
-            >
-          </div>
+                    <a th:each="tag : ${popularTags}" th:href="@{/search(q=${tag.name})}" class="topic-tag">
+                        <i class="fas fa-hashtag"></i>
+                        <span th:text="${tag.name}"></span>
+                    </a>
+                </div>
         </div>
       </section>
 
@@ -934,19 +167,19 @@
           <div class="stats-cta-wrapper">
             <div class="stats-container">
               <div class="stat-item">
-                <div class="stat-number" data-value="500000">500K+</div>
+                <div class="stat-number" th:attr="data-value=${numUsers}" th:text="${numUsers}">500K+</div>
                 <div class="stat-label">Người dùng</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number" data-value="15000">15K+</div>
+                <div class="stat-number" th:attr="data-value=${numNewDocuments}" th:text="${numNewDocuments}">15K+</div>
                 <div class="stat-label">Tài liệu mới mỗi tháng</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number" data-value="2500000">2.5M+</div>
+                <div class="stat-number" th:attr="data-value=${numDownloads}" th:text="${numDownloads}">2.5M+</div>
                 <div class="stat-label">Lượt tải xuống</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number" data-value="100000">100K+</div>
+                <div class="stat-number" th:attr="data-value=${numContributors}" th:text="${numContributors}">100K+</div>
                 <div class="stat-label">Tác giả đóng góp</div>
               </div>
             </div>
@@ -958,7 +191,7 @@
                 chia sẻ tri thức. Nhận xu thưởng và xây dựng danh tiếng của bạn.
               </p>
               <div class="cta-buttons">
-                <a href="upload.html" class="cta-btn cta-btn-primary">
+                <a href="upload" class="cta-btn cta-btn-primary">
                   <i class="fas fa-upload"></i> Đăng tải tài liệu
                 </a>
                 <a href="#" class="cta-btn cta-btn-secondary">

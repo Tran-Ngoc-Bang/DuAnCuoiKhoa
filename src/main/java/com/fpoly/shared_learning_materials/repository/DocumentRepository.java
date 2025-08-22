@@ -68,4 +68,8 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.transaction.annotation.Transactional
     int incrementDownloadCount(@Param("documentId") Long documentId);
+
+     // Tổng lượt tải xuống
+    @Query("SELECT SUM(d.downloadsCount) FROM Document d WHERE d.deletedAt IS NULL")
+    Long getTotalDownloads();
 }
