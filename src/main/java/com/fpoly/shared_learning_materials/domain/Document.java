@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "documents")
@@ -15,68 +17,87 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Document {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "title", nullable = false, columnDefinition = "nvarchar(255)")
-    private String title;
+	@Column(name = "title", nullable = false, columnDefinition = "nvarchar(255)")
+	private String title;
 
-    @Column(name = "slug", unique = true, nullable = false)
-    private String slug;
+	@Column(name = "slug", unique = true, nullable = false)
+	private String slug;
 
-    @Column(name = "description", columnDefinition = "nvarchar(max)")
-    private String description;
+	@Column(name = "description", columnDefinition = "nvarchar(max)")
+	private String description;
 
-    @Column(name = "price", precision = 18, scale = 2)
-    private BigDecimal price = BigDecimal.ZERO;
+	@Column(name = "price", precision = 18, scale = 2)
+	private BigDecimal price = BigDecimal.ZERO;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_id")
-    private File file;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "file_id")
+	private File file;
 
-    @Column(name = "status", length = 20)
-    private String status = "draft";
+	@Column(name = "status", length = 20)
+	private String status = "draft";
 
-    @Column(name = "visibility", length = 20)
-    private String visibility = "public";
+	@Column(name = "visibility", length = 20)
+	private String visibility = "public";
 
-    @Column(name = "downloads_count")
-    private Long downloadsCount = 0L;
+	@Column(name = "downloads_count")
+	private Long downloadsCount = 0L;
 
-    @Column(name = "views_count")
-    private Long viewsCount = 0L;
+	@Column(name = "views_count")
+	private Long viewsCount = 0L;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
-    @Column(name = "published_at")
-    private LocalDateTime publishedAt;
+	@Column(name = "published_at")
+	private LocalDateTime publishedAt;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+	@OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<DocumentCategory> documentCategories = new ArrayList<>();
+
+	@OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
+	private List<Comment> comments = new ArrayList<>();
+
+	@Transient 
+    public Double getRating() {
+        if (comments == null || comments.isEmpty()) {
+            return 0.0;
+        }
+        return comments.stream()
+                .filter(c -> c.getRating() != null)
+                .mapToInt(Comment::getRating)
+                .average()
+                .orElse(0.0);
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
-    public enum DocumentStatus {
-        DRAFT, PENDING, APPROVED, REJECTED, DELETED
-    }
+	@PrePersist
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
+	}
 
-    public enum DocumentType {
-        PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, OTHER
-    }
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
+
+	public enum DocumentStatus {
+		DRAFT, PENDING, APPROVED, REJECTED, DELETED
+	}
+
+	public enum DocumentType {
+		PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, OTHER
+	}
 
 	public Long getId() {
 		return id;
@@ -189,5 +210,5 @@ public class Document {
 	public void setDeletedAt(LocalDateTime deletedAt) {
 		this.deletedAt = deletedAt;
 	}
-    
+
 }

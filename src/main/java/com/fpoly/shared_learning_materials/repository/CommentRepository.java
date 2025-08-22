@@ -43,4 +43,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
 	Page<Comment> findByDocumentIdAndStatusIn(@Param("documentId") Long documentId,
 			@Param("statuses") List<String> statuses, Pageable pageable);
 
+	@Query("SELECT AVG(c.rating) FROM Comment c WHERE c.document.id = :documentId AND c.status = 'active' AND c.rating IS NOT NULL")
+	Double getAverageRatingByDocumentId(@Param("documentId") Long documentId);
+
+	List<Comment> findByDocumentIdInAndStatus(List<Long> documentIds, String status);
+
 }

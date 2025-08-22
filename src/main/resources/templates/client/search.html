@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <title>Tìm kiếm tài liệu - EduShare</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" th:href="@{/css/main.css}">
   <link rel="stylesheet" th:href="@{/css/responsive.css}">
@@ -17,61 +20,62 @@
   <link rel="stylesheet" th:href="@{/css/client-header.css}">
   <link rel="stylesheet" th:href="@{/css/client-footer.css}">
 </head>
+
 <body>
   <!-- Header -->
   <div th:replace="~{fragments/client/layout :: header}"></div>
-    <div class="container">
-      <div class="header-content">
-        <div class="logo">
-          <a href="../index.html">
-            <div class="logo-icon">E</div>
-            <span class="logo-text">EduShare</span>
-          </a>
-        </div>
-        <nav class="main-nav">
-          <a href="../index.html" class="nav-link">Trang chủ</a>
-          <a href="categories.html" class="nav-link">Danh mục</a>
-          <a href="search.html?sort=newest" class="nav-link">Tài liệu mới</a>
-          <a href="search.html?filter=premium" class="nav-link">Cao cấp</a>
-          <a href="about.html" class="nav-link">Giới thiệu</a>
-        </nav>
-        <div class="header-actions">
-          <!-- Đã xóa ô tìm kiếm theo yêu cầu -->
-          <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
-            <span class="dark-mode-handle" id="darkModeHandle"></span>
-          </button>
-          <a href="login.html" class="login-btn">
-            <i class="fas fa-sign-in-alt"></i> Đăng nhập
-          </a>
-          <a href="register.html" class="register-btn">
-            <i class="fas fa-user-plus"></i> Đăng ký
-          </a>
-        </div>
-        <div class="mobile-menu-toggle" id="mobileMenuBtn">
-          <i class="fas fa-bars"></i>
-        </div>
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <a href="../index.html">
+          <div class="logo-icon">E</div>
+          <span class="logo-text">EduShare</span>
+        </a>
       </div>
-    </div>
-    <!-- Mobile menu -->
-    <div id="mobileMenu" class="mobile-menu">
-      <div class="mobile-search">
-        <input type="text" placeholder="Tìm kiếm tài liệu...">
-        <button>
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-      <nav class="mobile-nav">
-        <a href="../index.html" class="mobile-nav-link">Trang chủ</a>
-        <a href="categories.html" class="mobile-nav-link">Danh mục</a>
-        <a href="search.html?sort=newest" class="mobile-nav-link active">Tài liệu mới</a>
-        <a href="search.html?filter=premium" class="mobile-nav-link">Cao cấp</a>
-        <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+      <nav class="main-nav">
+        <a href="../index.html" class="nav-link">Trang chủ</a>
+        <a href="categories.html" class="nav-link">Danh mục</a>
+        <a href="search.html?sort=newest" class="nav-link">Tài liệu mới</a>
+        <a href="search.html?filter=premium" class="nav-link">Cao cấp</a>
+        <a href="about.html" class="nav-link">Giới thiệu</a>
       </nav>
-      <div class="mobile-auth">
-        <a href="login.html" class="mobile-login-btn">Đăng nhập</a>
-        <a href="register.html" class="mobile-register-btn">Đăng ký</a>
+      <div class="header-actions">
+        <!-- Đã xóa ô tìm kiếm theo yêu cầu -->
+        <button class="dark-mode-toggle" id="darkModeToggle" type="button" aria-label="Toggle dark mode">
+          <span class="dark-mode-handle" id="darkModeHandle"></span>
+        </button>
+        <a href="login.html" class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Đăng nhập
+        </a>
+        <a href="register.html" class="register-btn">
+          <i class="fas fa-user-plus"></i> Đăng ký
+        </a>
+      </div>
+      <div class="mobile-menu-toggle" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
       </div>
     </div>
+  </div>
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="mobile-menu">
+    <div class="mobile-search">
+      <input type="text" placeholder="Tìm kiếm tài liệu...">
+      <button>
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+    <nav class="mobile-nav">
+      <a href="../index.html" class="mobile-nav-link">Trang chủ</a>
+      <a href="categories.html" class="mobile-nav-link">Danh mục</a>
+      <a href="search.html?sort=newest" class="mobile-nav-link active">Tài liệu mới</a>
+      <a href="search.html?filter=premium" class="mobile-nav-link">Cao cấp</a>
+      <a href="#" class="mobile-nav-link">Hướng dẫn</a>
+    </nav>
+    <div class="mobile-auth">
+      <a href="login.html" class="mobile-login-btn">Đăng nhập</a>
+      <a href="register.html" class="mobile-register-btn">Đăng ký</a>
+    </div>
+  </div>
   </header>
 
   <!-- Main Content -->
@@ -81,20 +85,15 @@
       <div class="container">
         <div class="search-hero-content">
           <h1 class="search-hero-title">Tìm kiếm tài liệu học tập chất lượng cao</h1>
-          <p class="search-hero-description">Khám phá hàng nghìn tài liệu từ các lĩnh vực khác nhau - giáo trình, bài giảng, đề thi, luận văn và nhiều hơn nữa</p>
-          
+          <p class="search-hero-description">Khám phá hàng nghìn tài liệu từ các lĩnh vực khác nhau - giáo trình, bài
+            giảng, đề thi, luận văn và nhiều hơn nữa</p>
+
           <div class="search-form-container">
-            <form id="searchForm" class="search-form">
+            <form id="searchForm" th:action="@{/search}" class="search-form">
               <div class="search-input-wrapper">
                 <i class="fas fa-search search-icon"></i>
-                <input 
-                  type="text" 
-                  id="searchInput" 
-                  class="search-input" 
-                  placeholder="Tìm kiếm theo tên, tác giả, chủ đề..." 
-                  value="React"
-                  autocomplete="off"
-                >
+                <input type="text" id="searchInput" name="q" class="search-input"
+                  placeholder="Tìm kiếm theo tên, tác giả, chủ đề..." autocomplete="off">
               </div>
               <button type="submit" class="search-submit">
                 <i class="fas fa-search"></i> Tìm kiếm
@@ -118,7 +117,7 @@
               <i class="fas fa-file-alt"></i> 215 kết quả
             </div>
           </div>
-          
+
           <div class="search-options">
             <div class="search-layout-options">
               <button class="layout-option active" data-layout="grid">
@@ -128,7 +127,7 @@
                 <i class="fas fa-list"></i>
               </button>
             </div>
-            
+
             <div class="search-sort-options">
               <span class="sort-label">Sắp xếp:</span>
               <select id="sortSelect" class="sort-select">
@@ -142,7 +141,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Search Content -->
         <div class="search-content">
           <!-- Sidebar Filters -->
@@ -151,585 +150,276 @@
               <span>Lọc kết quả</span>
               <i class="fas fa-chevron-down"></i>
             </button>
-            
-            <!-- Category Filter -->
-            <div class="filter-section">
-              <div class="filter-header">
-                <h3 class="filter-title">Danh mục</h3>
-                <i class="fas fa-chevron-down filter-toggle"></i>
-              </div>
-              <div class="filter-body">
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="category" value="it" checked>
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">Công nghệ thông tin</span>
-                    <span class="filter-option-count">154</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="category" value="business">
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">Kinh tế - Quản trị</span>
-                    <span class="filter-option-count">32</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="category" value="engineering">
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">Kỹ thuật - Công nghệ</span>
-                    <span class="filter-option-count">21</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="category" value="language">
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">Ngoại ngữ</span>
-                    <span class="filter-option-count">8</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="category" value="social">
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">Khoa học xã hội</span>
-                    <span class="filter-option-count">5</span>
-                  </label>
+            <form id="filterForm" method="get" th:action="@{/search}">
+              <!-- Category Filter -->
+              <div class="filter-section">
+                <div class="filter-header">
+                  <h3 class="filter-title">Danh mục</h3>
+                  <i class="fas fa-chevron-down filter-toggle"></i>
                 </div>
-                <button class="show-more-btn">
-                  Xem thêm <i class="fas fa-chevron-down"></i>
+                <div class="filter-body">
+                  <div class="filter-options">
+                    <th:block th:each="cat : ${categories}">
+                      <label class="filter-option">
+                        <div class="filter-checkbox">
+                          <input type="checkbox" name="category" th:value="${cat.slug}"
+                            th:checked="${category != null and category.contains(cat.slug)}">
+                          <span class="checkmark"></span>
+                        </div>
+                        <span class="filter-option-label" th:text="${cat.name}">Tên danh mục</span>
+                        <span class="filter-option-count" th:text="${categoryCounts[cat.slug]} ?: 0">0</span>
+                      </label>
+                    </th:block>
+                  </div>
+                  <button class="show-more-btn">
+                    Xem thêm <i class="fas fa-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Format Filter -->
+              <div class="filter-section">
+                <div class="filter-header">
+                  <h3 class="filter-title">Định dạng tệp</h3>
+                  <i class="fas fa-chevron-down filter-toggle"></i>
+                </div>
+                <div class="filter-body">
+                  <div class="filter-options">
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="checkbox" name="format" value="pdf">
+                        <span class="checkmark"></span>
+                      </div>
+                      <span class="filter-option-label">PDF</span>
+                      <span class="filter-option-count" th:text="${formatCounts['pdf']} ?: 0">0</span>
+                    </label>
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="checkbox" name="format" value="doc">
+                        <span class="checkmark"></span>
+                      </div>
+                      <span class="filter-option-label">DOC/DOCX</span>
+                      <span class="filter-option-count" th:text="${formatCounts['doc']} ?: 0">0</span>
+                    </label>
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="checkbox" name="format" value="ppt">
+                        <span class="checkmark"></span>
+                      </div>
+                      <span class="filter-option-label">PPT/PPTX</span>
+                      <span class="filter-option-count" th:text="${formatCounts['ppt']} ?: 0">0</span>
+                    </label>
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="checkbox" name="format" value="xls">
+                        <span class="checkmark"></span>
+                      </div>
+                      <span class="filter-option-label">XLS/XLSX</span>
+                      <span class="filter-option-count" th:text="${formatCounts['xls']} ?: 0">0</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Price Filter -->
+              <div class="filter-section">
+                <div class="filter-header">
+                  <h3 class="filter-title">Giá</h3>
+                  <i class="fas fa-chevron-down filter-toggle"></i>
+                </div>
+                <div class="filter-body">
+                  <div class="filter-options">
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="checkbox" name="price" value="free"
+                          th:checked="${price != null and price.contains('free')}">
+                        <span class="checkmark"></span>
+                      </div>
+                      <span class="filter-option-label">Miễn phí</span>
+                      <span class="filter-option-count" th:text="${priceCounts['free']} ?: 0">0</span>
+                    </label>
+
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="checkbox" name="price" value="paid"
+                          th:checked="${price != null and price.contains('paid')}">
+                        <span class="checkmark"></span>
+                      </div>
+                      <span class="filter-option-label">Trả phí</span>
+                      <span class="filter-option-count" th:text="${priceCounts['paid']} ?: 0">0</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rating Filter -->
+              <div class="filter-section">
+                <div class="filter-header">
+                  <h3 class="filter-title">Đánh giá</h3>
+                  <i class="fas fa-chevron-down filter-toggle"></i>
+                </div>
+                <div class="filter-body">
+                  <div class="filter-options">
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="radio" name="rating" value="4" th:checked="${rating == '4'}" />
+                        <span class="radiomark"></span>
+                      </div>
+                      <span class="filter-option-label">
+                        <span class="star-rating">
+                          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                            class="fas fa-star"></i><i class="far fa-star"></i>
+                        </span>
+                        & trở lên
+                      </span>
+                      <span class="filter-option-count" th:text="${ratingCounts['4']} ?: 0">0</span>
+                    </label>
+
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="radio" name="rating" value="3" th:checked="${rating == '3'}" />
+                        <span class="radiomark"></span>
+                      </div>
+                      <span class="filter-option-label">
+                        <span class="star-rating">
+                          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                            class="far fa-star"></i><i class="far fa-star"></i>
+                        </span>
+                        & trở lên
+                      </span>
+                      <span class="filter-option-count" th:text="${ratingCounts['3']} ?: 0">0</span>
+                    </label>
+
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="radio" name="rating" value="any"
+                          th:checked="${rating == null or rating == 'any'}" />
+                        <span class="radiomark"></span>
+                      </div>
+                      <span class="filter-option-label">Tất cả đánh giá</span>
+                      <span class="filter-option-count" th:text="${ratingCounts['any']} ?: 0">0</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Time Filter -->
+              <div class="filter-section">
+                <div class="filter-header">
+                  <h3 class="filter-title">Thời gian đăng</h3>
+                  <i class="fas fa-chevron-down filter-toggle"></i>
+                </div>
+                <div class="filter-body">
+                  <div class="filter-options">
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="radio" name="time" value="week" th:checked="${time == 'week'}">
+                        <span class="radiomark"></span>
+                      </div>
+                      <span class="filter-option-label">7 ngày qua</span>
+                      <span class="filter-option-count" th:text="${timeCounts['week']} ?: 0">0</span>
+                    </label>
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="radio" name="time" value="month" th:checked="${time == 'month'}">
+                        <span class="radiomark"></span>
+                      </div>
+                      <span class="filter-option-label">30 ngày qua</span>
+                      <span class="filter-option-count" th:text="${timeCounts['month']} ?: 0">0</span>
+                    </label>
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="radio" name="time" value="year" th:checked="${time == 'year'}">
+                        <span class="radiomark"></span>
+                      </div>
+                      <span class="filter-option-label">1 năm qua</span>
+                      <span class="filter-option-count" th:text="${timeCounts['year']} ?: 0">0</span>
+                    </label>
+                    <label class="filter-option">
+                      <div class="filter-checkbox">
+                        <input type="radio" name="time" value="any" th:checked="${time == 'any' || time == null}">
+                        <span class="radiomark"></span>
+                      </div>
+                      <span class="filter-option-label">Mọi lúc</span>
+                      <span class="filter-option-count" th:text="${timeCounts['any']} ?: 0">0</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filter Actions -->
+              <div class="filter-actions">
+                <button id="applyFilters" class="filter-apply-btn">
+                  <i class="fas fa-filter"></i> Áp dụng bộ lọc
+                </button>
+                <button id="resetFilters" class="filter-reset-btn">
+                  <i class="fas fa-undo"></i> Đặt lại bộ lọc
                 </button>
               </div>
-            </div>
-            
-            <!-- Format Filter -->
-            <div class="filter-section">
-              <div class="filter-header">
-                <h3 class="filter-title">Định dạng tệp</h3>
-                <i class="fas fa-chevron-down filter-toggle"></i>
-              </div>
-              <div class="filter-body">
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="format" value="pdf" checked>
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">PDF</span>
-                    <span class="filter-option-count">183</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="format" value="doc">
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">DOC/DOCX</span>
-                    <span class="filter-option-count">27</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="format" value="ppt">
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">PPT/PPTX</span>
-                    <span class="filter-option-count">32</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="format" value="xls">
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">XLS/XLSX</span>
-                    <span class="filter-option-count">5</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Price Filter -->
-            <div class="filter-section">
-              <div class="filter-header">
-                <h3 class="filter-title">Giá</h3>
-                <i class="fas fa-chevron-down filter-toggle"></i>
-              </div>
-              <div class="filter-body">
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="price" value="free" checked>
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">Miễn phí</span>
-                    <span class="filter-option-count">87</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="checkbox" name="price" value="paid" checked>
-                      <span class="checkmark"></span>
-                    </div>
-                    <span class="filter-option-label">Trả phí</span>
-                    <span class="filter-option-count">128</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Rating Filter -->
-            <div class="filter-section">
-              <div class="filter-header">
-                <h3 class="filter-title">Đánh giá</h3>
-                <i class="fas fa-chevron-down filter-toggle"></i>
-              </div>
-              <div class="filter-body">
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="radio" name="rating" value="4">
-                      <span class="radiomark"></span>
-                    </div>
-                    <span class="filter-option-label">
-                      <span class="star-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="far fa-star"></i>
-                      </span>
-                      & trở lên
-                    </span>
-                    <span class="filter-option-count">162</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="radio" name="rating" value="3">
-                      <span class="radiomark"></span>
-                    </div>
-                    <span class="filter-option-label">
-                      <span class="star-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="far fa-star"></i>
-                        <i class="far fa-star"></i>
-                      </span>
-                      & trở lên
-                    </span>
-                    <span class="filter-option-count">193</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="radio" name="rating" value="any" checked>
-                      <span class="radiomark"></span>
-                    </div>
-                    <span class="filter-option-label">Tất cả đánh giá</span>
-                    <span class="filter-option-count">215</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Time Filter -->
-            <div class="filter-section">
-              <div class="filter-header">
-                <h3 class="filter-title">Thời gian đăng</h3>
-                <i class="fas fa-chevron-down filter-toggle"></i>
-              </div>
-              <div class="filter-body">
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="radio" name="time" value="week">
-                      <span class="radiomark"></span>
-                    </div>
-                    <span class="filter-option-label">7 ngày qua</span>
-                    <span class="filter-option-count">23</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="radio" name="time" value="month">
-                      <span class="radiomark"></span>
-                    </div>
-                    <span class="filter-option-label">30 ngày qua</span>
-                    <span class="filter-option-count">87</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="radio" name="time" value="year">
-                      <span class="radiomark"></span>
-                    </div>
-                    <span class="filter-option-label">1 năm qua</span>
-                    <span class="filter-option-count">156</span>
-                  </label>
-                  <label class="filter-option">
-                    <div class="filter-checkbox">
-                      <input type="radio" name="time" value="any" checked>
-                      <span class="radiomark"></span>
-                    </div>
-                    <span class="filter-option-label">Mọi lúc</span>
-                    <span class="filter-option-count">215</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Filter Actions -->
-            <div class="filter-actions">
-              <button id="applyFilters" class="filter-apply-btn">
-                <i class="fas fa-filter"></i> Áp dụng bộ lọc
-              </button>
-              <button id="resetFilters" class="filter-reset-btn">
-                <i class="fas fa-undo"></i> Đặt lại bộ lọc
-              </button>
-            </div>
+            </form>
           </div>
-          
-          <!-- Search Results Container -->
+
           <div class="search-results-container">
             <div id="searchResults" class="search-results grid-view">
-              <!-- Result Item 1 -->
-              <div class="search-result-card">
+              <div th:each="doc : ${searchResults.content}" class="search-result-card">
                 <div class="result-thumbnail">
-                  <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="React document thumbnail">
+                  <img
+                    src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                    alt="Thumbnail">
                   <div class="result-badge premium">
-                    <i class="fas fa-coins"></i> 25.000 đ
+                    <i class="fas fa-coins"></i> <span th:text="${doc.price} + ' xu'">25 xu</span>
                   </div>
                 </div>
-                
+
                 <div class="result-content">
                   <div class="result-category">
-                    <i class="fas fa-folder"></i> Công nghệ thông tin
+                    <i class="fas fa-folder"></i>
+                    <span th:each="docCat, iterStat : ${doc.documentCategories}">
+                      <span th:text="${docCat.category.name}">Công nghệ thông tin</span>
+                      <span th:if="${!iterStat.last}">, </span>
+                    </span>
+
                     <span class="result-format pdf">
                       <i class="fas fa-file-pdf"></i> PDF
                     </span>
                   </div>
-                  
                   <h3 class="result-title">
-                    <a href="document-detail.html">Lập trình ứng dụng web với React và NodeJS: Từ cơ bản đến nâng cao</a>
+                    <a th:href="@{/documents/{id}(id=${doc.id})}" th:text="${doc.title}">
+                      Tên tài liệu
+                    </a>
                   </h3>
-                  
-                  <p class="result-description">
-                    Giới thiệu tổng quan về React, NodeJS và cách xây dựng ứng dụng web full-stack hiện đại. Khám phá các khái niệm cơ bản và nâng cao trong phát triển ứng dụng web.
+
+                  <p class="result-description" th:text="${doc.description}">
+                    Mô tả ngắn của tài liệu
                   </p>
-                  
+
                   <div class="result-meta">
                     <div class="meta-author">
-                      <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Author avatar">
+                      <img
+                        src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        alt="Author avatar">
                       <span>Nguyễn Văn A</span>
                     </div>
-                    
                     <div class="meta-stats">
                       <div class="stat-item rating">
-                        <i class="fas fa-star"></i> 4.8
+                        <i class="fas fa-star"></i>
+                        <span th:text="${doc.rating}">4.8</span>
+                      </div>
+
+                      <div class="stat-item">
+                        <i class="fas fa-download"></i> <span th:text="${doc.downloadsCount}">875</span>
                       </div>
                       <div class="stat-item">
-                        <i class="fas fa-download"></i> 875
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-eye"></i> 3.2k
+                        <i class="fas fa-eye"></i> <span th:text="${doc.viewsCount}">3.2k</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="result-actions">
-                  <div class="result-price">25 xu</div>
+                  <div class="result-price" th:text="${doc.price + ' xu'}">25 xu</div>
                   <div class="action-buttons">
-                    <a href="document-detail.html" class="result-download-btn">
-                      <i class="fas fa-download"></i> Tải xuống
-                    </a>
-                    <button class="result-bookmark-btn">
-                      <i class="far fa-bookmark"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Result Item 2 -->
-              <div class="search-result-card">
-                <div class="result-thumbnail">
-                  <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="React Native document thumbnail">
-                  <div class="result-badge free">
-                    <i class="fas fa-gift"></i> Miễn phí
-                  </div>
-                </div>
-                
-                <div class="result-content">
-                  <div class="result-category">
-                    <i class="fas fa-folder"></i> Công nghệ thông tin
-                    <span class="result-format doc">
-                      <i class="fas fa-file-word"></i> DOC
-                    </span>
-                  </div>
-                  
-                  <h3 class="result-title">
-                    <a href="document-detail.html">React Native: Xây dựng ứng dụng di động đa nền tảng</a>
-                  </h3>
-                  
-                  <p class="result-description">
-                    Hướng dẫn toàn diện về React Native, từ cấu hình môi trường đến triển khai ứng dụng. Bao gồm các kỹ thuật để tạo giao diện người dùng đẹp mắt và tối ưu hiệu suất.
-                  </p>
-                  
-                  <div class="result-meta">
-                    <div class="meta-author">
-                      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Author avatar">
-                      <span>Trần Văn B</span>
-                    </div>
-                    
-                    <div class="meta-stats">
-                      <div class="stat-item rating">
-                        <i class="fas fa-star"></i> 4.6
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-download"></i> 1.2k
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-eye"></i> 4.5k
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="result-actions">
-                  <div class="result-price price-free">Miễn phí</div>
-                  <div class="action-buttons">
-                    <a href="document-detail.html" class="result-download-btn">
-                      <i class="fas fa-download"></i> Tải xuống
-                    </a>
-                    <button class="result-bookmark-btn active">
-                      <i class="fas fa-bookmark"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Result Item 3 -->
-              <div class="search-result-card">
-                <div class="result-thumbnail">
-                  <img src="https://images.unsplash.com/photo-1579403124614-197f69d8187b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Redux document thumbnail">
-                  <div class="result-badge premium">
-                    <i class="fas fa-coins"></i> 15
-                  </div>
-                </div>
-                
-                <div class="result-content">
-                  <div class="result-category">
-                    <i class="fas fa-folder"></i> Công nghệ thông tin
-                    <span class="result-format ppt">
-                      <i class="fas fa-file-powerpoint"></i> PPT
-                    </span>
-                  </div>
-                  
-                  <h3 class="result-title">
-                    <a href="document-detail.html">Redux và State Management trong React</a>
-                  </h3>
-                  
-                  <p class="result-description">
-                    Tìm hiểu về quản lý trạng thái trong React với Redux. Bài giảng bao gồm các khái niệm cơ bản, kiến trúc Flux, và các pattern phổ biến trong Redux.
-                  </p>
-                  
-                  <div class="result-meta">
-                    <div class="meta-author">
-                      <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Author avatar">
-                      <span>Lê Thị C</span>
-                    </div>
-                    
-                    <div class="meta-stats">
-                      <div class="stat-item rating">
-                        <i class="fas fa-star"></i> 4.7
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-download"></i> 635
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-eye"></i> 2.1k
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="result-actions">
-                  <div class="result-price">15 xu</div>
-                  <div class="action-buttons">
-                    <a href="document-detail.html" class="result-download-btn">
-                      <i class="fas fa-download"></i> Tải xuống
-                    </a>
-                    <button class="result-bookmark-btn">
-                      <i class="far fa-bookmark"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Result Item 4 -->
-              <div class="search-result-card">
-                <div class="result-thumbnail">
-                  <img src="https://images.unsplash.com/photo-1555952517-2e8e729e0b44?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="React Hooks document thumbnail">
-                  <div class="result-badge free">
-                    <i class="fas fa-gift"></i> Miễn phí
-                  </div>
-                </div>
-                
-                <div class="result-content">
-                  <div class="result-category">
-                    <i class="fas fa-folder"></i> Công nghệ thông tin
-                    <span class="result-format pdf">
-                      <i class="fas fa-file-pdf"></i> PDF
-                    </span>
-                  </div>
-                  
-                  <h3 class="result-title">
-                    <a href="document-detail.html">React Hooks: Hướng dẫn toàn diện</a>
-                  </h3>
-                  
-                  <p class="result-description">
-                    Khám phá sức mạnh của React Hooks để viết code React gọn gàng và dễ bảo trì hơn. Hướng dẫn đầy đủ từ useState, useEffect đến các hook tùy chỉnh và mẹo tối ưu hóa.
-                  </p>
-                  
-                  <div class="result-meta">
-                    <div class="meta-author">
-                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Author avatar">
-                      <span>Phạm Văn D</span>
-                    </div>
-                    
-                    <div class="meta-stats">
-                      <div class="stat-item rating">
-                        <i class="fas fa-star"></i> 4.9
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-download"></i> 2.1k
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-eye"></i> 5.7k
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="result-actions">
-                  <div class="result-price price-free">Miễn phí</div>
-                  <div class="action-buttons">
-                    <a href="document-detail.html" class="result-download-btn">
-                      <i class="fas fa-download"></i> Tải xuống
-                    </a>
-                    <button class="result-bookmark-btn">
-                      <i class="far fa-bookmark"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Result Item 5 -->
-              <div class="search-result-card">
-                <div class="result-thumbnail">
-                  <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="React Performance document thumbnail">
-                  <div class="result-badge premium">
-                    <i class="fas fa-coins"></i> 30
-                  </div>
-                </div>
-                
-                <div class="result-content">
-                  <div class="result-category">
-                    <i class="fas fa-folder"></i> Công nghệ thông tin
-                    <span class="result-format pdf">
-                      <i class="fas fa-file-pdf"></i> PDF
-                    </span>
-                  </div>
-                  
-                  <h3 class="result-title">
-                    <a href="document-detail.html">Tối ưu hiệu suất cho ứng dụng React quy mô lớn</a>
-                  </h3>
-                  
-                  <p class="result-description">
-                    Các kỹ thuật để cải thiện hiệu suất của ứng dụng React quy mô lớn. Bao gồm memo, useMemo, useCallback, Code Splitting, và chiến lược tối ưu hóa render.
-                  </p>
-                  
-                  <div class="result-meta">
-                    <div class="meta-author">
-                      <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Author avatar">
-                      <span>Vũ Thị E</span>
-                    </div>
-                    
-                    <div class="meta-stats">
-                      <div class="stat-item rating">
-                        <i class="fas fa-star"></i> 4.8
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-download"></i> 542
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-eye"></i> 1.9k
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="result-actions">
-                  <div class="result-price">30 xu</div>
-                  <div class="action-buttons">
-                    <a href="document-detail.html" class="result-download-btn">
-                      <i class="fas fa-download"></i> Tải xuống
-                    </a>
-                    <button class="result-bookmark-btn">
-                      <i class="far fa-bookmark"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Result Item 6 -->
-              <div class="search-result-card">
-                <div class="result-thumbnail">
-                  <img src="https://images.unsplash.com/photo-1593642532973-d31b6557fa68?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="NextJS document thumbnail">
-                  <div class="result-badge premium">
-                    <i class="fas fa-coins"></i> 20
-                  </div>
-                </div>
-                
-                <div class="result-content">
-                  <div class="result-category">
-                    <i class="fas fa-folder"></i> Công nghệ thông tin
-                    <span class="result-format xls">
-                      <i class="fas fa-file-excel"></i> XLS
-                    </span>
-                  </div>
-                  
-                  <h3 class="result-title">
-                    <a href="document-detail.html">NextJS và Server-Side Rendering với React</a>
-                  </h3>
-                  
-                  <p class="result-description">
-                    Hướng dẫn xây dựng ứng dụng React hiệu suất cao với NextJS. Chi tiết về SSR, SSG, ISR và các pattern phổ biến trong phát triển ứng dụng web hiện đại.
-                  </p>
-                  
-                  <div class="result-meta">
-                    <div class="meta-author">
-                      <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Author avatar">
-                      <span>Đặng Văn F</span>
-                    </div>
-                    
-                    <div class="meta-stats">
-                      <div class="stat-item rating">
-                        <i class="fas fa-star"></i> 4.7
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-download"></i> 789
-                      </div>
-                      <div class="stat-item">
-                        <i class="fas fa-eye"></i> 2.5k
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="result-actions">
-                  <div class="result-price">20 xu</div>
-                  <div class="action-buttons">
-                    <a href="document-detail.html" class="result-download-btn">
+                    <a th:href="@{/documents/{id}(id=${doc.id})}" class="result-download-btn">
                       <i class="fas fa-download"></i> Tải xuống
                     </a>
                     <button class="result-bookmark-btn">
@@ -739,63 +429,32 @@
                 </div>
               </div>
             </div>
-            
-            <!-- Pagination -->
-            <div class="search-pagination">
-              <ul class="pagination-list">
-                <li class="pagination-item disabled">
-                  <a href="#" aria-label="Previous">
-                    <i class="fas fa-chevron-left"></i>
-                  </a>
-                </li>
-                <li class="pagination-item active">
-                  <a href="#">1</a>
-                </li>
-                <li class="pagination-item">
-                  <a href="#">2</a>
-                </li>
-                <li class="pagination-item">
-                  <a href="#">3</a>
-                </li>
-                <li class="pagination-item">
-                  <a href="#">4</a>
-                </li>
-                <li class="pagination-item">
-                  <a href="#">5</a>
-                </li>
-                <li class="pagination-item">
-                  <a href="#" aria-label="Next">
-                    <i class="fas fa-chevron-right"></i>
-                  </a>
-                </li>
-              </ul>
-            </div>
+
           </div>
         </div>
-      </div>
     </section>
-    
+
     <!-- Related Searches Section -->
     <section class="related-searches">
       <div class="container">
         <h2 class="related-searches-title">Tìm kiếm liên quan</h2>
         <div class="related-searches-list">
-          <a href="search.html?q=React%20Native" class="related-search-item">
+          <a th:href="@{/search(q='React Native')}" class="related-search-item">
             <i class="fas fa-search"></i> React Native
           </a>
-          <a href="search.html?q=ReactJS%20Tutorial" class="related-search-item">
+          <a th:href="@{/search(q='ReactJS Tutorial')}" class="related-search-item">
             <i class="fas fa-search"></i> ReactJS Tutorial
           </a>
-          <a href="search.html?q=React%20Hooks" class="related-search-item">
+          <a th:href="@{/search(q='React Hooks')}" class="related-search-item">
             <i class="fas fa-search"></i> React Hooks
           </a>
-          <a href="search.html?q=Redux" class="related-search-item">
+          <a th:href="@{/search(q='Redux')}" class="related-search-item">
             <i class="fas fa-search"></i> Redux
           </a>
-          <a href="search.html?q=NextJS" class="related-search-item">
+          <a th:href="@{/search(q='NextJS')}" class="related-search-item">
             <i class="fas fa-search"></i> NextJS
           </a>
-          <a href="search.html?q=Frontend%20Development" class="related-search-item">
+          <a th:href="@{/search(q='Frontend Development')}" class="related-search-item">
             <i class="fas fa-search"></i> Frontend Development
           </a>
         </div>
@@ -810,9 +469,10 @@
   <button id="backToTop" class="back-to-top">
     <i class="fas fa-arrow-up"></i>
   </button>
-  
+
   <script th:src="@{/js/main.js}"></script>
   <script th:src="@{/js/search.js}"></script>
   <script th:src="@{/js/client-header.js}"></script>
 </body>
+
 </html>

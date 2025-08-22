@@ -22,7 +22,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     Optional<Document> findFirstByDeletedAtIsNull();
 	List<Document> findTop5ByDeletedAtIsNullOrderByCreatedAtDesc();
 	long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
-	
+	Page<Document> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 	List<Document> findByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 
     long countByStatus(String status);
@@ -68,4 +68,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.transaction.annotation.Transactional
     int incrementDownloadCount(@Param("documentId") Long documentId);
+
+    @Query("SELECT d FROM Document d WHERE (:q IS NULL OR LOWER(d.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(d.description) LIKE LOWER(CONCAT('%', :q, '%')))")
+    Page<Document> findByKeyword(@Param("q") String q, Pageable pageable);
 }

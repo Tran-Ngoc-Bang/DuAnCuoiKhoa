@@ -922,36 +922,36 @@ public class DataInitializer implements CommandLineRunner {
 
                 // Tạo comments cho các documents
                 String[][] commentData = {
-                                { "Tài liệu rất hữu ích, cảm ơn tác giả!", "active", "user1" },
-                                { "Nội dung chi tiết và dễ hiểu, 5 sao!", "active", "user2" },
-                                { "Có thể bổ sung thêm ví dụ thực tế không?", "active", "user1" },
-                                { "Đây là tài liệu tốt nhất về chủ đề này mà tôi từng đọc", "active", "user2" },
-                                { "Cảm ơn bạn đã chia sẻ kiến thức quý báu", "active", "admin" },
-                                { "Rất bổ ích cho người mới bắt đầu như tôi", "active", "user1" },
-                                { "Có thể cập nhật thêm phần về best practices không?", "active", "user2" },
-                                { "Tài liệu viết rất chuyên nghiệp và dễ theo dõi", "active", "admin" },
-                                { "Mình đã áp dụng thành công theo hướng dẫn này", "active", "user1" },
-                                { "Chất lượng tuyệt vời, đáng giá từng xu!", "active", "user2" },
-                                { "Có thể làm thêm video hướng dẫn không?", "active", "user1" },
-                                { "Phần code example rất hay và thực tế", "active", "admin" },
-                                { "Tài liệu này giúp tôi hiểu rõ hơn về chủ đề", "active", "user2" },
-                                { "Cảm ơn tác giả, mong có thêm nhiều tài liệu hay", "active", "user1" },
-                                { "Nội dung cập nhật và theo kịp xu hướng", "active", "admin" },
-                                { "Giải thích rất rõ ràng, dễ hiểu", "active", "user2" },
-                                { "Tôi sẽ recommend tài liệu này cho bạn bè", "active", "user1" },
-                                { "Phần troubleshooting rất hữu ích", "active", "admin" },
-                                { "Đây là investment tốt cho việc học", "active", "user2" },
-                                { "Cảm ơn vì đã chia sẻ kinh nghiệm thực tế", "active", "user1" },
-                                { "Tài liệu được tổ chức rất logic và khoa học", "active", "admin" },
-                                { "Mình đã bookmark để tham khảo lại", "active", "user2" },
-                                { "Có thể thêm phần FAQ không?", "active", "user1" },
-                                { "Chất lượng nội dung rất cao", "active", "admin" },
-                                { "Đọc xong cảm thấy tự tin hơn nhiều", "active", "user2" },
-                                { "Tác giả có kinh nghiệm thực tế rất tốt", "active", "user1" },
-                                { "Tài liệu này đáng để đầu tư", "active", "admin" },
-                                { "Nội dung được cập nhật thường xuyên", "active", "user2" },
-                                { "Rất chi tiết và đầy đủ thông tin", "active", "user1" },
-                                { "Cảm ơn vì tài liệu miễn phí chất lượng cao", "active", "admin" }
+                                { "Tài liệu rất hữu ích, cảm ơn tác giả!", "active", "user1", "5" },
+                                { "Nội dung chi tiết và dễ hiểu, 5 sao!", "active", "user2", "5" },
+                                { "Có thể bổ sung thêm ví dụ thực tế không?", "active", "user1", "4" },
+                                { "Đây là tài liệu tốt nhất về chủ đề này mà tôi từng đọc", "active", "user2", "5" },
+                                { "Cảm ơn bạn đã chia sẻ kiến thức quý báu", "active", "admin", "4" },
+                                { "Rất bổ ích cho người mới bắt đầu như tôi", "active", "user1", "3" },
+                                { "Có thể cập nhật thêm phần về best practices không?", "active", "user2", "4" },
+                                { "Tài liệu viết rất chuyên nghiệp và dễ theo dõi", "active", "admin", "5" },
+                                { "Mình đã áp dụng thành công theo hướng dẫn này", "active", "user1", "5" },
+                                { "Chất lượng tuyệt vời, đáng giá từng xu!", "active", "user2", "5" },
+                                { "Có thể làm thêm video hướng dẫn không?", "active", "user1", "3" },
+                                { "Phần code example rất hay và thực tế", "active", "admin", "5" },
+                                { "Tài liệu này giúp tôi hiểu rõ hơn về chủ đề", "active", "user2", "4" },
+                                { "Cảm ơn tác giả, mong có thêm nhiều tài liệu hay", "active", "user1", "5" },
+                                { "Nội dung cập nhật và theo kịp xu hướng", "active", "admin", "4" },
+                                { "Giải thích rất rõ ràng, dễ hiểu", "active", "user2", "4" },
+                                { "Tôi sẽ recommend tài liệu này cho bạn bè", "active", "user1", "5" },
+                                { "Phần troubleshooting rất hữu ích", "active", "admin", "5" },
+                                { "Đây là investment tốt cho việc học", "active", "user2", "4" },
+                                { "Cảm ơn vì đã chia sẻ kinh nghiệm thực tế", "active", "user1", "3" },
+                                { "Tài liệu được tổ chức rất logic và khoa học", "active", "admin", "5" },
+                                { "Mình đã bookmark để tham khảo lại", "active", "user2", "4" },
+                                { "Có thể thêm phần FAQ không?", "active", "user1", "3" },
+                                { "Chất lượng nội dung rất cao", "active", "admin", "5" },
+                                { "Đọc xong cảm thấy tự tin hơn nhiều", "active", "user2", "4" },
+                                { "Tác giả có kinh nghiệm thực tế rất tốt", "active", "user1", "5" },
+                                { "Tài liệu này đáng để đầu tư", "active", "admin", "5" },
+                                { "Nội dung được cập nhật thường xuyên", "active", "user2", "4" },
+                                { "Rất chi tiết và đầy đủ thông tin", "active", "user1", "5" },
+                                { "Cảm ơn vì tài liệu miễn phí chất lượng cao", "active", "admin", "5" }
                 };
 
                 // Tạo comments ngẫu nhiên cho các documents
@@ -961,16 +961,18 @@ public class DataInitializer implements CommandLineRunner {
                         String content = data[0];
                         String status = data[1];
                         String username = data[2];
+                        Integer rating = Integer.parseInt(data[3]);
 
                         User commenter = "admin".equals(username) ? admin : "user1".equals(username) ? user1 : user2;
 
                         if (commenter != null) {
-                                createComment(document, commenter, content, status);
+                                createComment(document, commenter, content, status, rating);
                         }
                 }
+
         }
 
-        private void createComment(Document document, User user, String content, String status) {
+        private void createComment(Document document, User user, String content, String status, Integer rating) {
                 Comment comment = new Comment();
                 comment.setDocument(document);
                 comment.setUser(user);
@@ -979,6 +981,7 @@ public class DataInitializer implements CommandLineRunner {
                 comment.setCreatedAt(LocalDateTime.now().minusDays((long) (Math.random() * 30))); // Random date within
                                                                                                   // last 30 days
                 comment.setUpdatedAt(comment.getCreatedAt());
+                comment.setRating(rating);
                 commentRepository.save(comment);
         }
 
@@ -989,6 +992,7 @@ public class DataInitializer implements CommandLineRunner {
                 reply.setContent(content);
                 reply.setStatus("active");
                 reply.setCreatedAt(now);
+                reply.setUpdatedAt(now);
                 reply.setUpdatedAt(now);
                 return reply;
         }
