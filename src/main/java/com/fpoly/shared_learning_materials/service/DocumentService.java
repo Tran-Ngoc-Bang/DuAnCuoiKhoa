@@ -72,17 +72,17 @@ public class DocumentService {
     }
 
     // Export all documents as JSON string for backup
-    
+
     // Import documents from backup file
-    
 
     // Helper method to escape JSON strings
     private String escapeJson(String str) {
-        if (str == null) return "";
+        if (str == null)
+            return "";
         return str.replace("\"", "\\\"")
-                  .replace("\n", "\\n")
-                  .replace("\r", "\\r")
-                  .replace("\t", "\\t");
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 
     // Get document by ID
@@ -367,7 +367,7 @@ public class DocumentService {
                 System.out.println("Deleted document category: " + dc.getId());
             }
             System.out.println("Step 1: Completed - Categories deleted");
-            
+
             System.out.println("Step 2: Finding and deleting document tags...");
             // Tìm và xóa các liên kết với tags bằng JPA
             List<DocumentTag> documentTags = documentTagRepository.findByDocumentId(id);
@@ -377,7 +377,7 @@ public class DocumentService {
                 System.out.println("Deleted document tag: " + dt.getId());
             }
             System.out.println("Step 2: Completed - Tags deleted");
-            
+
             System.out.println("Step 3: Deleting document owners...");
             // Xóa document owners
             List<DocumentOwner> documentOwners = documentOwnerRepository.findByDocumentId(id);
@@ -387,24 +387,24 @@ public class DocumentService {
                 System.out.println("Deleted document owner: " + owner.getId());
             }
             System.out.println("Step 3: Completed - Document owners deleted");
-            
+
             System.out.println("Step 4: Deleting comments...");
             // Xóa comments liên quan (tất cả status)
-            List<Comment> comments = commentRepository.findByDocumentIdAndStatusIn(id, 
-                Arrays.asList("APPROVED", "PENDING", "REJECTED"), PageRequest.of(0, 1000)).getContent();
+            List<Comment> comments = commentRepository.findByDocumentIdAndStatusIn(id,
+                    Arrays.asList("APPROVED", "PENDING", "REJECTED"), PageRequest.of(0, 1000)).getContent();
             System.out.println("Found " + comments.size() + " comments to delete");
             for (Comment comment : comments) {
                 commentRepository.delete(comment);
                 System.out.println("Deleted comment: " + comment.getId());
             }
             System.out.println("Step 4: Completed - Comments deleted");
-            
+
             System.out.println("Step 5: Deleting reports...");
             // Xóa reports liên quan - tìm và xóa thủ công
             try {
                 List<Report> reports = reportRepository.findAll().stream()
-                    .filter(r -> r.getDocument() != null && r.getDocument().getId().equals(id))
-                    .collect(Collectors.toList());
+                        .filter(r -> r.getDocument() != null && r.getDocument().getId().equals(id))
+                        .collect(Collectors.toList());
                 System.out.println("Found " + reports.size() + " reports to delete");
                 for (Report report : reports) {
                     reportRepository.delete(report);
@@ -414,29 +414,32 @@ public class DocumentService {
             } catch (Exception e) {
                 System.out.println("Step 5: No reports to delete or error: " + e.getMessage());
             }
-            
+
             // Xóa file vật lý nếu có
-            if (document.getFile() != null && document.getFile().getFilePath() != null && !document.getFile().getFilePath().isEmpty()) {
+            if (document.getFile() != null && document.getFile().getFilePath() != null
+                    && !document.getFile().getFilePath().isEmpty()) {
                 try {
                     System.out.println("Step 6: Deleting physical file...");
                     fileService.deleteFile(document.getFile().getFilePath());
-                    System.out.println("Step 6: Completed - Physical file deleted: " + document.getFile().getFilePath());
+                    System.out
+                            .println("Step 6: Completed - Physical file deleted: " + document.getFile().getFilePath());
                 } catch (Exception e) {
                     System.err.println("Warning: Could not delete physical file: " + e.getMessage());
-                    // Không throw exception vì việc xóa file có thể thất bại nhưng vẫn muốn xóa record
+                    // Không throw exception vì việc xóa file có thể thất bại nhưng vẫn muốn xóa
+                    // record
                 }
             }
-            
+
             System.out.println("Step 7: Deleting document from database...");
             System.out.println("Document ID before delete: " + document.getId());
             System.out.println("Document title before delete: " + document.getTitle());
-            
+
             // Xóa document khỏi database
             documentRepository.delete(document);
             documentRepository.flush();
-            
+
             System.out.println("Step 7: Completed - Document deleted from database");
-            
+
             // Kiểm tra xem document có còn tồn tại không
             Optional<Document> checkDocument = documentRepository.findById(id);
             if (checkDocument.isPresent()) {
@@ -445,7 +448,7 @@ public class DocumentService {
             } else {
                 System.out.println("VERIFIED: Document successfully deleted from database");
             }
-            
+
             System.out.println("Transaction completed - Document permanently deleted successfully");
         } catch (Exception e) {
             System.err.println("Error during permanent document deletion: " + e.getMessage());
@@ -522,7 +525,8 @@ public class DocumentService {
 
         // Apply filters to the list (sử dụng cùng logic filter như active documents)
         List<DocumentDTO> filteredList = allDtoList.stream()
-                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,dateTo, size, views))
+                .filter(dto -> applyFilters(dto, search, status, categoryId, type, price, author, tags, dateFrom,
+                        dateTo, size, views))
                 .collect(Collectors.toList());
 
         System.out.println(
@@ -1690,5 +1694,37 @@ public class DocumentService {
         }
 
         return score;
+    }
+
+    // Get featured documents for homepage
+    public List<DocumentDTO> getFeaturedDocuments(int limit) {
+        try {
+            System.out.println("=== GET FEATURED DOCUMENTS ===");
+            System.out.println("Limit: " + limit);
+
+            // Create simple Pageable without sorting since we'll use @Query with custom
+            // ORDER BY
+            PageRequest pageRequest = PageRequest.of(0, limit);
+
+            // Get documents with status APPROVED and not deleted
+            Page<Document> featuredDocuments = documentRepository.findFeaturedDocuments("APPROVED", pageRequest);
+
+            List<DocumentDTO> dtoList = featuredDocuments.getContent().stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+            // Set additional fields for each DTO
+            for (DocumentDTO dto : dtoList) {
+                setAdditionalFields(dto);
+            }
+
+            System.out.println("Found " + dtoList.size() + " featured documents");
+            return dtoList;
+
+        } catch (Exception e) {
+            System.err.println("Error getting featured documents: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

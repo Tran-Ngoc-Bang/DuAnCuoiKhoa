@@ -13,6 +13,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.Map;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -64,10 +68,16 @@ public class DataInitializer implements CommandLineRunner {
 
         @Override
         public void run(String... args) throws Exception {
+                // Log thông tin về dữ liệu hiện tại
+                logCurrentDataStatus();
+
+                // Xóa categories duplicate trước khi tạo dữ liệu mới
+                cleanupDuplicateCategories();
+
                 // Initialize sample data
                 if (!userRepository.existsByUsernameAndDeletedAtIsNull("admin")) {
                         createSampleUsers();
-                        System.out.println("Sample users created successfully!");
+                        // System.out.println("Sample users created successfully!");
                 } else {
                         // System.out.println("Sample users already exist, skipping user
                         // initialization.");
@@ -75,7 +85,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 if (!coinPackageRepository.existsByCodeAndDeletedAtIsNull("CP001")) {
                         createSampleCoinPackages();
-                        System.out.println("Sample coin packages created successfully!");
+                        // System.out.println("Sample coin packages created successfully!");
                 } else {
                         // System.out.println("Sample coin packages already exist, skipping package
                         // initialization.");
@@ -83,7 +93,8 @@ public class DataInitializer implements CommandLineRunner {
 
                 if (!transactionRepository.existsByCodeAndDeletedAtIsNull("TXN000001")) {
                         createSampleTransactions();
-                        System.out.println("Sample transactions and withdrawals created successfully!");
+                        // System.out.println("Sample transactions and withdrawals created
+                        // successfully!");
                 } else {
                         // System.out.println("Sample transactions already exist, skipping transaction
                         // initialization.");
@@ -104,24 +115,24 @@ public class DataInitializer implements CommandLineRunner {
 
                         if (user1 != null && user2 != null) {
                                 createSampleWithdrawals(user1, user2, user3, user4, user5, contributor1, contributor2);
-                                System.out.println("Sample withdrawals created successfully!");
+                                // System.out.println("Sample withdrawals created successfully!");
                         }
                 } else {
                         // System.out.println("Sample withdrawals already exist, skipping withdrawal
                         // initialization.");
                 }
 
-                if (!categoryRepository.existsByNameAndDeletedAtIsNull("Công nghệ")) {
+                // Kiểm tra xem có categories nào chưa
+                if (categoryRepository.count() == 0) {
                         createSampleCategories();
                         System.out.println("Sample categories created successfully!");
                 } else {
-                        // System.out.println("Sample categories already exist, skipping category
-                        // initialization.");
+                        System.out.println("Categories already exist, skipping category initialization.");
                 }
 
                 if (!tagRepository.existsByName("beginner")) {
                         createSampleTags();
-                        System.out.println("Sample tags created successfully!");
+                        // System.out.println("Sample tags created successfully!");
                 } else {
                         // System.out.println("Sample tags already exist, skipping tag
                         // initialization.");
@@ -129,7 +140,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 if (!documentRepository.existsBySlug("java-programming-guide")) {
                         createSampleDocuments();
-                        System.out.println("Sample documents created successfully!");
+                        // System.out.println("Sample documents created successfully!");
                 } else {
                         // System.out.println("Sample documents already exist, skipping document
                         // initialization.");
@@ -137,7 +148,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 if (commentRepository.count() == 0) {
                         createSampleComments();
-                        System.out.println("Sample comments created successfully!");
+                        // System.out.println("Sample comments created successfully!");
                 } else {
                         // System.out.println("Sample comments already exist, skipping comment
                         // initialization.");
@@ -145,7 +156,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 if (replyRepository.count() == 0) {
                         createSampleReplies();
-                        System.out.println("Sample replies created successfully!");
+                        // System.out.println("Sample replies created successfully!");
                 } else {
                         // System.out.println("Sample replies already exist, skipping reply
                         // initialization.");
@@ -153,12 +164,75 @@ public class DataInitializer implements CommandLineRunner {
 
                 if (reportRepository.count() == 0) {
                         createSampleReports();
-                        System.out.println("Sample reports created successfully!");
+                        // System.out.println("Sample reports created successfully!");
                 } else {
                         // System.out.println("Sample reports already exist, skipping comment
                         // initialization.");
                 }
 
+                // Tạo dữ liệu mẫu cho tags và document-tag relationships để test popular tags
+                // Chỉ tạo nếu chưa có document-tag relationships
+                if (documentTagRepository.count() == 0) {
+                        createSampleTagsAndRelationships();
+                } else {
+                        System.out.println("Document-tag relationships already exist, skipping creation");
+                }
+        }
+
+        /**
+         * Xóa categories duplicate để tránh lỗi
+         */
+        private void cleanupDuplicateCategories() {
+                System.out.println("=== CLEANING UP DUPLICATE CATEGORIES ===");
+
+                List<Category> allCategories = categoryRepository.findAll();
+                Map<String, List<Category>> nameGroups = allCategories.stream()
+                                .collect(Collectors.groupingBy(Category::getName));
+
+                int deletedCount = 0;
+                for (Map.Entry<String, List<Category>> entry : nameGroups.entrySet()) {
+                        String name = entry.getKey();
+                        List<Category> categories = entry.getValue();
+
+                        if (categories.size() > 1) {
+                                System.out.println(
+                                                "Found " + categories.size() + " categories with name: '" + name + "'");
+
+                                // Giữ lại category đầu tiên, xóa các category còn lại
+                                Category keepCategory = categories.get(0);
+                                List<Category> toDelete = categories.subList(1, categories.size());
+
+                                for (Category category : toDelete) {
+                                        System.out.println("  - Deleting category ID: " + category.getId()
+                                                        + " (created: " + category.getCreatedAt() + ")");
+                                        categoryRepository.delete(category);
+                                        deletedCount++;
+                                }
+                        }
+                }
+
+                System.out.println("Deleted " + deletedCount + " duplicate categories");
+                System.out.println("=== END CLEANUP ===");
+        }
+
+        /**
+         * Log thông tin về dữ liệu hiện tại trong database
+         */
+        private void logCurrentDataStatus() {
+                System.out.println("=== CURRENT DATA STATUS ===");
+                System.out.println("Users: " + userRepository.count());
+                System.out.println("Categories: " + categoryRepository.count());
+                System.out.println("Category Hierarchies: " + categoryHierarchyRepository.count());
+                System.out.println("Tags: " + tagRepository.count());
+                System.out.println("Documents: " + documentRepository.count());
+                System.out.println("Document-Category relationships: " + documentCategoryRepository.count());
+                System.out.println("Document-Tag relationships: " + documentTagRepository.count());
+                System.out.println("Comments: " + commentRepository.count());
+                System.out.println("Replies: " + replyRepository.count());
+                System.out.println("Reports: " + reportRepository.count());
+                System.out.println("Coin Packages: " + coinPackageRepository.count());
+                System.out.println("Transactions: " + transactionRepository.count());
+                System.out.println("=== END DATA STATUS ===");
         }
 
         private void createSampleUsers() {
@@ -511,63 +585,220 @@ public class DataInitializer implements CommandLineRunner {
         private void createSampleCategories() {
                 User admin = userRepository.findByUsernameAndDeletedAtIsNull("admin").orElse(null);
 
-                // Tạo danh mục gốc
-                Category tech = createCategory("Công nghệ", "Các tài liệu về công nghệ thông tin", admin);
-                Category education = createCategory("Giáo dục", "Tài liệu giáo dục và học tập", admin);
-                Category business = createCategory("Kinh doanh", "Tài liệu về kinh doanh và quản lý", admin);
-                createCategory("Khoa học", "Tài liệu khoa học và nghiên cứu", admin);
-                createCategory("Nghệ thuật", "Tài liệu về nghệ thuật và sáng tạo", admin);
+                // Tạo danh mục gốc - Mở rộng từ 5 lên 12 danh mục chính
+                Category tech = createCategory("Công nghệ thông tin",
+                                "Các tài liệu về công nghệ thông tin, lập trình, phần mềm", admin);
+                Category education = createCategory("Giáo dục", "Tài liệu giáo dục và học tập các cấp", admin);
+                Category business = createCategory("Kinh tế - Quản trị", "Tài liệu về kinh doanh, quản lý và tài chính",
+                                admin);
+                Category science = createCategory("Khoa học", "Tài liệu khoa học tự nhiên và nghiên cứu", admin);
+                Category arts = createCategory("Nghệ thuật", "Tài liệu về nghệ thuật và sáng tạo", admin);
+                Category language = createCategory("Ngoại ngữ", "Tài liệu học ngoại ngữ và ngôn ngữ học", admin);
+                Category engineering = createCategory("Kỹ thuật", "Tài liệu về các ngành kỹ thuật", admin);
+                Category social = createCategory("Khoa học xã hội", "Tài liệu về tâm lý, xã hội, triết học", admin);
+                Category health = createCategory("Y tế - Sức khỏe", "Tài liệu về y học và chăm sóc sức khỏe", admin);
+                Category law = createCategory("Luật pháp", "Tài liệu về luật pháp và pháp lý", admin);
+                Category agriculture = createCategory("Nông nghiệp", "Tài liệu về nông nghiệp và thủy sản", admin);
+                Category environment = createCategory("Môi trường",
+                                "Tài liệu về bảo vệ môi trường và phát triển bền vững", admin);
 
-                // Tạo danh mục con cho Công nghệ
-                Category programming = createCategory("Lập trình", "Tài liệu về lập trình", admin);
-                Category webDev = createCategory("Phát triển Web", "Tài liệu về phát triển web", admin);
-                Category mobile = createCategory("Ứng dụng di động", "Tài liệu về phát triển mobile", admin);
-                Category database = createCategory("Cơ sở dữ liệu", "Tài liệu về database", admin);
-                Category ai = createCategory("Trí tuệ nhân tạo", "Tài liệu về AI và Machine Learning", admin);
+                // === CÔNG NGHỆ THÔNG TIN ===
+                Category programming = createCategory("Lập trình", "Tài liệu về lập trình và phát triển phần mềm",
+                                admin);
+                Category webDev = createCategory("Phát triển Web", "Tài liệu về phát triển website và ứng dụng web",
+                                admin);
+                Category mobile = createCategory("Ứng dụng di động", "Tài liệu về phát triển ứng dụng mobile", admin);
+                Category database = createCategory("Cơ sở dữ liệu", "Tài liệu về database và quản lý dữ liệu", admin);
+                Category ai = createCategory("Trí tuệ nhân tạo", "Tài liệu về AI, Machine Learning và Deep Learning",
+                                admin);
+                Category cybersecurity = createCategory("An ninh mạng", "Tài liệu về bảo mật và an ninh thông tin",
+                                admin);
+                Category cloud = createCategory("Điện toán đám mây", "Tài liệu về cloud computing và DevOps", admin);
 
-                // Tạo hierarchy cho Công nghệ
                 createHierarchy(tech, programming, 1);
                 createHierarchy(tech, webDev, 1);
                 createHierarchy(tech, mobile, 1);
                 createHierarchy(tech, database, 1);
                 createHierarchy(tech, ai, 1);
+                createHierarchy(tech, cybersecurity, 1);
+                createHierarchy(tech, cloud, 1);
 
-                // Tạo danh mục con cho Lập trình
-                Category java = createCategory("Java", "Tài liệu về ngôn ngữ Java", admin);
-                Category python = createCategory("Python", "Tài liệu về ngôn ngữ Python", admin);
-                Category javascript = createCategory("JavaScript", "Tài liệu về JavaScript", admin);
-                Category csharp = createCategory("C#", "Tài liệu về C#", admin);
+                // Danh mục con của Lập trình
+                Category java = createCategory("Java", "Tài liệu về ngôn ngữ lập trình Java", admin);
+                Category python = createCategory("Python", "Tài liệu về ngôn ngữ lập trình Python", admin);
+                Category javascript = createCategory("JavaScript", "Tài liệu về JavaScript và TypeScript", admin);
+                Category csharp = createCategory("C#", "Tài liệu về ngôn ngữ C# và .NET", admin);
+                Category cpp = createCategory("C++", "Tài liệu về ngôn ngữ C++", admin);
+                Category php = createCategory("PHP", "Tài liệu về ngôn ngữ PHP", admin);
 
                 createHierarchy(programming, java, 2);
                 createHierarchy(programming, python, 2);
                 createHierarchy(programming, javascript, 2);
                 createHierarchy(programming, csharp, 2);
+                createHierarchy(programming, cpp, 2);
+                createHierarchy(programming, php, 2);
 
-                // Tạo danh mục con cho Giáo dục
-                Category math = createCategory("Toán học", "Tài liệu toán học", admin);
-                Category physics = createCategory("Vật lý", "Tài liệu vật lý", admin);
-                Category chemistry = createCategory("Hóa học", "Tài liệu hóa học", admin);
-                Category literature = createCategory("Văn học", "Tài liệu văn học", admin);
+                // Danh mục con của Phát triển Web
+                Category frontend = createCategory("Frontend", "Tài liệu về phát triển giao diện người dùng", admin);
+                Category backend = createCategory("Backend", "Tài liệu về phát triển phía máy chủ", admin);
+                Category fullstack = createCategory("Fullstack", "Tài liệu về phát triển toàn bộ ứng dụng", admin);
+
+                createHierarchy(webDev, frontend, 2);
+                createHierarchy(webDev, backend, 2);
+                createHierarchy(webDev, fullstack, 2);
+
+                // === GIÁO DỤC ===
+                Category math = createCategory("Toán học", "Tài liệu toán học từ cơ bản đến nâng cao", admin);
+                Category physics = createCategory("Vật lý", "Tài liệu vật lý và cơ học", admin);
+                Category chemistry = createCategory("Hóa học", "Tài liệu hóa học và hóa sinh", admin);
+                Category biology = createCategory("Sinh học", "Tài liệu sinh học và y sinh", admin);
+                Category literature = createCategory("Văn học", "Tài liệu văn học và ngôn ngữ", admin);
+                Category history = createCategory("Lịch sử", "Tài liệu lịch sử và văn hóa", admin);
+                Category geography = createCategory("Địa lý", "Tài liệu địa lý và môi trường", admin);
 
                 createHierarchy(education, math, 1);
                 createHierarchy(education, physics, 1);
                 createHierarchy(education, chemistry, 1);
+                createHierarchy(education, biology, 1);
                 createHierarchy(education, literature, 1);
+                createHierarchy(education, history, 1);
+                createHierarchy(education, geography, 1);
 
-                // Tạo danh mục con cho Kinh doanh
-                Category marketing = createCategory("Marketing", "Tài liệu marketing", admin);
-                Category finance = createCategory("Tài chính", "Tài liệu tài chính", admin);
-                Category management = createCategory("Quản lý", "Tài liệu quản lý", admin);
+                // === KINH TẾ - QUẢN TRỊ ===
+                Category marketing = createCategory("Marketing", "Tài liệu marketing và quảng cáo", admin);
+                Category finance = createCategory("Tài chính", "Tài liệu tài chính và đầu tư", admin);
+                Category management = createCategory("Quản lý", "Tài liệu quản lý doanh nghiệp", admin);
+                Category accounting = createCategory("Kế toán", "Tài liệu kế toán và kiểm toán", admin);
+                Category hr = createCategory("Nhân sự", "Tài liệu quản trị nhân sự", admin);
+                Category startup = createCategory("Khởi nghiệp", "Tài liệu về startup và kinh doanh mới", admin);
 
                 createHierarchy(business, marketing, 1);
                 createHierarchy(business, finance, 1);
                 createHierarchy(business, management, 1);
+                createHierarchy(business, accounting, 1);
+                createHierarchy(business, hr, 1);
+                createHierarchy(business, startup, 1);
+
+                // === NGOẠI NGỮ ===
+                Category english = createCategory("Tiếng Anh", "Tài liệu học tiếng Anh", admin);
+                Category japanese = createCategory("Tiếng Nhật", "Tài liệu học tiếng Nhật", admin);
+                Category korean = createCategory("Tiếng Hàn", "Tài liệu học tiếng Hàn", admin);
+                Category chinese = createCategory("Tiếng Trung", "Tài liệu học tiếng Trung", admin);
+                Category french = createCategory("Tiếng Pháp", "Tài liệu học tiếng Pháp", admin);
+                Category german = createCategory("Tiếng Đức", "Tài liệu học tiếng Đức", admin);
+
+                createHierarchy(language, english, 1);
+                createHierarchy(language, japanese, 1);
+                createHierarchy(language, korean, 1);
+                createHierarchy(language, chinese, 1);
+                createHierarchy(language, french, 1);
+                createHierarchy(language, german, 1);
+
+                // === KỸ THUẬT ===
+                Category mechanical = createCategory("Cơ khí", "Tài liệu về cơ khí và chế tạo", admin);
+                Category electrical = createCategory("Điện - Điện tử", "Tài liệu về điện và điện tử", admin);
+                Category civil = createCategory("Xây dựng", "Tài liệu về xây dựng và kiến trúc", admin);
+                Category chemical = createCategory("Hóa học kỹ thuật", "Tài liệu về hóa học công nghiệp", admin);
+                Category automotive = createCategory("Ô tô", "Tài liệu về công nghệ ô tô", admin);
+
+                createHierarchy(engineering, mechanical, 1);
+                createHierarchy(engineering, electrical, 1);
+                createHierarchy(engineering, civil, 1);
+                createHierarchy(engineering, chemical, 1);
+                createHierarchy(engineering, automotive, 1);
+
+                // === KHOA HỌC XÃ HỘI ===
+                Category psychology = createCategory("Tâm lý học", "Tài liệu về tâm lý học", admin);
+                Category sociology = createCategory("Xã hội học", "Tài liệu về xã hội học", admin);
+                Category philosophy = createCategory("Triết học", "Tài liệu về triết học", admin);
+                Category politics = createCategory("Chính trị", "Tài liệu về chính trị học", admin);
+                Category economics = createCategory("Kinh tế học", "Tài liệu về kinh tế học", admin);
+
+                createHierarchy(social, psychology, 1);
+                createHierarchy(social, sociology, 1);
+                createHierarchy(social, philosophy, 1);
+                createHierarchy(social, politics, 1);
+                createHierarchy(social, economics, 1);
+
+                // === Y TẾ - SỨC KHỎE ===
+                Category medicine = createCategory("Y học", "Tài liệu về y học lâm sàng", admin);
+                Category pharmacy = createCategory("Dược học", "Tài liệu về dược phẩm", admin);
+                Category nursing = createCategory("Điều dưỡng", "Tài liệu về điều dưỡng", admin);
+                Category nutrition = createCategory("Dinh dưỡng", "Tài liệu về dinh dưỡng học", admin);
+                Category publicHealth = createCategory("Y tế công cộng", "Tài liệu về y tế cộng đồng", admin);
+
+                createHierarchy(health, medicine, 1);
+                createHierarchy(health, pharmacy, 1);
+                createHierarchy(health, nursing, 1);
+                createHierarchy(health, nutrition, 1);
+                createHierarchy(health, publicHealth, 1);
+
+                // === LUẬT PHÁP ===
+                Category civilLaw = createCategory("Luật dân sự", "Tài liệu về luật dân sự", admin);
+                Category criminalLaw = createCategory("Luật hình sự", "Tài liệu về luật hình sự", admin);
+                Category commercialLaw = createCategory("Luật thương mại", "Tài liệu về luật thương mại", admin);
+                Category internationalLaw = createCategory("Luật quốc tế", "Tài liệu về luật quốc tế", admin);
+                Category constitutionalLaw = createCategory("Luật hiến pháp", "Tài liệu về luật hiến pháp", admin);
+
+                createHierarchy(law, civilLaw, 1);
+                createHierarchy(law, criminalLaw, 1);
+                createHierarchy(law, commercialLaw, 1);
+                createHierarchy(law, internationalLaw, 1);
+                createHierarchy(law, constitutionalLaw, 1);
+
+                // === NÔNG NGHIỆP ===
+                Category cropScience = createCategory("Trồng trọt", "Tài liệu về trồng trọt", admin);
+                Category animalScience = createCategory("Chăn nuôi", "Tài liệu về chăn nuôi", admin);
+                Category aquaculture = createCategory("Thủy sản", "Tài liệu về nuôi trồng thủy sản", admin);
+                Category forestry = createCategory("Lâm nghiệp", "Tài liệu về lâm nghiệp", admin);
+                Category biotechnology = createCategory("Công nghệ sinh học",
+                                "Tài liệu về công nghệ sinh học nông nghiệp", admin);
+
+                createHierarchy(agriculture, cropScience, 1);
+                createHierarchy(agriculture, animalScience, 1);
+                createHierarchy(agriculture, aquaculture, 1);
+                createHierarchy(agriculture, forestry, 1);
+                createHierarchy(agriculture, biotechnology, 1);
+
+                // === MÔI TRƯỜNG ===
+                Category environmentalScience = createCategory("Khoa học môi trường", "Tài liệu về khoa học môi trường",
+                                admin);
+                Category climateChange = createCategory("Biến đổi khí hậu", "Tài liệu về biến đổi khí hậu", admin);
+                Category renewableEnergy = createCategory("Năng lượng tái tạo", "Tài liệu về năng lượng xanh", admin);
+                Category wasteManagement = createCategory("Quản lý chất thải", "Tài liệu về xử lý chất thải", admin);
+                Category biodiversity = createCategory("Đa dạng sinh học", "Tài liệu về bảo tồn đa dạng sinh học",
+                                admin);
+
+                createHierarchy(environment, environmentalScience, 1);
+                createHierarchy(environment, climateChange, 1);
+                createHierarchy(environment, renewableEnergy, 1);
+                createHierarchy(environment, wasteManagement, 1);
+                createHierarchy(environment, biodiversity, 1);
         }
 
         private Category createCategory(String name, String description, User createdBy) {
+                // Kiểm tra xem category đã tồn tại chưa
+                try {
+                        Category existingCategory = categoryRepository.findByNameAndDeletedAtIsNull(name).orElse(null);
+                        if (existingCategory != null) {
+                                System.out.println("Category '" + name + "' already exists, skipping creation");
+                                return existingCategory;
+                        }
+                } catch (Exception e) {
+                        // Nếu có nhiều categories cùng tên, lấy category đầu tiên chưa bị xóa
+                        System.out.println(
+                                        "Multiple categories found with name '" + name + "', using first active one");
+                        List<Category> categories = categoryRepository.findAll().stream()
+                                        .filter(cat -> name.equals(cat.getName()) && cat.getDeletedAt() == null)
+                                        .collect(Collectors.toList());
+                        if (!categories.isEmpty()) {
+                                return categories.get(0);
+                        }
+                }
+
                 Category category = new Category();
                 category.setName(name);
-                category.setSlug(SlugUtils.generateSlug(name));
+                category.setSlug(generateUniqueSlug(name));
                 category.setDescription(description);
                 category.setStatus("active");
                 category.setSortOrder(0);
@@ -577,11 +808,45 @@ public class DataInitializer implements CommandLineRunner {
                 return categoryRepository.save(category);
         }
 
+        private String generateUniqueSlug(String name) {
+                String baseSlug = SlugUtils.generateSlug(name);
+
+                // Handle special cases for programming languages
+                if ("C#".equals(name)) {
+                        baseSlug = "c-sharp";
+                } else if ("C++".equals(name)) {
+                        baseSlug = "cpp";
+                } else if ("C".equals(name)) {
+                        baseSlug = "c-language";
+                }
+
+                // Ensure uniqueness
+                String uniqueSlug = baseSlug;
+                int counter = 1;
+                while (categoryRepository.existsBySlug(uniqueSlug)) {
+                        uniqueSlug = baseSlug + "-" + counter++;
+                        if (counter > 100) {
+                                uniqueSlug = baseSlug + "-" + System.currentTimeMillis();
+                                break;
+                        }
+                }
+
+                return uniqueSlug;
+        }
+
         private void createHierarchy(Category parent, Category child, int level) {
-                CategoryHierarchy hierarchy = new CategoryHierarchy();
+                // Kiểm tra xem hierarchy đã tồn tại chưa
                 CategoryHierarchyId id = new CategoryHierarchyId();
                 id.setParentId(parent.getId());
                 id.setChildId(child.getId());
+
+                if (categoryHierarchyRepository.existsById(id)) {
+                        System.out.println("Hierarchy between '" + parent.getName() + "' and '" + child.getName()
+                                        + "' already exists, skipping creation");
+                        return;
+                }
+
+                CategoryHierarchy hierarchy = new CategoryHierarchy();
                 hierarchy.setId(id);
                 hierarchy.setParent(parent);
                 hierarchy.setChild(child);
@@ -634,7 +899,49 @@ public class DataInitializer implements CommandLineRunner {
                                 "performance:Tối ưu hiệu suất",
                                 "optimization:Tối ưu hóa",
                                 "best-practices:Thực hành tốt nhất",
-                                "free:Tài liệu miễn phí"
+                                "free:Tài liệu miễn phí",
+                                // Education tags
+                                "mathematics:Toán học",
+                                "physics:Vật lý",
+                                "chemistry:Hóa học",
+                                "biology:Sinh học",
+                                "literature:Văn học",
+                                "history:Lịch sử",
+                                "geography:Địa lý",
+                                // Business tags
+                                "marketing:Marketing",
+                                "finance:Tài chính",
+                                "management:Quản lý",
+                                "accounting:Kế toán",
+                                "startup:Khởi nghiệp",
+                                // Language tags
+                                "english:Tiếng Anh",
+                                "japanese:Tiếng Nhật",
+                                "korean:Tiếng Hàn",
+                                "chinese:Tiếng Trung",
+                                // Engineering tags
+                                "mechanical:Cơ khí",
+                                "electrical:Điện - Điện tử",
+                                "civil-engineering:Xây dựng",
+                                "automotive:Ô tô",
+                                // Social Science tags
+                                "psychology:Tâm lý học",
+                                "sociology:Xã hội học",
+                                "philosophy:Triết học",
+                                // Health tags
+                                "medicine:Y học",
+                                "pharmacy:Dược học",
+                                "nursing:Điều dưỡng",
+                                // Law tags
+                                "law:Luật pháp",
+                                // Agriculture tags
+                                "agriculture:Nông nghiệp",
+                                "animal-science:Chăn nuôi",
+                                "aquaculture:Thủy sản",
+                                // Environment tags
+                                "environmental-science:Khoa học môi trường",
+                                "climate-change:Biến đổi khí hậu",
+                                "renewable-energy:Năng lượng tái tạo"
                 };
 
                 for (String tagInfo : tagData) {
@@ -794,21 +1101,135 @@ public class DataInitializer implements CommandLineRunner {
                 Category category = null;
                 String title = document.getTitle().toLowerCase();
 
+                // Công nghệ thông tin
                 if (title.contains("java")) {
                         category = categoryRepository.findByNameAndDeletedAtIsNull("Java").orElse(null);
                 } else if (title.contains("python")) {
                         category = categoryRepository.findByNameAndDeletedAtIsNull("Python").orElse(null);
-                } else if (title.contains("javascript") || title.contains("react") || title.contains("vue")
-                                || title.contains("css")) {
+                } else if (title.contains("javascript") || title.contains("typescript")) {
                         category = categoryRepository.findByNameAndDeletedAtIsNull("JavaScript").orElse(null);
+                } else if (title.contains("c#") || title.contains("dotnet")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("C#").orElse(null);
+                } else if (title.contains("c++")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("C++").orElse(null);
+                } else if (title.contains("php")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("PHP").orElse(null);
+                } else if (title.contains("react") || title.contains("vue") || title.contains("angular")
+                                || title.contains("frontend")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Frontend").orElse(null);
+                } else if (title.contains("spring") || title.contains("express") || title.contains("backend")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Backend").orElse(null);
+                } else if (title.contains("fullstack")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Fullstack").orElse(null);
                 } else if (title.contains("web") || title.contains("node")) {
                         category = categoryRepository.findByNameAndDeletedAtIsNull("Phát triển Web").orElse(null);
-                } else if (title.contains("database") || title.contains("mongodb")) {
+                } else if (title.contains("database") || title.contains("mongodb") || title.contains("mysql")
+                                || title.contains("postgresql")) {
                         category = categoryRepository.findByNameAndDeletedAtIsNull("Cơ sở dữ liệu").orElse(null);
-                } else if (title.contains("machine learning") || title.contains("ai")) {
+                } else if (title.contains("machine learning") || title.contains("ai")
+                                || title.contains("deep learning")) {
                         category = categoryRepository.findByNameAndDeletedAtIsNull("Trí tuệ nhân tạo").orElse(null);
-                } else if (title.contains("mobile")) {
+                } else if (title.contains("mobile") || title.contains("android") || title.contains("ios")) {
                         category = categoryRepository.findByNameAndDeletedAtIsNull("Ứng dụng di động").orElse(null);
+                } else if (title.contains("security") || title.contains("cybersecurity")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("An ninh mạng").orElse(null);
+                } else if (title.contains("cloud") || title.contains("aws") || title.contains("azure")
+                                || title.contains("devops")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Điện toán đám mây").orElse(null);
+                }
+                // Giáo dục
+                else if (title.contains("toán") || title.contains("math")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Toán học").orElse(null);
+                } else if (title.contains("vật lý") || title.contains("physics")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Vật lý").orElse(null);
+                } else if (title.contains("hóa học") || title.contains("chemistry")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Hóa học").orElse(null);
+                } else if (title.contains("sinh học") || title.contains("biology")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Sinh học").orElse(null);
+                } else if (title.contains("văn học") || title.contains("literature")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Văn học").orElse(null);
+                } else if (title.contains("lịch sử") || title.contains("history")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Lịch sử").orElse(null);
+                } else if (title.contains("địa lý") || title.contains("geography")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Địa lý").orElse(null);
+                }
+                // Kinh tế - Quản trị
+                else if (title.contains("marketing")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Marketing").orElse(null);
+                } else if (title.contains("tài chính") || title.contains("finance")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tài chính").orElse(null);
+                } else if (title.contains("quản lý") || title.contains("management")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Quản lý").orElse(null);
+                } else if (title.contains("kế toán") || title.contains("accounting")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Kế toán").orElse(null);
+                } else if (title.contains("nhân sự") || title.contains("hr")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Nhân sự").orElse(null);
+                } else if (title.contains("startup") || title.contains("khởi nghiệp")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Khởi nghiệp").orElse(null);
+                }
+                // Ngoại ngữ
+                else if (title.contains("tiếng anh") || title.contains("english")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tiếng Anh").orElse(null);
+                } else if (title.contains("tiếng nhật") || title.contains("japanese")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tiếng Nhật").orElse(null);
+                } else if (title.contains("tiếng hàn") || title.contains("korean")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tiếng Hàn").orElse(null);
+                } else if (title.contains("tiếng trung") || title.contains("chinese")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tiếng Trung").orElse(null);
+                } else if (title.contains("tiếng pháp") || title.contains("french")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tiếng Pháp").orElse(null);
+                } else if (title.contains("tiếng đức") || title.contains("german")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tiếng Đức").orElse(null);
+                }
+                // Kỹ thuật
+                else if (title.contains("cơ khí") || title.contains("mechanical")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Cơ khí").orElse(null);
+                } else if (title.contains("điện") || title.contains("electrical")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Điện - Điện tử").orElse(null);
+                } else if (title.contains("xây dựng") || title.contains("civil")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Xây dựng").orElse(null);
+                } else if (title.contains("ô tô") || title.contains("automotive")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Ô tô").orElse(null);
+                }
+                // Khoa học xã hội
+                else if (title.contains("tâm lý") || title.contains("psychology")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Tâm lý học").orElse(null);
+                } else if (title.contains("xã hội") || title.contains("sociology")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Xã hội học").orElse(null);
+                } else if (title.contains("triết học") || title.contains("philosophy")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Triết học").orElse(null);
+                }
+                // Y tế - Sức khỏe
+                else if (title.contains("y học") || title.contains("medicine")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Y học").orElse(null);
+                } else if (title.contains("dược") || title.contains("pharmacy")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Dược học").orElse(null);
+                } else if (title.contains("điều dưỡng") || title.contains("nursing")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Điều dưỡng").orElse(null);
+                }
+                // Luật pháp
+                else if (title.contains("luật dân sự") || title.contains("civil law")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Luật dân sự").orElse(null);
+                } else if (title.contains("luật hình sự") || title.contains("criminal law")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Luật hình sự").orElse(null);
+                } else if (title.contains("luật thương mại") || title.contains("commercial law")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Luật thương mại").orElse(null);
+                }
+                // Nông nghiệp
+                else if (title.contains("nông nghiệp") || title.contains("agriculture")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Trồng trọt").orElse(null);
+                } else if (title.contains("chăn nuôi") || title.contains("animal")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Chăn nuôi").orElse(null);
+                } else if (title.contains("thủy sản") || title.contains("aquaculture")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Thủy sản").orElse(null);
+                }
+                // Môi trường
+                else if (title.contains("môi trường") || title.contains("environment")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Khoa học môi trường").orElse(null);
+                } else if (title.contains("biến đổi khí hậu") || title.contains("climate")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Biến đổi khí hậu").orElse(null);
+                } else if (title.contains("năng lượng tái tạo") || title.contains("renewable")) {
+                        category = categoryRepository.findByNameAndDeletedAtIsNull("Năng lượng tái tạo").orElse(null);
                 } else {
                         // Default to programming
                         category = categoryRepository.findByNameAndDeletedAtIsNull("Lập trình").orElse(null);
@@ -876,6 +1297,8 @@ public class DataInitializer implements CommandLineRunner {
                         tags.add("react");
                 if (content.contains("vue"))
                         tags.add("vue");
+                if (content.contains("angular"))
+                        tags.add("angular");
                 if (content.contains("node"))
                         tags.add("nodejs");
                 if (content.contains("spring"))
@@ -884,7 +1307,12 @@ public class DataInitializer implements CommandLineRunner {
                         tags.add("docker");
                 if (content.contains("aws"))
                         tags.add("aws");
-                if (content.contains("database") || content.contains("mongodb"))
+                if (content.contains("azure"))
+                        tags.add("azure");
+                if (content.contains("gcp"))
+                        tags.add("gcp");
+                if (content.contains("database") || content.contains("mongodb") || content.contains("mysql")
+                                || content.contains("postgresql"))
                         tags.add("database");
                 if (content.contains("machine learning") || content.contains("ai"))
                         tags.add("ai");
@@ -896,6 +1324,98 @@ public class DataInitializer implements CommandLineRunner {
                         tags.add("security");
                 if (content.contains("algorithm"))
                         tags.add("algorithm");
+                if (content.contains("devops"))
+                        tags.add("devops");
+                if (content.contains("testing"))
+                        tags.add("testing");
+                if (content.contains("performance"))
+                        tags.add("performance");
+                if (content.contains("optimization"))
+                        tags.add("optimization");
+
+                // Education tags
+                if (content.contains("toán") || content.contains("math"))
+                        tags.add("mathematics");
+                if (content.contains("vật lý") || content.contains("physics"))
+                        tags.add("physics");
+                if (content.contains("hóa học") || content.contains("chemistry"))
+                        tags.add("chemistry");
+                if (content.contains("sinh học") || content.contains("biology"))
+                        tags.add("biology");
+                if (content.contains("văn học") || content.contains("literature"))
+                        tags.add("literature");
+                if (content.contains("lịch sử") || content.contains("history"))
+                        tags.add("history");
+                if (content.contains("địa lý") || content.contains("geography"))
+                        tags.add("geography");
+
+                // Business tags
+                if (content.contains("marketing"))
+                        tags.add("marketing");
+                if (content.contains("tài chính") || content.contains("finance"))
+                        tags.add("finance");
+                if (content.contains("quản lý") || content.contains("management"))
+                        tags.add("management");
+                if (content.contains("kế toán") || content.contains("accounting"))
+                        tags.add("accounting");
+                if (content.contains("startup") || content.contains("khởi nghiệp"))
+                        tags.add("startup");
+
+                // Language tags
+                if (content.contains("tiếng anh") || content.contains("english"))
+                        tags.add("english");
+                if (content.contains("tiếng nhật") || content.contains("japanese"))
+                        tags.add("japanese");
+                if (content.contains("tiếng hàn") || content.contains("korean"))
+                        tags.add("korean");
+                if (content.contains("tiếng trung") || content.contains("chinese"))
+                        tags.add("chinese");
+
+                // Engineering tags
+                if (content.contains("cơ khí") || content.contains("mechanical"))
+                        tags.add("mechanical");
+                if (content.contains("điện") || content.contains("electrical"))
+                        tags.add("electrical");
+                if (content.contains("xây dựng") || content.contains("civil"))
+                        tags.add("civil-engineering");
+                if (content.contains("ô tô") || content.contains("automotive"))
+                        tags.add("automotive");
+
+                // Social Science tags
+                if (content.contains("tâm lý") || content.contains("psychology"))
+                        tags.add("psychology");
+                if (content.contains("xã hội") || content.contains("sociology"))
+                        tags.add("sociology");
+                if (content.contains("triết học") || content.contains("philosophy"))
+                        tags.add("philosophy");
+
+                // Health tags
+                if (content.contains("y học") || content.contains("medicine"))
+                        tags.add("medicine");
+                if (content.contains("dược") || content.contains("pharmacy"))
+                        tags.add("pharmacy");
+                if (content.contains("điều dưỡng") || content.contains("nursing"))
+                        tags.add("nursing");
+
+                // Law tags
+                if (content.contains("luật"))
+                        tags.add("law");
+
+                // Agriculture tags
+                if (content.contains("nông nghiệp") || content.contains("agriculture"))
+                        tags.add("agriculture");
+                if (content.contains("chăn nuôi") || content.contains("animal"))
+                        tags.add("animal-science");
+                if (content.contains("thủy sản") || content.contains("aquaculture"))
+                        tags.add("aquaculture");
+
+                // Environment tags
+                if (content.contains("môi trường") || content.contains("environment"))
+                        tags.add("environmental-science");
+                if (content.contains("biến đổi khí hậu") || content.contains("climate"))
+                        tags.add("climate-change");
+                if (content.contains("năng lượng tái tạo") || content.contains("renewable"))
+                        tags.add("renewable-energy");
 
                 // Price tag
                 if (price.compareTo(BigDecimal.ZERO) == 0) {
@@ -1071,6 +1591,82 @@ public class DataInitializer implements CommandLineRunner {
 
                         reportRepository.save(report);
                 }
+        }
+
+        /**
+         * Tạo dữ liệu mẫu cho tags và document-tag relationships để test popular tags
+         */
+        private void createSampleTagsAndRelationships() {
+                System.out.println("=== Creating sample tags and document-tag relationships ===");
+
+                // Tạo các tags mẫu
+                String[] sampleTags = {
+                                "Java", "Spring Boot", "Database", "Web Development", "API",
+                                "JavaScript", "React", "Vue.js", "Node.js", "Python",
+                                "Machine Learning", "Data Science", "DevOps", "Docker", "Kubernetes",
+                                "Microservices", "REST API", "GraphQL", "Security", "Testing"
+                };
+
+                List<Tag> createdTags = new ArrayList<>();
+                for (String tagName : sampleTags) {
+                        Tag existingTag = tagRepository.findByName(tagName).orElse(null);
+                        if (existingTag == null) {
+                                Tag tag = new Tag();
+                                tag.setName(tagName);
+                                tag.setSlug(tagName.toLowerCase().replaceAll("\\s+", "-"));
+                                tag.setDescription("Tag for " + tagName);
+                                tag.setCreatedAt(LocalDateTime.now());
+                                tag.setUpdatedAt(LocalDateTime.now());
+                                tag = tagRepository.save(tag);
+                                createdTags.add(tag);
+                                System.out.println("Created tag: " + tagName);
+                        } else {
+                                createdTags.add(existingTag);
+                        }
+                }
+
+                // Lấy tất cả documents
+                List<Document> documents = documentRepository.findByDeletedAtIsNull();
+                System.out.println("Found " + documents.size() + " documents to tag");
+
+                // Gắn tags ngẫu nhiên cho documents
+                Random random = new Random();
+                int totalRelationships = 0;
+
+                for (Document document : documents) {
+                        // Mỗi document sẽ có 2-5 tags ngẫu nhiên
+                        int numTags = random.nextInt(4) + 2; // 2-5 tags
+                        List<Tag> documentTags = new ArrayList<>();
+
+                        // Chọn tags ngẫu nhiên
+                        for (int i = 0; i < numTags; i++) {
+                                Tag randomTag = createdTags.get(random.nextInt(createdTags.size()));
+                                if (!documentTags.contains(randomTag)) {
+                                        documentTags.add(randomTag);
+                                }
+                        }
+
+                        // Tạo document-tag relationships
+                        for (Tag tag : documentTags) {
+                                // Kiểm tra xem relationship đã tồn tại chưa
+                                DocumentTagId docTagId = new DocumentTagId();
+                                docTagId.setDocumentId(document.getId());
+                                docTagId.setTagId(tag.getId());
+
+                                if (!documentTagRepository.existsById(docTagId)) {
+                                        DocumentTag documentTag = new DocumentTag();
+                                        documentTag.setId(docTagId);
+                                        documentTag.setDocument(document);
+                                        documentTag.setTag(tag);
+                                        documentTag.setCreatedAt(LocalDateTime.now());
+                                        documentTagRepository.save(documentTag);
+                                        totalRelationships++;
+                                }
+                        }
+                }
+
+                System.out.println("Created " + totalRelationships + " document-tag relationships");
+                System.out.println("=== Sample tags and relationships creation completed ===");
         }
 
 }

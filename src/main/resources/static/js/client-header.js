@@ -74,9 +74,39 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Search functionality
-    const searchInput = document.querySelector(".hero-search input");
-    const searchBtn = document.querySelector(".search-btn");
+    // Search functionality for hero search form
+    const heroSearchForm = document.getElementById("heroSearchForm");
+    const heroSearchInput = document.getElementById("heroSearchInput");
+    const heroCategorySelect = document.getElementById("heroCategorySelect");
+
+    if (heroSearchForm) {
+      heroSearchForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const query = heroSearchInput.value.trim();
+        const category = heroCategorySelect.value;
+        
+        // Build search URL
+        let searchUrl = "/search?";
+        const params = [];
+        
+        if (query) {
+          params.push(`q=${encodeURIComponent(query)}`);
+        }
+        
+        if (category && category !== "all") {
+          params.push(`category=${encodeURIComponent(category)}`);
+        }
+        
+        if (params.length > 0) {
+          searchUrl += params.join("&");
+          window.location.href = searchUrl;
+        }
+      });
+    }
+
+    // Legacy search functionality (fallback)
+    const searchInput = document.querySelector(".hero-search input:not(#heroSearchInput)");
+    const searchBtn = document.querySelector(".search-btn:not(#heroSearchForm .search-btn)");
 
     if (searchInput && searchBtn) {
       searchBtn.addEventListener("click", function (e) {

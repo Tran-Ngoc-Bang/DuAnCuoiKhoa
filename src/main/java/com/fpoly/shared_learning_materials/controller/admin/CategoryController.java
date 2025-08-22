@@ -37,6 +37,9 @@ import com.fpoly.shared_learning_materials.dto.CategoryTreeDTO;
 import com.fpoly.shared_learning_materials.repository.CategoryHierarchyRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
 import com.fpoly.shared_learning_materials.service.NotificationService;
+import com.fpoly.shared_learning_materials.domain.Category;
+import com.fpoly.shared_learning_materials.repository.CategoryRepository;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/categories")
@@ -47,7 +50,10 @@ public class CategoryController extends BaseAdminController {
 
     @Autowired
     private CategoryHierarchyRepository categoryHierarchyRepository;
-    
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     public CategoryController(NotificationService notificationService, UserRepository userRepository) {
         super(notificationService, userRepository);
     }
@@ -225,13 +231,13 @@ public class CategoryController extends BaseAdminController {
                 .filter(c -> !c.getId().equals(id) && !descendantIds.contains(c.getId()))
                 .collect(Collectors.toList());
 
-                String parentName = category.getParentId() != null 
-        ? availableCategories.stream()
-            .filter(c -> c.getId().equals(category.getParentId()))
-            .findFirst()
-            .map(CategoryDTO::getName)
-            .orElse("Danh mục gốc")
-        : "Danh mục gốc";
+        String parentName = category.getParentId() != null
+                ? availableCategories.stream()
+                        .filter(c -> c.getId().equals(category.getParentId()))
+                        .findFirst()
+                        .map(CategoryDTO::getName)
+                        .orElse("Danh mục gốc")
+                : "Danh mục gốc";
         model.addAttribute("parentName", parentName);
         model.addAttribute("category", category);
         model.addAttribute("categories", availableCategories);
@@ -342,14 +348,14 @@ public class CategoryController extends BaseAdminController {
         try {
             System.out.println("=== CONTROLLER RESTORE DEBUG ===");
             System.out.println("Restore request for category ID: " + id);
-            
+
             CategoryDTO category = categoryService.getAllCategories().stream()
                     .filter(c -> c.getId().equals(id))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
 
             System.out.println("Found category: " + category.getName());
-            
+
             categoryService.restoreCategory(id);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Danh mục '" + category.getName() + "' đã được khôi phục thành công");
@@ -381,7 +387,8 @@ public class CategoryController extends BaseAdminController {
     }
 
     @PostMapping("/bulk-permanent-delete")
-    public String bulkPermanentDelete(@RequestParam("categoryIds") String categoryIds, RedirectAttributes redirectAttributes) {
+    public String bulkPermanentDelete(@RequestParam("categoryIds") String categoryIds,
+            RedirectAttributes redirectAttributes) {
         try {
             // Chuyển chuỗi categoryIds thành danh sách Long
             List<Long> ids = Arrays.stream(categoryIds.split(","))
@@ -389,20 +396,20 @@ public class CategoryController extends BaseAdminController {
                     .filter(str -> !str.isEmpty())
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
-            
+
             if (ids.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Không có danh mục nào được chọn để xóa vĩnh viễn!");
                 return "redirect:/admin/categories?tab=deleted";
             }
 
             categoryService.bulkPermanentDelete(ids);
-            redirectAttributes.addFlashAttribute("successMessage", String.format("Xóa vĩnh viễn %d danh mục thành công!", ids.size()));
+            redirectAttributes.addFlashAttribute("successMessage",
+                    String.format("Xóa vĩnh viễn %d danh mục thành công!", ids.size()));
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không thể xóa vĩnh viễn các danh mục: " + e.getMessage());
         }
         return "redirect:/admin/categories?tab=deleted";
     }
-    
 
     @PostMapping("/delete-multiple")
     public String deleteMultipleCategories(HttpServletRequest request, RedirectAttributes redirectAttributes) {
@@ -573,25 +580,66 @@ public class CategoryController extends BaseAdminController {
     }
 
     @GetMapping("/{id}/path")
-  @ResponseBody
-  public List<CategoryDTO> getCategoryPath(@PathVariable Long id) {
-      List<CategoryDTO> path = new ArrayList<>();
-      CategoryDTO current = categoryService.getAllCategories().stream()
-              .filter(c -> c.getId().equals(id))
-              .findFirst()
-              .orElse(null);
-      
-      while (current != null) {
-          path.add(0, current);
-          Long parentId = current.getParentId();
-          current = parentId != null 
-              ? categoryService.getAllCategories().stream()
-                  .filter(c -> c.getId().equals(parentId))
-                  .findFirst()
-                  .orElse(null)
-              : null;
-      }
-      
-      return path;
-  }
+    @ResponseBody
+    public List<CategoryDTO> getCategoryPath(@PathVariable Long id) {
+        List<CategoryDTO> path = new ArrayList<>();
+        CategoryDTO current = categoryService.getAllCategories().stream()
+                .filter(c -> c.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+
+        while (current != null) {
+            path.add(0, current);
+            Long parentId = current.getParentId();
+            current = parentId != null
+                    ? categoryService.getAllCategories().stream()
+                            .filter(c -> c.getId().equals(parentId))
+                            .findFirst()
+                            .orElse(null)
+                    : null;
+        }
+
+        return path;
+    }
+
+    @GetMapping("/debug/duplicates")
+    public String debugDuplicates(Model model) {
+        try {
+            // Kiểm tra categories duplicate
+            List<Category> allCategories = categoryRepository.findAll();
+            Map<String, List<Category>> nameGroups = allCategories.stream()
+                    .collect(Collectors.groupingBy(Category::getName));
+
+            List<String> duplicateNames = nameGroups.entrySet().stream()
+                    .filter(entry -> entry.getValue().size() > 1)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("duplicateNames", duplicateNames);
+            model.addAttribute("totalCategories", allCategories.size());
+            model.addAttribute("uniqueNames", nameGroups.size());
+            model.addAttribute("duplicateCount", duplicateNames.size());
+
+            // Log chi tiết
+            System.out.println("=== DUPLICATE CATEGORIES DEBUG ===");
+            System.out.println("Total categories: " + allCategories.size());
+            System.out.println("Unique names: " + nameGroups.size());
+            System.out.println("Duplicate names: " + duplicateNames.size());
+
+            for (String name : duplicateNames) {
+                List<Category> duplicates = nameGroups.get(name);
+                System.out.println("Name: '" + name + "' - Count: " + duplicates.size());
+                for (Category cat : duplicates) {
+                    System.out.println("  - ID: " + cat.getId() + ", Created: " + cat.getCreatedAt() + ", Deleted: "
+                            + cat.getDeletedAt());
+                }
+            }
+            System.out.println("=== END DUPLICATE DEBUG ===");
+
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+        }
+
+        return "admin/categories/list";
+    }
 }

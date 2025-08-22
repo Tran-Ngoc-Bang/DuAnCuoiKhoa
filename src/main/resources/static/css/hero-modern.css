@@ -170,14 +170,14 @@
 }
 
 .search-wrapper {
-  display: flex;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  padding: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  position: relative;
+      display: flex;
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        padding: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
 }
 
 .search-wrapper input {

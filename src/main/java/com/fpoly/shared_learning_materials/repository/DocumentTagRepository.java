@@ -14,28 +14,31 @@ import com.fpoly.shared_learning_materials.domain.DocumentTagId;
 
 @Repository
 public interface DocumentTagRepository extends JpaRepository<DocumentTag, DocumentTagId> {
-    
+
     @Modifying
     @Transactional
     @Query("DELETE FROM DocumentTag dt WHERE dt.id.documentId = ?1")
     void deleteByDocumentId(Long documentId);
-    
+
     @Modifying
     @Transactional
     @Query("DELETE FROM DocumentTag dt WHERE dt.id.tagId = ?1")
     void deleteByTagId(Long tagId);
-    
+
     List<DocumentTag> findByDocumentId(Long documentId);
-    
+
     @Query("SELECT COUNT(dt) FROM DocumentTag dt WHERE dt.id.tagId = :tagId")
     long countByTagId(@Param("tagId") Long tagId);
-    
+
     @Query("SELECT COUNT(DISTINCT dt.document) FROM DocumentTag dt")
     Long countDistinctDocumentsWithTags();
-    
+
     @Query("SELECT COUNT(dt) FROM DocumentTag dt")
     Long countTotalDocumentsTagged();
-    
+
     @Query("SELECT COUNT(DISTINCT dt.id.tagId) FROM DocumentTag dt")
     Long countUsedTags();
+
+    @Query("SELECT dt FROM DocumentTag dt WHERE dt.id.documentId IN :documentIds")
+    List<DocumentTag> findByDocumentIdIn(@Param("documentIds") List<Long> documentIds);
 }

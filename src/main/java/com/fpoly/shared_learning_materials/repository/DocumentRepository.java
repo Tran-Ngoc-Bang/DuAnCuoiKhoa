@@ -20,10 +20,12 @@ import com.fpoly.shared_learning_materials.domain.Document;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSpecificationExecutor<Document> {
     Optional<Document> findFirstByDeletedAtIsNull();
-	List<Document> findTop5ByDeletedAtIsNullOrderByCreatedAtDesc();
-	long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
-	
-	List<Document> findByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
+
+    List<Document> findTop5ByDeletedAtIsNullOrderByCreatedAtDesc();
+
+    long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
+
+    List<Document> findByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 
     long countByStatus(String status);
 
@@ -68,4 +70,8 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.transaction.annotation.Transactional
     int incrementDownloadCount(@Param("documentId") Long documentId);
+
+    // Get featured documents with custom sorting
+    @Query("SELECT d FROM Document d WHERE d.deletedAt IS NULL AND d.status = :status ORDER BY d.viewsCount DESC, d.downloadsCount DESC, d.createdAt DESC")
+    Page<Document> findFeaturedDocuments(@Param("status") String status, Pageable pageable);
 }
