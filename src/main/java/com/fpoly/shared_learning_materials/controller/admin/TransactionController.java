@@ -29,7 +29,7 @@ public class TransactionController extends BaseAdminController {
     @Autowired
     private UserService userService;
 
-     public TransactionController(NotificationService notificationService, UserRepository userRepository) {
+    public TransactionController(NotificationService notificationService, UserRepository userRepository) {
         super(notificationService, userRepository);
     }
 

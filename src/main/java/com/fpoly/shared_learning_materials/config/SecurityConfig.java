@@ -81,6 +81,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**",
                                                                 "/favicon.ico")
                                                 .permitAll()
+                                                .requestMatchers("/payment/**").permitAll()
                                                 .requestMatchers("/", "/home", "/login", "/register").permitAll()
                                                 .requestMatchers("/coin-packages", "/coin-packages/**").permitAll()
 

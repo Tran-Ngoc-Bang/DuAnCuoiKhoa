@@ -56,23 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Dark Mode Toggle
-    const darkModeToggle = document.getElementById("darkModeToggle");
-    const body = document.body;
-
-    if (darkModeToggle) {
-      // Check for saved dark mode preference
-      const isDarkMode = localStorage.getItem("darkMode") === "true";
-      if (isDarkMode) {
-        body.classList.add("dark-mode");
-      }
-
-      darkModeToggle.addEventListener("click", function () {
-        body.classList.toggle("dark-mode");
-        const isDark = body.classList.contains("dark-mode");
-        localStorage.setItem("darkMode", isDark);
-      });
-    }
+    // Dark mode is handled globally in main.js; removed duplicate toggle here.
 
     // Search functionality for hero search form
     const heroSearchForm = document.getElementById("heroSearchForm");

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.fpoly.shared_learning_materials.service.CoinPackageService;
 
 /**
  * Controller for user account pages
@@ -13,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/account")
 @PreAuthorize("isAuthenticated()")
 public class AccountController {
+
+    @Autowired
+    private CoinPackageService coinPackageService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -47,6 +52,7 @@ public class AccountController {
     @GetMapping("/recharge")
     public String recharge(Model model) {
         model.addAttribute("pageTitle", "Nạp tiền");
+        model.addAttribute("coinPackages", coinPackageService.getActivePackagesForClient());
         return "client/account/recharge";
     }
 
