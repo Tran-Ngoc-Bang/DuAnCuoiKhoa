@@ -43,5 +43,6 @@ public class DocumentDTO {
     private Double averageRating;
     private Map<String, Integer> ratingDistribution;
     private List<DocumentContentDTO> contents;
+    private Long parentId;
 
 }

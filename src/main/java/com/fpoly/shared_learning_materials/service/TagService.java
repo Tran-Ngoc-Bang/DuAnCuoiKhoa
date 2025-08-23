@@ -279,5 +279,15 @@ public class TagService {
             throw new RuntimeException("Lỗi khi xóa vĩnh viễn tag: " + e.getMessage());
         }
     }
-
+//     public Page<TagDTO> searchTags(String keyword, int page, int size) {
+//     Pageable pageable = PageRequest.of(page, size);
+//     return tagRepository.findByNameContainingIgnoreCase(keyword, pageable)
+//             .map(this::convertToDTO); // Giả định có phương thức convertToDTO
+// }
+    public List<Tag> searchTags(String keyword) {
+        return tagRepository.findByNameContainingIgnoreCase(keyword);
+    }
+    public List<Tag> getAllTags() {
+        return tagRepository.findAll();
+    }
 }

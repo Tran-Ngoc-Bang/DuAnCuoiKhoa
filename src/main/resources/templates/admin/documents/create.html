@@ -347,6 +347,39 @@
       html {
         scroll-behavior: auto;
       }
+      .tag-list-container {
+        margin-top: 10px;
+    }
+
+    .tag-search {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .tag-list-scrollable {
+        max-height: 200px; /* Giới hạn chiều cao để có thanh cuộn */
+        overflow-y: auto; /* Thanh cuộn dọc */
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background: #fff;
+    }
+
+    .tag-item {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+    }
+
+    .tag-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .tag-item.selected {
+        background-color: #e9ecef;
+        font-weight: 600;
+    }
     </style>
   </head>
 
@@ -453,107 +486,110 @@
                     </div>
                     <!-- Phân loại tài liệu -->
                     <div class="form-row">
-                      <div class="form-group" style="flex: 1 1 100%;">
-                        <label for="documentCategory"
-                          >Phân loại tài liệu <span class="required">*</span></label
-                        >
-                        
-                        <div class="categories-container">
-                          <!-- Danh mục Tổng quát -->
-                          <div class="category-section">
-                            <h6 class="category-section-title">
-                              <i class="fas fa-folder"></i> Danh mục Tổng quát
-                            </h6>
-                            <div class="category-group" id="generalCategories">
-                              <div
-                                th:each="category : ${categories}"
-                                th:if="${category.parentId == null}"
-                                class="form-check"
-                              >
-                                <input
-                                  type="checkbox"
-                                  th:id="'general_' + ${category.id}"
-                                  th:value="${category.id}"
-                                  th:data-parent-id="${category.parentId}"
-                                  th:data-level="0"
-                                  class="form-check-input category-checkbox general-category"
-                                />
-                                <label
-                                  th:for="'general_' + ${category.id}"
-                                  class="form-check-label"
-                                >
-                                  <i class="fas fa-folder-open text-primary"></i>
-                                  <span th:text="${category.name}"></span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
+                      <!-- Phân loại tài liệu (Đa cấp với API) -->
+                                    <div class="form-group full-width">
+                                        <label>Chọn danh mục cha <span class="required">*</span></label>
+                                        
+                                        <!-- Level 1: Root categories -->
+                                        <div class="category-level" id="level1">
+                                            <label for="level1Select" class="level-label">Cấp 1 - Danh mục gốc:</label>
+                                            <select id="level1Select" class="form-select level-select" onchange="onLevelChange(1)" th:name="parentId">
+                                                <option value="0">🏠 Danh mục gốc (không có cha)</option>
+                                                <option th:each="parent : ${rootCategories}"
+                                                        th:value="${parent.id}"
+                                                        th:text="'📂 ' + ${parent.name}"
+                                                        th:attr="data-subcategories=${parent.subcategories}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Level 2: Subcategories -->
+                                        <div class="category-level" id="level2" style="display: none;">
+                                            <label for="level2Select" class="level-label">Cấp 2 - Danh mục con:</label>
+                                            <select id="level2Select" class="form-select level-select" onchange="onLevelChange(2)" th:name="parentId">
+                                                <option value="">Chọn danh mục con...</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Level 3: Sub-subcategories -->
+                                        <div class="category-level" id="level3" style="display: none;">
+                                            <label for="level3Select" class="level-label">Cấp 3 - Danh mục con cấp 2:</label>
+                                            <select id="level3Select" class="form-select level-select" onchange="onLevelChange(3)" th:name="parentId">
+                                                <option value="">Chọn danh mục con cấp 2...</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Hidden input for final parent selection -->
+                                         <input type="hidden" id="categoryIdsString" name="categoryIdsString" th:value="${#strings.listToCommaDelimitedString(document.categoryIds)}">
+                                        <input type="hidden" id="finalParentId" name="parentId" th:value="${documentDTO != null and documentDTO.parentId != null ? documentDTO.parentId : 0}">
+                                        
+                                        <!-- Breadcrumb hiển thị đường dẫn đã chọn -->
+                                        <div id="categoryBreadcrumb" style="margin-top: 10px; display: none;">
+                                            <div style="padding: 8px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 4px;">
+                                                <strong>Đường dẫn đã chọn:</strong>
+                                                <div id="breadcrumbPath" style="margin-top: 5px; font-family: monospace;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback" id="categoryError" style="display: none;">
+        Vui lòng chọn ít nhất một danh mục
+    </div>
+                                        <span class="error" th:if="${#fields.hasErrors('parentId')}" th:errors="*{parentId}">Vui lòng chọn ít nhất một danh mục</span>
+                                        <small class="form-text text-muted">Chọn từ 1-3 cấp độ danh mục để phân loại chi tiết.</small>
+                                    </div>
+                    </div>
+               
+                   <div class="form-row">
+    <div class="form-group">
+        <label for="documentTags">
+            <i class="fas fa-hashtag"></i>
+            Tag (nhập tên tag, cách nhau bằng dấu phẩy)
+        </label>
+        <input
+            type="text"
+            id="documentTags"
+            name="tagNames"
+            th:value="${#strings.listJoin(document.tagNames, ', ')}"
+            placeholder="java, spring-boot, tutorial, backend"
+            class="form-control"
+        />
+        <small class="form-text text-muted">
+            <i class="fas fa-lightbulb"></i>
+            Ví dụ: java, spring-boot, tutorial, backend (giúp tìm kiếm dễ dàng hơn)
+        </small>
+    </div>
+</div>
 
-                          <!-- Chuyên mục -->
-                          <div class="category-section">
-                            <h6 class="category-section-title">
-                              <i class="fas fa-tags"></i> Chuyên mục
-                            </h6>
-                            <div class="category-group" id="specificCategories">
-                              <div
-                                th:each="category : ${categories}"
-                                th:if="${category.parentId != null}"
-                                class="form-check"
-                              >
-                                <input
-                                  type="checkbox"
-                                  th:id="'specific_' + ${category.id}"
-                                  th:value="${category.id}"
-                                  th:data-parent-id="${category.parentId}"
-                                  th:data-level="1"
-                                  class="form-check-input category-checkbox specific-category"
-                                />
-                                <label
-                                  th:for="'specific_' + ${category.id}"
-                                  class="form-check-label"
-                                >
-                                  <i class="fas fa-tag text-success"></i>
-                                  <span th:text="${category.name}"></span>
-                                  <span th:if="${category.parentName != null}" class="text-muted small">
-                                    (thuộc: <span th:text="${category.parentName}"></span>)
-                                  </span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="invalid-feedback" id="categoryError" style="display: none;">
-                          Vui lòng chọn ít nhất một danh mục để phân loại tài liệu
-                        </div>
-                        <small class="form-text text-muted">
-                          <i class="fas fa-info-circle"></i>
-                          Chọn từ 1-15 mục. <strong>Danh mục Tổng quát</strong> (1 mục) + <strong>Chuyên mục</strong> (có thể nhiều mục) để phân loại chi tiết.
-                        </small>
-                        <input type="hidden" id="selectedCategoryIds" name="categoryIdsString" value="" />
-                      </div>
-                    </div>
-                    
-                    <!-- Tag - Xuống dưới riêng -->
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="documentTags">
-                          <i class="fas fa-hashtag"></i>
-                          Tag (nhập tên tag, cách nhau bằng dấu phẩy)
-                        </label>
-                        <input
-                          type="text"
-                          id="documentTags"
-                          name="tagNames"
-                          th:value="${#strings.listJoin(document.tagNames, ', ')}"
-                          placeholder="java, spring-boot, tutorial, backend"
-                          class="form-control"
-                        />
-                        <small class="form-text text-muted">
-                          <i class="fas fa-lightbulb"></i>
-                          Ví dụ: java, spring-boot, tutorial, backend (giúp tìm kiếm dễ dàng hơn)
-                        </small>
-                      </div>
-                    </div>
+<!-- Thêm phần mới: Hiển thị tất cả tag và tìm kiếm -->
+<div class="form-row">
+    <div class="form-group">
+        <label>
+            <i class="fas fa-tags"></i>
+            Danh sách tất cả Tag
+        </label>
+        <div class="input-group mb-3">
+            <input
+                type="text"
+                id="tagSearch"
+                class="form-control"
+                placeholder="Tìm kiếm tag..."
+            />
+            <button
+                class="btn btn-primary"
+                type="button"
+                id="searchTagButton"
+            >
+                <i class="fas fa-search"></i> Tìm kiếm
+            </button>
+        </div>
+        <div
+            id="tagListContainer"
+            class="tag-list-container"
+            style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; border-radius: 6px; padding: 10px; background: #fff;"
+        >
+            <ul id="tagList" class="list-group"></ul>
+        </div>
+    </div>
+</div>
                     <div class="form-row">
                       <div class="form-group">
                         <label for="documentPrice">Giá (coin)</label>
@@ -760,23 +796,21 @@
             title.classList.remove('is-invalid');
             hideInlineError('titleError');
           }
-          
-          // Validate categories
-          const checkedCategories = document.querySelectorAll('.category-checkbox:checked');
-          if (checkedCategories.length === 0) {
-            const categoryContainer = document.getElementById('generalCategories').closest('.categories-container');
+          // Validate categories based on categoryIdsString
+        const categoryIdsStringInput = document.getElementById('categoryIdsString');
+        const categoryContainer = document.querySelector('.full-width');
+        if (!categoryIdsStringInput.value || categoryIdsStringInput.value.trim() === '') {
             if (categoryContainer) {
-              categoryContainer.classList.add('is-invalid');
+                categoryContainer.classList.add('is-invalid');
             }
             showInlineError('categoryError', 'Vui lòng chọn ít nhất một danh mục');
             isValid = false;
-          } else {
-            const categoryContainer = document.getElementById('generalCategories').closest('.categories-container');
+        } else {
             if (categoryContainer) {
-              categoryContainer.classList.remove('is-invalid');
+                categoryContainer.classList.remove('is-invalid');
             }
             hideInlineError('categoryError');
-          }
+        }
           
           // Validate file
           const fileInput = document.getElementById('documentFile');
@@ -1006,6 +1040,234 @@
 
 
       });
+      let selectedPath = [];
+      let initialCategoryIds = [];
+      let currentCategoryId = /*[[${documentDTO.id != null ? documentDTO.id : null}]]*/ null;
+      let currentParentId = /*[[${documentDTO.parentId != null ? documentDTO.parentId : 0}]]*/ 0;
+      
+
+      function onLevelChange(level) {
+    const currentSelect = document.getElementById(`level${level}Select`);
+    const selectedValue = currentSelect.value;
+    const selectedText = currentSelect.options[currentSelect.selectedIndex].text;
+
+    // Clear subsequent levels
+    for (let i = level + 1; i <= 3; i++) {
+        const nextLevel = document.getElementById(`level${i}`);
+        const nextSelect = document.getElementById(`level${i}Select`);
+        nextLevel.style.display = 'none';
+        nextSelect.innerHTML = '<option value="">Chọn danh mục con...</option>';
+    }
+
+    // Update selected path
+    selectedPath = selectedPath.slice(0, level - 1);
+    if (selectedValue && selectedValue !== '0') {
+        selectedPath[level - 1] = {
+            id: selectedValue,
+            name: selectedText.replace(/^[📂📁🏠]\s*/, ''),
+            level: level
+        };
+        loadNextLevel(selectedValue, level + 1);
+    } else if (level === 1 && selectedValue === '0') {
+        selectedPath = [];
+    }
+
+    const categoryIdsStringInput = document.getElementById('categoryIdsString');
+    const newCategoryIds = selectedPath.map(item => item.id);
+
+    // Chỉ cập nhật categoryIdsString khi có thay đổi hoặc chọn danh mục mới
+    if (selectedPath.length > 0 && !arraysEqual(newCategoryIds, initialCategoryIds)) {
+        categoryIdsStringInput.value = newCategoryIds.join(',');
+        console.log("Updated categoryIdsString (changed):", categoryIdsStringInput.value);
+    } else {
+        // Giữ nguyên giá trị ban đầu từ Thymeleaf
+        categoryIdsStringInput.value = initialCategoryIds.join(',');
+        console.log("Kept original categoryIdsString:", categoryIdsStringInput.value);
+    }
+
+    updateFinalSelection();
+    updateBreadcrumb();
+}
+      function arraysEqual(arr1, arr2) {
+    if (arr1.length !== arr2.length) return false;
+    return arr1.every((value, index) => value === arr2[index]);
+}
+
+      function loadNextLevel(parentId, targetLevel) {
+    if (targetLevel > 3) return;
+
+    fetch(`/admin/categories/${parentId}/subcategories`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const targetSelect = document.getElementById(`level${targetLevel}Select`);
+                const targetDiv = document.getElementById(`level${targetLevel}`);
+
+                targetSelect.innerHTML = '<option value="">Chọn danh mục con...</option>';
+                data.forEach(sub => {
+                    if (!currentCategoryId || sub.id != currentCategoryId) {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = `📁 ${sub.name}`;
+                        option.setAttribute('data-subcategories', sub.subcategories || 0);
+                        targetSelect.appendChild(option);
+                    }
+                });
+
+                targetDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading subcategories:', error);
+        });
+}
+
+      function updateFinalSelection() {
+    const finalParentId = document.getElementById('finalParentId');
+    if (selectedPath.length === 0) {
+        finalParentId.value = '0'; // Root category
+    } else {
+        const lastSelected = selectedPath[selectedPath.length - 1];
+        finalParentId.value = lastSelected.id;
+    }
+    // Xóa các tham số parentId dư thừa từ các select
+    const selects = document.querySelectorAll('.level-select');
+    selects.forEach(select => select.removeAttribute('name'));
+}
+
+      function updateBreadcrumb() {
+    const breadcrumb = document.getElementById('categoryBreadcrumb');
+    const breadcrumbPath = document.getElementById('breadcrumbPath');
+
+    if (selectedPath.length === 0) {
+        breadcrumb.style.display = 'none';
+        return;
+    }
+
+    let pathHtml = '<span class="breadcrumb-item">🏠 Gốc</span>';
+    selectedPath.forEach((item, index) => {
+        pathHtml += '<span class="breadcrumb-arrow">→</span>';
+        pathHtml += `<span class="breadcrumb-item">📁 ${item.name}</span>`;
+    });
+
+    breadcrumbPath.innerHTML = pathHtml;
+    breadcrumb.style.display = 'block';
+}
+
+      // Initialize form with current parent selection
+      document.addEventListener('DOMContentLoaded', function() {
+         const categoryIdsInput = document.getElementById('categoryIdsString');
+    initialCategoryIds = categoryIdsInput.value.split(',').map(id => id.trim()).filter(id => id !== '');
+    console.log("Initial Category IDs:", initialCategoryIds);
+
+    // Khởi tạo giá trị ban đầu cho categoryIdsString
+    if (categoryIdsInput.value === '') {
+        categoryIdsInput.value = initialCategoryIds.join(',');
+    }
+
+    if (currentParentId && currentParentId !== 0) {
+        loadCurrentParentPath(currentParentId);
+    }
+      });
+
+      function loadCurrentParentPath(parentId) {
+    fetch(`/admin/categories/${parentId}/path`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                data.forEach((category, index) => {
+                    const level = index + 1;
+                    const select = document.getElementById(`level${level}Select`);
+                    if (select) {
+                        select.value = category.id;
+                        onLevelChange(level);
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading category path:', error);
+        });
+}
+const form = document.getElementById('documentForm');
+if (form) {
+    form.addEventListener('submit', function(event) {
+        const categoryIdsStringInput = document.getElementById('categoryIdsString');
+        if (!categoryIdsStringInput.value || categoryIdsStringInput.value.trim() === '') {
+            // Nếu không chọn danh mục, giữ nguyên giá trị ban đầu từ Thymeleaf
+            categoryIdsStringInput.value = initialCategoryIds.join(',');
+            console.log("Restored categoryIdsString to initial value:", categoryIdsStringInput.value);
+        }
+    });
+}
+      let allTags = [];
+
+    // Hàm tải danh sách tag từ API
+    function loadTags(searchQuery = '') {
+        fetch(`/admin/documents/tags?q=${encodeURIComponent(searchQuery)}`)
+            .then(response => response.json())
+            .then(data => {
+                allTags = data;
+                renderTags(searchQuery);
+            })
+            .catch(error => {
+                console.error('Error loading tags:', error);
+                document.getElementById('tagList').innerHTML = '<li class="list-group-item text-danger">Lỗi khi tải danh sách tag</li>';
+            });
+    }
+
+    // Hàm render danh sách tag
+    function renderTags(searchQuery = '') {
+        const tagList = document.getElementById('tagList');
+        tagList.innerHTML = '';
+
+        const filteredTags = searchQuery
+            ? allTags.filter(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
+            : allTags;
+
+        if (filteredTags.length === 0) {
+            tagList.innerHTML = '<li class="list-group-item text-muted">Không tìm thấy tag nào</li>';
+            return;
+        }
+
+        filteredTags.forEach(tag => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.textContent = `${tag.name} (ID: ${tag.id})`;
+            li.addEventListener('click', () => {
+                const currentTags = document.getElementById('documentTags').value.split(',').map(t => t.trim()).filter(t => t);
+                if (!currentTags.includes(tag.name)) {
+                    currentTags.push(tag.name);
+                    document.getElementById('documentTags').value = currentTags.join(', ');
+                }
+            });
+            tagList.appendChild(li);
+        });
+    }
+
+    // Xử lý sự kiện tìm kiếm
+    document.getElementById('searchTagButton').addEventListener('click', () => {
+        const searchQuery = document.getElementById('tagSearch').value.trim();
+        renderTags(searchQuery);
+    });
+
+    // Xử lý tìm kiếm khi nhấn Enter
+    document.getElementById('tagSearch').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const searchQuery = e.target.value.trim();
+            renderTags(searchQuery);
+        }
+    });
+
+    // Khởi tạo khi trang load
+    document.addEventListener('DOMContentLoaded', function () {
+        if (currentParentId && currentParentId !== 0) {
+            loadCurrentParentPath(currentParentId);
+        }
+        // Tải danh sách tag khi trang load
+        loadTags();
+    });
+     
     </script>
   </body>
 </html>
