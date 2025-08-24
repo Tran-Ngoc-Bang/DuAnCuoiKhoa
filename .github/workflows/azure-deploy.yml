@@ -43,28 +43,10 @@ jobs:
           # Copy JAR to root for easier access
           cp "$JAR_FILE" app.jar
 
-      - name: Create web.config
-        run: |
-          cat > web.config << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <configuration>
-            <system.webServer>
-              <handlers>
-                <add name="httpPlatformHandler" path="*" verb="*" modules="httpPlatformHandler" resourceType="Unspecified" />
-              </handlers>
-              <httpPlatform processPath="java" arguments="-jar app.jar --spring.profiles.active=azure --server.port=%HTTP_PLATFORM_PORT%">
-                <environmentVariables>
-                  <environmentVariable name="PORT" value="%HTTP_PLATFORM_PORT%" />
-                </environmentVariables>
-              </httpPlatform>
-            </system.webServer>
-          </configuration>
-          EOF
-
       - name: Deploy to Azure Web App via Kudu
         run: |
-          # Create a zip file containing the JAR and web.config
-          zip -r app.zip app.jar web.config
+          # Create a zip file containing the JAR
+          zip -r app.zip app.jar
 
           # Deploy using Kudu API
           curl -X POST \
@@ -72,6 +54,15 @@ jobs:
             -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
             --data-binary @app.zip \
             "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy"
+
+      - name: Set Startup Command
+        run: |
+          # Set startup command via Kudu API
+          curl -X PUT \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
+            -d '{"startupCommand": "java -jar /home/site/wwwroot/app.jar --spring.profiles.active=azure --server.port=80"}' \
+            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/settings"
 
       - name: Health check
         run: |
