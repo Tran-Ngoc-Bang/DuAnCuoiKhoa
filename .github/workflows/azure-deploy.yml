@@ -34,29 +34,30 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Deploy to Azure Web App using Kudu API
+      - name: Deploy to Azure Web App using FTPS
         run: |
           # Find the JAR file
           JAR_FILE=$(find target -name "*.jar" | head -1)
           echo "Found JAR file: $JAR_FILE"
 
-          # Create deployment package
-          mkdir -p deploy
-          cp "$JAR_FILE" deploy/app.jar
-          cd deploy
-          zip -r ../deploy.zip .
-          cd ..
+          # Install lftp for FTPS upload
+          sudo apt-get update && sudo apt-get install -y lftp
 
-          # Deploy using Kudu REST API with deployment credentials
-          echo "Deploying to Azure Web App..."
+          # Deploy using FTPS
+          echo "Deploying to Azure Web App via FTPS..."
 
-          # Try with verbose output
-          curl -v -X POST \
-            -H "Content-Type: application/zip" \
-            -H "Authorization: Basic $(echo -n '${{ secrets.AZURE_DEPLOY_USERNAME }}:${{ secrets.AZURE_DEPLOY_PASSWORD }}' | base64)" \
-            --data-binary @deploy.zip \
-            "https://shared-learning-app-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy" \
-            -w "\nHTTP Status: %{http_code}\n"
+          # Create lftp script
+          cat > deploy.lftp << EOF
+          set ssl:verify-certificate no
+          open ftps://waws-prod-hk1-057.ftp.azurewebsites.windows.net
+          user ${{ secrets.AZURE_FTPS_USERNAME }} ${{ secrets.AZURE_FTPS_PASSWORD }}
+          cd /site/wwwroot
+          put $JAR_FILE app.jar
+          bye
+          EOF
+
+          # Execute lftp script
+          lftp -f deploy.lftp
 
           echo "Deployment completed!"
 
