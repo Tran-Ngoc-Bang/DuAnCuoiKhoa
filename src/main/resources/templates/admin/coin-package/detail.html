@@ -24,7 +24,7 @@
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
-    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
     <script th:src="@{/js/admin/notifications.js}"></script>
   </head>
 
@@ -77,11 +77,10 @@
                 Gói Starter
               </h2>
               <p class="package-code" th:text="${coinPackage.code}">COIN-S</p>
-              <div class="package-status">
-              </div>
+              <div class="package-status"></div>
             </div>
           </div>
-                                <div class="dashboard-actions">
+          <div class="dashboard-actions">
             <a th:href="@{/admin/coin-packages}" class="secondary-btn">
               <i class="fas fa-arrow-left"></i> Quay lại
             </a>
@@ -167,6 +166,59 @@
                     >Mô tả gói xu</span
                   >
                 </div>
+              </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="detail-card">
+              <div class="card-header">
+                <h3><i class="fas fa-chart-line"></i> Thống kê</h3>
+              </div>
+              <div class="card-content stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Số lần mua</span>
+                  <span class="stat-value" th:text="${purchaseCount}">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Tổng doanh thu</span>
+                  <span
+                    class="stat-value"
+                    th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫'}"
+                    >0 ₫</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent buyers -->
+            <div class="detail-card">
+              <div class="card-header">
+                <h3><i class="fas fa-users"></i> Người mua gần đây</h3>
+              </div>
+              <div class="card-content">
+                <table class="packages-table">
+                  <thead>
+                    <tr>
+                      <th>Người dùng</th>
+                      <th>Email</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      th:if="${recentBuyers == null || #lists.isEmpty(recentBuyers)}"
+                    >
+                      <td colspan="2" class="no-data">Chưa có lượt mua</td>
+                    </tr>
+                    <tr th:each="u : ${recentBuyers}">
+                      <td
+                        th:text="${u.fullName != null ? u.fullName : u.username}"
+                      >
+                        User
+                      </td>
+                      <td th:text="${u.email}">email@example.com</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

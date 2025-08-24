@@ -973,6 +973,133 @@
       transform: translateX(3px);
     }
 
+    /* Payment Info Styles */
+    .payment-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: var(--radius-lg);
+      border-left: 4px solid #28a745;
+    }
+
+    .info-icon {
+      font-size: 2rem;
+    }
+
+    .info-text h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--gray-900);
+      font-size: 1.1rem;
+    }
+
+    .info-text p {
+      margin: 0;
+      color: var(--gray-600);
+      font-size: 0.9rem;
+    }
+
+    /* Supported Cards */
+    .supported-cards {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+
+    .supported-cards .card-icon {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .supported-cards .card-icon:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    /* Payment Steps */
+    .payment-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      background: #f8f9fa;
+      border-radius: var(--radius-md);
+    }
+
+    .step-number {
+      width: 2rem;
+      height: 2rem;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .step-text {
+      color: var(--gray-700);
+      font-size: 0.9rem;
+    }
+
+    /* QR Preview */
+    .qr-preview {
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+
+    .qr-placeholder {
+      padding: 2rem;
+      background: #f8f9fa;
+      border: 2px dashed var(--gray-300);
+      border-radius: var(--radius-lg);
+      margin: 1rem 0;
+    }
+
+    .qr-placeholder p {
+      margin: 1rem 0 0 0;
+      color: var(--gray-600);
+      font-size: 0.9rem;
+    }
+
+    /* Payment Buttons */
+    .payment-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .vnpay-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .qr-btn {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+
+    .vnpay-btn:hover {
+      background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+    }
+
+    .qr-btn:hover {
+      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    }
+
     /* Responsive */
     @media (max-width: 1200px) {
       .stats-grid {
@@ -1088,50 +1215,32 @@
                   Chọn gói xu
                 </h2>
               </div>
-    
-              <div class="recharge-options">
-                <div class="recharge-package" data-amount="50" data-price="20000">
+
+              <div th:if="${coinPackages != null and !#lists.isEmpty(coinPackages)}" class="recharge-options">
+                <div class="recharge-package"
+                     th:each="pkg : ${coinPackages}"
+                     th:attr="data-amount=${pkg.coinAmount},data-price=${pkg.salePrice},data-id=${pkg.id}"
+                >
                   <div class="recharge-coin">
                     <i class="fas fa-coins"></i>
                   </div>
-                  <div class="recharge-amount">50 xu</div>
-                  <div class="recharge-price">20.000đ</div>
-                </div>
-    
-                <div class="recharge-package" data-amount="100" data-price="35000">
-                  <div class="recharge-coin">
-                    <i class="fas fa-coins"></i>
+                  <div class="recharge-amount" th:text="${#numbers.formatInteger(pkg.coinAmount, 0)} + ' xu'">100 xu</div>
+
+                  <div th:if="${pkg.discountPercent != null and pkg.discountPercent > 0}" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                    <div class="recharge-price" th:text="${#numbers.formatDecimal(pkg.salePrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">90.000đ</div>
+                    <div style="text-decoration: line-through; color: var(--gray-500); font-size: 0.9rem;"
+                         th:text="${#numbers.formatDecimal(pkg.originalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">100.000đ</div>
                   </div>
-                  <div class="recharge-amount">100 xu</div>
-                  <div class="recharge-price">35.000đ</div>
+                  <div th:if="${pkg.discountPercent == null or pkg.discountPercent == 0}" class="recharge-price"
+                       th:text="${#numbers.formatDecimal(pkg.salePrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">100.000đ</div>
+
+                  <div class="recharge-bonus" th:if="${pkg.bonusCoins != null and pkg.bonusCoins > 0}"
+                       th:text="'+' + ${#numbers.formatInteger(pkg.bonusCoins, 0)} + ' xu'">+10 xu</div>
                 </div>
-    
-                <div class="recharge-package" data-amount="200" data-price="65000">
-                  <div class="recharge-coin">
-                    <i class="fas fa-coins"></i>
-                  </div>
-                  <div class="recharge-amount">200 xu</div>
-                  <div class="recharge-price">65.000đ</div>
-                  <div class="recharge-bonus">+10% xu</div>
-                </div>
-    
-                <div class="recharge-package" data-amount="500" data-price="150000">
-                  <div class="recharge-coin">
-                    <i class="fas fa-coins"></i>
-                  </div>
-                  <div class="recharge-amount">500 xu</div>
-                  <div class="recharge-price">150.000đ</div>
-                  <div class="recharge-bonus">+15% xu</div>
-                </div>
-    
-                <div class="recharge-package" data-amount="1000" data-price="280000">
-                  <div class="recharge-coin">
-                    <i class="fas fa-coins"></i>
-                  </div>
-                  <div class="recharge-amount">1.000 xu</div>
-                  <div class="recharge-price">280.000đ</div>
-                  <div class="recharge-bonus">+20% xu</div>
-                </div>
+              </div>
+
+              <div th:if="${coinPackages == null or #lists.isEmpty(coinPackages)}" class="empty-state">
+                Hiện tại không có gói xu nào
               </div>
             </div>
           </div>
@@ -1147,21 +1256,28 @@
     
             <div class="payment-methods">
               <div class="payment-tabs">
-                <div class="payment-tab active" data-tab="credit-card">
-                  <i class="far fa-credit-card"></i> Thẻ tín dụng/ghi nợ
+                <div class="payment-tab active" data-tab="vnpay">
+                  <i class="fas fa-credit-card"></i> VNPAY (Thẻ tín dụng/ghi nợ)
                 </div>
-                <div class="payment-tab" data-tab="banking">
-                  <i class="fas fa-university"></i> Chuyển khoản ngân hàng
-                </div>
-                <div class="payment-tab" data-tab="e-wallet">
-                  <i class="fas fa-wallet"></i> Ví điện tử
+                <div class="payment-tab" data-tab="qr-banking">
+                  <i class="fas fa-qrcode"></i> QR Banking (Chuyển khoản)
                 </div>
               </div>
     
-              <div class="payment-content active" id="credit-card-content">
+              <div class="payment-content active" id="vnpay-content">
                 <div class="payment-card">
-                  <div class="card-icons">
-                    <div class="card-icon selected" data-card="visa">
+                  <div class="payment-info">
+                    <div class="info-icon">
+                      <i class="fas fa-shield-alt" style="color: #28a745;"></i>
+                    </div>
+                    <div class="info-text">
+                      <h4>Thanh toán an toàn qua VNPAY</h4>
+                      <p>Hỗ trợ tất cả thẻ tín dụng, thẻ ghi nợ nội địa và quốc tế</p>
+                    </div>
+                  </div>
+                  
+                  <div class="supported-cards">
+                    <div class="card-icon" data-card="visa">
                       <i class="fab fa-cc-visa fa-2x" style="color: #1a1f71;"></i>
                     </div>
                     <div class="card-icon" data-card="mastercard">
@@ -1170,141 +1286,97 @@
                     <div class="card-icon" data-card="jcb">
                       <i class="fab fa-cc-jcb fa-2x" style="color: #0b4ea2;"></i>
                     </div>
-                  </div>
-    
-                  <div class="form-group">
-                    <label class="form-label">Số thẻ</label>
-                    <input type="text" class="form-input" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" id="cardNumber">
-                  </div>
-    
-                  <div class="card-row">
-                    <div class="form-group">
-                      <label class="form-label">Ngày hết hạn</label>
-                      <input type="text" class="form-input" placeholder="MM/YY" maxlength="5" id="expiry">
-                    </div>
-    
-                    <div class="form-group">
-                      <label class="form-label">Mã bảo mật (CVV)</label>
-                      <input type="password" class="form-input" placeholder="XXX" maxlength="3" id="cvv">
+                    <div class="card-icon" data-card="domestic">
+                      <i class="fas fa-credit-card fa-2x" style="color: #007bff;"></i>
                     </div>
                   </div>
-    
-                  <div class="form-group">
-                    <label class="form-label">Tên chủ thẻ</label>
-                    <input type="text" class="form-input" placeholder="Nguyễn Văn A" id="cardName">
+                  
+                  <div class="payment-steps">
+                    <div class="step">
+                      <div class="step-number">1</div>
+                      <div class="step-text">Chọn gói xu và click "Thanh toán VNPAY"</div>
+                    </div>
+                    <div class="step">
+                      <div class="step-number">2</div>
+                      <div class="step-text">Chuyển đến trang thanh toán VNPAY</div>
+                    </div>
+                    <div class="step">
+                      <div class="step-number">3</div>
+                      <div class="step-text">Nhập thông tin thẻ và hoàn tất thanh toán</div>
+                    </div>
                   </div>
                 </div>
               </div>
     
-              <div class="payment-content" id="banking-content">
-                <div class="transfer-instructions">
-                  <div class="instruction-step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                      <strong>Chuyển khoản đến tài khoản ngân hàng của chúng tôi với thông tin bên dưới</strong>
-                    </div>
-                  </div>
-    
-                  <div class="instruction-step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                      <strong>Nội dung chuyển khoản:</strong> EDUSHARE [Số điện thoại của bạn]
-                    </div>
-                  </div>
-    
-                  <div class="instruction-step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                      <strong>Điền thông tin giao dịch vào form bên dưới và gửi yêu cầu</strong>
-                    </div>
-                  </div>
-                </div>
-    
-                <div class="bank-info">
-                  <div class="bank-detail">
-                    <div class="detail-label">Tên ngân hàng</div>
-                    <div class="detail-value">
-                      Vietcombank
-                    </div>
-                  </div>
-    
-                  <div class="bank-detail">
-                    <div class="detail-label">Số tài khoản</div>
-                    <div class="detail-value">
-                      1234567890123
-                      <button class="copy-btn" data-copy="1234567890123"><i class="far fa-copy"></i></button>
-                    </div>
-                  </div>
-    
-                  <div class="bank-detail">
-                    <div class="detail-label">Chủ tài khoản</div>
-                    <div class="detail-value">
-                      CÔNG TY EDUSHARE VIỆT NAM
-                      <button class="copy-btn" data-copy="CÔNG TY EDUSHARE VIỆT NAM"><i class="far fa-copy"></i></button>
-                    </div>
-                  </div>
-    
-                  <div class="bank-detail">
-                    <div class="detail-label">Nội dung chuyển khoản</div>
-                    <div class="detail-value">
-                      EDUSHARE 0912345678
-                      <button class="copy-btn" data-copy="EDUSHARE 0912345678"><i class="far fa-copy"></i></button>
-                    </div>
-                  </div>
-                </div>
-    
-                <div style="margin-top: 1.5rem;">
-                  <div class="form-group">
-                    <label class="form-label">Người chuyển khoản</label>
-                    <input type="text" class="form-input" placeholder="Nhập tên người chuyển khoản">
-                  </div>
-    
-                  <div class="form-group">
-                    <label class="form-label">Từ ngân hàng</label>
-                    <input type="text" class="form-input" placeholder="Nhập tên ngân hàng của bạn">
-                  </div>
-    
-                  <div class="form-group">
-                    <label class="form-label">Số tiền đã chuyển</label>
-                    <input type="text" class="form-input" placeholder="Nhập số tiền đã chuyển">
-                  </div>
-    
-                  <div class="form-group">
-                    <label class="form-label">Mã giao dịch (nếu có)</label>
-                    <input type="text" class="form-input" placeholder="Nhập mã giao dịch">
-                  </div>
-                </div>
-              </div>
-    
-              <div class="payment-content" id="e-wallet-content">
+              <div class="payment-content" id="qr-banking-content">
                 <div class="payment-card">
-                  <div class="card-icons" style="margin-bottom: 1.5rem;">
-                    <div class="card-icon selected" data-card="momo" style="width: 4rem; height: 2.5rem;">
-                      <img src="https://momo.vn/public/uploads/images/2020/11/Logo-MoMo.png" alt="MoMo">
+                  <div class="payment-info">
+                    <div class="info-icon">
+                      <i class="fas fa-mobile-alt" style="color: #007bff;"></i>
                     </div>
-                    <div class="card-icon" data-card="zalopay" style="width: 4rem; height: 2.5rem;">
-                      <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png" alt="ZaloPay">
-                    </div>
-                    <div class="card-icon" data-card="vnpay" style="width: 4rem; height: 2.5rem;">
-                      <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png" alt="VNPay">
+                    <div class="info-text">
+                      <h4>Thanh toán qua QR Banking</h4>
+                      <p>Quét mã QR bằng ứng dụng ngân hàng để chuyển khoản nhanh chóng</p>
                     </div>
                   </div>
-    
-                  <div class="form-group">
-                    <label class="form-label">Số điện thoại đăng ký ví</label>
-                    <input type="text" class="form-input" placeholder="Nhập số điện thoại của bạn">
-                  </div>
-    
-                  <div id="qr-code" style="text-align: center; margin: 1.5rem 0;">
-                    <p>Quét mã QR để thanh toán</p>
-                    <div
-                      style="width: 200px; height: 200px; background-color: #f3f4f6; margin: 1rem auto; display: flex; align-items: center; justify-content: center;">
-                      <i class="fas fa-qrcode fa-5x" style="color: #9ca3af;"></i>
+                  
+                  <div class="qr-preview">
+                    <div class="qr-placeholder" id="qrContainer">
+                      <div th:if="${qrData == null}">
+                        <i class="fas a-qrcode fa-4x" style="color: #6c757d;"></i>
+                        <p>Mã QR sẽ hiển thị sau khi chọn gói xu</p>
+                      </div>
+                      <div th:if="${qrData != null}">
+                        <img th:if="${#strings.startsWith(qrData, 'http') }" th:src="${qrData}" alt="VietQR" style="max-width: 240px; border-radius: 8px;" />
+                        <div th:if="${!#strings.startsWith(qrData, 'http') }" id="qrCode" style="display:inline-block;"></div>
+                        <p style="margin-top:8px; color:var(--gray-600)">Quét mã này bằng ứng dụng ngân hàng hỗ trợ VietQR để chuyển khoản đúng nội dung.</p>
+                      </div>
                     </div>
-                    <p class="text-sm text-gray-600">Sử dụng ứng dụng MoMo để quét mã QR và thanh toán</p>
+                  </div>
+                  
+                  <div class="bank-info">
+                    <div class="bank-detail">
+                      <div class="detail-label">Ngân hàng</div>
+                      <div class="detail-value">Techcombank</div>
+                    </div>
+                    <div class="bank-detail">
+                      <div class="detail-label">Số tài khoản</div>
+                      <div class="detail-value">
+                        8888180802
+                        <button class="copy-btn" data-copy="8888180802">
+                          <i class="far fa-copy"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="bank-detail">
+                      <div class="detail-label">Chủ tài khoản</div>
+                      <div class="detail-value">
+                        TRAN NGOC BANG
+                        <button class="copy-btn" data-copy="TRAN NGOC BANG">
+                          <i class="far fa-copy"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="payment-steps">
+                    <div class="step">
+                      <div class="step-number">1</div>
+                      <div class="step-text">Chọn gói xu và click "Thanh toán QR"</div>
+                    </div>
+                    <div class="step">
+                      <div class="step-number">2</div>
+                      <div class="step-text">Quét mã QR bằng ứng dụng ngân hàng</div>
+                    </div>
+                    <div class="step">
+                      <div class="step-number">3</div>
+                      <div class="step-text">Xác nhận chuyển khoản và hoàn tất</div>
+                    </div>
                   </div>
                 </div>
               </div>
+    
+
             </div>
     
             <div class="recharge-total">
@@ -1313,9 +1385,25 @@
             </div>
     
             <div style="margin-top: 2rem; text-align: center;">
-              <button class="view-all-link" id="confirmPayment" style="min-width: 200px; padding: 0.75rem 1.5rem;">
-                <i class="fas fa-check-circle"></i> Xác nhận thanh toán
-              </button>
+              <div class="payment-buttons">
+                                 <form th:action="@{/coin-packages/purchase}" method="post" id="purchaseForm" style="display: inline-block; margin-right: 1rem;">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                  <input type="hidden" name="coinPackageId" id="selectedPackageId" value="">
+                  <input type="hidden" name="paymentMethod" value="VNPAY">
+                  <button type="submit" class="view-all-link vnpay-btn" id="confirmPayment" style="min-width: 200px; padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-credit-card"></i> Thanh toán VNPAY
+                  </button>
+                </form>
+                
+                                 <form th:action="@{/coin-packages/purchase}" method="post" id="qrPurchaseForm" style="display: inline-block;">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                  <input type="hidden" name="coinPackageId" id="selectedPackageIdQR" value="">
+                  <input type="hidden" name="paymentMethod" value="QR">
+                  <button type="submit" class="view-all-link qr-btn" id="confirmQRPayment" style="min-width: 200px; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+                    <i class="fas fa-qrcode"></i> Thanh toán QR
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
     
@@ -1359,24 +1447,56 @@
   <script th:src="@{/js/account.js}"></script>
   <script th:src="@{/js/recharge.js}"></script>
   <script th:src="@{/js/client-header.js}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       initAccountDashboard();
 
       // Initialize payment methods tabs
       const paymentTabs = document.querySelectorAll('.payment-tab');
+      const switchTab = (tabId) => {
+        paymentTabs.forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.payment-content').forEach(c => c.classList.remove('active'));
+        const activeTab = Array.from(paymentTabs).find(t => t.getAttribute('data-tab') === tabId);
+        if (activeTab) activeTab.classList.add('active');
+        const content = document.getElementById(`${tabId}-content`);
+        if (content) content.classList.add('active');
+      };
+
       paymentTabs.forEach(tab => {
         tab.addEventListener('click', function () {
-          // Remove active class from all tabs and contents
-          paymentTabs.forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.payment-content').forEach(c => c.classList.remove('active'));
-
-          // Add active class to clicked tab and corresponding content
-          this.classList.add('active');
           const tabId = this.getAttribute('data-tab');
-          document.getElementById(`${tabId}-content`).classList.add('active');
+          switchTab(tabId);
         });
       });
+
+      // Auto open QR tab if qrData exists
+      const hasQR = /*[[${qrData != null}]]*/ false;
+      const urlParams = new URLSearchParams(window.location.search);
+      const qrDataFromUrl = urlParams.get('qrdata');
+      
+      console.log('Has QR data (Thymeleaf):', hasQR);
+      console.log('QR Data from URL:', qrDataFromUrl);
+      
+             if (hasQR || qrDataFromUrl) {
+        switchTab('qr-banking');
+        const qrData = qrDataFromUrl || '/*[[${qrData}]]*/';
+        console.log('Final QR Data:', qrData);
+        
+        if (qrData && qrData.startsWith('http')) {
+          // Image tag via Thymeleaf will show; nothing to draw by JS
+          console.log('VietQR image URL detected');
+        } else {
+          const qrEl = document.getElementById('qrCode');
+          if (qrEl && qrData && typeof QRCode !== 'undefined') {
+            qrEl.innerHTML = '';
+            new QRCode(qrEl, { text: qrData, width: 220, height: 220 });
+            console.log('QR Code generated successfully');
+          } else {
+            console.error('Failed to generate QR code:', { qrEl: !!qrEl, qrData: !!qrData, QRCode: typeof QRCode });
+          }
+        }
+      }
 
       // Initialize card icons
       const cardIcons = document.querySelectorAll('.card-icon');
@@ -1390,14 +1510,32 @@
 
       // Initialize recharge packages
       const packages = document.querySelectorAll('.recharge-package');
+      console.log('Found packages:', packages.length);
+      
       packages.forEach(pkg => {
         pkg.addEventListener('click', function () {
+          console.log('Package clicked:', this.getAttribute('data-id'));
+          
           packages.forEach(p => p.classList.remove('selected'));
           this.classList.add('selected');
 
           // Update total amount
-          const amount = this.getAttribute('data-price');
-          document.getElementById('totalAmount').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+          const amountStr = this.getAttribute('data-price');
+          const amount = Number(amountStr);
+          const totalEl = document.getElementById('totalAmount');
+          if (totalEl) {
+            totalEl.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(isNaN(amount) ? 0 : amount);
+          }
+          
+          // Update selected package ID for form submission
+          const packageId = this.getAttribute('data-id');
+          const vnpayIdEl = document.getElementById('selectedPackageId');
+          const qrIdEl = document.getElementById('selectedPackageIdQR');
+          
+          if (vnpayIdEl) vnpayIdEl.value = packageId;
+          if (qrIdEl) qrIdEl.value = packageId;
+          
+          console.log('Updated package IDs - VNPAY:', vnpayIdEl?.value, 'QR:', qrIdEl?.value);
         });
       });
 
@@ -1418,25 +1556,43 @@
         });
       });
 
-      // Handle confirmation button
-      document.getElementById('confirmPayment').addEventListener('click', function () {
-        const selectedPackage = document.querySelector('.recharge-package.selected');
+      // Handle VNPAY form submission
+      const vnpayForm = document.getElementById('purchaseForm');
+      if (vnpayForm) {
+        vnpayForm.addEventListener('submit', function (e) {
+          const selectedPackage = document.querySelector('.recharge-package.selected');
 
-        if (!selectedPackage) {
-          alert('Vui lòng chọn gói xu bạn muốn nạp');
-          return;
-        }
+          if (!selectedPackage) {
+            e.preventDefault();
+            alert('Vui lòng chọn gói xu bạn muốn nạp');
+            return;
+          }
 
-        const transactionId = generateTransactionId();
-        document.getElementById('displayTransactionId').textContent = transactionId;
-
-        // Hide payment form and show success message
-        document.querySelectorAll('.panel-body').forEach(panel => {
-          panel.style.display = 'none';
+          console.log('Submitting VNPAY form with package ID:', document.getElementById('selectedPackageId').value);
+          // Form will submit to backend, which will redirect to VNPAY
         });
+      } else {
+        console.error('VNPAY form not found!');
+      }
 
-        document.getElementById('transactionSuccess').style.display = 'block';
-      });
+      // Handle QR form submission
+      const qrForm = document.getElementById('qrPurchaseForm');
+      if (qrForm) {
+        qrForm.addEventListener('submit', function (e) {
+          const selectedPackage = document.querySelector('.recharge-package.selected');
+
+          if (!selectedPackage) {
+            e.preventDefault();
+            alert('Vui lòng chọn gói xu bạn muốn nạp');
+            return;
+          }
+
+          console.log('Submitting QR form with package ID:', document.getElementById('selectedPackageIdQR').value);
+          // Form will submit to backend, which will redirect to QR payment
+        });
+      } else {
+        console.error('QR form not found!');
+      }
 
       // Generate random transaction ID
       function generateTransactionId() {

@@ -199,6 +199,37 @@ public class SettingController extends BaseAdminController {
     //     } catch (Exception e) {
     //         return ResponseEntity.badRequest().build();
     //     }
+    // // Export documents as backup
+    // @GetMapping("/backup/export")
+    // public ResponseEntity<InputStreamResource> exportDocuments() {
+    // try {
+    // String documentsData = documentService.exportAllDocuments();
+
+    // LocalDateTime now = LocalDateTime.now();
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+    // String filename = "documents_backup_" + now.format(formatter) + ".json";
+
+    // ByteArrayInputStream bis = new
+    // ByteArrayInputStream(documentsData.getBytes());
+
+    // // Update backup info
+    // DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy
+    // HH:mm");
+    // settings.put("lastBackup", now.format(displayFormatter));
+    // settings.put("backupSize", String.format("%.2f MB", documentsData.length() /
+    // 1024.0 / 1024.0));
+
+    // HttpHeaders headers = new HttpHeaders();
+    // headers.add("Content-Disposition", "attachment; filename=" + filename);
+
+    // return ResponseEntity.ok()
+    // .headers(headers)
+    // .contentType(MediaType.APPLICATION_JSON)
+    // .body(new InputStreamResource(bis));
+
+    // } catch (Exception e) {
+    // return ResponseEntity.badRequest().build();
+    // }
     // }
 
     // // Import documents from backup
@@ -218,6 +249,22 @@ public class SettingController extends BaseAdminController {
     //     }
 
     //     return "redirect:/admin/settings";
+    // RedirectAttributes redirectAttributes) {
+    // try {
+    // if (file.isEmpty()) {
+    // redirectAttributes.addFlashAttribute("error", "Vui lòng chọn file backup!");
+    // return "redirect:/admin/settings";
+    // }
+
+    // String result = documentService.importDocuments(file);
+    // redirectAttributes.addFlashAttribute("success", "Đã import thành công: " +
+    // result);
+    // } catch (Exception e) {
+    // redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi import: " +
+    // e.getMessage());
+    // }
+
+    // return "redirect:/admin/settings";
     // }
 
     @PostMapping("/maintenance/toggle")

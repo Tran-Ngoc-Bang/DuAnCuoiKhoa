@@ -24,9 +24,11 @@ public class CoinPackageController extends BaseAdminController {
 
     @Autowired
     private CoinPackageService coinPackageService;
+
     public CoinPackageController(NotificationService notificationService, UserRepository userRepository) {
         super(notificationService, userRepository);
     }
+
     /**
      * Hiển thị danh sách gói xu với phân trang và tìm kiếm
      */
@@ -56,7 +58,12 @@ public class CoinPackageController extends BaseAdminController {
             }
         }
 
-        packagePage = coinPackageService.getAllPackagesIncludingDeleted(pageable);
+        if ((keyword != null && !keyword.trim().isEmpty()) || statusEnum != null) {
+            packagePage = coinPackageService.searchAndFilterPackages(keyword, statusEnum, pageable);
+        } else {
+            // Mặc định cho admin: hiển thị tất cả kể cả đã xóa mềm
+            packagePage = coinPackageService.getAllPackagesIncludingDeleted(pageable);
+        }
 
         // Thêm dữ liệu vào model
         model.addAttribute("packages", packagePage.getContent());
@@ -67,7 +74,7 @@ public class CoinPackageController extends BaseAdminController {
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("status", status);
+        model.addAttribute("status", status != null ? status : "all");
 
         // Thêm thông tin phân trang
         model.addAttribute("hasPrevious", packagePage.hasPrevious());
@@ -119,6 +126,10 @@ public class CoinPackageController extends BaseAdminController {
         Optional<CoinPackage> packageOpt = coinPackageService.getPackageById(id);
         if (packageOpt.isPresent()) {
             model.addAttribute("coinPackage", packageOpt.get());
+            // Thêm thống kê
+            model.addAttribute("purchaseCount", coinPackageService.countSoldPackages(id));
+            model.addAttribute("totalRevenue", coinPackageService.sumRevenueByPackage(id));
+            model.addAttribute("recentBuyers", coinPackageService.findRecentBuyersByPackage(id, 10));
             return "admin/coin-package/detail";
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy gói xu");

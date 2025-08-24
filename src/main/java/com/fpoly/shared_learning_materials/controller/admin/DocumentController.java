@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,8 +31,13 @@ import com.fpoly.shared_learning_materials.service.DocumentService;
 import com.fpoly.shared_learning_materials.service.CategoryService;
 import com.fpoly.shared_learning_materials.service.DocumentNotificationService;
 import com.fpoly.shared_learning_materials.service.NotificationService;
+import com.fpoly.shared_learning_materials.service.TagService;
 import com.fpoly.shared_learning_materials.domain.User;
+import com.fpoly.shared_learning_materials.domain.Tag;
+import com.fpoly.shared_learning_materials.dto.CategoryDTO;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;
+import com.fpoly.shared_learning_materials.dto.TagDTO;
+import com.fpoly.shared_learning_materials.repository.TagRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -50,6 +56,10 @@ public class DocumentController extends BaseAdminController {
 
     @Autowired
     private DocumentNotificationService documentNotificationService;
+    @Autowired
+    private TagService tagService;
+    @Autowired
+    private TagRepository tagRepository;
     
     public DocumentController(NotificationService notificationService, UserRepository userRepository) {
         super(notificationService, userRepository);
@@ -168,12 +178,27 @@ public class DocumentController extends BaseAdminController {
     public List<DocumentDTO> exportDocumentsData() {
         return documentService.getAllDocumentsForExport();
     }
+    @GetMapping("/tags/search")
+    @ResponseBody
+    public List<TagDTO> searchTags(@RequestParam("query") String query) {
+        // Tìm tag dựa trên query (ví dụ: tìm theo tên tag)
+        Page<TagDTO> tagsPage = tagService.getAllTags(0, 10, "popular"); // Giới hạn 10 kết quả
+        return tagsPage.getContent().stream()
+                .filter(tag -> tag.getName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+    
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         if (!model.containsAttribute("document")) {
             model.addAttribute("document", new DocumentDTO());
+           
         }
+         DocumentDTO documentDTO = new DocumentDTO();
+          documentDTO.setParentId(0L);
+          model.addAttribute("documentDTO", documentDTO);
+             model.addAttribute("rootCategories", categoryService.getActiveRootCategories());
         if (!model.containsAttribute("categories")) {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("currentPage", "documents");
@@ -181,143 +206,189 @@ public class DocumentController extends BaseAdminController {
         return "admin/documents/create";
     }
 
-    @PostMapping
-    public String createDocument(
-            @ModelAttribute("document") @Valid DocumentDTO documentDTO,
-            BindingResult result,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "categoryIdsString", required = false) String categoryIdsString,
-            @RequestParam(value = "tagNames", required = false) String tagNames,
-            RedirectAttributes redirectAttributes) {
+@PostMapping
+public String createDocument(
+        @ModelAttribute("document") @Valid DocumentDTO documentDTO,
+        BindingResult result,
+        @RequestParam("file") MultipartFile file,
+        @RequestParam(value = "categoryIdsString", required = false) String categoryIdsString,
+        @RequestParam(value = "tagNames", required = false) String tagNames,
+        RedirectAttributes redirectAttributes,
+        Model model) {
 
-        // Log basic info for debugging
-        System.out.println("Creating document: " + documentDTO.getTitle() +
-                ", categories: " + categoryIdsString);
-        System.out.println("==============================");
+    // Log basic info for debugging
+    System.out.println("Creating document: " + documentDTO.getTitle() + ", categories: " + categoryIdsString);
+    System.out.println("==============================");
 
-        // Parse categoryIds from string
-        List<Long> categoryIds = new ArrayList<>();
-        if (categoryIdsString != null && !categoryIdsString.trim().isEmpty()) {
-            try {
-                String[] idStrings = categoryIdsString.split(",");
-                for (String idString : idStrings) {
-                    if (!idString.trim().isEmpty()) {
-                        categoryIds.add(Long.parseLong(idString.trim()));
-                    }
-                }
-            } catch (NumberFormatException e) {
-                redirectAttributes.addFlashAttribute("error", "Danh mục không hợp lệ");
-                redirectAttributes.addFlashAttribute("document", documentDTO);
-                redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-                return "redirect:/admin/documents/create";
-            }
-        }
+    if (result.hasErrors()) {
+        model.addAttribute("rootCategories", categoryService.getActiveRootCategories());
+        model.addAttribute("allCategories", categoryService.getAllCategories());
+        return "admin/documents/create";
+    }
 
-        // Bắt buộc chọn ít nhất 1 danh mục để phân loại tài liệu
-        if (categoryIds.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
-            redirectAttributes.addFlashAttribute("document", documentDTO);
-            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-            return "redirect:/admin/documents/create";
-        }
-
-        if (categoryIds.size() > 15) {
-            redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 15 danh mục");
-            redirectAttributes.addFlashAttribute("document", documentDTO);
-            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-            return "redirect:/admin/documents/create";
-        }
-
-        // Validate categoryIds are valid numbers
-        for (Long categoryId : categoryIds) {
-            if (categoryId == null || categoryId <= 0) {
-                redirectAttributes.addFlashAttribute("error", "Danh mục không hợp lệ");
-                redirectAttributes.addFlashAttribute("document", documentDTO);
-                redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-                return "redirect:/admin/documents/create";
-            }
-        }
-
-        if (result.hasErrors()) {
-            String errors = result.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .collect(Collectors.joining(", "));
-            System.out.println("Validation errors: " + errors);
-            redirectAttributes.addFlashAttribute("error", "Vui lòng kiểm tra lại: " + errors);
-            redirectAttributes.addFlashAttribute("document", documentDTO);
-            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-            return "redirect:/admin/documents/create";
-        }
-
-        if (file == null || file.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn file tài liệu");
-            redirectAttributes.addFlashAttribute("document", documentDTO);
-            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-            return "redirect:/admin/documents/create";
-        }
-
+    // Parse categoryIds from string
+    List<Long> categoryIds = new ArrayList<>();
+    if (categoryIdsString != null && !categoryIdsString.trim().isEmpty()) {
         try {
-            List<String> tagList = tagNames != null && !tagNames.trim().isEmpty()
-                    ? Arrays.asList(tagNames.split("\\s*,\\s*"))
-                    : new ArrayList<>();
-
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Long userId = null;
-
-            if (authentication != null && authentication.isAuthenticated()
-                    && !"anonymousUser".equals(authentication.getPrincipal())) {
-                Object principal = authentication.getPrincipal();
-                if (principal instanceof UserDetails) {
-                    String username = ((UserDetails) principal).getUsername();
-                    User user = userRepository.findByUsername(username)
-                            .orElseThrow(() -> new IllegalStateException(
-                                    "Không tìm thấy người dùng với username: " + username));
-                    userId = user.getId();
+            String[] idStrings = categoryIdsString.split(",");
+            for (String idString : idStrings) {
+                if (!idString.trim().isEmpty()) {
+                    categoryIds.add(Long.parseLong(idString.trim()));
                 }
             }
-
-            documentDTO.setUserId(userId);
-            DocumentDTO createdDocument = documentService.createDocument(documentDTO, file, categoryIds, tagList,
-                    documentDTO.getUserId());
-            
-            // Tạo notification cho admin khi có document mới
-            try {
-                String uploaderName = "Admin"; // Default name
-                if (userId != null) {
-                    User uploader = userRepository.findById(userId).orElse(null);
-                    if (uploader != null) {
-                        uploaderName = uploader.getFullName() != null ? uploader.getFullName() : uploader.getUsername();
-                    }
-                }
-                notificationService.notifyAdminsNewDocument(documentDTO.getTitle(), uploaderName);
-                System.out.println("Created notification for new document: " + documentDTO.getTitle());
-            } catch (Exception e) {
-                System.err.println("Error creating notification for new document: " + e.getMessage());
-            }
-
-            // Gửi email thông báo tài liệu mới cho users (nếu bật chế độ immediate)
-            try {
-                // Tìm document vừa tạo để gửi thông báo
-                com.fpoly.shared_learning_materials.domain.Document newDocument = 
-                    documentService.findById(createdDocument.getId());
-                if (newDocument != null) {
-                    documentNotificationService.sendImmediateNotification(newDocument);
-                    System.out.println("Sent immediate document notification for: " + documentDTO.getTitle());
-                }
-            } catch (Exception e) {
-                System.err.println("Error sending immediate document notification: " + e.getMessage());
-            }
-            
-            redirectAttributes.addFlashAttribute("successMessage", "Thêm tài liệu thành công");
-            return "redirect:/admin/documents";
-        } catch (Exception e) {
-            System.err.println("Error creating document: " + e.getMessage());
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            redirectAttributes.addFlashAttribute("error", "Danh mục không hợp lệ");
             redirectAttributes.addFlashAttribute("document", documentDTO);
             redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
             return "redirect:/admin/documents/create";
         }
+    }
+
+    // Bắt buộc chọn ít nhất 1 danh mục để phân loại tài liệu
+    if (categoryIds.isEmpty() && (documentDTO.getParentId() == null || documentDTO.getParentId() == 0)) {
+        redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
+        redirectAttributes.addFlashAttribute("document", documentDTO);
+        redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+        return "redirect:/admin/documents/create";
+    }
+
+    if (categoryIds.size() > 15) {
+        redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 15 danh mục");
+        redirectAttributes.addFlashAttribute("document", documentDTO);
+        redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+        return "redirect:/admin/documents/create";
+    }
+
+    // Validate categoryIds are valid numbers
+    for (Long categoryId : categoryIds) {
+        if (categoryId == null || categoryId <= 0) {
+            redirectAttributes.addFlashAttribute("error", "Danh mục không hợp lệ");
+            redirectAttributes.addFlashAttribute("document", documentDTO);
+            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+            return "redirect:/admin/documents/create";
+        }
+    }
+
+    if (file == null || file.isEmpty()) {
+        redirectAttributes.addFlashAttribute("error", "Vui lòng chọn file tài liệu");
+        redirectAttributes.addFlashAttribute("document", documentDTO);
+        redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+        return "redirect:/admin/documents/create";
+    }
+
+    try {
+        List<String> tagList = tagNames != null && !tagNames.trim().isEmpty()
+                ? Arrays.asList(tagNames.split("\\s*,\\s*"))
+                : new ArrayList<>();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = null;
+
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetails) {
+                String username = ((UserDetails) principal).getUsername();
+                User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Không tìm thấy người dùng với username: " + username));
+                userId = user.getId();
+            }
+        }
+        documentDTO.setUserId(userId);
+
+        // Gọi service để tạo document
+        DocumentDTO createdDocument = documentService.createDocument(documentDTO, file, categoryIds, tagList, userId);
+
+        // Tạo notification cho admin khi có document mới
+        try {
+            String uploaderName = "Admin"; // Default name
+            if (userId != null) {
+                User uploader = userRepository.findById(userId).orElse(null);
+                if (uploader != null) {
+                    uploaderName = uploader.getFullName() != null ? uploader.getFullName() : uploader.getUsername();
+                }
+            }
+            notificationService.notifyAdminsNewDocument(documentDTO.getTitle(), uploaderName);
+            System.out.println("Created notification for new document: " + documentDTO.getTitle());
+        } catch (Exception e) {
+            System.err.println("Error creating notification for new document: " + e.getMessage());
+        }
+
+        // Gửi email thông báo tài liệu mới cho users (nếu bật chế độ immediate)
+        try {
+            com.fpoly.shared_learning_materials.domain.Document newDocument = 
+                documentService.findById(createdDocument.getId());
+            if (newDocument != null) {
+                documentNotificationService.sendImmediateNotification(newDocument);
+                System.out.println("Sent immediate document notification for: " + documentDTO.getTitle());
+            }
+        } catch (Exception e) {
+            System.err.println("Error sending immediate document notification: " + e.getMessage());
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm tài liệu thành công");
+        return "redirect:/admin/documents";
+    } catch (Exception e) {
+        System.err.println("Error creating document: " + e.getMessage());
+        e.printStackTrace();
+        model.addAttribute("error", "Lỗi: " + e.getMessage());
+        model.addAttribute("rootCategories", categoryService.getActiveRootCategories());
+        model.addAttribute("allCategories", categoryService.getAllCategories());
+        redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        redirectAttributes.addFlashAttribute("document", documentDTO);
+        redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+        return "redirect:/admin/documents/create";
+    }
+}
+   @GetMapping("/categories/{parentId}/subcategories")
+    @ResponseBody
+    public List<CategoryDTO> getSubcategories(@PathVariable Long parentId) {
+        if (parentId == 0) {
+            return categoryService.getActiveRootCategories();
+        }
+        // Lấy danh mục con dựa trên parentId
+        return categoryService.getAllCategories().stream()
+                .filter(c -> c.getParentId() != null && c.getParentId().equals(parentId))
+                .collect(Collectors.toList());
+    }
+    @GetMapping("/categories/{id}/path")
+    @ResponseBody
+    public List<CategoryDTO> getCategoryPath(@PathVariable Long id) {
+        List<CategoryDTO> path = new ArrayList<>();
+        CategoryDTO current = categoryService.getAllCategories().stream()
+                .filter(c -> c.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+        
+        while (current != null) {
+            path.add(0, current);
+            Long parentId = current.getParentId();
+            current = parentId != null 
+                    ? categoryService.getAllCategories().stream()
+                        .filter(c -> c.getId().equals(parentId))
+                        .findFirst()
+                        .orElse(null)
+                    : null;
+        }
+        
+        return path;
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<List<TagDTO>> getTags(@RequestParam(required = false) String q) {
+        List<Tag> tags;
+        if (q != null && !q.trim().isEmpty()) {
+            tags = tagRepository.findByNameContainingIgnoreCase(q);
+        } else {
+            tags = tagRepository.findAll();
+        }
+
+        List<TagDTO> tagDTOs = tags.stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getName()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(tagDTOs);
     }
 
     @GetMapping("/{id}/edit")
@@ -334,6 +405,7 @@ public class DocumentController extends BaseAdminController {
         System.out.println("Document categoryNames: " + document.getCategoryNames());
         model.addAttribute("document", document);
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("rootCategories", categoryService.getRootCategories());
         model.addAttribute("currentPage", "documents");
         return "admin/documents/edit";
     }
@@ -375,16 +447,45 @@ public class DocumentController extends BaseAdminController {
                 return "redirect:/admin/documents/" + id + "/edit";
             }
         }
+       // Parse categoryIds from string
+    // List<Long> categoryIds = new ArrayList<>();
+    // if (categoryIdsString != null && !categoryIdsString.trim().isEmpty()) {
+    //     try {
+    //         String[] idStrings = categoryIdsString.split(",");
+    //         for (String idString : idStrings) {
+    //             if (!idString.trim().isEmpty()) {
+    //                 categoryIds.add(Long.parseLong(idString.trim()));
+    //             }
+    //         }
+    //     } catch (NumberFormatException e) {
+    //         redirectAttributes.addFlashAttribute("error", "Danh mục không hợp lệ");
+    //         redirectAttributes.addFlashAttribute("document", documentDTO);
+    //         redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+    //         return "redirect:/admin/documents/" + id + "/edit";
+    //     }
+    // } else {
+    //     // Nếu categoryIdsString rỗng (không thay đổi danh mục), giữ nguyên danh mục hiện tại từ document gốc
+    //     DocumentDTO originalDocument = documentService.getDocumentById(id);
+    //     if (originalDocument != null && originalDocument.getCategoryIds() != null) {
+    //         categoryIds = originalDocument.getCategoryIds();
+    //         System.out.println("Kept original categoryIds: " + categoryIds);
+    //     }
+    // }
+
+    // if (categoryIds.isEmpty()) {
+    //     redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
+    //     return "redirect:/admin/documents/" + id + "/edit";
+    // }
 
         System.out.println("Parsed CategoryIds: " + categoryIds + " (size: " + categoryIds.size() + ")");
 
         // Bắt buộc chọn ít nhất 1 danh mục để phân loại tài liệu
-        if (categoryIds.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
-            redirectAttributes.addFlashAttribute("document", documentDTO);
-            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-            return "redirect:/admin/documents/" + id + "/edit";
-        }
+        // if (categoryIds.isEmpty()) {
+        //     redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
+        //     redirectAttributes.addFlashAttribute("document", documentDTO);
+        //     redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+        //     return "redirect:/admin/documents/" + id + "/edit";
+        // }
 
         if (categoryIds.size() > 15) {
             redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 15 danh mục");
@@ -415,39 +516,37 @@ public class DocumentController extends BaseAdminController {
         }
 
         try {
-            List<String> tagList = tagNames != null && !tagNames.trim().isEmpty()
-                    ? Arrays.asList(tagNames.split("\\s*,\\s*"))
-                    : new ArrayList<>();
-            documentDTO.setId(id);
-            documentDTO.setCategoryIds(categoryIds); // Gán categoryIds vào DTO
+    List<String> tagList = tagNames != null && !tagNames.trim().isEmpty()
+            ? Arrays.asList(tagNames.split("\\s*,\\s*"))
+            : new ArrayList<>();
+    documentDTO.setId(id);
+    documentDTO.setCategoryIds(categoryIds);
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Long userId = null;
-
-            if (authentication != null && authentication.isAuthenticated()
-                    && !"anonymousUser".equals(authentication.getPrincipal())) {
-                Object principal = authentication.getPrincipal();
-                if (principal instanceof UserDetails) {
-                    String username = ((UserDetails) principal).getUsername();
-                    User user = userRepository.findByUsername(username)
-                            .orElseThrow(() -> new IllegalStateException(
-                                    "Không tìm thấy người dùng với username: " + username));
-                    userId = user.getId();
-                }
-            }
-
-            documentDTO.setUserId(userId);
-            DocumentDTO updatedDocument = documentService.updateDocument(id, documentDTO, file, categoryIds, tagList);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật tài liệu thành công");
-            return "redirect:/admin/documents";
-        } catch (Exception e) {
-            System.err.println("Error updating document: " + e.getMessage());
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("document", documentDTO);
-            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-            return "redirect:/admin/documents/" + id + "/edit";
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Long userId = null;
+    if (authentication != null && authentication.isAuthenticated()
+            && !"anonymousUser".equals(authentication.getPrincipal())) {
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalStateException("Không tìm thấy người dùng với username: " + username));
+            userId = user.getId();
         }
+    }
+
+    documentDTO.setUserId(userId);
+    DocumentDTO updatedDocument = documentService.updateDocument(id, documentDTO, file, categoryIds, tagList);
+    redirectAttributes.addFlashAttribute("successMessage", "Cập nhật tài liệu thành công");
+    return "redirect:/admin/documents";
+} catch (Exception e) {
+    System.err.println("Error updating document: " + e.getMessage());
+    e.printStackTrace();
+    redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+    redirectAttributes.addFlashAttribute("document", documentDTO);
+    redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+    return "redirect:/admin/documents/" + id + "/edit";
+}
     }
 
     @GetMapping("/{id}/details")

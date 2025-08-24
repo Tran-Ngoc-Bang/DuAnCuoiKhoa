@@ -388,6 +388,48 @@
   box-shadow: 0 10px 20px rgba(7, 59, 76, 0.25);
 }
 
+.education-icon {
+  background: linear-gradient(135deg, #ffbe0b, #fb8500);
+  color: var(--white);
+  box-shadow: 0 10px 20px rgba(255, 190, 11, 0.25);
+}
+
+.art-icon {
+  background: linear-gradient(135deg, #ff006e, #8338ec);
+  color: var(--white);
+  box-shadow: 0 10px 20px rgba(255, 0, 110, 0.25);
+}
+
+.science-icon {
+  background: linear-gradient(135deg, #8338ec, #3a0ca3);
+  color: var(--white);
+  box-shadow: 0 10px 20px rgba(131, 56, 236, 0.25);
+}
+
+.agriculture-icon {
+  background: linear-gradient(135deg, #38b000, #06d6a0);
+  color: var(--white);
+  box-shadow: 0 10px 20px rgba(56, 176, 0, 0.25);
+}
+
+.environment-icon {
+  background: linear-gradient(135deg, #31cb9e, #06d6a0);
+  color: var(--white);
+  box-shadow: 0 10px 20px rgba(49, 203, 158, 0.25);
+}
+
+.default-icon {
+  background: linear-gradient(135deg, #6b7280, #9ca3af);
+  color: var(--white);
+  box-shadow: 0 10px 20px rgba(107, 114, 128, 0.25);
+}
+
+.dynamic-icon {
+  /* Dynamic styles will be applied via inline CSS */
+  color: var(--white);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
 .category-card:hover .category-icon {
   transform: scale(1.08) rotate(-5deg);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
@@ -419,6 +461,35 @@
 
 .category-card:hover .law-icon {
   box-shadow: 0 15px 30px rgba(7, 59, 76, 0.3);
+}
+
+.category-card:hover .education-icon {
+  box-shadow: 0 15px 30px rgba(255, 190, 11, 0.3);
+}
+
+.category-card:hover .art-icon {
+  box-shadow: 0 15px 30px rgba(255, 0, 110, 0.3);
+}
+
+.category-card:hover .science-icon {
+  box-shadow: 0 15px 30px rgba(131, 56, 236, 0.3);
+}
+
+.category-card:hover .agriculture-icon {
+  box-shadow: 0 15px 30px rgba(56, 176, 0, 0.3);
+}
+
+.category-card:hover .environment-icon {
+  box-shadow: 0 15px 30px rgba(49, 203, 158, 0.3);
+}
+
+.category-card:hover .default-icon {
+  box-shadow: 0 15px 30px rgba(107, 114, 128, 0.3);
+}
+
+.category-card:hover .dynamic-icon {
+  transform: scale(1.08) rotate(-5deg);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
 }
 
 .category-badge {
@@ -938,4 +1009,55 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Error message styles */
+.categories-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  padding: var(--spacing-8);
+}
+
+.error-message {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.error-message i {
+  font-size: 2rem;
+  color: #fbbf24;
+  margin-bottom: var(--spacing-4);
+}
+
+.error-message p {
+  color: var(--white);
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-6);
+  opacity: 0.9;
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.retry-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }

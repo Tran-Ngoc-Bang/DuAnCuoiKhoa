@@ -1,16 +1,23 @@
 package com.fpoly.shared_learning_materials.service;
 
 import com.fpoly.shared_learning_materials.domain.CoinPackage;
+import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.repository.CoinPackageRepository;
+import com.fpoly.shared_learning_materials.repository.TransactionDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -18,6 +25,9 @@ public class CoinPackageService {
 
     @Autowired
     private CoinPackageRepository coinPackageRepository;
+
+    @Autowired
+    private TransactionDetailRepository transactionDetailRepository;
 
     /**
      * Lấy tất cả gói xu với phân trang (chỉ active)
@@ -208,5 +218,25 @@ public class CoinPackageService {
         if (coinPackage.getSalePrice().compareTo(coinPackage.getOriginalPrice()) > 0) {
             throw new IllegalArgumentException("Giá bán không được lớn hơn giá gốc");
         }
+    }
+
+    // ==== STATISTICS ====
+    public long countSoldPackages(Long packageId) {
+        return transactionDetailRepository.countSoldPackages(packageId);
+    }
+
+    public BigDecimal sumRevenueByPackage(Long packageId) {
+        return transactionDetailRepository.sumRevenueByPackage(packageId);
+    }
+
+    public List<User> findRecentBuyersByPackage(Long packageId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        List<User> ordered = transactionDetailRepository.findRecentBuyersByPackage(packageId, pageable);
+        // Loại trùng user theo thứ tự mới nhất
+        Set<Long> seen = new LinkedHashSet<>();
+        return ordered.stream()
+                .filter(u -> seen.add(u.getId()))
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 }

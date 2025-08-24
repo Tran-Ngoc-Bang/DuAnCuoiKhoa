@@ -2,8 +2,11 @@ package com.fpoly.shared_learning_materials.service;
 
 import com.fpoly.shared_learning_materials.domain.Transaction;
 import com.fpoly.shared_learning_materials.domain.User;
+import com.fpoly.shared_learning_materials.domain.TransactionDetail;
 import com.fpoly.shared_learning_materials.repository.TransactionRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.repository.TransactionDetailRepository;
+import com.fpoly.shared_learning_materials.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,12 @@ public class TransactionService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TransactionDetailRepository transactionDetailRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * Lấy tất cả giao dịch với phân trang
@@ -82,12 +91,12 @@ public class TransactionService {
      * Tạo giao dịch mới
      */
     public Transaction createTransaction(Transaction transaction) {
-        validateTransaction(transaction);
-
         // Tự động generate code nếu chưa có
         if (transaction.getCode() == null || transaction.getCode().trim().isEmpty()) {
             transaction.setCode(generateTransactionCode());
         }
+
+        validateTransaction(transaction);
 
         // Set default status nếu chưa có
         if (transaction.getStatus() == null) {
@@ -189,6 +198,66 @@ public class TransactionService {
      */
     public long getPendingTransactions() {
         return transactionRepository.countPendingTransactions();
+    }
+
+    /**
+     * Complete coin purchase and update user balance
+     */
+    public void completeCoinPurchase(Transaction transaction) {
+        try {
+            // Find transaction details
+            List<TransactionDetail> details = transactionDetailRepository.findByTransaction(transaction);
+
+            if (details.isEmpty()) {
+                throw new IllegalStateException("Không tìm thấy chi tiết giao dịch");
+            }
+
+            // Update user balance
+            User user = transaction.getUser();
+            BigDecimal totalCoinsReceived = BigDecimal.ZERO;
+
+            for (TransactionDetail detail : details) {
+                if (detail.getCoinsReceived() != null) {
+                    totalCoinsReceived = totalCoinsReceived.add(new BigDecimal(detail.getCoinsReceived()));
+                }
+            }
+
+            // Update user's coin balance and statistics
+            if (user.getCoinBalance() == null) {
+                user.setCoinBalance(BigDecimal.ZERO);
+            }
+            user.setCoinBalance(user.getCoinBalance().add(totalCoinsReceived));
+
+            if (user.getTotalSpent() == null) {
+                user.setTotalSpent(BigDecimal.ZERO);
+            }
+            user.setTotalSpent(user.getTotalSpent().add(transaction.getAmount()));
+
+            if (user.getTotalCoinsPurchased() == null) {
+                user.setTotalCoinsPurchased(BigDecimal.ZERO);
+            }
+            user.setTotalCoinsPurchased(user.getTotalCoinsPurchased().add(totalCoinsReceived));
+
+            userRepository.save(user);
+
+            // Update transaction status to completed
+            transaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+            transaction.setUpdatedAt(LocalDateTime.now());
+            transactionRepository.save(transaction);
+
+            // Notify user
+            String title = "Nạp xu thành công";
+            String message = "Bạn đã nạp thành công " + totalCoinsReceived + " xu. Mã giao dịch: "
+                    + transaction.getCode();
+            notificationService.createNotification(user, title, message, "transaction");
+
+        } catch (Exception e) {
+            // Rollback transaction status
+            transaction.setStatus(Transaction.TransactionStatus.FAILED);
+            transaction.setUpdatedAt(LocalDateTime.now());
+            transactionRepository.save(transaction);
+            throw new RuntimeException("Lỗi cập nhật số dư xu: " + e.getMessage(), e);
+        }
     }
 
     /**

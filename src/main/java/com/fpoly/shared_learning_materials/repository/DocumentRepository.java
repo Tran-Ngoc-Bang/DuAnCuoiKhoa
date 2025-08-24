@@ -84,4 +84,11 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
             @Param("documentId") Long documentId,
             Pageable pageable);
 
+    // Get featured documents with custom sorting
+    @Query("SELECT d FROM Document d WHERE d.deletedAt IS NULL AND d.status = :status ORDER BY d.viewsCount DESC, d.downloadsCount DESC, d.createdAt DESC")
+    Page<Document> findFeaturedDocuments(@Param("status") String status, Pageable pageable);
+
+     // Tổng lượt tải xuống
+    @Query("SELECT SUM(d.downloadsCount) FROM Document d WHERE d.deletedAt IS NULL")
+    Long getTotalDownloads();
 }

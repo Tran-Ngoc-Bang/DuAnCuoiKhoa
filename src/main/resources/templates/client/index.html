@@ -74,24 +74,27 @@
                 viên.
               </p>
               <div class="hero-search">
-                <div class="search-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm tài liệu, khóa học, đề thi..."
-                  />
-                  <div class="search-categories">
-                    <select>
-                      <option value="all">Tất cả danh mục</option>
-                      <option value="it">Công nghệ thông tin</option>
-                      <option value="business">Kinh tế - Quản trị</option>
-                      <option value="language">Ngoại ngữ</option>
-                    </select>
-                  </div>
-                  <button class="search-btn">
-                    <i class="fas fa-search"></i>
-                    <span>Tìm kiếm</span>
-                  </button>
-                </div>
+                  <form id="heroSearchForm" action="/search" method="GET" class="search-wrapper">
+                    <input
+                      type="text"
+                      name="q"
+                      id="heroSearchInput"
+                      placeholder="Tìm kiếm tài liệu, khóa học, đề thi..."
+                      autocomplete="off"
+                    />
+                    <div class="search-categories">
+                      <select name="category" id="heroCategorySelect">
+                        <option value="all">Tất cả danh mục</option>
+                        <th:block th:each="category : ${searchCategories}">
+                          <option th:value="${category.slug}" th:text="${category.name}">Category Name</option>
+                        </th:block>
+                      </select>
+                    </div>
+                    <button type="submit" class="search-btn">
+                      <i class="fas fa-search"></i>
+                      <span>Tìm kiếm</span>
+                    </button>
+                  </form>
               </div>
               <div class="hero-btns">
                 <a th:href="@{/search}" class="primary-btn">
@@ -187,173 +190,64 @@
 
           <div class="category-filters">
             <button class="category-pill active" data-category="all">
-              Tất cả <span class="pill-count">8</span>
+              Tất cả <span class="pill-count" th:text="${totalCategories}">0</span>
             </button>
-            <button class="category-pill" data-category="it">
-              Công nghệ thông tin <span class="pill-count">2.4K</span>
-            </button>
-            <button class="category-pill" data-category="business">
-              Kinh tế - Quản trị <span class="pill-count">1.9K</span>
-            </button>
-            <button class="category-pill" data-category="language">
-              Ngoại ngữ <span class="pill-count">3.2K</span>
-            </button>
-            <button class="category-pill" data-category="engineering">
-              Kỹ thuật <span class="pill-count">1.5K</span>
-            </button>
-            <button class="category-pill" data-category="social">
-              Khoa học xã hội <span class="pill-count">985</span>
-            </button>
-            <button class="category-pill" data-category="health">
-              Y dược <span class="pill-count">1.2K</span>
-            </button>
-            <button class="category-pill" data-category="law">
-              Luật <span class="pill-count">648</span>
-            </button>
+            <th:block th:each="category : ${categories}">
+              <button class="category-pill" th:data-category="${category.slug}">
+                <span th:text="${category.name}">Category Name</span> 
+                <span class="pill-count" th:text="${category.documents}">0</span>
+              </button>
+            </th:block>
           </div>
 
-          <div class="categories-grid">
-            <div class="category-card" data-category="it">
+          <div class="categories-grid" th:if="${categoriesError == null}">
+            <div class="category-card" th:each="category : ${categories}" th:data-category="${category.slug}">
               <div class="card-top">
-                <div class="category-icon it-icon">
-                  <i class="fas fa-laptop-code"></i>
+                <div class="category-icon" 
+                     th:classappend="${category.iconClass}"
+                     th:style="${category.iconStyle}">
+                  <i th:class="${category.iconName}"></i>
                 </div>
                 <div class="category-badge">
-                  <span>2.4K+ tài liệu</span>
+                  <span th:text="${category.documents > 0 ? category.documents + '+ tài liệu' : '0 tài liệu'}">0 tài liệu</span>
                 </div>
               </div>
               <div class="category-content">
-                <h3 class="category-title">Công nghệ thông tin</h3>
-                <p class="category-description">
-                  Java, Python, Web, Mobile, Database, AI, Big Data, Security
+                <h3 class="category-title" th:text="${category.name}">Category Name</h3>
+                <p class="category-description" th:text="${category.description != null ? category.description : 'Khám phá các tài liệu chất lượng cao trong lĩnh vực này'}">
+                  Category Description
                 </p>
+                <!-- Hiển thị các tag phổ biến của documents trong category -->
                 <div class="category-tags">
-                  <span class="category-tag">Programming</span>
-                  <span class="category-tag">Database</span>
-                  <span class="category-tag">AI</span>
-                  <span class="category-tag">Web Dev</span>
+                  
+                  <span class="category-tag" th:each="tag : ${category.popularTags}" th:text="${tag}">Tag</span>
+                  <span th:if="${category.popularTags == null or category.popularTags.isEmpty()}" class="no-tags">Chưa có tags</span>
                 </div>
                 <div class="modern-category-footer">
                   <div class="docs-meta">
                     <div class="meta-item">
                       <i class="fas fa-file-pdf"></i>
-                      <span>1,218 PDF</span>
+                      <span th:text="${category.documents + ' tài liệu'}">0 tài liệu</span>
                     </div>
                   </div>
-                  <a
-                    href="pages/categories.html?category=it"
-                    class="explore-btn"
-                  >
+                  <a th:href="@{/categories(category=${category.slug})}" class="explore-btn">
                     <span class="btn-text">Khám phá</span>
                     <i class="fas fa-arrow-right"></i>
                   </a>
                 </div>
               </div>
             </div>
-
-            <div class="category-card" data-category="business">
-              <div class="card-top">
-                <div class="category-icon business-icon">
-                  <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="category-badge">
-                  <span>1.9K+ tài liệu</span>
-                </div>
-              </div>
-              <div class="category-content">
-                <h3 class="category-title">Kinh tế - Quản trị</h3>
-                <p class="category-description">
-                  Marketing, Tài chính, Kế toán, Quản trị, Khởi nghiệp
-                </p>
-                <div class="category-tags">
-                  <span class="category-tag">Marketing</span>
-                  <span class="category-tag">Finance</span>
-                  <span class="category-tag">HR</span>
-                  <span class="category-tag">Startup</span>
-                </div>
-                <div class="modern-category-footer">
-                  <div class="docs-meta">
-                    <div class="meta-item">
-                      <i class="fas fa-file-pdf"></i>
-                      <span>985 PDF</span>
-                    </div>
-                  </div>
-                  <a
-                    href="pages/categories.html?category=business"
-                    class="explore-btn"
-                  >
-                    <span class="btn-text">Khám phá</span>
-                    <i class="fas fa-arrow-right"></i>
-                  </a>
-                </div>
-              </div>
+          </div>
+          
+          <!-- Error message display -->
+          <div class="categories-error" th:if="${categoriesError != null}">
+            <div class="error-message">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p th:text="${categoriesError}">Error loading categories</p>
+              <button onclick="location.reload()" class="retry-btn">
+                <i class="fas fa-redo"></i> Thử lại
+              </button>
             </div>
-
-            <div class="category-card" data-category="language">
-              <div class="card-top">
-                <div class="category-icon language-icon">
-                  <i class="fas fa-language"></i>
-                </div>
-                <div class="category-badge">
-                  <span>3.2K+ tài liệu</span>
-                </div>
-              </div>
-              <div class="category-content">
-                <h3 class="category-title">Ngoại ngữ</h3>
-                <p class="category-description">
-                  Tiếng Anh, Hàn, Nhật, Trung, Pháp, Đức, IELTS, TOEIC
-                </p>
-                <div class="category-tags">
-                  <span class="category-tag">Tiếng Anh</span>
-                  <span class="category-tag">IELTS</span>
-                  <span class="category-tag">Tiếng Nhật</span>
-                  <span class="category-tag">Tiếng Hàn</span>
-                </div>
-                <div class="modern-category-footer">
-                  <div class="docs-meta">
-                    <div class="meta-item">
-                      <i class="fas fa-file-pdf"></i>
-                      <span>1,542 PDF</span>
-                    </div>
-                  </div>
-                  <a
-                    href="pages/categories.html?category=language"
-                    class="explore-btn"
-                  >
-                    <span class="btn-text">Khám phá</span>
-                    <i class="fas fa-arrow-right"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div class="category-card" data-category="engineering">
-              <div class="card-top">
-                <div class="category-icon engineering-icon">
-                  <i class="fas fa-cogs"></i>
-                </div>
-                <div class="category-badge">
-                  <span>1.5K+ tài liệu</span>
-                </div>
-              </div>
-              <div class="category-content">
-                <h3 class="category-title">Kỹ thuật - Công nghệ</h3>
-                <p class="category-description">
-                  Cơ khí, Điện, Điện tử, Xây dựng, Kiến trúc, Hóa học
-                </p>
-                <div class="category-tags">
-                  <span class="category-tag">Cơ khí</span>
-                  <span class="category-tag">Điện tử</span>
-                  <span class="category-tag">Xây dựng</span>
-                  <span class="category-tag">Hóa học</span>
-                </div>
-                <div class="modern-category-footer">
-                  <div class="docs-meta">
-                    <div class="meta-item">
-                      <i class="fas fa-file-pdf"></i>
-                      <span>1,120 PDF</span>
-                    </div>
-                  </div>
                   <a
                     href="pages/categories.html?category=engineering"
                     class="explore-btn"
@@ -389,17 +283,19 @@
             </p>
           </div>
 
-          <div class="featured-document-cards">
-            <!-- Featured Document Card 1 -->
-            <div class="featured-document-card">
+          <div class="featured-document-cards" th:if="${featuredDocumentsError == null}">
+            <!-- Dynamic Featured Document Cards -->
+            <div class="featured-document-card" th:each="document : ${featuredDocuments}">
               <div class="featured-document-image">
                 <img
                   src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                  alt="Tài liệu kinh doanh"
+                  th:alt="${document.title}"
                 />
                 <div class="featured-document-overlay"></div>
-                <div class="featured-document-badge premium">
-                  <i class="fas fa-crown"></i> Premium
+                <!-- Dynamic Badge based on price -->
+                <div class="featured-document-badge" th:classappend="${document.price != null and document.price > 0 ? 'premium' : 'free'}">
+                  <i th:class="${document.price != null and document.price > 0 ? 'fas fa-crown' : 'fas fa-unlock-alt'}"></i>
+                  <span th:text="${document.price != null and document.price > 0 ? 'Mua để tải' : 'Miễn Phí'}">Free</span>
                 </div>
                 <div class="featured-document-author">
                   <img
@@ -407,11 +303,11 @@
                     alt="Author"
                     class="featured-author-avatar"
                   />
-                  <span class="featured-author-name">TS. Nguyễn Văn A</span>
+                  <span class="featured-author-name" th:text="${document.authorName != null ? document.authorName : 'Tác giả ẩn danh'}">Tác giả</span>
                 </div>
                 <div class="document-overlay">
                   <a
-                    th:href="@{/client/document-details?id=1}"
+                    th:href="@{/documents/{id}(id=${document.id})}"
                     class="view-document-btn"
                   >
                     <i class="fas fa-eye"></i>
@@ -420,264 +316,55 @@
               </div>
               <div class="featured-document-content">
                 <div class="document-tags">
-                  <span class="featured-document-category">Kinh doanh</span>
-                  <span class="document-date">Cập nhật: 15/05/2023</span>
+                  <span class="featured-document-category" th:text="${document.categoryNames != null and !document.categoryNames.isEmpty() ? document.categoryNames[0] : 'Không phân loại'}">Danh mục</span>
+                  <span class="document-date" th:text="${document.createdAt != null ? 'Cập nhật: ' + #temporals.format(document.createdAt, 'dd/MM/yyyy') : 'Không có ngày'}">Cập nhật</span>
                 </div>
-                <h3 class="featured-document-title">
-                  Kỹ năng lãnh đạo trong thời đại số: Chiến lược và thực hành
+                <h3 class="featured-document-title" th:text="${document.title}">
+                  Tên tài liệu
                 </h3>
-                <p class="document-description">
-                  Hướng dẫn các kỹ năng lãnh đạo hiệu quả trong bối cảnh chuyển
-                  đổi số, từ lý thuyết đến thực tiễn.
+                <p class="document-description" th:text="${document.description != null ? document.description : 'Không có mô tả'}">
+                  Mô tả tài liệu
                 </p>
                 <div class="featured-document-stats">
                   <div class="featured-document-rating">
                     <div class="featured-document-stars">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star-half-alt"></i>
+                      <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                         th:class="${i <= (document.averageRating != null ? document.averageRating : 0) ? 'fas fa-star' : 'far fa-star'}"></i>
                     </div>
-                    <span class="featured-document-rating-count">(128)</span>
+                    <span class="featured-document-rating-count" th:text="'(' + ${document.comments != null ? document.comments.size() : 0} + ')'">(0)</span>
                   </div>
                   <div class="featured-document-meta">
                     <span class="featured-document-meta-item"
-                      ><i class="fas fa-download"></i> 2.5K</span
+                      ><i class="fas fa-download"></i> <span th:text="${document.downloadsCount != null ? document.downloadsCount : 0}">0</span></span
                     >
                     <span class="featured-document-meta-item"
-                      ><i class="fas fa-eye"></i> 8.3K</span
+                      ><i class="fas fa-eye"></i> <span th:text="${document.viewsCount != null ? document.viewsCount : 0}">0</span></span
                     >
                   </div>
                 </div>
               </div>
               <div class="document-footer">
                 <div class="document-price">
-                  <span class="price">35.000đ</span>
-                  <span class="price-label">/ Tải xuống</span>
+                  <!-- Dynamic price display -->
+                  <span th:if="${document.price != null and document.price > 0}" class="price" th:text="${#numbers.formatDecimal(document.price, 1, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                  <span th:if="${document.price == null or document.price == 0}" class="price free-price">Miễn phí</span>
+                  <span th:if="${document.price != null and document.price > 0}" class="price-label">/ Tải xuống</span>
                 </div>
-                <a th:href="@{/client/document-details?id=1}" class="detail-btn"
+                <a th:href="@{/documents/{id}(id=${document.id})}" class="detail-btn"
                   >Xem chi tiết</a
                 >
               </div>
             </div>
-
-            <!-- Featured Document Card 2 -->
-            <div class="featured-document-card">
-              <div class="featured-document-image">
-                <img
-                  src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                  alt="Lập trình JavaScript"
-                />
-                <div class="featured-document-overlay"></div>
-                <div class="featured-document-badge free">
-                  <i class="fas fa-unlock-alt"></i> Free
-                </div>
-                <div class="featured-document-author">
-                  <img
-                    src="https://randomuser.me/api/portraits/women/44.jpg"
-                    alt="Author"
-                    class="featured-author-avatar"
-                  />
-                  <span class="featured-author-name">ThS. Trần Thị B</span>
-                </div>
-                <div class="document-overlay">
-                  <a
-                    th:href="@{/client/document-details?id=2}"
-                    class="view-document-btn"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </a>
-                </div>
-              </div>
-              <div class="featured-document-content">
-                <div class="document-tags">
-                  <span class="featured-document-category"
-                    >Công nghệ thông tin</span
-                  >
-                  <span class="document-date">Cập nhật: 20/04/2023</span>
-                </div>
-                <h3 class="featured-document-title">
-                  Tập hợp các thủ thuật và mẹo vặt hữu ích trong JavaScript hiện
-                  đại
-                </h3>
-                <p class="document-description">
-                  Chia sẻ các thủ thuật tiên tiến và các mẹo vặt giúp tăng năng
-                  suất khi lập trình JavaScript.
-                </p>
-                <div class="featured-document-stats">
-                  <div class="featured-document-rating">
-                    <div class="featured-document-stars">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="far fa-star"></i>
-                    </div>
-                    <span class="featured-document-rating-count">(67)</span>
-                  </div>
-                  <div class="featured-document-meta">
-                    <span class="featured-document-meta-item"
-                      ><i class="fas fa-download"></i> 1.2K</span
-                    >
-                    <span class="featured-document-meta-item"
-                      ><i class="fas fa-eye"></i> 5.4K</span
-                    >
-                  </div>
-                </div>
-              </div>
-              <div class="document-footer">
-                <div class="document-price">
-                  <span class="price free-price">Miễn phí</span>
-                </div>
-                <a th:href="@{/client/document-details?id=2}" class="detail-btn"
-                  >Xem chi tiết</a
-                >
-              </div>
-            </div>
-
-            <!-- Featured Document Card 3 -->
-            <div class="featured-document-card">
-              <div class="featured-document-image">
-                <img
-                  src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                  alt="Tài liệu kinh doanh"
-                />
-                <div class="featured-document-overlay"></div>
-                <div class="featured-document-badge premium">
-                  <i class="fas fa-crown"></i> Premium
-                </div>
-                <div class="featured-document-author">
-                  <img
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="Author"
-                    class="featured-author-avatar"
-                  />
-                  <span class="featured-author-name">TS. Nguyễn Văn A</span>
-                </div>
-                <div class="document-overlay">
-                  <a
-                    th:href="@{/client/document-details?id=1}"
-                    class="view-document-btn"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </a>
-                </div>
-              </div>
-              <div class="featured-document-content">
-                <div class="document-tags">
-                  <span class="featured-document-category">Kinh doanh</span>
-                  <span class="document-date">Cập nhật: 15/05/2023</span>
-                </div>
-                <h3 class="featured-document-title">
-                  Kỹ năng lãnh đạo trong thời đại số: Chiến lược và thực hành
-                </h3>
-                <p class="document-description">
-                  Hướng dẫn các kỹ năng lãnh đạo hiệu quả trong bối cảnh chuyển
-                  đổi số, từ lý thuyết đến thực tiễn.
-                </p>
-                <div class="featured-document-stats">
-                  <div class="featured-document-rating">
-                    <div class="featured-document-stars">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star-half-alt"></i>
-                    </div>
-                    <span class="featured-document-rating-count">(128)</span>
-                  </div>
-                  <div class="featured-document-meta">
-                    <span class="featured-document-meta-item"
-                      ><i class="fas fa-download"></i> 2.5K</span
-                    >
-                    <span class="featured-document-meta-item"
-                      ><i class="fas fa-eye"></i> 8.3K</span
-                    >
-                  </div>
-                </div>
-              </div>
-              <div class="document-footer">
-                <div class="document-price">
-                  <span class="price">35.000đ</span>
-                  <span class="price-label">/ Tải xuống</span>
-                </div>
-                <a th:href="@{/client/document-details?id=1}" class="detail-btn"
-                  >Xem chi tiết</a
-                >
-              </div>
-            </div>
-
-            <!-- Featured Document Card 4 -->
-            <div class="featured-document-card">
-              <div class="featured-document-image">
-                <img
-                  src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                  alt="Tài liệu kinh doanh"
-                />
-                <div class="featured-document-overlay"></div>
-                <div class="featured-document-badge premium">
-                  <i class="fas fa-crown"></i> Premium
-                </div>
-                <div class="featured-document-author">
-                  <img
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="Author"
-                    class="featured-author-avatar"
-                  />
-                  <span class="featured-author-name">TS. Nguyễn Văn A</span>
-                </div>
-                <div class="document-overlay">
-                  <a
-                    th:href="@{/client/document-details?id=1}"
-                    class="view-document-btn"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </a>
-                </div>
-              </div>
-              <div class="featured-document-content">
-                <div class="document-tags">
-                  <span class="featured-document-category">Kinh doanh</span>
-                  <span class="document-date">Cập nhật: 15/05/2023</span>
-                </div>
-                <h3 class="featured-document-title">
-                  Kỹ năng lãnh đạo trong thời đại số: Chiến lược và thực hành
-                </h3>
-                <p class="document-description">
-                  Hướng dẫn các kỹ năng lãnh đạo hiệu quả trong bối cảnh chuyển
-                  đổi số, từ lý thuyết đến thực tiễn.
-                </p>
-                <div class="featured-document-stats">
-                  <div class="featured-document-rating">
-                    <div class="featured-document-stars">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star-half-alt"></i>
-                    </div>
-                    <span class="featured-document-rating-count">(128)</span>
-                  </div>
-                  <div class="featured-document-meta">
-                    <span class="featured-document-meta-item"
-                      ><i class="fas fa-download"></i> 2.5K</span
-                    >
-                    <span class="featured-document-meta-item"
-                      ><i class="fas fa-eye"></i> 8.3K</span
-                    >
-                  </div>
-                </div>
-              </div>
-              <div class="document-footer">
-                <div class="document-price">
-                  <span class="price">35.000đ</span>
-                  <span class="price-label">/ Tải xuống</span>
-                </div>
-                <a th:href="@{/client/document-details?id=1}" class="detail-btn"
-                  >Xem chi tiết</a
-                >
-              </div>
+          </div>
+          
+          <!-- Error message for featured documents -->
+          <div class="featured-documents-error" th:if="${featuredDocumentsError != null}">
+            <div class="error-message">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p th:text="${featuredDocumentsError}">Error loading featured documents</p>
+              <button onclick="location.reload()" class="retry-btn">
+                <i class="fas fa-redo"></i> Thử lại
+              </button>
             </div>
           </div>
 
@@ -759,7 +446,7 @@
                   </div>
                 </div>
               </div>
-
+              <!-- Thống kê tài liệu đã đăng, tác giả đóng góp, lượt tải xuống 
               <div class="upload-stats">
                 <div class="stat-item">
                   <span class="stat-number">500K+</span>
@@ -773,7 +460,7 @@
                   <span class="stat-number">2M+</span>
                   <span class="stat-label">Lượt tải xuống</span>
                 </div>
-              </div>
+              </div>-->
             </div>
 
             <div class="upload-promo">
@@ -1004,6 +691,12 @@
     </button>
 
     <script th:src="@{/js/client-header.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/upload.js}"></script>
+    <script th:src="@{/js/documents.js}"></script>
+    <script th:src="@{/js/search.js}"></script>
+    <script th:src="@{/js/home-sections.js}"></script>
+    <script th:src="@{/js/featured-slider.js}"></script>
     <script>
       // Inline script to ensure dropdown works
       document.addEventListener("DOMContentLoaded", function () {
@@ -1031,11 +724,6 @@
         }
       });
     </script>
-    <script th:src="@{/js/main.js}"></script>
-    <script th:src="@{/js/upload.js}"></script>
-    <script th:src="@{/js/documents.js}"></script>
-    <script th:src="@{/js/search.js}"></script>
-    <script th:src="@{/js/home-sections.js}"></script>
-    <script th:src="@{/js/featured-slider.js}"></script>
+    
   </body>
 </html>

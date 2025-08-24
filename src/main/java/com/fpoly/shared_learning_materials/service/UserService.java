@@ -12,10 +12,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.dto.UserDTO;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import org.thymeleaf.context.Context;
 
 @Service
 public class UserService {
@@ -24,6 +26,12 @@ public class UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+    private EmailConfigService emailConfigService;
+
+    @Autowired
+    private SpringTemplateEngine templateEngine;
 
 	/**
 	 * Lấy tất cả người dùng
@@ -130,4 +138,56 @@ public class UserService {
 	public List<User> findAllActiveUsers() {
 		return userRepository.findByDeletedAtIsNull();
 	}
+
+	public boolean registerUser(String firstName, String lastName,String username, String email, String password) {
+        // Kiểm tra email hoặc username đã tồn tại
+        if (userRepository.existsByEmail(email)|| userRepository.existsByUsername(username)) {
+            return false; // Email đã được sử dụng
+        }
+
+        // Tạo user mới
+        User user = new User();
+        user.setUsername(username); 
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setFullName(firstName + " " + lastName);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setStatus("pending"); // Trạng thái mặc định là pending
+        user.setRole("user");
+
+        // Lưu user vào cơ sở dữ liệu
+        userRepository.save(user);
+		sendConfirmationEmail(user);
+        return true;
+    }
+	 public boolean confirmUser(String username) {
+        // Tìm user theo username
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    // Kiểm tra trạng thái hiện tại
+                    if ("pending".equals(user.getStatus())) {
+                        // Cập nhật trạng thái thành ACTIVE
+                        user.setStatus("active");
+                        user.setUpdatedAt(LocalDateTime.now());
+                        userRepository.save(user); 
+                        return true;
+                    }
+                    return false; // Trạng thái không phải PENDING
+                })
+                .orElse(false); // Không tìm thấy user
+    }
+		private void sendConfirmationEmail(User user) {
+        // Tạo nội dung email từ template Thymeleaf
+        Context context = new Context();
+        context.setVariable("fullName", user.getFullName());
+        context.setVariable("confirmationUrl", "http://localhost:8080/confirm?username=" + user.getUsername());
+        String emailContent = templateEngine.process("client/confirmation-email", context);
+
+        // Gửi email sử dụng EmailConfigService
+        boolean sent = emailConfigService.sendHtmlEmail(user.getEmail(), "Xác nhận đăng ký tài khoản - EduShare", emailContent);
+        if (!sent) {
+            throw new RuntimeException("Không thể gửi email xác nhận cho: " + user.getEmail());
+        }
+    }
 }

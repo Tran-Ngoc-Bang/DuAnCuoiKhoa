@@ -2112,10 +2112,11 @@ body.dark-mode .header {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 1rem;
+  color: #fff;
 }
 
 .newsletter-description {
-  color: var(--gray-600);
+  color: #fff;
   margin-bottom: 2rem;
   max-width: 35rem;
   margin-left: auto;
@@ -2686,9 +2687,9 @@ body.dark-mode .footer-bottom {
 }
 
 .document-info {
-  /* background-color: var(--white); */
-  /* border-radius: var(--radius-lg); */
-  /* box-shadow: var(--shadow); */
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
   padding: 2rem;
 }
 

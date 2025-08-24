@@ -24,13 +24,21 @@
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
-    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
     <script th:src="@{/js/admin/notifications.js}"></script>
     <script th:src="@{/js/admin/flash-toast.js}"></script>
-    <meta name="flash-success" th:content="${successMessage}" th:if="${successMessage}"/>
-    <meta name="flash-error" th:content="${errorMessage}" th:if="${errorMessage}"/>
-    <meta name="flash-warning" th:content="${warning}" th:if="${warning}"/>
-    <meta name="flash-info" th:content="${info}" th:if="${info}"/>
+    <meta
+      name="flash-success"
+      th:content="${successMessage}"
+      th:if="${successMessage}"
+    />
+    <meta
+      name="flash-error"
+      th:content="${errorMessage}"
+      th:if="${errorMessage}"
+    />
+    <meta name="flash-warning" th:content="${warning}" th:if="${warning}" />
+    <meta name="flash-info" th:content="${info}" th:if="${info}" />
   </head>
 
   <body class="admin-body">
@@ -80,10 +88,15 @@
                   placeholder="Tìm kiếm gói xu..."
                   class="search-input"
                   id="searchInput"
+                  th:value="${keyword}"
                 />
               </div>
               <div class="tool-item">
-                <select class="filter-select" id="statusFilter">
+                <select
+                  class="filter-select"
+                  id="statusFilter"
+                  th:value="${status}"
+                >
                   <option value="all">Tất cả trạng thái</option>
                   <option value="active">Đang hoạt động</option>
                   <option value="inactive">Tạm ngưng</option>

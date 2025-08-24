@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -20,7 +23,12 @@ import com.fpoly.shared_learning_materials.dto.CategoryTreeDTO;
 import com.fpoly.shared_learning_materials.repository.CategoryHierarchyRepository;
 import com.fpoly.shared_learning_materials.repository.CategoryRepository;
 import com.fpoly.shared_learning_materials.repository.DocumentCategoryRepository;
+import com.fpoly.shared_learning_materials.repository.DocumentTagRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.domain.DocumentTag;
+import com.fpoly.shared_learning_materials.domain.Tag;
+import com.fpoly.shared_learning_materials.domain.DocumentCategory;
+import com.fpoly.shared_learning_materials.util.CategoryIconMapper;
 
 @Service
 public class CategoryService {
@@ -33,6 +41,8 @@ public class CategoryService {
     private DocumentCategoryRepository documentCategoryRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private DocumentTagRepository documentTagRepository;
 
     public List<CategoryDTO> getAllCategories() {
         return getCategoriesByDeletedStatus(null); // Lấy tất cả
@@ -105,6 +115,23 @@ public class CategoryService {
 
         System.out.println("Converting " + categories.size() + " categories to DTOs");
 
+        // OPTIMIZATION: Batch load document counts and popular tags
+        List<Long> categoryIds = categories.stream().map(Category::getId).collect(Collectors.toList());
+
+        // Batch load document counts
+        Map<Long, Long> documentCountMap = new HashMap<>();
+        if (!categoryIds.isEmpty()) {
+            List<Object[]> docCountResults = documentCategoryRepository.countDocumentsByCategoryIds(categoryIds);
+            for (Object[] result : docCountResults) {
+                Long catId = (Long) result[0];
+                Long count = (Long) result[1];
+                documentCountMap.put(catId, count);
+            }
+        }
+
+        // Batch load popular tags
+        Map<Long, List<String>> popularTagsMap = getPopularTagsForCategories(categoryIds, 5);
+
         List<CategoryDTO> result = categories.stream().map(cat -> {
             CategoryDTO dto = new CategoryDTO();
             dto.setId(cat.getId());
@@ -120,7 +147,7 @@ public class CategoryService {
             dto.setCreatedAt(cat.getCreatedAt());
             dto.setUpdatedAt(cat.getUpdatedAt());
             dto.setDeletedAt(cat.getDeletedAt());
-            dto.setDocuments(documentCategoryRepository.countByCategoryId(cat.getId()));
+            dto.setDocuments(documentCountMap.getOrDefault(cat.getId(), 0L).intValue());
             dto.setSubcategories(subcategoryCount.getOrDefault(cat.getId(), 0L).intValue());
             dto.setHierarchyCreatedAt(hierarchyCreatedAtMap.get(cat.getId()));
             dto.setParentId(parentIdMap.get(cat.getId()));
@@ -130,6 +157,9 @@ public class CategoryService {
             if (parentId != null) {
                 dto.setParentName(categoryNameMap.get(parentId));
             }
+
+            // Set popular tags from batch loaded data
+            dto.setPopularTags(popularTagsMap.getOrDefault(cat.getId(), new ArrayList<>()));
 
             return dto;
         }).collect(Collectors.toList());
@@ -316,13 +346,13 @@ public class CategoryService {
         // Xóa danh mục vĩnh viễn
         categoryRepository.deleteById(categoryId);
     }
-@Transactional
+
+    @Transactional
     public void bulkPermanentDelete(List<Long> categoryIds) {
         for (Long categoryId : categoryIds) {
             permanentDeleteCategory(categoryId); // Gọi phương thức xóa vĩnh viễn cho từng danh mục
         }
     }
-
 
     @Transactional
     public void restoreCategory(Long categoryId) {
@@ -393,7 +423,7 @@ public class CategoryService {
         }
 
         List<CategoryHierarchy> hierarchies = categoryHierarchyRepository.findAll();
-        
+
         // Get all child IDs to filter out child categories
         Set<Long> childIds = hierarchies.stream()
                 .map(h -> h.getId().getChildId())
@@ -408,7 +438,8 @@ public class CategoryService {
         Map<Long, Long> subcategoryCount = hierarchies.stream()
                 .collect(Collectors.groupingBy(h -> h.getId().getParentId(), Collectors.counting()));
 
-        // Tạo map để lấy tên danh mục cha - cần lấy TẤT CẢ categories để có thể lấy tên parent
+        // Tạo map để lấy tên danh mục cha - cần lấy TẤT CẢ categories để có thể lấy tên
+        // parent
         List<Category> allCategories = categoryRepository.findAll();
         Map<Long, String> categoryNameMap = allCategories.stream()
                 .collect(Collectors.toMap(Category::getId, Category::getName));
@@ -428,15 +459,74 @@ public class CategoryService {
             dto.setCreatedAt(cat.getCreatedAt());
             dto.setUpdatedAt(cat.getUpdatedAt());
             dto.setDeletedAt(cat.getDeletedAt());
-            dto.setDocuments(documentCategoryRepository.countByCategoryId(cat.getId()));
+
+            // Đếm documents trong category và subcategories
+            long totalDocuments = countDocumentsInCategoryAndSubcategories(cat.getId(), hierarchies);
+            dto.setDocuments((int) totalDocuments);
+
             dto.setSubcategories(subcategoryCount.getOrDefault(cat.getId(), 0L).intValue());
             dto.setParentId(null); // Root categories have no parent
             dto.setParentName(null);
+
+            // Set icon information
+            dto.setIconClass(CategoryIconMapper.getIconClassForCategory(cat.getName()));
+            dto.setIconName(CategoryIconMapper.getIconForCategory(cat.getName()));
+            if ("dynamic-icon".equals(dto.getIconClass())) {
+                dto.setIconStyle(CategoryIconMapper.getDynamicIconStyle(cat.getName()));
+            }
+
+            // Get popular tags for this category
+            List<String> popularTags = getPopularTagsForCategory(cat.getId(), 4);
+            dto.setPopularTags(popularTags);
 
             return dto;
         }).collect(Collectors.toList());
 
         return result;
+    }
+
+    // Method to count documents in a category and all its subcategories - OPTIMIZED
+    // VERSION
+    private long countDocumentsInCategoryAndSubcategories(Long categoryId, List<CategoryHierarchy> hierarchies) {
+        // Tìm tất cả subcategories (recursive)
+        Set<Long> allSubcategoryIds = getAllSubcategoryIds(categoryId, hierarchies);
+
+        // Thêm category hiện tại vào danh sách để đếm
+        allSubcategoryIds.add(categoryId);
+
+        // Batch count documents cho tất cả categories trong một lần query
+        if (allSubcategoryIds.isEmpty()) {
+            return 0;
+        }
+
+        List<Object[]> countResults = documentCategoryRepository.countDocumentsByCategoryIds(
+                new ArrayList<>(allSubcategoryIds));
+
+        // Sum up all counts
+        return countResults.stream()
+                .mapToLong(result -> (Long) result[1])
+                .sum();
+    }
+
+    // Helper method to get all subcategory IDs recursively
+    private Set<Long> getAllSubcategoryIds(Long parentId, List<CategoryHierarchy> hierarchies) {
+        Set<Long> subcategoryIds = new HashSet<>();
+
+        // Tìm direct children
+        List<Long> directChildren = hierarchies.stream()
+                .filter(h -> h.getId().getParentId().equals(parentId))
+                .map(h -> h.getId().getChildId())
+                .collect(Collectors.toList());
+
+        // Thêm direct children
+        subcategoryIds.addAll(directChildren);
+
+        // Recursively get children of children
+        for (Long childId : directChildren) {
+            subcategoryIds.addAll(getAllSubcategoryIds(childId, hierarchies));
+        }
+
+        return subcategoryIds;
     }
 
     // Get subcategories tree for a parent category
@@ -454,7 +544,8 @@ public class CategoryService {
 
     private CategoryTreeDTO buildCategoryTree(Long categoryId, Map<Long, Category> categoryMap) {
         Category category = categoryMap.get(categoryId);
-        if (category == null) return null;
+        if (category == null)
+            return null;
 
         CategoryTreeDTO tree = new CategoryTreeDTO();
         tree.setId(category.getId());
@@ -473,7 +564,62 @@ public class CategoryService {
                 .map(h -> buildCategoryTree(h.getId().getChildId(), categoryMap))
                 .filter(child -> child != null)
                 .collect(Collectors.toList());
-        
+
+        tree.setChildren(children);
+        tree.setSubcategories(children.size());
+
+        return tree;
+    }
+
+    // Get subcategories tree for a parent category - OPTIMIZED VERSION
+    public List<CategoryTreeDTO> getSubcategoriesTreeOptimized(Long parentId) {
+        List<CategoryHierarchy> hierarchies = categoryHierarchyRepository.findByIdParentId(parentId);
+        List<Category> allCategories = categoryRepository.findAll();
+        Map<Long, Category> categoryMap = allCategories.stream()
+                .collect(Collectors.toMap(Category::getId, cat -> cat));
+
+        // Batch load document counts for all categories
+        List<Long> categoryIds = allCategories.stream().map(Category::getId).collect(Collectors.toList());
+        Map<Long, Long> documentCountMap = new HashMap<>();
+        if (!categoryIds.isEmpty()) {
+            List<Object[]> docCountResults = documentCategoryRepository.countDocumentsByCategoryIds(categoryIds);
+            for (Object[] result : docCountResults) {
+                Long catId = (Long) result[0];
+                Long count = (Long) result[1];
+                documentCountMap.put(catId, count);
+            }
+        }
+
+        return hierarchies.stream()
+                .map(h -> buildCategoryTreeOptimized(h.getId().getChildId(), categoryMap, documentCountMap))
+                .filter(tree -> tree != null)
+                .collect(Collectors.toList());
+    }
+
+    private CategoryTreeDTO buildCategoryTreeOptimized(Long categoryId, Map<Long, Category> categoryMap,
+            Map<Long, Long> documentCountMap) {
+        Category category = categoryMap.get(categoryId);
+        if (category == null)
+            return null;
+
+        CategoryTreeDTO tree = new CategoryTreeDTO();
+        tree.setId(category.getId());
+        tree.setName(category.getName());
+        tree.setSlug(category.getSlug());
+        tree.setDescription(category.getDescription());
+        tree.setStatus(category.getStatus());
+        tree.setDocuments(documentCountMap.getOrDefault(category.getId(), 0L).intValue());
+        tree.setCreatedAt(category.getCreatedAt());
+        tree.setUpdatedAt(category.getUpdatedAt());
+        tree.setDeletedAt(category.getDeletedAt());
+
+        // Get children
+        List<CategoryHierarchy> childHierarchies = categoryHierarchyRepository.findByIdParentId(categoryId);
+        List<CategoryTreeDTO> children = childHierarchies.stream()
+                .map(h -> buildCategoryTreeOptimized(h.getId().getChildId(), categoryMap, documentCountMap))
+                .filter(child -> child != null)
+                .collect(Collectors.toList());
+
         tree.setChildren(children);
         tree.setSubcategories(children.size());
 
@@ -483,5 +629,47 @@ public class CategoryService {
     // Helper method to generate slug
     private String generateSlug(String name) {
         return name.toLowerCase().replaceAll("[^a-z0-9]", "-").replaceAll("-+", "-");
+    }
+
+    /**
+     * Get popular tags for a category - OPTIMIZED VERSION
+     */
+    public List<String> getPopularTagsForCategory(Long categoryId, int limit) {
+        // Sử dụng JOIN query để lấy tất cả tags trong một lần query
+        List<Object[]> tagResults = documentCategoryRepository.findPopularTagsByCategoryId(categoryId);
+
+        return tagResults.stream()
+                .map(result -> (String) result[0]) // Tag name
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get popular tags for multiple categories - BATCH OPTIMIZED VERSION
+     */
+    public Map<Long, List<String>> getPopularTagsForCategories(List<Long> categoryIds, int limit) {
+        if (categoryIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        // Lấy tất cả popular tags cho tất cả categories trong một lần query
+        List<Object[]> allTagResults = documentCategoryRepository.findPopularTagsByCategoryIds(categoryIds);
+
+        // Group results by category ID and apply limit
+        Map<Long, List<String>> result = new HashMap<>();
+        Map<Long, Integer> categoryCounts = new HashMap<>();
+
+        for (Object[] row : allTagResults) {
+            Long catId = (Long) row[0];
+            String tagName = (String) row[1];
+
+            int currentCount = categoryCounts.getOrDefault(catId, 0);
+            if (currentCount < limit) {
+                result.computeIfAbsent(catId, k -> new ArrayList<>()).add(tagName);
+                categoryCounts.put(catId, currentCount + 1);
+            }
+        }
+
+        return result;
     }
 }

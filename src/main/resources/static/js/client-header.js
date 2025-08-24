@@ -56,27 +56,41 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Dark Mode Toggle
-    const darkModeToggle = document.getElementById("darkModeToggle");
-    const body = document.body;
+    // Dark mode is handled globally in main.js; removed duplicate toggle here.
 
-    if (darkModeToggle) {
-      // Check for saved dark mode preference
-      const isDarkMode = localStorage.getItem("darkMode") === "true";
-      if (isDarkMode) {
-        body.classList.add("dark-mode");
-      }
+    // Search functionality for hero search form
+    const heroSearchForm = document.getElementById("heroSearchForm");
+    const heroSearchInput = document.getElementById("heroSearchInput");
+    const heroCategorySelect = document.getElementById("heroCategorySelect");
 
-      darkModeToggle.addEventListener("click", function () {
-        body.classList.toggle("dark-mode");
-        const isDark = body.classList.contains("dark-mode");
-        localStorage.setItem("darkMode", isDark);
+    if (heroSearchForm) {
+      heroSearchForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const query = heroSearchInput.value.trim();
+        const category = heroCategorySelect.value;
+        
+        // Build search URL
+        let searchUrl = "/search?";
+        const params = [];
+        
+        if (query) {
+          params.push(`q=${encodeURIComponent(query)}`);
+        }
+        
+        if (category && category !== "all") {
+          params.push(`category=${encodeURIComponent(category)}`);
+        }
+        
+        if (params.length > 0) {
+          searchUrl += params.join("&");
+          window.location.href = searchUrl;
+        }
       });
     }
 
-    // Search functionality
-    const searchInput = document.querySelector(".hero-search input");
-    const searchBtn = document.querySelector(".search-btn");
+    // Legacy search functionality (fallback)
+    const searchInput = document.querySelector(".hero-search input:not(#heroSearchInput)");
+    const searchBtn = document.querySelector(".search-btn:not(#heroSearchForm .search-btn)");
 
     if (searchInput && searchBtn) {
       searchBtn.addEventListener("click", function (e) {

@@ -16,6 +16,74 @@
     <link rel="stylesheet" th:href="@{/css/footer-modern.css}">
     <link rel="stylesheet" th:href="@{/css/client-header.css}">
     <link rel="stylesheet" th:href="@{/css/client-footer.css}">
+    <style>
+     
+    .tag-suggestion {
+        padding: 5px;
+        cursor: pointer;
+    }
+    .tag-suggestion:hover {
+        background-color: #f0f0f0;
+    }
+    .tag-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        background-color: #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+    .tag-badge:hover {
+        background-color: #d0d0d0;
+    }
+    .input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 300px; /* Điều chỉnh độ rộng tối đa tùy ý */
+    margin-bottom: 15px;
+}
+
+.input-group .fas {
+    position: absolute;
+    left: 10px;
+    color: #555;
+    font-size: 1.2em;
+}
+
+.input-group .form-input {
+    width: 100%;
+    padding: 10px 10px 10px 40px; /* Padding trái để tránh chồng lấp icon */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.input-group .form-input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+
+}
+
+.input-group .form-input:invalid {
+    border-color: #dc3545;
+}
+
+.input-group .form-input:invalid + .error-message {
+    display: block;
+}
+
+.error-message {
+    display: none;
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+</style>
+       
 </head>
 <body>
     <!-- Decorative Background Elements -->
@@ -92,57 +160,64 @@
                     </div>
                     <h1 class="page-title">Đăng tải tài liệu</h1>
                     <p class="page-description">Chia sẻ kiến thức của bạn và giúp đỡ cộng đồng học tập</p>
+                     <div class="error-message" th:if="${error}" th:text="${error}"></div>
+                    <div class="success-message" th:if="${success}" th:text="${success}"></div> 
                 </div>
                 
                 <div class="upload-container">
                     <div class="upload-steps">
-                        <div class="step active" data-step="1">
+                        <div class="step active"  th:classappend="${currentStep == 1} ? 'active' : ''" data-step="1">
                             <div class="step-number">1</div>
                             <div class="step-label">Tải lên tài liệu</div>
                         </div>
-                        <div class="step" data-step="2">
+                        <div class="step" th:classappend="${currentStep == 2} ? 'active' : (${currentStep > 2} ? 'completed' : '')" data-step="2">
                             <div class="step-number">2</div>
                             <div class="step-label">Thông tin tài liệu</div>
                         </div>
-                        <div class="step" data-step="3">
+                        <div class="step" th:classappend="${currentStep == 3} ? 'active' : (${currentStep > 3} ? 'completed' : '')" data-step="3">
                             <div class="step-number">3</div>
                             <div class="step-label">Cài đặt và xem trước</div>
                         </div>
-                        <div class="step" data-step="4">
+                        <div class="step" th:classappend="${currentStep == 4} ? 'active' : ''" data-step="4">
                             <div class="step-number">4</div>
                             <div class="step-label">Hoàn tất</div>
                         </div>
                     </div>
                     
                     <!-- Step 1: Upload File -->
-                    <div class="upload-step-content active" data-step="1">
+                    <div class="upload-step-content" th:classappend="${currentStep == 1} ? 'active' : ''" data-step="1">
                         <div class="upload-dropzone" id="uploadDropzone">
-                            <input type="file" id="fileInput" class="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
+                             <form th:action="@{/upload/step1}" method="post" enctype="multipart/form-data">
+                            <input type="file" id="fileInput"  name="file" class="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
                             <div class="dropzone-content">
                                 <div class="dropzone-icon">
                                     <i class="fas fa-cloud-upload-alt"></i>
                                 </div>
                                 <h3 class="dropzone-title">Kéo thả tài liệu tại đây</h3>
                                 <p class="dropzone-description">hoặc</p>
-                                <button class="btn btn-primary browse-btn">Chọn tài liệu</button>
+                                <button type="button" class="btn btn-primary browse-btn">Chọn tài liệu</button>
                                 <p class="file-requirements">Hỗ trợ tập tin: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX <br> Kích thước tối đa: 100MB</p>
                             </div>
                             
-                            <div class="upload-preview" style="display: none;">
+                            <div class="upload-preview" th:style="${fileName != null} ? 'display: block;' : 'display: none;'">
                                 <div class="preview-header">
                                     <div class="preview-file-info">
                                         <div class="preview-file-icon">
-                                            <i class="fas fa-file-pdf"></i>
+                                            <i th:class="${fileType == 'PDF' ? 'fas fa-file-pdf' : 
+               fileType == 'DOC' || fileType == 'DOCX' ? 'fas fa-file-word' : 
+               fileType == 'XLS' || fileType == 'XLSX' ? 'fas fa-file-excel' : 
+               fileType == 'PPT' || fileType == 'PPTX' ? 'fas fa-file-powerpoint' : 
+               'fas fa-file'}"></i>
                                         </div>
                                         <div class="preview-file-details">
-                                            <div class="preview-file-name">document.pdf</div>
+                                            <div class="preview-file-name" th:text="${fileName}">document.pdf</div>
                                             <div class="preview-file-meta">
-                                                <span class="file-size">2.5 MB</span>
-                                                <span class="file-type">PDF</span>
+                                                <span class="file-size" th:text="${fileSize != null} ? ${#numbers.formatDecimal(fileSize / 1024.0 / 1024.0, 0, 2, 'COMMA')} + ' MB' : 'N/A'"></span>
+                                                <span class="file-type" th:text="${fileType}"></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-outline btn-sm change-file-btn">
+                                    <button type="button" class="btn btn-outline btn-sm change-file-btn">
                                         <i class="fas fa-exchange-alt"></i> Đổi tài liệu
                                     </button>
                                 </div>
@@ -168,95 +243,107 @@
                         </div>
                         
                         <div class="step-actions">
-                            <button class="btn btn-primary next-step" id="step1Next" disabled>Tiếp theo</button>
+                            <button type="submit" class="btn btn-primary next-step" id="step1Next" th:disabled="${fileName == null}">Tiếp theo</button>
                         </div>
-                    </div>
-                    
-                    <!-- Step 2: Document Info -->
-                    <div class="upload-step-content" data-step="2">
-                        <form class="document-form">
-                            <div class="form-grid">
-                                <div class="form-group full-width">
-                                    <label for="docTitle">Tiêu đề tài liệu<span class="required">*</span></label>
-                                    <input type="text" id="docTitle" class="form-input" placeholder="Nhập tiêu đề mô tả tài liệu" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="docCategory">Danh mục<span class="required">*</span></label>
-                                    <select id="docCategory" class="form-select" required>
-                                        <option value="" disabled selected>Chọn danh mục</option>
-                                        <option value="it">Công nghệ thông tin</option>
-                                        <option value="business">Kinh tế - Quản trị</option>
-                                        <option value="language">Ngoại ngữ</option>
-                                        <option value="engineering">Kỹ thuật - Công nghệ</option>
-                                        <option value="social">Khoa học xã hội</option>
-                                        <option value="science">Khoa học tự nhiên</option>
-                                        <option value="health">Y tế - Sức khỏe</option>
-                                        <option value="art">Nghệ thuật</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="docSubcategory">Danh mục con</label>
-                                    <select id="docSubcategory" class="form-select" disabled>
-                                        <option value="" disabled selected>Chọn danh mục con</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group full-width">
-                                    <label for="docDescription">Mô tả tài liệu<span class="required">*</span></label>
-                                    <textarea id="docDescription" class="form-input" rows="5" placeholder="Mô tả ngắn gọn về nội dung tài liệu" required></textarea>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="docLanguage">Ngôn ngữ</label>
-                                    <select id="docLanguage" class="form-select">
-                                        <option value="vi" selected>Tiếng Việt</option>
-                                        <option value="en">Tiếng Anh</option>
-                                        <option value="fr">Tiếng Pháp</option>
-                                        <option value="de">Tiếng Đức</option>
-                                        <option value="ja">Tiếng Nhật</option>
-                                        <option value="zh">Tiếng Trung</option>
-                                        <option value="ko">Tiếng Hàn</option>
-                                        <option value="other">Khác</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="docPages">Số trang</label>
-                                    <input type="number" id="docPages" class="form-input" placeholder="Số trang tài liệu" min="1">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="docTags">Từ khóa</label>
-                                    <input type="text" id="docTags" class="form-input" placeholder="Nhập các từ khóa, ngăn cách bởi dấu phẩy">
-                                    <div class="form-hint">Thêm từ khóa giúp tài liệu của bạn dễ dàng được tìm thấy hơn</div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="docYear">Năm xuất bản</label>
-                                    <input type="number" id="docYear" class="form-input" placeholder="Năm xuất bản tài liệu" min="1900" max="2023">
-                                </div>
-                            </div>
-                            
-                            <div class="step-actions">
-                                <button type="button" class="btn btn-outline prev-step" data-prev="1">Quay lại</button>
-                                <button type="button" class="btn btn-primary next-step" id="step2Next">Tiếp theo</button>
-                            </div>
                         </form>
                     </div>
                     
+                 <!-- Step 2: Document Info -->
+<div class="upload-step-content" th:classappend="${currentStep == 2} ? 'active' : ''" data-step="2">
+    <form class="document-form" th:action="@{/upload/step2}" th:object="${documentDTO}" method="post">
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label for="docTitle">Tiêu đề tài liệu<span class="required">*</span></label>
+                <input type="text" id="docTitle" name="title" class="form-input" th:field="*{title}" placeholder="Nhập tiêu đề mô tả tài liệu" required>
+            </div>
+             <div class="form-group">
+            <!-- Phân loại danh mục đa cấp -->
+            <label>Chọn danh mục cha <span class="required">*</span></label>
+            
+            <!-- Level 1: Root categories -->
+            <div class="category-level" id="level1">
+                <label for="level1Select" class="level-label">Cấp 1 - Danh mục gốc:</label>
+                <select id="level1Select" class="form-select level-select" onchange="onLevelChange(1)" th:name="parentId">
+                    <option value="0">🏠 Danh mục gốc (không có cha)</option>
+                    <option th:each="parent : ${rootCategories}"
+                            th:value="${parent.id}"
+                            th:text="'📂 ' + ${parent.name}"
+                            th:attr="data-subcategories=${parent.subcategories}">
+                    </option>
+                </select>
+            </div>
+            
+            <!-- Level 2: Subcategories -->
+            <div class="category-level" id="level2" style="display: none;">
+                <label for="level2Select" class="level-label">Cấp 2 - Danh mục con:</label>
+                <select id="level2Select" class="form-select level-select" onchange="onLevelChange(2)" th:name="parentId">
+                    <option value="">Chọn danh mục con...</option>
+                </select>
+            </div>
+            
+            <!-- Level 3: Sub-subcategories -->
+            <div class="category-level" id="level3" style="display: none;">
+                <label for="level3Select" class="level-label">Cấp 3 - Danh mục con cấp 2:</label>
+                <select id="level3Select" class="form-select level-select" onchange="onLevelChange(3)" th:name="parentId">
+                    <option value="">Chọn danh mục con cấp 2...</option>
+                </select>
+            </div>
+            
+            <!-- Hidden input for final parent selection -->
+            <input type="hidden" id="finalParentId" name="parentId" th:value="${documentDTO.parentId != null ? documentDTO.parentId : 0}">
+            
+            <!-- Hidden input for all categoryIds -->
+            <input type="hidden" id="categoryIds" name="categoryIds" value="">
+
+            <!-- Breadcrumb hiển thị đường dẫn đã chọn -->
+            <div id="categoryBreadcrumb" style="margin-top: 10px; display: none;">
+                <div style="padding: 8px 12px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 4px;">
+                    <strong>Đường dẫn đã chọn:</strong>
+                    <div id="breadcrumbPath" style="margin-top: 5px; font-family: monospace;"></div>
+                </div>
+            </div>
+             </div>
+            
+            <div class="form-group full-width">
+                <label for="docDescription">Mô tả tài liệu<span class="required">*</span></label>
+                <textarea id="docDescription" name="description" th:field="*{description}" class="form-input" rows="5" placeholder="Mô tả ngắn gọn về nội dung tài liệu" required></textarea>
+            </div>
+            <!-- Hiển thị tag phổ biến và tìm kiếm tag -->
+           <div class="form-group">
+                <label for="docTags">Từ khóa</label>
+                <input type="text" id="docTags" class="form-input" placeholder="Nhập để tìm hoặc tạo từ khóa, ngăn cách bởi dấu phẩy" oninput="searchTags()">
+                <div class="form-hint">Thêm từ khóa giúp tài liệu của bạn dễ dàng được tìm thấy hơn</div>
+                <div id="tagSuggestions" class="tag-suggestions" style="display: none; position: absolute; background: white; border: 1px solid #ccc; padding: 5px; z-index: 1000;"></div>
+                <div id="popularTags" class="popular-tags" style="margin-top: 10px;">
+                    <strong>Tag phổ biến:</strong>
+                    <div th:if="${popularTags != null and not #lists.isEmpty(popularTags)}" th:each="tag : ${popularTags}" style="display: inline-block; margin-right: 5px;">
+                        <span class="tag-badge" th:attr="data-tag=${tag.name}" onclick="addTag(this.getAttribute('data-tag'))">#<span th:text="${tag.name}"></span></span>
+                    </div>
+                    <div th:unless="${popularTags != null and not #lists.isEmpty(popularTags)}" style="color: #888;">Không có tag phổ biến.</div>
+                </div>
+                <input type="hidden" id="tagNames" name="tagNames" value="">
+            </div>
+        </div>
+        
+        <div class="step-actions">
+            <button type="button" class="btn btn-outline prev-step" data-prev="1">Quay lại</button>
+            <button type="submit" class="btn btn-primary next-step" id="step2Next">Tiếp theo</button>
+        </div>
+    </form>
+</div>
+                    
                     <!-- Step 3: Settings & Preview -->
-                    <div class="upload-step-content" data-step="3">
+                    <div class="upload-step-content"  th:classappend="${currentStep == 3} ? 'active' : ''" data-step="3">
+                         <form th:action="@{/upload/step3}" method="post">
                         <div class="setting-sections">
                             <div class="setting-section">
                                 <h3 class="section-title">Cài đặt quyền truy cập</h3>
-                                
+           
                                 <div class="form-group">
                                     <label class="setting-label">Loại truy cập</label>
                                     <div class="toggle-options">
                                         <label class="toggle-option">
-                                            <input type="radio" name="accessType" value="free" checked>
+                                            <input type="radio" name="accessType" value="0" checked>
                                             <span class="option-label"><i class="fas fa-unlock-alt"></i> Miễn phí</span>
                                             <span class="option-description">Ai cũng có thể xem và tải xuống tài liệu này</span>
                                         </label>
@@ -273,7 +360,8 @@
                                         <label for="docPrice">Giá tài liệu (xu)</label>
                                         <div class="input-group">
                                             <i class="fas fa-coins"></i>
-                                            <input type="number" id="docPrice" class="form-input" placeholder="Nhập số xu" min="10" max="1000" value="50">
+                                            <input type="number" id="docPrice" name="price" class="form-input" placeholder="Nhập số xu" min="10" max="1000" value="50" oninput="validatePrice(this)">
+                                            <div id="priceError" class="error-message"></div>
                                         </div>
                                     </div>
                                     
@@ -295,7 +383,7 @@
                                 </div>
                             </div>
                             
-                            <div class="setting-section">
+                        <!--  <div class="setting-section">
                                 <h3 class="section-title">Cài đặt xem trước</h3>
                                 
                                 <div class="form-group">
@@ -312,9 +400,9 @@
                                             <span class="option-description">Người dùng chỉ thấy thông tin tài liệu mà không xem được nội dung</span>
                                         </label>
                                     </div>
-                                </div>
+                                </div> 
                                 
-                                <div id="previewSettings" class="preview-settings">
+                              <div id="previewSettings" class="preview-settings">
                                     <label for="previewPages">Số trang xem trước:</label>
                                     <div class="preview-slider">
                                         <div class="slider-container">
@@ -329,9 +417,9 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --> 
                             
-                            <div class="setting-section">
+                      <!--     <div class="setting-section">
                                 <h3 class="section-title">Tài liệu liên quan</h3>
                                 
                                 <div class="form-group">
@@ -350,7 +438,7 @@
                                     </div>
                                 </div>
                                 
-                                <div id="manualRelatedDocs" style="display: none;">
+                             <div id="manualRelatedDocs" style="display: none;">
                                     <div class="related-docs-selector">
                                         <div class="search-related">
                                             <input type="text" placeholder="Tìm kiếm tài liệu của bạn...">
@@ -361,17 +449,18 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
                         
                         <div class="step-actions">
-                            <button type="button" class="btn btn-outline prev-step" data-prev="2">Quay lại</button>
-                            <button type="button" class="btn btn-primary next-step" id="publishBtn">Xuất bản</button>
+                             <a href="/upload" class="btn btn-outline prev-step">Quay lại</a>
+                            <button type="submit" class="btn btn-primary next-step" id="publishBtn">Xuất bản</button>
                         </div>
+                        </form>
                     </div>
                     
                     <!-- Step 4: Completion -->
-                    <div class="upload-step-content" data-step="4">
+                    <div class="upload-step-content" th:classappend="${currentStep == 4} ? 'active' : ''" data-step="4">
                         <div class="completion-message">
                             <div class="completion-icon">
                                 <i class="fas fa-check-circle"></i>
@@ -382,29 +471,31 @@
                                 Tài liệu của bạn đã được tải lên và đang chờ kiểm duyệt. Quá trình này thường mất 24-48 giờ. 
                                 Bạn sẽ nhận được thông báo khi tài liệu được duyệt và công khai.
                                 <br><br>
-                                ID tài liệu: <span class="document-id">DOC-2023120001</span>
+                                ID tài liệu: <span class="document-id" th:text="${documentId}" >DOC-2023120001</span>
                             </p>
                             
                             <div class="completion-actions">
-                                <a href="account/documents.html" class="btn btn-outline">
+                                <a href="account/documents" class="btn btn-outline">
                                     <i class="fas fa-file-alt"></i> Quản lý tài liệu
                                 </a>
+                                <form th:action="@{/upload/reset}" method="post" style="display: inline;">
                                 <button class="btn btn-primary" id="uploadAnotherBtn">
                                     <i class="fas fa-plus"></i> Tải lên tài liệu khác
                                 </button>
+                                   </form>
                             </div>
                             
                             <div class="completion-stats">
                                 <div class="stat-card">
-                                    <div class="stat-value">5</div>
+                                    <div class="stat-value" th:text="${#numbers.formatInteger(numDocuments, 0, 'DEFAULT')}">5</div>
                                     <div class="stat-label">Tài liệu đã tải</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-value">125</div>
+                                    <div class="stat-value" th:text="${#numbers.formatInteger(numDownloads, 0, 'DEFAULT')}">125</div>
                                     <div class="stat-label">Lượt tải xuống</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-value">2,500</div>
+                                    <div class="stat-value" th:text="${#numbers.formatInteger(numPoints, 0, 'DEFAULT')}">2,500</div>
                                     <div class="stat-label">Xu đã kiếm được</div>
                                 </div>
                             </div>
@@ -825,6 +916,184 @@
                 });
             }
         });
+
+   let selectedPath = [];
+    let rootCategories = /*[[${rootCategories}]]*/ [];
+    let popularTags = /*[[${popularTags}]]*/ []; // Lấy từ model
+
+    function onLevelChange(level) {
+        const currentSelect = document.getElementById(`level${level}Select`);
+        const selectedValue = currentSelect.value;
+        const selectedText = currentSelect.options[currentSelect.selectedIndex].text;
+
+        // Clear subsequent levels
+        for (let i = level + 1; i <= 3; i++) {
+            const nextLevel = document.getElementById(`level${i}`);
+            const nextSelect = document.getElementById(`level${i}Select`);
+            nextLevel.style.display = 'none';
+            nextSelect.innerHTML = '<option value="">Chọn danh mục con...</option>';
+        }
+
+        // Update selected path
+        selectedPath = selectedPath.slice(0, level - 1);
+        if (selectedValue && selectedValue !== '0') {
+            selectedPath.push({
+                id: selectedValue,
+                name: selectedText.replace(/^[📂📁🏠]\s*/, ''),
+                level: level
+            });
+
+            // Load next level via API
+            loadNextLevel(selectedValue, level + 1);
+        } else if (level === 1 && selectedValue === '0') {
+            selectedPath = [];
+        }
+
+        updateFinalSelection();
+        updateBreadcrumb();
+    }
+
+    function loadNextLevel(parentId, targetLevel) {
+        if (targetLevel > 3) return;
+
+        fetch(`/categories/${parentId}/subcategories`)
+            .then(response => response.json())
+            .then(data => {
+                const targetSelect = document.getElementById(`level${targetLevel}Select`);
+                const targetDiv = document.getElementById(`level${targetLevel}`);
+
+                if (data && data.length > 0) {
+                    targetSelect.innerHTML = '<option value="">Chọn danh mục con...</option>';
+                    data.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = `📁 ${sub.name}`;
+                        option.setAttribute('data-subcategories', sub.subcategories || 0);
+                        targetSelect.appendChild(option);
+                    });
+                    targetDiv.style.display = 'block';
+                } else {
+                    targetDiv.style.display = 'none';
+                    updateFinalSelection();
+                }
+            })
+            .catch(error => console.error('Error loading subcategories:', error));
+    }
+
+    function updateFinalSelection() {
+        const finalParentId = document.getElementById('finalParentId');
+        const categoryIdsInput = document.getElementById('categoryIds');
+        finalParentId.value = selectedPath.length > 0 ? selectedPath[selectedPath.length - 1].id : '0';
+        categoryIdsInput.value = selectedPath.map(item => item.id).join(',');
+        console.log("Updated parentId:", finalParentId.value);
+        console.log("Updated categoryIds:", categoryIdsInput.value);
+    }
+
+    function updateBreadcrumb() {
+        const breadcrumb = document.getElementById('categoryBreadcrumb');
+        const breadcrumbPath = document.getElementById('breadcrumbPath');
+
+        if (selectedPath.length === 0) {
+            breadcrumb.style.display = 'none';
+            return;
+        }
+
+        let pathHtml = '<span class="breadcrumb-item">🏠 Gốc</span>';
+        selectedPath.forEach((item, index) => {
+            pathHtml += '<span class="breadcrumb-arrow">→</span>';
+            pathHtml += `<span class="breadcrumb-item">📁 ${item.name}</span>`;
+        });
+
+        breadcrumbPath.innerHTML = pathHtml;
+        breadcrumb.style.display = 'block';
+    }
+
+    // Logic tìm kiếm và tạo tag
+    function searchTags() {
+        const input = document.getElementById('docTags');
+        const suggestions = document.getElementById('tagSuggestions');
+        const query = input.value.trim();
+
+        if (query.length < 1) {
+            suggestions.style.display = 'none';
+            return;
+        }
+
+        fetch(`/tags/search?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+                data.forEach(tag => {
+                    const div = document.createElement('div');
+                    div.textContent = `#${tag.name}`;
+                    div.className = 'tag-suggestion';
+                    div.onclick = () => addTag(tag.name);
+                    suggestions.appendChild(div);
+                });
+                suggestions.style.display = data.length > 0 ? 'block' : 'none';
+            })
+            .catch(error => console.error('Error searching tags:', error));
+    }
+
+    function addTag(tagName) {
+        const input = document.getElementById('docTags');
+        const tagNamesInput = document.getElementById('tagNames');
+        let tags = input.value.split(',').map(t => t.trim()).filter(t => t);
+        if (!tags.includes(tagName)) {
+            tags.push(tagName);
+            input.value = tags.join(', ');
+        }
+        updateTagNamesInput();
+        document.getElementById('tagSuggestions').style.display = 'none';
+    }
+
+    function updateTagNamesInput() {
+        const input = document.getElementById('docTags');
+        const tagNamesInput = document.getElementById('tagNames');
+        tagNamesInput.value = input.value.split(',').map(t => t.trim()).filter(t => t).join(',');
+        console.log("Updated tagNames:", tagNamesInput.value);
+    }
+
+    document.getElementById('docTags').addEventListener('change', updateTagNamesInput);
+    document.getElementById('step2Next').addEventListener('click', updateTagNamesInput);
+
+    function validatePrice(input) {
+    const errorDiv = document.getElementById('priceError');
+    const value = parseInt(input.value);
+    const max = parseInt(input.max);
+    const min = parseInt(input.min);
+
+    if (value > max) {
+        errorDiv.textContent = `Số xu không được vượt quá ${max}!`;
+        input.value = max; // Đặt lại giá trị về max nếu vượt quá
+    } else if (value < min) {
+        errorDiv.textContent = `Số xu phải lớn hơn hoặc bằng ${min}!`;
+        input.value = min; // Đặt lại giá trị về min nếu nhỏ hơn
+    } else {
+        errorDiv.textContent = '';
+    }
+}
+    // Khởi tạo khi tải trang
+    document.addEventListener('DOMContentLoaded', function() {
+        const initialParentId = /*[[${documentDTO.parentId != null ? documentDTO.parentId : 0}]]*/ 0;
+        if (initialParentId > 0) {
+            let currentId = initialParentId;
+            let level = 1;
+            while (currentId > 0 && level <= 3) {
+                const select = document.getElementById(`level${level}Select`);
+                const category = rootCategories.find(c => c.id == currentId);
+                if (category) {
+                    select.value = currentId;
+                    onLevelChange(level);
+                    currentId = category.parentId || 0;
+                    level++;
+                } else {
+                    break;
+                }
+            }
+        }
+    });
+   
     </script>
 </body>
 </html>

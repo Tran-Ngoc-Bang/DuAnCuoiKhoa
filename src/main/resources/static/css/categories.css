@@ -370,6 +370,11 @@
   color: #31cb9e;
 }
 
+.category-icon-container.default-icon {
+  background: linear-gradient(135deg, #6b728020, #6b728040);
+  color: #6b7280;
+}
+
 .category-card:hover .category-icon-container {
   transform: scale(1.1) rotate(5deg);
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
