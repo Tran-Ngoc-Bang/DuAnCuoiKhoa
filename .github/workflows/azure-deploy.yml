@@ -8,7 +8,6 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: shared-learning-app
-  AZURE_WEBAPP_PACKAGE_PATH: "."
 
 jobs:
   build-and-deploy:
@@ -34,22 +33,25 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Build and prepare for manual deployment
+      - name: Find JAR file
+        id: find-jar
         run: |
-          # Find the JAR file
           JAR_FILE=$(find target -name "*.jar" | head -1)
           echo "Found JAR file: $JAR_FILE"
+          echo "jar-path=$JAR_FILE" >> $GITHUB_OUTPUT
 
-          # Create deployment info
-          echo "## Deployment Instructions" >> deployment-info.md
-          echo "1. Go to Kudu Console: https://shared-learning-app-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net" >> deployment-info.md
-          echo "2. Navigate to Debug Console → Bash" >> deployment-info.md
-          echo "3. Run: cd /home/site/wwwroot" >> deployment-info.md
-          echo "4. Upload the JAR file: $JAR_FILE" >> deployment-info.md
-          echo "5. Rename to: app.jar" >> deployment-info.md
-          echo "6. Configure Startup Command in Azure Portal" >> deployment-info.md
+      - name: Deploy to Azure Web App via Kudu
+        run: |
+          # Create a zip file containing the JAR
+          cd target
+          zip -r app.zip *.jar
 
-          echo "Manual deployment required. See deployment-info.md for instructions."
+          # Deploy using Kudu API
+          curl -X POST \
+            -H "Content-Type: application/zip" \
+            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
+            --data-binary @app.zip \
+            "https://${{ env.AZURE_WEBAPP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
 
       - name: Health check
         run: |
