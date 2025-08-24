@@ -43,16 +43,6 @@ jobs:
           # Copy JAR to root for easier access
           cp "$JAR_FILE" app.jar
 
-      - name: Debug Kudu credentials
-        run: |
-          echo "Checking KUDU_CREDENTIALS length: ${#KUDU_CREDENTIALS}"
-          if [ -z "$KUDU_CREDENTIALS" ]; then
-            echo "❌ KUDU_CREDENTIALS is empty!"
-            exit 1
-          else
-            echo "✅ KUDU_CREDENTIALS is set"
-          fi
-
       - name: Deploy to Azure Web App via Kudu
         run: |
           # Create a zip file containing the JAR
@@ -63,20 +53,10 @@ jobs:
             -H "Content-Type: application/zip" \
             -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
             --data-binary @app.zip \
-            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy" \
-            -v
-
-      - name: Set Startup Command
-        run: |
-          # Set startup command via Kudu API
-          curl -X PUT \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
-            -d '{"startupCommand": "java -jar /home/site/wwwroot/app.jar"}' \
-            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/settings"
+            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy"
 
       - name: Health check
         run: |
           echo "Waiting for deployment to complete..."
           sleep 30
-          curl -f https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.eastasia-01.azurewebsites.net/health/simple || echo "Health check failed"
+          curl -f https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health/simple || echo "Health check failed"
