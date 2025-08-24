@@ -1,0 +1,113 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  AZURE_WEBAPP_NAME: shared-learning-materials-app # Change this to your app name
+  AZURE_WEBAPP_PACKAGE_PATH: "."
+  JAVA_VERSION: "17"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build with Maven
+        run: |
+          mvn clean package -DskipTests
+          echo "Build completed successfully"
+
+      - name: Run tests
+        run: |
+          mvn test
+          echo "Tests completed successfully"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: java-app
+          path: "${{ github.workspace }}/target/*.jar"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          slot-name: "Production"
+          package: ${{ github.workspace }}/target/*.jar
+          startup-command: "java -jar -Dspring.profiles.active=azure target/*.jar"
+
+  health-check:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for deployment to complete..."
+          sleep 60
+
+      - name: Health check
+        run: |
+          # Get the Azure Web App URL
+          APP_URL="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+
+          # Wait for the application to be ready
+          echo "Checking if application is ready at $APP_URL"
+
+          # Try health check endpoint
+          for i in {1..10}; do
+            echo "Attempt $i: Checking health endpoint..."
+            if curl -f -s "$APP_URL/health/simple" > /dev/null; then
+              echo "✅ Application is healthy!"
+              break
+            else
+              echo "⏳ Application not ready yet, waiting..."
+              sleep 30
+            fi
+          done
+
+          # Final health check
+          if curl -f -s "$APP_URL/health/simple" > /dev/null; then
+            echo "✅ Deployment successful! Application is running."
+          else
+            echo "❌ Deployment failed! Application is not responding."
+            exit 1
+          fi
+
+  notify:
+    needs: [build-and-deploy, health-check]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [ "${{ needs.health-check.result }}" == "success" ]; then
+            echo "✅ Deployment to Azure completed successfully!"
+            echo "🌐 Application URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          else
+            echo "❌ Deployment to Azure failed!"
+            echo "Please check the logs for more details."
+          fi
