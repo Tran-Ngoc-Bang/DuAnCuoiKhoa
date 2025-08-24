@@ -9,6 +9,7 @@ import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,18 +22,19 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "azure.storage.enabled", havingValue = "true", matchIfMissing = false)
 public class AzureBlobStorageService {
 
-    @Value("${azure.storage.connection-string}")
+    @Value("${azure.storage.connection-string:}")
     private String connectionString;
 
-    @Value("${azure.storage.container-name}")
+    @Value("${azure.storage.container-name:}")
     private String containerName;
 
-    @Value("${azure.storage.account-name}")
+    @Value("${azure.storage.account-name:}")
     private String accountName;
 
-    @Value("${azure.storage.account-key}")
+    @Value("${azure.storage.account-key:}")
     private String accountKey;
 
     private BlobServiceClient blobServiceClient;
