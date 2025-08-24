@@ -53,7 +53,7 @@ jobs:
             -H "Content-Type: application/zip" \
             -H "Authorization: Basic $(echo -n '${{ secrets.AZURE_DEPLOY_USERNAME }}:${{ secrets.AZURE_DEPLOY_PASSWORD }}' | base64)" \
             --data-binary @deploy.zip \
-            "https://${{ env.AZURE_WEBAPP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
+            "https://shared-learning-app-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy"
 
           echo "Deployment completed!"
 
