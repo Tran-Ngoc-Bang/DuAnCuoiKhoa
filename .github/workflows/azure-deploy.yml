@@ -34,32 +34,22 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Deploy to Azure Web App using FTPS
+            - name: Build and prepare for manual deployment
         run: |
           # Find the JAR file
           JAR_FILE=$(find target -name "*.jar" | head -1)
           echo "Found JAR file: $JAR_FILE"
-
-          # Install lftp for FTPS upload
-          sudo apt-get update && sudo apt-get install -y lftp
-
-          # Deploy using FTPS
-          echo "Deploying to Azure Web App via FTPS..."
-
-          # Create lftp script
-          cat > deploy.lftp << EOF
-          set ssl:verify-certificate no
-          open ftps://waws-prod-hk1-057.ftp.azurewebsites.windows.net
-          user ${{ secrets.AZURE_FTPS_USERNAME }} ${{ secrets.AZURE_FTPS_PASSWORD }}
-          cd /site/wwwroot
-          put $JAR_FILE app.jar
-          bye
-          EOF
-
-          # Execute lftp script
-          lftp -f deploy.lftp
-
-          echo "Deployment completed!"
+          
+          # Create deployment info
+          echo "## Deployment Instructions" >> deployment-info.md
+          echo "1. Go to Kudu Console: https://shared-learning-app-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net" >> deployment-info.md
+          echo "2. Navigate to Debug Console → Bash" >> deployment-info.md
+          echo "3. Run: cd /home/site/wwwroot" >> deployment-info.md
+          echo "4. Upload the JAR file: $JAR_FILE" >> deployment-info.md
+          echo "5. Rename to: app.jar" >> deployment-info.md
+          echo "6. Configure Startup Command in Azure Portal" >> deployment-info.md
+          
+          echo "Manual deployment required. See deployment-info.md for instructions."
 
       - name: Health check
         run: |
