@@ -39,6 +39,8 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/target/*.jar
+          username: ${{ secrets.AZURE_WEBAPP_USERNAME }}
+          password: ${{ secrets.AZURE_WEBAPP_PASSWORD }}
 
       - name: Health check
         run: |
