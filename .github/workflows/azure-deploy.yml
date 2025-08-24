@@ -43,25 +43,37 @@ jobs:
           # Copy JAR to root for easier access
           cp "$JAR_FILE" app.jar
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          username: ${{ secrets.AZURE_USERNAME }}
-          password: ${{ secrets.AZURE_PASSWORD }}
-
-      - name: Deploy to Azure Web App
+      - name: Debug Kudu credentials
         run: |
-          # Deploy JAR file
-          az webapp deployment source config-zip \
-            --resource-group shared-learning-rg-sea \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --src app.jar
+          echo "Checking KUDU_CREDENTIALS length: ${#KUDU_CREDENTIALS}"
+          if [ -z "$KUDU_CREDENTIALS" ]; then
+            echo "❌ KUDU_CREDENTIALS is empty!"
+            exit 1
+          else
+            echo "✅ KUDU_CREDENTIALS is set"
+          fi
 
-          # Set startup command
-          az webapp config set \
-            --resource-group shared-learning-rg-sea \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --startup-file "java -jar /home/site/wwwroot/app.jar"
+      - name: Deploy to Azure Web App via Kudu
+        run: |
+          # Create a zip file containing the JAR
+          zip -r app.zip app.jar
+
+          # Deploy using Kudu API
+          curl -X POST \
+            -H "Content-Type: application/zip" \
+            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
+            --data-binary @app.zip \
+            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy" \
+            -v
+
+      - name: Set Startup Command
+        run: |
+          # Set startup command via Kudu API
+          curl -X PUT \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
+            -d '{"startupCommand": "java -jar /home/site/wwwroot/app.jar"}' \
+            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/settings"
 
       - name: Health check
         run: |
