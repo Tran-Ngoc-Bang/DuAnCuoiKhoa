@@ -49,11 +49,14 @@ jobs:
 
           # Deploy using Kudu REST API with deployment credentials
           echo "Deploying to Azure Web App..."
-          curl -X POST \
+
+          # Try with verbose output
+          curl -v -X POST \
             -H "Content-Type: application/zip" \
             -H "Authorization: Basic $(echo -n '${{ secrets.AZURE_DEPLOY_USERNAME }}:${{ secrets.AZURE_DEPLOY_PASSWORD }}' | base64)" \
             --data-binary @deploy.zip \
-            "https://shared-learning-app-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy"
+            "https://shared-learning-app-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy" \
+            -w "\nHTTP Status: %{http_code}\n"
 
           echo "Deployment completed!"
 
