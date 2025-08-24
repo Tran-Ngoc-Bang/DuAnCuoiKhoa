@@ -55,8 +55,17 @@ jobs:
             --data-binary @app.zip \
             "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy"
 
+      - name: Set Startup Command
+        run: |
+          # Set startup command via Kudu API
+          curl -X PUT \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
+            -d '{"startupCommand": "java -jar /home/site/wwwroot/app.jar --spring.profiles.active=azure --server.port=80"}' \
+            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/settings"
+
       - name: Health check
         run: |
           echo "Waiting for deployment to complete..."
           sleep 30
-          curl -f https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health/simple || echo "Health check failed"
+          curl -f https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.eastasia-01.azurewebsites.net/health/simple || echo "Health check failed"
