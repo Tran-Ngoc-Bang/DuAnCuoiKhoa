@@ -34,12 +34,12 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-            - name: Build and prepare for manual deployment
+      - name: Build and prepare for manual deployment
         run: |
           # Find the JAR file
           JAR_FILE=$(find target -name "*.jar" | head -1)
           echo "Found JAR file: $JAR_FILE"
-          
+
           # Create deployment info
           echo "## Deployment Instructions" >> deployment-info.md
           echo "1. Go to Kudu Console: https://shared-learning-app-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net" >> deployment-info.md
@@ -48,7 +48,7 @@ jobs:
           echo "4. Upload the JAR file: $JAR_FILE" >> deployment-info.md
           echo "5. Rename to: app.jar" >> deployment-info.md
           echo "6. Configure Startup Command in Azure Portal" >> deployment-info.md
-          
+
           echo "Manual deployment required. See deployment-info.md for instructions."
 
       - name: Health check
