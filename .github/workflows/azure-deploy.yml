@@ -34,46 +34,28 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Deploy to Azure Web App using FTP
+      - name: Deploy to Azure Web App using Kudu API
         run: |
-          # Install curl if not available
-          sudo apt-get update && sudo apt-get install -y curl
-
-          # Upload JAR file using FTP
-          echo "Uploading JAR file to Azure Web App..."
-
           # Find the JAR file
           JAR_FILE=$(find target -name "*.jar" | head -1)
           echo "Found JAR file: $JAR_FILE"
 
-          # Create a simple deployment script
-          cat > deploy.sh << 'EOF'
-          #!/bin/bash
-          # Simple FTP upload script
-          HOST="waws-prod-hk1-057.ftp.azurewebsites.windows.net"
-          USER="${{ secrets.AZURE_WEBAPP_USERNAME }}"
-          PASS="${{ secrets.AZURE_WEBAPP_PASSWORD }}"
-          FILE="$1"
+          # Create deployment package
+          mkdir -p deploy
+          cp "$JAR_FILE" deploy/app.jar
+          cd deploy
+          zip -r ../deploy.zip .
+          cd ..
 
-          echo "Uploading $FILE to $HOST..."
+          # Deploy using Kudu REST API with deployment credentials
+          echo "Deploying to Azure Web App..."
+          curl -X POST \
+            -H "Content-Type: application/zip" \
+            -H "Authorization: Basic $(echo -n '${{ secrets.AZURE_DEPLOY_USERNAME }}:${{ secrets.AZURE_DEPLOY_PASSWORD }}' | base64)" \
+            --data-binary @deploy.zip \
+            "https://shared-learning-app.scm.azurewebsites.net/api/zipdeploy"
 
-          # Use curl for FTP upload
-          curl -T "$FILE" "ftps://$HOST/site/wwwroot/app.jar" \
-            --user "$USER:$PASS" \
-            --ftp-create-dirs \
-            --ftp-ssl \
-            --ftp-ssl-reqd
-
-          if [ $? -eq 0 ]; then
-            echo "Upload successful!"
-          else
-            echo "Upload failed!"
-            exit 1
-          fi
-          EOF
-
-          chmod +x deploy.sh
-          ./deploy.sh "$JAR_FILE"
+          echo "Deployment completed!"
 
       - name: Health check
         run: |
