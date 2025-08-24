@@ -9,26 +9,26 @@
 function updateDocumentTitle(docId) {
   let title = "Tài liệu xem trước";
   let author = "Tác giả";
-  
+
   // Định nghĩa thông tin cho các tài liệu khác nhau
   if (docId === 'master-spring-boot') {
     title = "Master Spring & Spring Boot với Hibernate & React";
     author = "Ranga Karnan";
-    
+
     // Cập nhật tiêu đề trên header
     const docTitle = document.querySelector('.document-title');
     if (docTitle) docTitle.textContent = title;
-    
+
     // Cập nhật thông tin tác giả
     const docAuthor = document.querySelector('.document-author');
     if (docAuthor) docAuthor.textContent = author;
-    
+
     // Cập nhật tiêu đề trang
     document.title = title + " - Xem trước | EduShare";
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   initDocumentViewer();
   initToolbarActions();
   initSidebarThumbActions();
@@ -45,15 +45,14 @@ function initDocumentViewer() {
   // Hiển thị loading với hiệu ứng mượt mà
   const loader = document.getElementById('documentLoader');
   if (loader) {
-    // Hiển thị loader với hiệu ứng fade in
     loader.style.opacity = '0';
     loader.style.display = 'flex';
-    
+
     // Hiệu ứng fade in cho loader
     setTimeout(() => {
       loader.style.opacity = '1';
     }, 50);
-    
+
     // Làm mờ các trang hiện tại và thêm hiệu ứng blur
     const pages = document.querySelectorAll('.document-page');
     if (pages.length > 0) {
@@ -65,57 +64,65 @@ function initDocumentViewer() {
       });
     }
   }
-  
+
   // Tạo sự kiện cho nút unlock
   const unlockBtn = document.getElementById('unlockDocumentBtn');
   if (unlockBtn) {
-    unlockBtn.addEventListener('click', function() {
+    unlockBtn.addEventListener('click', function () {
       showDownloadConfirmation();
     });
   }
-  
-  // Load PDF document with PDF.js
-  loadPdfDocument('../assets/documents/master-spring-and-spring-boot.pdf');
-  
+
+  // 🔥 Lấy path PDF từ HTML (dùng input ẩn hoặc data attribute)
+  const pdfPathInput = document.getElementById('pdfDocumentPath');
+  const pdfUrl = pdfPathInput ? pdfPathInput.value : null;
+
+  if (pdfUrl) {
+    loadPdfDocument(pdfUrl);
+  } else {
+    console.error('PDF path not found.');
+  }
+
   // Hiển thị thông báo giới hạn trang xem trước
   setTimeout(() => {
     showToast('Bạn đang xem bản xem trước. Chỉ có thể xem 5 trang đầu tiên.', 'info', 8000);
   }, 1000);
 }
 
+
 /**
  * Load và hiển thị file PDF
  */
 function loadPdfDocument(pdfPath) {
   const loadingTask = pdfjsLib.getDocument(pdfPath);
-  
-  loadingTask.promise.then(function(pdf) {
+
+  loadingTask.promise.then(function (pdf) {
     console.log('PDF document loaded successfully!');
-    
+
     // Lấy thông tin từ URL nếu có
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('doc');
-    
+
     // Cập nhật tiêu đề tài liệu dựa trên docId
     if (docId) {
       updateDocumentTitle(docId);
     }
-    
+
     // Load first 5 pages
     for (let i = 1; i <= 5; i++) {
       renderPage(pdf, i);
     }
-    
+
     // Load previews for locked pages (sẽ bị che mờ)
     renderPage(pdf, 6, true);
     renderPage(pdf, 7, true);
-    
+
     // Ẩn loading sau khi tải xong với hiệu ứng mượt mà
     const loader = document.getElementById('documentLoader');
     if (loader) {
       // Ẩn loader từ từ
       loader.style.opacity = '0';
-      
+
       // Hiển thị lại các trang với hiệu ứng đẹp mắt
       const pages = document.querySelectorAll('.document-page');
       if (pages.length > 0) {
@@ -128,16 +135,16 @@ function loadPdfDocument(pdfPath) {
           }, 100 * index);
         });
       }
-      
+
       // Ẩn loader hoàn toàn sau khi hoàn thành
       setTimeout(() => {
         loader.style.display = 'none';
       }, 500);
-      
+
       // Hiển thị thông báo chuyển trang
       showPageTransitionNotification(1, 45);
     }
-  }).catch(function(error) {
+  }).catch(function (error) {
     console.error('Error loading PDF:', error);
     showToast('Không thể tải tài liệu PDF. Vui lòng thử lại sau.', 'error');
     const loader = document.getElementById('documentLoader');
@@ -151,66 +158,66 @@ function loadPdfDocument(pdfPath) {
  * Render một trang PDF cụ thể
  */
 function renderPage(pdf, pageNumber, isLocked = false) {
-  pdf.getPage(pageNumber).then(function(page) {
+  pdf.getPage(pageNumber).then(function (page) {
     // Canvas element cho trang này
     const canvas = document.getElementById('pdf-canvas' + pageNumber);
     if (!canvas) return;
-    
+
     const context = canvas.getContext('2d');
-    
+
     // Tạo wrapper cho canvas nếu chưa có
     let wrapper = canvas.parentNode;
     if (!wrapper || !wrapper.classList.contains('canvas-wrapper')) {
       // Tạo wrapper mới
       wrapper = document.createElement('div');
       wrapper.className = 'canvas-wrapper';
-      
+
       // Tìm container
       const container = document.getElementById('pdf-preview-container');
-      
+
       // Di chuyển canvas vào wrapper
       if (canvas.parentNode) {
         canvas.parentNode.replaceChild(wrapper, canvas);
       }
       wrapper.appendChild(canvas);
-      
+
       // Thêm số trang vào wrapper
       const pageNumberDiv = document.createElement('div');
       pageNumberDiv.className = 'page-number';
       pageNumberDiv.textContent = pageNumber + ' / 45';
       wrapper.appendChild(pageNumberDiv);
     }
-    
+
     // Lấy kích thước viewport
     const viewport = page.getViewport({ scale: 1.0 });
-    
+
     // Tính tỷ lệ để vừa với chiều rộng container
     const containerWidth = 700; // Giảm kích thước để nội dung hiển thị rõ ràng hơn
     const scale = containerWidth / viewport.width;
     const scaledViewport = page.getViewport({ scale: scale });
-    
+
     // Thiết lập kích thước canvas
     canvas.height = scaledViewport.height;
     canvas.width = scaledViewport.width;
-    
+
     // Render PDF page vào canvas
     const renderContext = {
       canvasContext: context,
       viewport: scaledViewport
     };
-    
-    page.render(renderContext).promise.then(function() {
+
+    page.render(renderContext).promise.then(function () {
       console.log('Page ' + pageNumber + ' rendered successfully');
-      
+
       // Cập nhật thumbnail cho trang này
       updatePageThumbnail(canvas, pageNumber);
-      
+
       if (isLocked) {
         // Nếu là trang bị khóa, thêm lớp mờ
         canvas.classList.add('locked-content');
       }
     });
-  }).catch(function(error) {
+  }).catch(function (error) {
     console.error('Error rendering page ' + pageNumber + ':', error);
   });
 }
@@ -222,20 +229,20 @@ function updatePageThumbnail(canvas, pageNumber) {
   // Tìm thumbnail tương ứng
   const thumbItems = document.querySelectorAll('.thumb-item');
   if (thumbItems.length >= pageNumber) {
-    const thumbImg = thumbItems[pageNumber-1].querySelector('.thumb-img');
+    const thumbImg = thumbItems[pageNumber - 1].querySelector('.thumb-img');
     if (!thumbImg) return;
-    
+
     // Tạo thumbnail từ canvas
     const thumbCanvas = document.createElement('canvas');
     const thumbContext = thumbCanvas.getContext('2d');
-    
+
     // Kích thước thumbnail
     thumbCanvas.width = 160;
     thumbCanvas.height = 200;
-    
+
     // Scale và vẽ lại từ canvas gốc
     thumbContext.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, 160, 200);
-    
+
     // Thay thế hình ảnh thumbnail
     thumbImg.src = thumbCanvas.toDataURL();
   }
@@ -248,23 +255,23 @@ function initToolbarActions() {
   // Nút tìm kiếm trong tài liệu
   const searchDocument = document.getElementById('searchDocument');
   if (searchDocument) {
-    searchDocument.addEventListener('click', function() {
+    searchDocument.addEventListener('click', function () {
       showToast('Tính năng tìm kiếm trong tài liệu chỉ có sẵn cho tài liệu đầy đủ.', 'warning');
     });
   }
-  
+
   // Nút in tài liệu
   const printDocument = document.getElementById('printDocument');
   if (printDocument) {
-    printDocument.addEventListener('click', function() {
+    printDocument.addEventListener('click', function () {
       showToast('Tính năng in tài liệu chỉ có sẵn cho tài liệu đầy đủ.', 'warning');
     });
   }
-  
+
   // Nút tải xuống trên toolbar
   const downloadButton = document.getElementById('downloadButton');
   if (downloadButton) {
-    downloadButton.addEventListener('click', function() {
+    downloadButton.addEventListener('click', function () {
       showDownloadConfirmation();
     });
   }
@@ -279,48 +286,48 @@ function initSidebarThumbActions() {
   const documentSidebar = document.getElementById('documentSidebar');
   const notesPanel = document.getElementById('notesPanel');
   const toggleNotes = document.getElementById('toggleNotes');
-  
+
   if (toggleSidebar && documentSidebar) {
-    toggleSidebar.addEventListener('click', function() {
+    toggleSidebar.addEventListener('click', function () {
       documentSidebar.classList.toggle('visible');
       this.classList.toggle('active');
-      
+
       // Đóng panel notes nếu đang mở
       if (notesPanel && toggleNotes) {
         notesPanel.classList.remove('visible');
         toggleNotes.classList.remove('active');
       }
     });
-    
+
     // Nút đóng sidebar
     const closeSidebar = document.getElementById('closeSidebar');
     if (closeSidebar) {
-      closeSidebar.addEventListener('click', function() {
+      closeSidebar.addEventListener('click', function () {
         documentSidebar.classList.remove('visible');
         toggleSidebar.classList.remove('active');
       });
     }
   }
-  
+
   // Xử lý click vào thumbnail
   const thumbnails = document.querySelectorAll('.thumb-item');
   thumbnails.forEach((thumb) => {
-    thumb.addEventListener('click', function() {
+    thumb.addEventListener('click', function () {
       // Xóa trạng thái active cho tất cả thumbnails
       thumbnails.forEach(t => t.classList.remove('active'));
-      
+
       // Thêm trạng thái active cho thumbnail được chọn
       this.classList.add('active');
-      
+
       // Lấy số trang từ data attribute
       const pageNum = parseInt(this.getAttribute('data-page'));
-      
+
       // Cập nhật trang hiện tại
       const currentPage = document.getElementById('currentPage');
       if (currentPage) {
         currentPage.value = pageNum;
       }
-      
+
       // Chuyển đến trang tương ứng
       changePage(pageNum);
     });
@@ -336,35 +343,35 @@ function initNotesPanel() {
   const notesPanel = document.getElementById('notesPanel');
   const documentSidebar = document.getElementById('documentSidebar');
   const toggleSidebar = document.getElementById('toggleSidebar');
-  
+
   if (toggleNotes && notesPanel) {
-    toggleNotes.addEventListener('click', function() {
+    toggleNotes.addEventListener('click', function () {
       notesPanel.classList.toggle('visible');
       this.classList.toggle('active');
-      
+
       // Đóng sidebar nếu đang mở
       if (documentSidebar && toggleSidebar) {
         documentSidebar.classList.remove('visible');
         toggleSidebar.classList.remove('active');
       }
     });
-    
+
     // Nút đóng panel ghi chú
     const closeNotes = document.getElementById('closeNotes');
     if (closeNotes) {
-      closeNotes.addEventListener('click', function() {
+      closeNotes.addEventListener('click', function () {
         notesPanel.classList.remove('visible');
         toggleNotes.classList.remove('active');
       });
     }
   }
-  
+
   // Xử lý nút lưu ghi chú
   const saveNote = document.getElementById('saveNote');
   const noteTextarea = document.getElementById('noteTextarea');
-  
+
   if (saveNote && noteTextarea) {
-    saveNote.addEventListener('click', function() {
+    saveNote.addEventListener('click', function () {
       const noteText = noteTextarea.value.trim();
       if (noteText) {
         addNewNote(noteText);
@@ -384,24 +391,24 @@ function initZoomControls() {
   const zoomOut = document.getElementById('zoomOut');
   const zoomLevel = document.getElementById('zoomLevel');
   const documentPages = document.querySelector('.document-pages');
-  
+
   let currentZoom = 100;
-  
+
   if (zoomIn && zoomOut && zoomLevel && documentPages) {
-    zoomIn.addEventListener('click', function() {
+    zoomIn.addEventListener('click', function () {
       if (currentZoom < 200) {
         currentZoom += 10;
         updateZoom();
       }
     });
-    
-    zoomOut.addEventListener('click', function() {
+
+    zoomOut.addEventListener('click', function () {
       if (currentZoom > 50) {
         currentZoom -= 10;
         updateZoom();
       }
     });
-    
+
     function updateZoom() {
       zoomLevel.textContent = `${currentZoom}%`;
       documentPages.style.transform = `scale(${currentZoom / 100})`;
@@ -418,13 +425,13 @@ function initPageNavigation() {
   const nextPage = document.getElementById('nextPage');
   const currentPage = document.getElementById('currentPage');
   const totalPages = document.querySelector('.total-pages');
-  
+
   let totalPagesNum = 45; // Tổng số trang của tài liệu
   let maxPreviewPages = 5; // Số trang tối đa được xem trước
   let currentPageNum = 1;
-  
+
   if (prevPage && nextPage && currentPage) {
-    prevPage.addEventListener('click', function() {
+    prevPage.addEventListener('click', function () {
       let pageNum = parseInt(currentPage.value);
       if (pageNum > 1) {
         pageNum--;
@@ -432,39 +439,39 @@ function initPageNavigation() {
         changePage(pageNum);
       }
     });
-    
-    nextPage.addEventListener('click', function() {
+
+    nextPage.addEventListener('click', function () {
       let pageNum = parseInt(currentPage.value);
       if (pageNum < totalPagesNum) {
         pageNum++;
         currentPage.value = pageNum;
-        
+
         if (pageNum > maxPreviewPages) {
           showToast('Phiên bản xem trước chỉ cho phép xem ' + maxPreviewPages + ' trang đầu tiên. Vui lòng tải xuống tài liệu đầy đủ.', 'warning');
           return;
         }
-        
+
         changePage(pageNum);
       }
     });
-    
-    currentPage.addEventListener('change', function() {
+
+    currentPage.addEventListener('change', function () {
       let pageNum = parseInt(currentPage.value);
-      
+
       // Kiểm tra giá trị hợp lệ
       if (isNaN(pageNum) || pageNum < 1) {
         pageNum = 1;
       } else if (pageNum > totalPagesNum) {
         pageNum = totalPagesNum;
       }
-      
+
       currentPage.value = pageNum;
-      
+
       if (pageNum > maxPreviewPages) {
         showToast('Phiên bản xem trước chỉ cho phép xem ' + maxPreviewPages + ' trang đầu tiên. Vui lòng tải xuống tài liệu đầy đủ.', 'warning');
         return;
       }
-      
+
       changePage(pageNum);
     });
   }
@@ -484,7 +491,7 @@ function changePage(pageNum) {
       thumb.classList.remove('active');
     }
   });
-  
+
   // Cuộn đến canvas của trang được chọn
   const canvas = document.getElementById('pdf-canvas' + pageNum);
   if (canvas) {
@@ -492,7 +499,7 @@ function changePage(pageNum) {
     const loader = document.getElementById('documentLoader');
     if (loader) {
       loader.style.display = 'flex';
-      
+
       // Ẩn loader sau 1 giây
       setTimeout(() => {
         loader.style.display = 'none';
@@ -511,12 +518,12 @@ function addNewNote(noteText) {
   const notesList = document.getElementById('notesList');
   const currentPage = document.getElementById('currentPage');
   const pageNum = currentPage ? currentPage.value : 1;
-  
+
   if (notesList) {
     // Tạo cấu trúc HTML cho ghi chú mới
     const today = new Date();
     const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-    
+
     const noteItem = document.createElement('div');
     noteItem.className = 'note-item';
     noteItem.innerHTML = `
@@ -528,10 +535,10 @@ function addNewNote(noteText) {
         ${noteText}
       </div>
     `;
-    
+
     // Thêm vào đầu danh sách
     notesList.insertBefore(noteItem, notesList.firstChild);
-    
+
     showToast('Ghi chú đã được lưu thành công.', 'success');
   }
 }
@@ -543,7 +550,7 @@ function initDownloadDocument() {
   // Nút tải xuống trên header
   const downloadDocument = document.getElementById('downloadDocument');
   if (downloadDocument) {
-    downloadDocument.addEventListener('click', function() {
+    downloadDocument.addEventListener('click', function () {
       showDownloadConfirmation();
     });
   }
@@ -588,7 +595,7 @@ function showDownloadConfirmation() {
       </div>
     </div>
   `;
-  
+
   // Thêm CSS inline cho modal
   const style = document.createElement('style');
   style.textContent = `
@@ -723,10 +730,10 @@ function showDownloadConfirmation() {
       to { transform: translateY(0); opacity: 1; }
     }
   `;
-  
+
   document.head.appendChild(style);
   document.body.appendChild(modal);
-  
+
   // Xử lý đóng modal
   const closeModal = () => {
     modal.classList.add('fade-out');
@@ -734,12 +741,12 @@ function showDownloadConfirmation() {
       document.body.removeChild(modal);
     }, 300);
   };
-  
+
   // Xử lý các nút
   document.getElementById('modalClose').addEventListener('click', closeModal);
   document.getElementById('cancelDownload').addEventListener('click', closeModal);
-  
-  document.getElementById('confirmDownload').addEventListener('click', function() {
+
+  document.getElementById('confirmDownload').addEventListener('click', function () {
     closeModal();
     simulateDownload();
   });
@@ -750,11 +757,11 @@ function showDownloadConfirmation() {
  */
 function simulateDownload() {
   showToast('Đang chuẩn bị tải xuống tài liệu...', 'info');
-  
+
   // Giả lập quá trình tải xuống
   setTimeout(() => {
     showToast('Tài liệu đã được tải xuống thành công! Bạn đã sử dụng 25 xu.', 'success');
-    
+
     // Tạo link tải file
     const pdfFile = '../assets/documents/course-presentation-master-spring-and-spring-boot.pdf';
     const a = document.createElement('a');
@@ -771,13 +778,13 @@ function simulateDownload() {
  */
 function showToast(message, type = 'info', duration = 5000) {
   const toastContainer = document.getElementById('toastContainer');
-  
+
   if (!toastContainer) return;
-  
+
   // Tạo toast
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  
+
   // Icon dựa vào type
   let icon = '';
   switch (type) {
@@ -793,7 +800,7 @@ function showToast(message, type = 'info', duration = 5000) {
     default:
       icon = '<i class="fas fa-info-circle"></i>';
   }
-  
+
   // Nội dung toast
   toast.innerHTML = `
     <div class="toast-content">
@@ -802,23 +809,23 @@ function showToast(message, type = 'info', duration = 5000) {
     </div>
     <button class="toast-close"><i class="fas fa-times"></i></button>
   `;
-  
+
   // Thêm vào container
   toastContainer.appendChild(toast);
-  
+
   // Xử lý nút đóng
   const closeBtn = toast.querySelector('.toast-close');
   if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
+    closeBtn.addEventListener('click', function () {
       removeToast(toast);
     });
   }
-  
+
   // Hiệu ứng hiển thị
   setTimeout(() => {
     toast.classList.add('show');
   }, 10);
-  
+
   // Tự động ẩn sau duration ms
   setTimeout(() => {
     removeToast(toast);
@@ -831,7 +838,7 @@ function showToast(message, type = 'info', duration = 5000) {
 function removeToast(toast) {
   setTimeout(() => {
     toast.classList.remove('show');
-    
+
     setTimeout(() => {
       toast.remove();
     }, 300);
@@ -853,18 +860,18 @@ function showPageTransitionNotification(pageNum, totalPages) {
     </div>
   `;
   document.body.appendChild(pageInfo);
-  
+
   // Hiệu ứng fade in
   setTimeout(() => {
     pageInfo.style.opacity = '1';
     pageInfo.style.transform = 'translate(-50%, -50%) scale(1)';
   }, 50);
-  
+
   // Tự động ẩn sau vài giây
   setTimeout(() => {
     pageInfo.style.opacity = '0';
     pageInfo.style.transform = 'translate(-50%, -50%) scale(0.8)';
-    
+
     setTimeout(() => {
       pageInfo.remove();
     }, 300);

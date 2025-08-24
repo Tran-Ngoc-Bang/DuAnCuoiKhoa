@@ -17,10 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,14 +31,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.Authentication;
+
+import com.fpoly.shared_learning_materials.domain.Category;
+import com.fpoly.shared_learning_materials.domain.Document;
 import com.fpoly.shared_learning_materials.domain.User;
 import com.fpoly.shared_learning_materials.service.DocumentService;
 import com.fpoly.shared_learning_materials.service.NotificationService;
-import com.fpoly.shared_learning_materials.domain.Category;
 import com.fpoly.shared_learning_materials.dto.CategoryDTO;
 import com.fpoly.shared_learning_materials.dto.CategoryTreeDTO;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;
@@ -54,12 +53,6 @@ import com.fpoly.shared_learning_materials.service.TagService;
 
 import jakarta.servlet.http.HttpSession;
 
-import com.fpoly.shared_learning_materials.dto.CategoryDTO;
-import com.fpoly.shared_learning_materials.dto.DocumentDTO;
-import com.fpoly.shared_learning_materials.service.CategoryService;
-import com.fpoly.shared_learning_materials.service.DocumentService;
-
-import java.util.List;
 
 /**
  * Controller for main client pages
@@ -67,7 +60,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/")
 public class ClientPageController {
-       @Autowired
+    @Autowired
     private TagService tagService;
     @Autowired
     private UserRepository userRepository;
@@ -222,76 +215,54 @@ public class ClientPageController {
     }
 
     @GetMapping("/search")
-    public String search(Model model,
+    public String search(
             @RequestParam(required = false) String q,
-            @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String filter,
-            @RequestParam(required = false) String category,
+            @RequestParam(required = false) List<String> category,
+            @RequestParam(required = false) List<String> format,
+            @RequestParam(required = false) List<String> price,
+            @RequestParam(required = false) String rating,
+            @RequestParam(required = false) String time,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
 
-        model.addAttribute("pageTitle", "Tìm kiếm tài liệu");
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Document> searchResults = documentService.searchDocuments(q, category, format, price, rating, time,
+                pageable);
+
+        model.addAttribute("searchResults", searchResults);
         model.addAttribute("query", q);
-        model.addAttribute("sort", sort);
-        model.addAttribute("filter", filter);
         model.addAttribute("category", category);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("pageSize", size);
+        model.addAttribute("format", format);
+        model.addAttribute("price", price);
+        model.addAttribute("rating", rating);
+        model.addAttribute("time", time);
 
-        // Load categories for dropdown
-        try {
-            List<CategoryDTO> allCategories = categoryService.getActiveCategories();
-            model.addAttribute("searchCategories", allCategories);
-        } catch (Exception e) {
-            model.addAttribute("searchCategories", List.of());
-        }
+        // Theo định dạng
+        Map<String, Long> formatCounts = documentService.countFormats(q);
+        model.addAttribute("formatCounts", formatCounts);
 
-        // Perform search if query or category is provided
-        if ((q != null && !q.trim().isEmpty()) || (category != null && !category.trim().isEmpty())) {
-            try {
-                // Create pageable for search results
-                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        // Theo danh mục
+        List<CategoryDTO> allCategories = categoryService.getAllCategories();
+        Map<String, Long> categoryCounts = documentService.countDocumentsPerCategorySlug();
+        model.addAttribute("categories", allCategories);
+        model.addAttribute("categoryCounts", categoryCounts);
 
-                // Convert category slug to category ID if needed
-                Long categoryId = null;
-                if (category != null && !category.trim().isEmpty() && !"all".equals(category)) {
-                    categoryId = getCategoryIdBySlug(category);
-                }
+        // Theo giá
+        Map<String, Long> priceCounts = documentService.countByPrice(q);
+        model.addAttribute("price", price);
+        model.addAttribute("priceCounts", priceCounts);
 
-                // Get search results
-                Page<DocumentDTO> searchResults = documentService.getFilteredDocuments(
-                        pageable,
-                        q,
-                        "APPROVED", // Only show approved documents
-                        categoryId,
-                        null, // type
-                        null, // price
-                        null, // author
-                        null, // tags
-                        null, // dateFrom
-                        null, // dateTo
-                        null, // size
-                        null // views
-                );
+        // Theo đánh giá
+        Map<String, Long> ratingCounts = documentService.countByRating(q);
+        model.addAttribute("rating", rating);
+        model.addAttribute("ratingCounts", ratingCounts);
 
-                model.addAttribute("searchResults", searchResults);
-                model.addAttribute("totalResults", searchResults.getTotalElements());
-                model.addAttribute("totalPages", searchResults.getTotalPages());
 
-            } catch (Exception e) {
-                model.addAttribute("searchError", "Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.");
-                Pageable pageable = PageRequest.of(page, size);
-                model.addAttribute("searchResults", Page.empty(pageable));
-                model.addAttribute("totalResults", 0L);
-                model.addAttribute("totalPages", 0);
-            }
-        } else {
-            // No search performed, show empty results
-            Pageable pageable = PageRequest.of(page, size);
-            model.addAttribute("searchResults", Page.empty(pageable));
-            model.addAttribute("totalResults", 0L);
-            model.addAttribute("totalPages", 0);
-        }
+        Map<String, Long> timeCounts = documentService.countByTime(q);
+        model.addAttribute("time", time);
+        model.addAttribute("timeCounts", timeCounts);
 
         return "client/search";
     }

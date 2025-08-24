@@ -214,19 +214,19 @@ public class TransactionService {
 
             // Update user balance
             User user = transaction.getUser();
-            int totalCoinsReceived = 0;
+            BigDecimal totalCoinsReceived = BigDecimal.ZERO;
 
             for (TransactionDetail detail : details) {
                 if (detail.getCoinsReceived() != null) {
-                    totalCoinsReceived += detail.getCoinsReceived();
+                    totalCoinsReceived = totalCoinsReceived.add(new BigDecimal(detail.getCoinsReceived()));
                 }
             }
 
             // Update user's coin balance and statistics
             if (user.getCoinBalance() == null) {
-                user.setCoinBalance(0);
+                user.setCoinBalance(BigDecimal.ZERO);
             }
-            user.setCoinBalance(user.getCoinBalance() + totalCoinsReceived);
+            user.setCoinBalance(user.getCoinBalance().add(totalCoinsReceived));
 
             if (user.getTotalSpent() == null) {
                 user.setTotalSpent(BigDecimal.ZERO);
@@ -234,9 +234,9 @@ public class TransactionService {
             user.setTotalSpent(user.getTotalSpent().add(transaction.getAmount()));
 
             if (user.getTotalCoinsPurchased() == null) {
-                user.setTotalCoinsPurchased(0);
+                user.setTotalCoinsPurchased(BigDecimal.ZERO);
             }
-            user.setTotalCoinsPurchased(user.getTotalCoinsPurchased() + totalCoinsReceived);
+            user.setTotalCoinsPurchased(user.getTotalCoinsPurchased().add(totalCoinsReceived));
 
             userRepository.save(user);
 

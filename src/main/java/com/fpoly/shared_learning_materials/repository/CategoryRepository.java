@@ -18,6 +18,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     boolean existsBySlug(String slug);
 
+    List<Category> findByStatus(String status);
+
     // Validation queries - kiểm tra tên trùng lặp (chỉ với danh mục chưa xóa)
     boolean existsByNameAndDeletedAtIsNull(String name);
 

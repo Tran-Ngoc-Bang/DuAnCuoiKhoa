@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <title>Xem trước tài liệu - EduShare</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <!-- PDF.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.min.js"></script>
   <script>
     // Đặt worker path cho thư viện PDF.js
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js';
   </script>
-  
+
   <link rel="stylesheet" th:href="@{/css/main.css}">
   <link rel="stylesheet" th:href="@{/css/responsive.css}">
   <link rel="stylesheet" th:href="@{/css/main-fixes.css}">
@@ -28,9 +31,16 @@
   <link rel="stylesheet" th:href="@{/css/client-header.css}">
   <link rel="stylesheet" th:href="@{/css/client-footer.css}">
 </head>
+
 <body>
-<!-- Header -->
-<div th:replace="~{fragments/client/layout :: header}"></div>
+  <!-- Cách 2: Gắn vào thẻ ẩn -->
+  <input type="hidden" id="pdfDocumentPath" th:value="@{'/uploads/documents/' + ${document.file.fileName}}" />
+
+  <!-- Header -->
+  <div th:replace="~{fragments/client/layout :: header}"></div>
+  <div th:if="${toastMessage}" th:attr="data-toast-message=${toastMessage},
+                data-toast-type=${toastType}" style="display: none;"></div>
+
   <div class="container">
     <div class="header-content">
       <div class="logo">
@@ -83,7 +93,7 @@
       <a href="register.html" class="mobile-register-btn">Đăng ký</a>
     </div>
   </div>
-</header>
+  </header>
 
 
   <!-- Main Content -->
@@ -94,30 +104,50 @@
         <!-- Document Header -->
         <div class="document-viewer-header">
           <div class="document-title-wrapper">
-            <h1 class="document-title">Master Spring & Spring Boot với Hibernate & React</h1>
+            <h1 class="document-title" th:text="${document.title}">Master Spring & Spring Boot với Hibernate & React
+            </h1>
             <div class="document-subtitle">
               <div class="document-category">
-                <i class="fas fa-folder"></i> Lập trình Java
+                <i class="fas fa-folder"></i>
+                <span th:each="docCat, iterStat : ${document.documentCategories}">
+                  <span th:text="${docCat.category.name}"></span><span th:if="${!iterStat.last}">, </span>
+                </span>
               </div>
+
               <div class="document-author">
-                <i class="fas fa-user"></i> Ranga Karnan
+                <i class="fas fa-user"></i> <span th:text="${document.file.uploadedBy.fullName}">Ranga Karnan</span>
               </div>
               <div class="document-date">
-                <i class="fas fa-calendar-alt"></i> 15/01/2023
+                <i class="fas fa-calendar-alt"></i> <span
+                  th:text="${#temporals.format(document.createdAt, 'dd/MM/yyyy')}">15/01/2023</span>
               </div>
             </div>
           </div>
-          
+
           <div class="document-actions">
-            <a href="document-details.html" class="action-button secondary">
+            <a th:href="@{/documents/{id}(id=${document.id})}" class="action-button secondary">
               <i class="fas fa-arrow-left"></i> Quay lại
             </a>
-            <button class="action-button primary" id="downloadDocument">
-              <i class="fas fa-download"></i> Tải xuống (25 xu)
-            </button>
+
+            <a th:href="@{/documents/{id}/download(id=${document.id})}" class="action-button download-button"
+              th:classappend="${document.price > 0} ? ' premium' : ' free'"
+              th:attr="data-premium=${document.price > 0}">
+
+              <i class="fas fa-download"></i> Tải xuống
+
+              <span th:if="${!isOwned and document.price > 0}">
+                (<i class="fas fa-coins"></i>
+                <span th:text="${#numbers.formatDecimal(document.price, 0, 'COMMA', 0, 'POINT')} + ' xu'"></span>)
+              </span>
+
+              <span th:unless="${document.price > 0}">(Miễn phí)</span>
+
+            </a>
+
+
           </div>
         </div>
-        
+
         <!-- Document Viewer Container -->
         <div class="document-viewer-container">
           <!-- Document Toolbar -->
@@ -131,7 +161,7 @@
                   <i class="fas fa-sticky-note"></i>
                 </button>
               </div>
-              
+
               <div class="toolbar-group">
                 <button class="toolbar-button" id="searchDocument" title="Tìm kiếm trong tài liệu">
                   <i class="fas fa-search"></i>
@@ -144,7 +174,7 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="toolbar-right">
               <div class="page-navigation">
                 <button class="toolbar-button" id="prevPage" title="Trang trước">
@@ -156,7 +186,7 @@
                   <i class="fas fa-chevron-right"></i>
                 </button>
               </div>
-              
+
               <div class="zoom-controls">
                 <button class="toolbar-button" id="zoomOut" title="Thu nhỏ">
                   <i class="fas fa-search-minus"></i>
@@ -168,7 +198,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Document Content Area -->
           <div class="document-content-area">
             <!-- Document Sidebar -->
@@ -179,31 +209,17 @@
                   <i class="fas fa-times"></i>
                 </button>
               </div>
-              
+
               <div class="document-thumbs">
-                <div class="thumb-item active" data-page="1">
-                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+1" class="thumb-img" alt="Thumbnail trang 1">
-                  <span class="thumb-number">1</span>
-                </div>
-                <div class="thumb-item" data-page="2">
-                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+2" class="thumb-img" alt="Thumbnail trang 2">
-                  <span class="thumb-number">2</span>
-                </div>
-                <div class="thumb-item" data-page="3">
-                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+3" class="thumb-img" alt="Thumbnail trang 3">
-                  <span class="thumb-number">3</span>
-                </div>
-                <div class="thumb-item" data-page="4">
-                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+4" class="thumb-img" alt="Thumbnail trang 4">
-                  <span class="thumb-number">4</span>
-                </div>
-                <div class="thumb-item" data-page="5">
-                  <img src="https://via.placeholder.com/160x200/f8f9fa/6c757d?text=Trang+5" class="thumb-img" alt="Thumbnail trang 5">
-                  <span class="thumb-number">5</span>
+                <div class="thumb-item" th:each="i : ${#numbers.sequence(1,5)}" th:data-page="${i}"
+                  th:classappend="${i == 1} ? ' active'">
+                  <img th:src="@{'/uploads/thumbnails/' + ${document.file.id} + '_page' + ${i} + '.png'}"
+                    th:alt="'Thumbnail trang ' + ${i}" class="thumb-img">
+                  <span class="thumb-number" th:text="${i}">1</span>
                 </div>
               </div>
             </div>
-            
+
             <!-- Document Notes Panel -->
             <div class="document-notes-panel" id="notesPanel">
               <div class="notes-panel-header">
@@ -212,13 +228,14 @@
                   <i class="fas fa-times"></i>
                 </button>
               </div>
-              
+
               <div class="notes-content">
                 <div class="note-form">
-                  <textarea class="note-textarea" placeholder="Thêm ghi chú của bạn cho trang này..." id="noteTextarea"></textarea>
+                  <textarea class="note-textarea" placeholder="Thêm ghi chú của bạn cho trang này..."
+                    id="noteTextarea"></textarea>
                   <button class="note-submit" id="saveNote">Lưu ghi chú</button>
                 </div>
-                
+
                 <div class="notes-list" id="notesList">
                   <div class="note-item">
                     <div class="note-meta">
@@ -229,7 +246,7 @@
                       Phần giới thiệu về React Hooks rất hữu ích. Cần đọc kỹ phần này để hiểu các khái niệm cơ bản.
                     </div>
                   </div>
-                  
+
                   <div class="note-item">
                     <div class="note-meta">
                       <span class="note-page">Trang 3</span>
@@ -242,7 +259,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Document Main View -->
             <div class="document-main-view" id="documentMainView">
               <div class="document-pages">
@@ -253,7 +270,7 @@
                   <canvas id="pdf-canvas3" class="pdf-canvas"></canvas>
                   <canvas id="pdf-canvas4" class="pdf-canvas"></canvas>
                   <canvas id="pdf-canvas5" class="pdf-canvas"></canvas>
-                  
+
                   <!-- Locked canvas placeholders for pages 6-7 -->
                   <div class="document-page locked" id="page6">
                     <div class="page-watermark">BẢN XEM TRƯỚC</div>
@@ -263,7 +280,7 @@
                       <i class="fas fa-lock"></i>
                     </div>
                   </div>
-                  
+
                   <div class="document-page locked" id="page7">
                     <div class="page-watermark">BẢN XEM TRƯỚC</div>
                     <canvas id="pdf-canvas7" class="pdf-canvas"></canvas>
@@ -273,7 +290,7 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Locked pages overlay - thiết kế mới -->
                 <div class="locked-pages-overlay">
                   <div class="locked-icon">
@@ -281,183 +298,141 @@
                   </div>
                   <h3 class="locked-title">Đã hết phần xem trước</h3>
                   <p class="locked-description">
-                    Tài liệu này có tổng cộng 45 trang, bạn đã xem 5/45 trang. Để truy cập toàn bộ nội dung, vui lòng tải xuống.
+                    Tài liệu này có tổng cộng 45 trang, bạn đã xem 5/45 trang. Để truy cập toàn bộ nội dung, vui lòng
+                    tải xuống.
                   </p>
                   <button class="unlock-button" id="unlockDocumentBtn">
-                    <i class="fas fa-download"></i> Tải xuống đầy đủ (25 xu)
+                    <i class="fas fa-download"></i> Tải xuống đầy đủ (<span
+                      th:text="${#numbers.formatDecimal(document.price, 0, 'COMMA', 0, 'POINT')} + ' xu'"></span>)
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- Loading Indicator -->
         <div class="pdf-viewer-loader" id="documentLoader" style="display: none;">
           <div class="loader-spinner"></div>
           <div class="loading-text">Đang tải trang...</div>
         </div>
-        
+
         <!-- Document Information -->
         <div class="document-info-section">
           <div class="section-header">
             <h2 class="section-title">Thông tin tài liệu</h2>
             <p class="section-description">Chi tiết về tài liệu và thông số kỹ thuật</p>
           </div>
-          
+
           <div class="info-cards">
+
+            <!-- Tác giả -->
             <div class="info-card">
-              <div class="info-icon">
-                <i class="fas fa-user"></i>
-              </div>
+              <div class="info-icon"><i class="fas fa-user"></i></div>
               <div class="info-content">
                 <h3>Tác giả</h3>
-                <p>Ranga Karnan</p>
+                <p th:text="${document.file.uploadedBy.fullName}">Tên tác giả</p>
               </div>
             </div>
-            
+
+            <!-- Ngày đăng -->
             <div class="info-card">
-              <div class="info-icon">
-                <i class="fas fa-calendar-alt"></i>
-              </div>
+              <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
               <div class="info-content">
                 <h3>Ngày đăng</h3>
-                <p>15/01/2023</p>
+                <p th:text="${#temporals.format(document.createdAt, 'dd/MM/yyyy')}">15/01/2023</p>
               </div>
             </div>
-            
+
+            <!-- Định dạng -->
             <div class="info-card">
-              <div class="info-icon">
-                <i class="fas fa-file-pdf"></i>
-              </div>
+              <div class="info-icon"><i class="fas fa-file-pdf"></i></div>
               <div class="info-content">
                 <h3>Định dạng</h3>
-                <p>PDF (2.5 MB)</p>
+                <p th:text="'PDF (' + ${#numbers.formatDecimal(document.file.fileSize / 1048576.0, 1, 2)} + ' MB)'">PDF
+                  (2.5 MB)</p>
               </div>
             </div>
-            
+
+            <!-- Số trang (giả định bạn có thuộc tính document.pageCount) -->
             <div class="info-card">
-              <div class="info-icon">
-                <i class="fas fa-book"></i>
-              </div>
+              <div class="info-icon"><i class="fas fa-book"></i></div>
               <div class="info-content">
                 <h3>Số trang</h3>
                 <p>45 trang</p>
               </div>
             </div>
-            
+
+            <!-- Lượt xem -->
             <div class="info-card">
-              <div class="info-icon">
-                <i class="fas fa-eye"></i>
-              </div>
+              <div class="info-icon"><i class="fas fa-eye"></i></div>
               <div class="info-content">
                 <h3>Lượt xem</h3>
-                <p>1,245</p>
+                <p th:text="${document.viewsCount}">1,245</p>
               </div>
             </div>
-            
+
+            <!-- Lượt tải -->
             <div class="info-card">
-              <div class="info-icon">
-                <i class="fas fa-download"></i>
-              </div>
+              <div class="info-icon"><i class="fas fa-download"></i></div>
               <div class="info-content">
                 <h3>Lượt tải</h3>
-                <p>267</p>
+                <p th:text="${document.downloadsCount}">267</p>
               </div>
             </div>
+
           </div>
         </div>
-        
+
+
         <!-- Related Documents -->
         <div class="related-documents">
           <div class="section-header">
             <h2 class="section-title">Tài liệu liên quan</h2>
             <p class="section-description">Các tài liệu cùng chủ đề có thể bạn quan tâm</p>
           </div>
-          
+
           <div class="document-grid">
-            <div class="document-card">
+            <div class="document-card" th:each="doc : ${relatedDocuments}">
               <div class="document-card-image">
-                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document Thumbnail">
-                <div class="document-badge premium">
-                  <i class="fas fa-coins"></i> 15 xu
+                <img
+                  src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                  alt="Document Thumbnail">
+                <div class="document-badge"
+                  th:classappend="${doc.price.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? ' premium' : ' free'}">
+                  <i class="fas"
+                    th:classappend="${doc.price.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? ' fa-coins' : ' fa-unlock'}"></i>
+                  <span
+                    th:text="${doc.price.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? doc.price + ' xu' : 'Miễn phí'}">Miễn
+                    phí</span>
                 </div>
               </div>
               <div class="document-card-content">
-                <div class="document-card-category">Công nghệ</div>
-                <h3 class="document-card-title">JavaScript: Những kỹ thuật nâng cao cho lập trình viên</h3>
-                <div class="document-card-meta">
-                  <div class="doc-meta-item">
-                    <i class="fas fa-star"></i> 4.7
-                  </div>
-                  <div class="doc-meta-item">
-                    <i class="fas fa-eye"></i> 823
-                  </div>
-                  <div class="doc-meta-author">
-                    <div class="doc-author-avatar">
-                      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" alt="Author">
-                    </div>
-                    <span class="doc-author-name">Lê Thị B</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="document-card">
-              <div class="document-card-image">
-                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document Thumbnail">
-                <div class="document-badge free">
-                  <i class="fas fa-unlock"></i> Miễn phí
-                </div>
-              </div>
-              <div class="document-card-content">
-                <div class="document-card-category">Lập trình</div>
-                <h3 class="document-card-title">Nhập môn HTML5 và CSS3 cho người mới bắt đầu</h3>
+                <div class="document-card-category" th:text="${doc.documentCategories[0].category.name}">Lập trình</div>
+                <h3 class="document-card-title" th:text="${doc.title}">Tên tài liệu</h3>
                 <div class="document-card-meta">
                   <div class="meta-item">
-                    <i class="fas fa-star"></i> 4.5
+                    <i class="fas fa-star"></i>
+                    <span th:text="${doc.rating}">4.5</span>
                   </div>
                   <div class="meta-item">
-                    <i class="fas fa-eye"></i> 1,205
+                    <i class="fas fa-eye"></i>
+                    <span th:text="${doc.viewsCount}">123</span>
                   </div>
                   <div class="meta-author">
                     <div class="author-avatar">
-                      <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" alt="Author">
+                      <img
+                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80"
+                        alt="Author">
                     </div>
-                    <span class="author-name">Trần Văn C</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="document-card">
-              <div class="document-card-image">
-                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Document Thumbnail">
-                <div class="document-badge premium">
-                  <i class="fas fa-coins"></i> 20 xu
-                </div>
-              </div>
-              <div class="document-card-content">
-                <div class="document-card-category">Web App</div>
-                <h3 class="document-card-title">Xây dựng API với NodeJS và Express</h3>
-                <div class="document-card-meta">
-                  <div class="meta-item">
-                    <i class="fas fa-star"></i> 4.8
-                  </div>
-                  <div class="meta-item">
-                    <i class="fas fa-eye"></i> 752
-                  </div>
-                  <div class="meta-author">
-                    <div class="author-avatar">
-                      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" alt="Author">
-                    </div>
-                    <span class="author-name">Phạm Thị D</span>
+                    <span class="author-name" th:text="${doc.file.uploadedBy.fullName}">Tên tác giả</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </section>
   </main>
@@ -479,4 +454,5 @@
   <script th:src="@{/js/pdf-viewer-new.js}"></script>
   <script th:src="@{/js/client-header.js}"></script>
 </body>
+
 </html>

@@ -25,6 +25,8 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
 
     long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 
+    Page<Document> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
     List<Document> findByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 
     long countByStatus(String status);
@@ -71,6 +73,16 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     @org.springframework.transaction.annotation.Transactional
     int incrementDownloadCount(@Param("documentId") Long documentId);
 
+    @Query("SELECT d FROM Document d WHERE (:q IS NULL OR LOWER(d.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(d.description) LIKE LOWER(CONCAT('%', :q, '%')))")
+    Page<Document> findByKeyword(@Param("q") String q, Pageable pageable);
+
+    @Query("SELECT DISTINCT d FROM Document d " +
+            "JOIN d.documentCategories dc " +
+            "WHERE dc.category.id IN :categoryIds " +
+            "AND d.id <> :documentId")
+    List<Document> findRelatedDocuments(@Param("categoryIds") List<Long> categoryIds,
+            @Param("documentId") Long documentId,
+            Pageable pageable);
 
     // Get featured documents with custom sorting
     @Query("SELECT d FROM Document d WHERE d.deletedAt IS NULL AND d.status = :status ORDER BY d.viewsCount DESC, d.downloadsCount DESC, d.createdAt DESC")
@@ -79,5 +91,4 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
      // Tổng lượt tải xuống
     @Query("SELECT SUM(d.downloadsCount) FROM Document d WHERE d.deletedAt IS NULL")
     Long getTotalDownloads();
-
 }

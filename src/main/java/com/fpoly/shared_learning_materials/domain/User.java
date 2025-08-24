@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -97,13 +99,13 @@ public class User {
     private String role = "user";
 
     @Column(name = "coin_balance")
-    private Integer coinBalance = 0;
+    private BigDecimal coinBalance = BigDecimal.ZERO;
 
     @Column(name = "total_spent", precision = 18, scale = 2)
     private java.math.BigDecimal totalSpent = java.math.BigDecimal.ZERO;
 
     @Column(name = "total_coins_purchased")
-    private Integer totalCoinsPurchased = 0;
+    private BigDecimal totalCoinsPurchased = BigDecimal.ZERO;
 
     @PreUpdate
     protected void onUpdate() {
@@ -326,11 +328,11 @@ public class User {
 		this.role = role;
 	}
 
-	public Integer getCoinBalance() {
+	public BigDecimal getCoinBalance() {
 		return coinBalance;
 	}
 
-	public void setCoinBalance(Integer coinBalance) {
+	public void setCoinBalance(BigDecimal coinBalance) {
 		this.coinBalance = coinBalance;
 	}
 
@@ -342,11 +344,11 @@ public class User {
 		this.totalSpent = totalSpent;
 	}
 
-	public Integer getTotalCoinsPurchased() {
+	public BigDecimal getTotalCoinsPurchased() {
 		return totalCoinsPurchased;
 	}
 
-	public void setTotalCoinsPurchased(Integer totalCoinsPurchased) {
+	public void setTotalCoinsPurchased(BigDecimal totalCoinsPurchased) {
 		this.totalCoinsPurchased = totalCoinsPurchased;
 	}
     
