@@ -25,8 +25,8 @@
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/transactions.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/transactions-create.css}" />
-     <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
-  <script th:src="@{/js/admin/notifications.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
+    <script th:src="@{/js/admin/notifications.js}"></script>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
@@ -219,8 +219,8 @@
       </main>
     </div>
 
-    <script src="../../js/main.js"></script>
-    <script src="../js/admin.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
     <script>
       // Initialize date picker
       flatpickr("#createdAt", {

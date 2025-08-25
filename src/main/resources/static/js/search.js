@@ -467,20 +467,29 @@ function getCurrentPage() {
   return 1;
 }
 
-// Initialize bookmark buttons
 function initBookmarkButtons() {
   const bookmarkButtons = document.querySelectorAll('.result-bookmark-btn');
 
-  if (bookmarkButtons.length) {
-    bookmarkButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        // Toggle active class
-        this.classList.toggle('active');
+  bookmarkButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      const icon = this.querySelector('i');
+      const docCard = this.closest('.search-result-card');
+      const docId = docCard.getAttribute('data-doc-id');
 
-        // Toggle bookmark icon
-        const icon = this.querySelector('i');
-        if (icon) {
-          if (icon.classList.contains('far')) {
+      fetch(`/account/favorites/toggle/${docId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          if (!data) return;
+
+          const favorited = data.favorited;
+          if (favorited) {
             icon.classList.remove('far');
             icon.classList.add('fas');
             showToast('Đã lưu tài liệu vào mục yêu thích', 'success');
@@ -489,11 +498,15 @@ function initBookmarkButtons() {
             icon.classList.add('far');
             showToast('Đã xóa tài liệu khỏi mục yêu thích', 'info');
           }
-        }
-      });
+        })
+        .catch(error => {
+          console.error("Lỗi khi gọi API yêu thích:", error);
+          showToast('Có lỗi xảy ra', 'error');
+        });
     });
-  }
+  });
 }
+
 
 // Initialize mobile filter toggle
 function initMobileFilterToggle() {

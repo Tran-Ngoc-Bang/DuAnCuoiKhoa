@@ -80,13 +80,15 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(authz -> authz
                                                 // Public resources
                                                 .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**",
-                                                                "/favicon.ico")
+                                                                "/favicon.ico",
+                                                                "/.well-known/**")
                                                 .permitAll()
-
                                                 .requestMatchers("/payment/**").permitAll()
+
                                               
                                                 .requestMatchers("/", "/home", "/login", "/register", "/confirm", 
                                                                 "/forgot-password", "/verify-reset-code", "/reset-password").permitAll()
+
 
                                                 .requestMatchers("/coin-packages", "/coin-packages/**").permitAll()
 
@@ -94,7 +96,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
                                                 // User endpoints
-                                                .requestMatchers("/my-transactions", "/profile/**")
+                                                .requestMatchers("/my-transactions", "/profile/**", "/favorites/**")
                                                 .hasAnyRole("USER", "ADMIN")
 
                                                 // All other requests need authentication

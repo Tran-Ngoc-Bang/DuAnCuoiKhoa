@@ -22,11 +22,20 @@ public class PaymentController {
     @GetMapping("/vnpay/callback")
     @ResponseBody
     public String vnpayIPNCallback(@RequestParam Map<String, String> params) {
+        // Log all received parameters
+        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PaymentController.class);
+        log.info("VNPay IPN callback received with parameters: {}", params);
+
         PaymentResult result = paymentService.processIPNCallback("vnpay", params);
 
+        // Log the result
+        log.info("VNPay IPN callback result: {}", result);
+
         // Return JSON response as required by VNPAY
-        return String.format("{\"RspCode\":\"%s\",\"Message\":\"%s\"}",
+        String response = String.format("{\"RspCode\":\"%s\",\"Message\":\"%s\"}",
                 result.getErrorCode(), result.getErrorMessage());
+        log.info("VNPay IPN callback response: {}", response);
+        return response;
     }
 
     /**
@@ -34,7 +43,14 @@ public class PaymentController {
      */
     @GetMapping("/vnpay/return")
     public String vnpayReturn(@RequestParam Map<String, String> params, Model model) {
+        // Log all received parameters
+        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PaymentController.class);
+        log.info("VNPay return URL received with parameters: {}", params);
+
         PaymentResult result = paymentService.processReturnCallback("vnpay", params);
+
+        // Log the result
+        log.info("VNPay return URL result: {}", result);
 
         if (result.isSuccess()) {
             model.addAttribute("success", true);
@@ -95,5 +111,25 @@ public class PaymentController {
         }
 
         return "payment/return";
+    }
+
+    /**
+     * Test VNPay configuration
+     */
+    @GetMapping("/vnpay/test")
+    @ResponseBody
+    public String testVNPayConfig() {
+        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PaymentController.class);
+
+        StringBuilder result = new StringBuilder();
+        result.append("VNPay Configuration Test:\n");
+        result.append("TMN Code: ").append(paymentService.getVnpayTmnCode()).append("\n");
+        result.append("Secret Key: ").append(paymentService.getVnpaySecretKey().substring(0, 10)).append("...\n");
+        result.append("URL: ").append(paymentService.getVnpayUrl()).append("\n");
+        result.append("Return URL: ").append(paymentService.getVnpayReturnUrl()).append("\n");
+        result.append("Notify URL: ").append(paymentService.getVnpayNotifyUrl()).append("\n");
+
+        log.info("VNPay configuration test: {}", result.toString());
+        return result.toString();
     }
 }

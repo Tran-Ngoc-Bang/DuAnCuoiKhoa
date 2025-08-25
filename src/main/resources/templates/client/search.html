@@ -19,6 +19,26 @@
   <link rel="stylesheet" th:href="@{/css/footer-modern.css}">
   <link rel="stylesheet" th:href="@{/css/client-header.css}">
   <link rel="stylesheet" th:href="@{/css/client-footer.css}">
+  <style>
+    .filter-options {
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .filter-options::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .filter-options::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 4px;
+    }
+
+    .filter-header.active {
+      background-color: #007bff;
+    }
+  </style>
 </head>
 
 <body>
@@ -111,11 +131,11 @@
         <div class="search-stats-bar">
           <div class="search-stats-info">
             <div class="search-query-display">
-              <span>Kết quả cho:</span> <strong>"React"</strong>
+              <span>Kết quả cho:</span> <strong>""</strong>
             </div>
-            <div class="search-count-display">
+            <!-- <div class="search-count-display">
               <i class="fas fa-file-alt"></i> 215 kết quả
-            </div>
+            </div> -->
           </div>
 
           <div class="search-options">
@@ -255,7 +275,7 @@
               <!-- Rating Filter -->
               <div class="filter-section">
                 <div class="filter-header">
-                  <h3 class="filter-title">Đánh giá</h3>
+                  <h3 class="filter-title active">Đánh giá</h3>
                   <i class="fas fa-chevron-down filter-toggle"></i>
                 </div>
                 <div class="filter-body">
@@ -361,7 +381,7 @@
 
           <div class="search-results-container">
             <div id="searchResults" class="search-results grid-view">
-              <div th:each="doc : ${searchResults.content}" class="search-result-card">
+              <div th:each="doc : ${searchResults.content}" class="search-result-card" th:attr="data-doc-id=${doc.id}">
                 <div class="result-thumbnail">
                   <img
                     src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
@@ -423,8 +443,10 @@
                       <i class="fas fa-download"></i> Tải xuống
                     </a>
                     <button class="result-bookmark-btn">
-                      <i class="far fa-bookmark"></i>
+                      <i
+                        th:classappend="${favoriteDocIds.contains(doc.id)} ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
                     </button>
+
                   </div>
                 </div>
               </div>
@@ -469,6 +491,29 @@
   <button id="backToTop" class="back-to-top">
     <i class="fas fa-arrow-up"></i>
   </button>
+
+  <script>
+    function updateActiveFilterTitles() {
+      document.querySelectorAll('.filter-section').forEach(section => {
+        const inputs = section.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+        const hasChecked = Array.from(inputs).some(input => input.checked);
+        const title = section.querySelector('.filter-header');
+
+        if (hasChecked) {
+          title.classList.add('active');
+        } else {
+          title.classList.remove('active');
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', updateActiveFilterTitles);
+
+    document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
+      input.addEventListener('change', updateActiveFilterTitles);
+    });
+  </script>
+
 
   <script th:src="@{/js/main.js}"></script>
   <script th:src="@{/js/search.js}"></script>

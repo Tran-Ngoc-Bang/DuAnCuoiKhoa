@@ -15,7 +15,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 
+import java.beans.PropertyEditorSupport;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +36,48 @@ public class TransactionController extends BaseAdminController {
 
     public TransactionController(NotificationService notificationService, UserRepository userRepository) {
         super(notificationService, userRepository);
+    }
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        final DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME, // 2025-01-01T00:00 or with seconds
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss") };
+
+        binder.registerCustomEditor(LocalDateTime.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                if (text == null || text.trim().isEmpty()) {
+                    setValue(null);
+                    return;
+                }
+                String value = text.trim();
+                // Normalize: convert ' ' to 'T' or vice versa as needed will be handled by
+                // trying patterns
+                for (DateTimeFormatter f : formatters) {
+                    try {
+                        setValue(LocalDateTime.parse(value, f));
+                        return;
+                    } catch (Exception ignored) {
+                    }
+                }
+                // Fallback: if contains 'T' but failed, try replacing 'T' with space
+                try {
+                    setValue(LocalDateTime.parse(value.replace('T', ' '),
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                    return;
+                } catch (Exception ignored) {
+                }
+                throw new IllegalArgumentException("Invalid date time format: " + text);
+            }
+
+            @Override
+            public String getAsText() {
+                LocalDateTime value = (LocalDateTime) getValue();
+                return value != null ? value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "";
+            }
+        });
     }
 
     /**
@@ -178,10 +225,32 @@ public class TransactionController extends BaseAdminController {
             @ModelAttribute Transaction transaction,
             RedirectAttributes redirectAttributes) {
         try {
-            transaction.setId(id);
-            transactionService.updateTransaction(transaction);
+            Optional<Transaction> existingOpt = transactionService.getTransactionById(id);
+            if (!existingOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy giao dịch");
+                return "redirect:/admin/transactions";
+            }
+
+            Transaction existing = existingOpt.get();
+            // Cập nhật các trường cho phép chỉnh sửa
+            existing.setCode(transaction.getCode());
+            existing.setType(transaction.getType());
+            existing.setAmount(transaction.getAmount());
+            existing.setStatus(transaction.getStatus());
+            if (transaction.getPaymentMethod() != null && !transaction.getPaymentMethod().trim().isEmpty()) {
+                existing.setPaymentMethod(transaction.getPaymentMethod().trim());
+            }
+            existing.setNotes(transaction.getNotes());
+            if (transaction.getCreatedAt() != null) {
+                existing.setCreatedAt(transaction.getCreatedAt());
+            }
+            if (transaction.getUser() != null && transaction.getUser().getId() != null) {
+                existing.setUser(transaction.getUser());
+            }
+
+            transactionService.updateTransaction(existing);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Cập nhật giao dịch thành công: " + transaction.getCode());
+                    "Cập nhật giao dịch thành công: " + existing.getCode());
             return "redirect:/admin/transactions";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",

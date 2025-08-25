@@ -26,8 +26,8 @@
     <link rel="stylesheet" th:href="@{/css/admin/transactions.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/transactions.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/transactions-delete.css}" />
-     <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
-  <script th:src="@{/js/admin/notifications.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
+    <script th:src="@{/js/admin/notifications.js}"></script>
   </head>
 
   <body class="admin-body">
@@ -224,7 +224,7 @@
       </main>
     </div>
 
-    <script src="../../js/main.js"></script>
-    <script src="../js/admin.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/admin/admin.js}"></script>
   </body>
 </html>

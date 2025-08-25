@@ -185,11 +185,17 @@ public class PaymentService {
                 responseCode = params.get("status"); // QR Banking
             }
 
+            log.info("VNPay callback - Transaction: {}, ResponseCode: {}, TransactionStatus: {}",
+                    transactionCode, responseCode, transactionStatus);
+
             if ("00".equals(responseCode) && "00".equals(transactionStatus)) {
                 transaction.setStatus(Transaction.TransactionStatus.COMPLETED);
                 transactionService.completeCoinPurchase(transaction);
+                log.info("Transaction {} completed successfully", transactionCode);
             } else {
                 transaction.setStatus(Transaction.TransactionStatus.FAILED);
+                log.warn("Transaction {} failed - ResponseCode: {}, TransactionStatus: {}",
+                        transactionCode, responseCode, transactionStatus);
             }
 
             transaction.setUpdatedAt(LocalDateTime.now());
@@ -241,10 +247,10 @@ public class PaymentService {
             }
 
             boolean isSuccess = "00".equals(responseCode);
+            String message = getVNPayErrorMessage(responseCode);
 
-            return new PaymentResult(isSuccess,
-                    isSuccess ? "Thanh toán thành công" : "Thanh toán thất bại",
-                    null, null, transactionCode, transaction.getAmount(), paymentMethod, null, null);
+            return new PaymentResult(isSuccess, message,
+                    null, null, transactionCode, transaction.getAmount(), paymentMethod, responseCode, null);
 
         } catch (Exception e) {
             return new PaymentResult(false, "Lỗi xử lý return", null, null,
@@ -297,67 +303,68 @@ public class PaymentService {
         vnpayParams.put("vnp_OrderType", "other");
         vnpayParams.put("vnp_Locale", "vn");
         vnpayParams.put("vnp_ReturnUrl", vnpayReturnUrl);
-        vnpayParams.put("vnp_IpAddr", "127.0.0.1"); // TODO: inject real client IP
+        vnpayParams.put("vnp_IpAddr", getClientIpAddress());
 
-        String createDate = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        // Use Vietnam timezone for VNPay
+        java.time.ZoneId vietnamZone = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDateTime now = LocalDateTime.now(vietnamZone);
+        String createDate = now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         vnpayParams.put("vnp_CreateDate", createDate);
 
-        // Add expire date (15 minutes from now)
-        LocalDateTime expireDate = LocalDateTime.now().plusMinutes(15);
+        // Add expire date (15 minutes from now) in Vietnam timezone
+        LocalDateTime expireDate = now.plusMinutes(15);
         String expireDateStr = expireDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         vnpayParams.put("vnp_ExpireDate", expireDateStr);
 
-        // Build query string (sorted, url-encoded, joined by '&')
-        String queryWithoutHash = buildQueryString(vnpayParams);
+        // Log parameters for debugging
+        log.info("VNPay parameters for transaction {}: {}", transaction.getCode(), vnpayParams);
 
-        // Create secure hash on queryWithoutHash
-        String secureHash = hmacSHA512(vnpaySecretKey, queryWithoutHash);
-
-        // Append hash type + hash to URL
-        StringBuilder url = new StringBuilder(vnpayUrl);
-        url.append("?").append(queryWithoutHash)
-                .append("&vnp_SecureHashType=").append("HmacSHA512")
-                .append("&vnp_SecureHash=").append(secureHash);
-
-        return url.toString();
-    }
-
-    /**
-     * Build query string from params per VNPay docs (sorted keys, url-encoded,
-     * joined by '&')
-     */
-    private String buildQueryString(Map<String, String> params) {
+        // Build hash data first (sorted, url-encoded, joined by '&')
+        StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
         boolean first = true;
-        for (Map.Entry<String, String> entry : params.entrySet()) {
+
+        for (Map.Entry<String, String> entry : vnpayParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (value == null || value.isEmpty())
                 continue;
-            if (!first)
+
+            // Build hash data
+            if (!first) {
+                hashData.append('&');
+            }
+            hashData.append(key).append('=').append(java.net.URLEncoder.encode(value, StandardCharsets.US_ASCII));
+
+            // Build query
+            if (!first) {
                 query.append('&');
-            first = false;
+            }
             query.append(java.net.URLEncoder.encode(key, StandardCharsets.US_ASCII))
                     .append('=')
                     .append(java.net.URLEncoder.encode(value, StandardCharsets.US_ASCII));
-        }
-        return query.toString();
-    }
 
-    /**
-     * Create hash data for VNPay (kept for callback verification, uses same query
-     * rules)
-     */
-    private String createVNPayHashData(Map<String, String> params) {
-        // Filter out SecureHash/Type and build query in sorted order
-        Map<String, String> filtered = new TreeMap<>();
-        for (Map.Entry<String, String> e : params.entrySet()) {
-            String k = e.getKey();
-            if (k.startsWith("vnp_") && !"vnp_SecureHash".equals(k) && !"vnp_SecureHashType".equals(k)) {
-                filtered.put(k, e.getValue());
-            }
+            first = false;
         }
-        return buildQueryString(filtered);
+
+        // Log hash data for debugging
+        log.info("VNPay hash data for transaction {}: {}", transaction.getCode(), hashData.toString());
+
+        // Create secure hash on hashData
+        String secureHash = hmacSHA512(vnpaySecretKey, hashData.toString());
+        log.info("VNPay secure hash for transaction {}: {}", transaction.getCode(), secureHash);
+
+        // Append hash to query
+        query.append("&vnp_SecureHash=").append(secureHash);
+
+        // Build final URL
+        StringBuilder url = new StringBuilder(vnpayUrl);
+        url.append("?").append(query.toString());
+
+        String finalUrl = url.toString();
+        log.info("VNPay final URL for transaction {}: {}", transaction.getCode(), finalUrl);
+
+        return finalUrl;
     }
 
     /**
@@ -382,11 +389,35 @@ public class PaymentService {
                 return false;
             }
 
-            String hashData = createVNPayHashData(params);
-            String calculatedHash = hmacSHA512(vnpaySecretKey, hashData);
+            // Build hash data from params (excluding SecureHash and SecureHashType)
+            Map<String, String> filteredParams = new TreeMap<>();
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String key = entry.getKey();
+                if (key.startsWith("vnp_") && !"vnp_SecureHash".equals(key) && !"vnp_SecureHashType".equals(key)) {
+                    filteredParams.put(key, entry.getValue());
+                }
+            }
 
+            // Build hash data string (sorted, url-encoded, joined by '&')
+            StringBuilder hashData = new StringBuilder();
+            boolean first = true;
+            for (Map.Entry<String, String> entry : filteredParams.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (value == null || value.isEmpty())
+                    continue;
+
+                if (!first) {
+                    hashData.append('&');
+                }
+                hashData.append(key).append('=').append(java.net.URLEncoder.encode(value, StandardCharsets.US_ASCII));
+                first = false;
+            }
+
+            String calculatedHash = hmacSHA512(vnpaySecretKey, hashData.toString());
             return calculatedHash.equals(receivedHash);
         } catch (Exception e) {
+            log.error("Error verifying VNPay signature: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -425,5 +456,105 @@ public class PaymentService {
             result.append(String.format("%02x", b));
         }
         return result.toString();
+    }
+
+    /**
+     * Get client IP address (fallback for Azure deployment)
+     */
+    private String getClientIpAddress() {
+        try {
+            // Try to get real client IP from Azure headers
+            org.springframework.web.context.request.RequestAttributes requestAttributes = org.springframework.web.context.request.RequestContextHolder
+                    .getRequestAttributes();
+            if (requestAttributes instanceof org.springframework.web.context.request.ServletRequestAttributes) {
+                jakarta.servlet.http.HttpServletRequest request = ((org.springframework.web.context.request.ServletRequestAttributes) requestAttributes)
+                        .getRequest();
+
+                // Check Azure-specific headers
+                String clientIp = request.getHeader("X-Forwarded-For");
+                if (clientIp == null || clientIp.isEmpty()) {
+                    clientIp = request.getHeader("X-Real-IP");
+                }
+                if (clientIp == null || clientIp.isEmpty()) {
+                    clientIp = request.getHeader("X-Azure-ClientIP");
+                }
+                if (clientIp == null || clientIp.isEmpty()) {
+                    clientIp = request.getRemoteAddr();
+                }
+
+                // Handle comma-separated IPs (take first one)
+                if (clientIp != null && clientIp.contains(",")) {
+                    clientIp = clientIp.split(",")[0].trim();
+                }
+
+                return clientIp != null && !clientIp.isEmpty() ? clientIp : "127.0.0.1";
+            }
+        } catch (Exception e) {
+            log.warn("Could not get client IP address: {}", e.getMessage());
+        }
+        return "127.0.0.1";
+    }
+
+    /**
+     * Get VNPay error message by response code
+     */
+    private String getVNPayErrorMessage(String responseCode) {
+        if (responseCode == null) {
+            return "Không có mã phản hồi từ VNPay";
+        }
+
+        switch (responseCode) {
+            case "00":
+                return "Thanh toán thành công";
+            case "07":
+                return "Trừ tiền thành công. Giao dịch bị nghi ngờ (liên quan tới lừa đảo, giao dịch bất thường)";
+            case "09":
+                return "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng chưa đăng ký dịch vụ InternetBanking tại ngân hàng";
+            case "10":
+                return "Giao dịch không thành công do: Khách hàng xác thực thông tin thẻ/tài khoản không đúng quá 3 lần";
+            case "11":
+                return "Giao dịch không thành công do: Đã hết hạn chờ thanh toán. Xin quý khách vui lòng thực hiện lại giao dịch";
+            case "12":
+                return "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng bị khóa";
+            case "13":
+                return "Giao dịch không thành công do Quý khách nhập sai mật khẩu xác thực giao dịch (OTP)";
+            case "15":
+                return "Giao dịch không thành công do: Giao dịch không hợp lệ hoặc thông tin giao dịch bị sai lệch";
+            case "24":
+                return "Giao dịch không thành công do: Khách hàng hủy giao dịch";
+            case "51":
+                return "Giao dịch không thành công do: Tài khoản của quý khách không đủ số dư để thực hiện giao dịch";
+            case "65":
+                return "Giao dịch không thành công do: Tài khoản của Quý khách đã vượt quá hạn mức giao dịch trong ngày";
+            case "75":
+                return "Ngân hàng thanh toán đang bảo trì";
+            case "79":
+                return "Giao dịch không thành công do: KH nhập sai mật khẩu thanh toán quá số lần quy định";
+            case "99":
+                return "Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)";
+            default:
+                return "Lỗi không xác định từ VNPay (Mã lỗi: " + responseCode + ")";
+        }
+    }
+
+    // Getter methods for VNPay configuration
+    public String getVnpayTmnCode() {
+        return vnpayTmnCode;
+    }
+
+    public String getVnpaySecretKey() {
+        return vnpaySecretKey;
+    }
+
+    public String getVnpayUrl() {
+        return vnpayUrl;
+    }
+
+    public String getVnpayReturnUrl() {
+        return vnpayReturnUrl;
+    }
+
+    public String getVnpayNotifyUrl() {
+        return vnpayNotifyUrl;
     }
 }

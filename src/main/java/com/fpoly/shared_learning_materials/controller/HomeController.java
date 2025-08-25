@@ -5,15 +5,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
+
 import com.fpoly.shared_learning_materials.service.CategoryService;
 import com.fpoly.shared_learning_materials.service.DocumentService;
+import com.fpoly.shared_learning_materials.service.FavoriteService;
 import com.fpoly.shared_learning_materials.dto.CategoryDTO;
 import com.fpoly.shared_learning_materials.dto.DocumentDTO;
 import com.fpoly.shared_learning_materials.util.NumberFormatUtils;
+
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +34,9 @@ public class HomeController {
 
     @Autowired
     private DocumentService documentService;
+
+    @Autowired
+    private FavoriteService favoriteService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -132,4 +142,11 @@ public class HomeController {
 
         return "client/index"; // Reuse the same template
     }
+
+
+    @GetMapping("/favicon.ico")
+    public void favicon(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+    }
+
 }

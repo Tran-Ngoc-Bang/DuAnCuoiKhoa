@@ -29,6 +29,8 @@
     <link rel="stylesheet" th:href="@{/css/footer-modern.css}" />
     <link rel="stylesheet" th:href="@{/css/client-header.css}" />
     <link rel="stylesheet" th:href="@{/css/client-footer.css}" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <style>
       :root {
         --primary: #4361ee;
@@ -1087,18 +1089,8 @@
       <div class="container">
         <div class="dashboard-header">
           <div class="dashboard-header-actions">
-            <div class="date-display" id="currentDate">
-              <i class="far fa-calendar-alt"></i>
-              <span>Ngày 22 tháng 5, 2025</span>
-            </div>
             <button class="refresh-button" id="refreshBtn">
               <i class="fas fa-sync-alt"></i> Làm mới
-            </button>
-            <button class="recharge-button" id="rechargeBtn">
-              <i class="fas fa-plus"></i> Nạp tiền
-            </button>
-            <button class="settings-button" id="settingsBtn">
-              <i class="fas fa-cog"></i> Cài đặt thanh toán
             </button>
           </div>
         </div>
@@ -1116,7 +1108,7 @@
                   <i class="fas fa-credit-card"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">24</div>
+                  <div class="stat-value" id="totalTransactionsCard">0</div>
                   <div class="stat-label">Tổng giao dịch</div>
                 </div>
               </div>
@@ -1126,7 +1118,7 @@
                   <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">18</div>
+                  <div class="stat-value" id="completedTransactionsCard">0</div>
                   <div class="stat-label">Thành công</div>
                 </div>
               </div>
@@ -1136,7 +1128,7 @@
                   <i class="fas fa-clock"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">4</div>
+                  <div class="stat-value" id="pendingTransactionsCard">0</div>
                   <div class="stat-label">Đang xử lý</div>
                 </div>
               </div>
@@ -1146,7 +1138,7 @@
                   <i class="fas fa-coins"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">890,000đ</div>
+                  <div class="stat-value" id="totalSpentCard">0đ</div>
                   <div class="stat-label">Tổng chi tiêu</div>
                 </div>
               </div>
@@ -1192,16 +1184,31 @@
                   <i class="fas fa-history section-title-icon"></i>
                   Lịch sử giao dịch
                 </h2>
+                <!--
                 <div class="section-actions">
                   <button class="action-button" id="exportBtn">
                     <i class="fas fa-download"></i>
                     Xuất CSV
                   </button>
                 </div>
+                -->
               </div>
 
               <div class="transaction-count" id="totalTransactions">
-                <i class="fas fa-list"></i> Tổng: <span>0</span> giao dịch
+                <i class="fas fa-list"></i> Tổng:
+                <span
+                  th:text="${transactionsPage != null ? transactionsPage.totalElements : 0}"
+                  >0</span
+                >
+                giao dịch
+                <span
+                  th:if="${transactionsPage != null and transactionsPage.totalPages > 1}"
+                  style="margin-left: 1rem; color: #6b7280"
+                >
+                  (Trang
+                  <span th:text="${transactionsPage.number + 1}">1</span> /
+                  <span th:text="${transactionsPage.totalPages}">1</span>)
+                </span>
               </div>
 
               <div class="documents-grid" style="grid-template-columns: 1fr">
@@ -1224,28 +1231,69 @@
                         <label>Trạng thái</label>
                         <select id="statusFilter">
                           <option value="all">Tất cả trạng thái</option>
-                          <option value="success">Thành công</option>
-                          <option value="pending">Đang xử lý</option>
-                          <option value="failed">Thất bại</option>
-                          <option value="refunded">Hoàn tiền</option>
+                          <option
+                            value="PENDING"
+                            th:selected="${status == 'PENDING'}"
+                          >
+                            Đang xử lý
+                          </option>
+                          <option
+                            value="PROCESSING"
+                            th:selected="${status == 'PROCESSING'}"
+                          >
+                            Đang xử lý
+                          </option>
+                          <option
+                            value="COMPLETED"
+                            th:selected="${status == 'COMPLETED'}"
+                          >
+                            Thành công
+                          </option>
+                          <option
+                            value="FAILED"
+                            th:selected="${status == 'FAILED'}"
+                          >
+                            Thất bại
+                          </option>
+                          <option
+                            value="CANCELLED"
+                            th:selected="${status == 'CANCELLED'}"
+                          >
+                            Đã hủy
+                          </option>
                         </select>
                       </div>
                       <div class="form-group">
-                        <label>Loại giao dịch</label>
+                        <label>Loại</label>
                         <select id="typeFilter">
                           <option value="all">Tất cả loại</option>
-                          <option value="recharge">Nạp tiền</option>
-                          <option value="download">Tải tài liệu</option>
-                          <option value="refund">Hoàn tiền</option>
+                          <option
+                            value="PURCHASE"
+                            th:selected="${type == 'PURCHASE'}"
+                          >
+                            Nạp tiền
+                          </option>
+                          <option
+                            value="WITHDRAWAL"
+                            th:selected="${type == 'WITHDRAWAL'}"
+                          >
+                            Tải tài liệu
+                          </option>
+                          <option
+                            value="REFUND"
+                            th:selected="${type == 'REFUND'}"
+                          >
+                            Hoàn tiền
+                          </option>
                         </select>
                       </div>
                       <div class="form-group">
                         <label>Từ ngày</label>
-                        <input type="date" id="dateFrom" max="2025-06-12" />
+                        <input id="dateFrom" type="date" th:value="${from}" />
                       </div>
                       <div class="form-group">
                         <label>Đến ngày</label>
-                        <input type="date" id="dateTo" max="2025-06-12" />
+                        <input id="dateTo" type="date" th:value="${to}" />
                       </div>
                       <div class="form-group">
                         <label>Số tiền</label>
@@ -1261,16 +1309,136 @@
                           <option value="200001+">Trên 200.000 VNĐ</option>
                         </select>
                       </div>
-                      <button id="filterBtn" class="action-button">
-                        <i class="fas fa-filter"></i>
-                        Lọc
-                      </button>
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button
+                          id="filterBtn"
+                          type="button"
+                          class="action-button"
+                        >
+                          <i class="fas fa-filter"></i> Lọc
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div id="transactionGroups"></div>
+
+              <!-- Server-side rendered transactions list -->
+              <div
+                th:if="${transactionsPage != null}"
+                class="transaction-group"
+                style="margin-top: 1.5rem"
+              >
+                <h3>Giao dịch gần đây</h3>
+                <div class="transaction-table-container">
+                  <table class="transaction-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 15%">Mã giao dịch</th>
+                        <th style="width: 10%">Loại</th>
+                        <th style="width: 15%">Số tiền</th>
+                        <th style="width: 15%">Trạng thái</th>
+                        <th style="width: 10%">Hoàn tiền</th>
+                        <th style="width: 15%">Phương thức</th>
+                        <th style="width: 15%">Ngày tạo</th>
+                        <th style="width: 15%">Ghi chú</th>
+                        <th style="width: 15%">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr th:each="tx : ${transactionsPage.content}">
+                        <td th:text="${tx.code}">TXN000001</td>
+                        <td th:text="${tx.type}">PURCHASE</td>
+                        <td
+                          th:text="${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 2, 'POINT')}"
+                        ></td>
+                        <td>
+                          <span
+                            class="status-badge"
+                            th:classappend="${tx.status.name() == 'COMPLETED'} ? ' status-success' : (${tx.status.name() == 'PENDING'} ? ' status-pending' : ' status-failed')"
+                            th:text="${tx.status.displayName}"
+                            >Trạng thái</span
+                          >
+                        </td>
+                        <td
+                          th:text="${tx.type.name() == 'REFUND' ? 'Có' : 'Không'}"
+                        >
+                          Không
+                        </td>
+                        <td th:text="${tx.paymentMethod}">VNPAY</td>
+                        <td
+                          th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}"
+                        >
+                          01/01/2025 12:00
+                        </td>
+                        <td th:text="${tx.notes}">-</td>
+                        <td class="action-cell">
+                          <button
+                            class="action-btn"
+                            onclick="openModal(this.dataset.id)"
+                            th:attr="data-id=${tx.id}"
+                          >
+                            <i class="fas fa-eye"></i>&nbsp;Chi tiết
+                          </button>
+                          <button
+                            class="refund-btn"
+                            type="button"
+                            th:if="${tx.type.name() == 'PURCHASE' and tx.status.name() == 'COMPLETED'}"
+                            onclick="confirmRefund(this.dataset.id)"
+                            th:attr="data-id=${tx.id}"
+                          >
+                            <i class="fas fa-undo"></i>&nbsp;Hoàn tiền
+                          </button>
+                        </td>
+                      </tr>
+                      <tr th:if="${transactionsPage.totalElements == 0}">
+                        <td
+                          colspan="8"
+                          style="text-align: center; color: var(--gray-600)"
+                        >
+                          Không có giao dịch
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                <div
+                  class="pagination"
+                  th:if="${transactionsPage.totalElements > 0}"
+                >
+                  <a
+                    class="page-link"
+                    th:classappend="${transactionsPage.first} ? ' disabled'"
+                    th:href="@{'/account/transactions'(page=${transactionsPage.number - 1}, size=${transactionsPage.size})}"
+                    >&laquo;</a
+                  >
+
+                  <span
+                    th:each="i : ${#numbers.sequence(0, transactionsPage.totalPages - 1)}"
+                  >
+                    <a
+                      class="page-link"
+                      th:classappend="${i == transactionsPage.number} ? ' active'"
+                      th:text="${i + 1}"
+                      th:href="@{'/account/transactions'(page=${i}, size=${transactionsPage.size})}"
+                      >1</a
+                    >
+                  </span>
+
+                  <a
+                    class="page-link"
+                    th:classappend="${transactionsPage.last} ? ' disabled'"
+                    th:href="@{'/account/transactions'(page=${transactionsPage.number + 1}, size=${transactionsPage.size})}"
+                    >&raquo;</a
+                  >
+                </div>
+              </div>
+
               <div class="pagination" id="pagination"></div>
             </div>
           </div>
@@ -1285,7 +1453,6 @@
           <strong>Mã giao dịch:</strong> <span id="modalTransactionId"></span>
         </p>
         <p><strong>Loại giao dịch:</strong> <span id="modalType"></span></p>
-        <p><strong>Tài liệu:</strong> <span id="modalDocument"></span></p>
         <p><strong>Ngày giao dịch:</strong> <span id="modalDate"></span></p>
         <p><strong>Số tiền:</strong> <span id="modalAmount"></span></p>
         <p><strong>Trạng thái:</strong> <span id="modalStatus"></span></p>
@@ -1294,7 +1461,6 @@
           <strong>Phương thức thanh toán:</strong>
           <span id="modalMethod"></span>
         </p>
-        <button class="support-btn" onclick="openSupportPopup()">Hỗ trợ</button>
         <button
           class="download-btn"
           id="downloadInvoiceBtn"
@@ -1351,6 +1517,20 @@
       </div>
     </div>
 
+    <div class="modal" id="refundModal" style="display: none">
+      <div class="modal-content">
+        <h2>Xác nhận hoàn tiền</h2>
+        <p><strong>Mã giao dịch:</strong> <span id="refundTxId"></span></p>
+        <p style="margin: 1rem 0; color: #6b7280">
+          Bạn có chắc muốn yêu cầu hoàn tiền cho giao dịch này?
+        </p>
+        <div style="display: flex; gap: 1rem">
+          <button class="close-btn" id="refundCancelBtn">Hủy</button>
+          <button class="export-btn" id="refundConfirmBtn">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+
     <div class="notification" id="notification">
       <i class="fas fa-check-circle"></i>
       <span id="notificationMessage"></span>
@@ -1361,86 +1541,103 @@
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@jspdf/autotable@3.5.23/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/account.js}"></script>
     <script th:src="@{/js/client-header.js}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const transactions = [
-          {
-            id: "TRX123456789",
-            type: "recharge",
-            document: "Nạp 100 xudfjsbfjdsjfbdsjhfhdbsb",
-            date: "2025-06-03 19:15:00",
-            amount: 35000,
-            status: "success",
-            statusClass: "status-success",
-            method: "Thẻ tín dụng (Visa)",
-            refund: "Không",
-          },
-          {
-            id: "TRX789123456",
-            type: "recharge",
-            document: "Nạp 500 xu",
-            date: "2025-05-20 14:20:00",
-            amount: 150000,
-            status: "success",
-            statusClass: "status-success",
-            method: "Thẻ tín dụng (Mastercard)",
-            refund: "Không",
-          },
-          {
-            id: "TRX987654321",
-            type: "download",
-            document: "Tài liệu Văn 11",
-            date: "2025-05-22 15:15:00",
-            amount: 65000,
-            status: "pending",
-            statusClass: "status-pending",
-            method: "Chuyển khoản ngân hàng",
-            refund: "Không",
-          },
-          {
-            id: "TRX456789123",
-            type: "download",
-            document: "Tài liệu Hóa 10",
-            date: "2025-05-21 10:30:00",
-            amount: 20000,
-            status: "failed",
-            statusClass: "status-failed",
-            method: "Ví điện tử (MoMo)",
-            refund: "Không",
-          },
-          {
-            id: "TRX321654987",
-            type: "download",
-            document: "Tài liệu Toán 12",
-            date: "2025-05-19 09:45:00",
-            amount: 35000,
-            status: "success",
-            statusClass: "status-success",
-            method: "Ví điện tử (ZaloPay)",
-            refund: "Đã hoàn 50%",
-          },
-          {
-            id: "TRX654987321",
-            type: "refund",
-            document: "Tài liệu Toán 12",
-            date: "2025-05-18 16:10:00",
-            amount: 17500,
-            status: "refunded",
-            statusClass: "status-refunded",
-            method: "Ví điện tử (ZaloPay)",
-            refund: "Đã hoàn 50%",
-          },
-        ];
+        // Load real data from backend
+        let transactionStats = {};
+        let dailyChartData = [];
+        let typeChartData = [];
+
+        // Load stats data
+        function loadTransactionStats() {
+          console.log("Loading transaction stats...");
+          fetch("/account/transactions/stats")
+            .then((response) => {
+              console.log("Response status:", response.status);
+              console.log("Response headers:", response.headers);
+              if (!response.ok) {
+                return response.text().then((text) => {
+                  console.log("Error response body:", text);
+                  throw new Error(
+                    `HTTP ${response.status}: ${response.statusText} - ${text}`
+                  );
+                });
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("Received data:", data);
+              transactionStats = data.stats || {};
+              dailyChartData = data.dailyData || [];
+              typeChartData = data.typeData || [];
+
+              console.log("Stats:", transactionStats);
+              console.log("Daily data:", dailyChartData);
+              console.log("Type data:", typeChartData);
+
+              // Update stats cards
+              updateStatsCards();
+
+              // Update charts
+              initChart("day", dailyChartData, "transactionChart");
+              initChart("type", typeChartData, "typeChartContainer");
+            })
+            .catch((error) => {
+              console.error("Error loading transaction stats:", error);
+              // Fallback to default values
+              transactionStats = {
+                totalTransactions: 0,
+                completedTransactions: 0,
+                pendingTransactions: 0,
+                totalSpent: 0,
+              };
+              dailyChartData = [];
+              typeChartData = [];
+              updateStatsCards();
+              initChart("day", dailyChartData, "transactionChart");
+              initChart("type", typeChartData, "typeChartContainer");
+            });
+        }
+
+        function updateStatsCards() {
+          const totalEl = document.getElementById("totalTransactionsCard");
+          const completedEl = document.getElementById(
+            "completedTransactionsCard"
+          );
+          const pendingEl = document.getElementById("pendingTransactionsCard");
+          const spentEl = document.getElementById("totalSpentCard");
+
+          if (totalEl) {
+            totalEl.textContent = transactionStats.totalTransactions || 0;
+          }
+          if (completedEl) {
+            completedEl.textContent =
+              transactionStats.completedTransactions || 0;
+          }
+          if (pendingEl) {
+            pendingEl.textContent = transactionStats.pendingTransactions || 0;
+          }
+          if (spentEl) {
+            const amount = transactionStats.totalSpent || 0;
+            spentEl.textContent = new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(amount);
+          }
+        }
+
+        // Load initial data
+        loadTransactionStats();
 
         let transactionChart, typeChart;
         let currentChartMode = "day";
         const transactionsPerPage = 3;
         let currentPage = 1;
-        let filteredTransactions = transactions;
+        let filteredTransactions = [];
         let selectedTransactions = [];
         let modalSelectedTransactions = [];
 
@@ -1454,50 +1651,68 @@
             .trim();
         }
 
-        function aggregateChartData(transactions, mode) {
+        function aggregateChartData(data, mode) {
+          if (!data || data.length === 0) {
+            return { labels: [], amounts: [] };
+          }
+
           const grouped = {};
-          transactions.forEach((t) => {
-            if (t.type === "refund") return;
-            const date = new Date(t.date);
+          data.forEach((item) => {
             let key;
             if (mode === "day") {
-              key = date.toISOString().split("T")[0];
+              key = item.date;
             } else if (mode === "week") {
-              const weekStart = new Date(date);
-              weekStart.setDate(date.getDate() - date.getDay() + 1);
+              // Convert date to week format
+              const date = new Date(item.date);
               key = `Tuần ${Math.ceil(date.getDate() / 7)}/${
                 date.getMonth() + 1
               }`;
             } else if (mode === "month") {
+              const date = new Date(item.date);
               key = `${date.getFullYear()}-${String(
                 date.getMonth() + 1
               ).padStart(2, "0")}`;
             }
             if (!grouped[key]) grouped[key] = 0;
-            grouped[key] += t.amount;
+            grouped[key] += parseFloat(item.amount || 0);
           });
           const labels = Object.keys(grouped).sort();
           return { labels, amounts: labels.map((key) => grouped[key]) };
         }
 
-        function aggregateTypeData(transactions) {
-          const grouped = { recharge: 0, download: 0, refund: 0 };
-          transactions.forEach((t) => {
-            if (t.type === "recharge") grouped.recharge += t.amount;
-            else if (t.type === "download") grouped.download += t.amount;
-            else if (t.type === "refund") grouped.refund += t.amount;
+        function aggregateTypeData(data) {
+          if (!data || data.length === 0) {
+            return {
+              categories: ["Nạp tiền", "Thanh toán", "Hoàn tiền"],
+              amounts: [0, 0, 0],
+            };
+          }
+
+          const typeMap = {
+            PURCHASE: "Nạp tiền",
+            WITHDRAWAL: "Thanh toán",
+            REFUND: "Hoàn tiền",
+          };
+
+          const grouped = { "Nạp tiền": 0, "Thanh toán": 0, "Hoàn tiền": 0 };
+          data.forEach((item) => {
+            const typeName = typeMap[item.type] || item.type;
+            if (grouped[typeName] !== undefined) {
+              grouped[typeName] += parseFloat(item.amount || 0);
+            }
           });
+
           return {
-            categories: ["Nạp tiền", "Thanh toán", "Hoàn tiền"],
-            amounts: [grouped.recharge, grouped.download, grouped.refund],
+            categories: Object.keys(grouped),
+            amounts: Object.values(grouped),
           };
         }
 
-        function initChart(mode, transactions, containerId) {
+        function initChart(mode, data, containerId) {
           let chartData, options;
 
           if (mode === "day") {
-            chartData = aggregateChartData(transactions, currentChartMode);
+            chartData = aggregateChartData(data, currentChartMode);
             options = {
               series: [{ name: "Số tiền tiêu (VNĐ)", data: chartData.amounts }],
               chart: {
@@ -1573,7 +1788,7 @@
               },
             };
           } else {
-            chartData = aggregateTypeData(transactions);
+            chartData = aggregateTypeData(data);
             options = {
               series: [{ name: "Số tiền (VNĐ)", data: chartData.amounts }],
               chart: {
@@ -1674,7 +1889,7 @@
               this.dataset.tab === "typeChart" ? "block" : "none";
             initChart(
               this.dataset.tab === "dayChart" ? "day" : "type",
-              filteredTransactions,
+              this.dataset.tab === "dayChart" ? dailyChartData : typeChartData,
               this.dataset.tab === "dayChart"
                 ? "transactionChart"
                 : "typeChartContainer"
@@ -1682,8 +1897,9 @@
           });
         });
 
-        initChart("day", transactions, "transactionChart");
-        initChart("type", transactions, "typeChartContainer");
+        // Initialize charts with real data
+        initChart("day", dailyChartData, "transactionChart");
+        initChart("type", typeChartData, "typeChartContainer");
 
         function renderTransactions(transactionsToRender) {
           const groupsContainer = document.getElementById("transactionGroups");
@@ -1732,7 +1948,7 @@
                   <th style="width: 25%;">Tài liệu</th>
                   <th style="width: 15%;">Số tiền</th>
                   <th style="width: 15%;">Trạng thái</th>
-                  <th style="width: 15%;">Hoàn tiền</th>
+                  <th style="width: 10%;">Hoàn tiền</th>
                   <th style="width: 20%;">Hành động</th>
                 </tr>
               </thead>
@@ -1905,7 +2121,7 @@
               "block";
             document.getElementById("dashboardModal").style.display = "flex";
             showNotification(
-              `Đang hiển thị chi tiết giao dịch ${transaction.id}`,
+              `Đã mở chi tiết giao dịch ${transaction.id}`,
               "success"
             );
           } else {
@@ -1938,219 +2154,125 @@
           }, 3000);
         }
 
-        document
-          .getElementById("downloadInvoiceBtn")
-          .addEventListener("click", function () {
-            const transaction = transactions.find(
-              (t) =>
-                t.id ===
-                document.getElementById("modalTransactionId").textContent
-            );
-            if (transaction) {
-              const { jsPDF } = window.jspdf;
-              const doc = new jsPDF();
-              doc.setFontSize(16);
-              doc.text("HÓA ĐƠN GIAO DỊCH", 105, 20, { align: "center" });
-              doc.setFontSize(12);
-              doc.text(`Mã giao dịch: ${transaction.id}`, 20, 40);
-              doc.text(
-                `Loại giao dịch: ${
-                  transaction.type === "recharge"
-                    ? "Nạp xu"
-                    : transaction.type === "download"
-                    ? "Tải tài liệu"
-                    : "Hoàn tiền"
-                }`,
-                20,
-                50
+        // Add event listener for download invoice button
+        (function () {
+          const downloadBtn = document.getElementById("downloadInvoiceBtn");
+          if (downloadBtn) {
+            downloadBtn.addEventListener("click", function () {
+              const transaction = transactions.find(
+                (t) =>
+                  t.id ===
+                  document.getElementById("modalTransactionId").textContent
               );
-              doc.text(`Tài liệu: ${transaction.document}`, 20, 60);
-              doc.text(
-                `Ngày giao dịch: ${formatDateTime(transaction.date)}`,
-                20,
-                70
-              );
-              doc.text(
-                `Số tiền: ${new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(transaction.amount)}`,
-                20,
-                80
-              );
-              doc.text(
-                `Trạng thái: ${
-                  transaction.status === "success"
-                    ? "Thành công"
-                    : transaction.status === "pending"
-                    ? "Đang xử lý"
-                    : transaction.status === "failed"
-                    ? "Thất bại"
-                    : "Hoàn tiền"
-                }`,
-                20,
-                90
-              );
-              doc.text(`Hoàn tiền: ${transaction.refund}`, 20, 100);
-              doc.text(
-                `Phương thức thanh toán: ${transaction.method}`,
-                20,
-                110
-              );
-              doc.save(`invoice_${transaction.id}.pdf`);
-              showNotification("Hóa đơn đã được tải xuống!", "success");
-            }
-          });
-
-        document
-          .getElementById("filterBtn")
-          .addEventListener("click", function () {
-            const searchQuery = normalizeString(
-              document.getElementById("searchInput").value
-            );
-            const statusFilter = document.getElementById("statusFilter").value;
-            const typeFilter = document.getElementById("typeFilter").value;
-            const dateFrom = document.getElementById("dateFrom").value;
-            const dateTo = document.getElementById("dateTo").value;
-            const amountFilter = document.getElementById("amountFilter").value;
-
-            if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
-              showNotification(
-                "Ngày bắt đầu không được lớn hơn ngày kết thúc!",
-                "error"
-              );
-              return;
-            }
-
-            filteredTransactions = transactions.filter((t) => {
-              const matchesSearch =
-                !searchQuery ||
-                normalizeString(t.id).includes(searchQuery) ||
-                normalizeString(t.document).includes(searchQuery);
-              const matchesStatus =
-                statusFilter === "all" || t.status === statusFilter;
-              const matchesType = typeFilter === "all" || t.type === typeFilter;
-              const transactionDate = new Date(t.date);
-              transactionDate.setHours(0, 0, 0, 0);
-              const fromDate = dateFrom
-                ? new Date(dateFrom)
-                : new Date("1900-01-01");
-              const toDate = dateTo ? new Date(dateTo) : new Date("2025-06-12");
-              fromDate.setHours(0, 0, 0, 0);
-              toDate.setHours(0, 0, 0, 0);
-              const matchesDate =
-                transactionDate >= fromDate && transactionDate <= toDate;
-              const matchesAmount =
-                amountFilter === "all" ||
-                (amountFilter === "0-50000" &&
-                  t.amount >= 0 &&
-                  t.amount <= 50000) ||
-                (amountFilter === "50001-100000" &&
-                  t.amount > 50000 &&
-                  t.amount <= 100000) ||
-                (amountFilter === "100001-200000" &&
-                  t.amount > 100000 &&
-                  t.amount <= 200000) ||
-                (amountFilter === "200001+" && t.amount > 200000);
-
-              return (
-                matchesSearch &&
-                matchesStatus &&
-                matchesType &&
-                matchesDate &&
-                matchesAmount
-              );
+              if (transaction) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(16);
+                doc.text("HÓA ĐƠN GIAO DỊCH", 105, 20, { align: "center" });
+                doc.setFontSize(12);
+                doc.text(`Mã giao dịch: ${transaction.id}`, 20, 40);
+                doc.text(
+                  `Loại giao dịch: ${
+                    transaction.type === "recharge"
+                      ? "Nạp xu"
+                      : transaction.type === "download"
+                      ? "Tải tài liệu"
+                      : "Hoàn tiền"
+                  }`,
+                  20,
+                  50
+                );
+                doc.text(`Tài liệu: ${transaction.document}`, 20, 60);
+                doc.text(
+                  `Ngày giao dịch: ${formatDateTime(transaction.date)}`,
+                  20,
+                  70
+                );
+                doc.text(
+                  `Số tiền: ${new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(transaction.amount)}`,
+                  20,
+                  80
+                );
+                doc.text(
+                  `Trạng thái: ${
+                    transaction.status === "success"
+                      ? "Thành công"
+                      : transaction.status === "pending"
+                      ? "Đang xử lý"
+                      : transaction.status === "failed"
+                      ? "Thất bại"
+                      : "Hoàn tiền"
+                  }`,
+                  20,
+                  90
+                );
+                doc.text(`Hoàn tiền: ${transaction.refund}`, 20, 100);
+                doc.text(
+                  `Phương thức thanh toán: ${transaction.method}`,
+                  20,
+                  110
+                );
+                doc.save(`invoice_${transaction.id}.pdf`);
+                showNotification("Hóa đơn đã được tải xuống!", "success");
+              }
             });
+          }
+        })();
 
-            currentPage = 1;
-            renderTransactions(filteredTransactions);
-            initChart("day", filteredTransactions, "transactionChart");
-            initChart("type", filteredTransactions, "typeChartContainer");
+        // Add event listeners for navigation buttons
+        (function () {
+          const rechargeBtn = document.getElementById("rechargeBtn");
+          if (rechargeBtn) {
+            rechargeBtn.addEventListener("click", function () {
+              window.location.href = "recharge.html";
+              showNotification("Chuyển đến trang nạp tiền!", "success");
+            });
+          }
 
-            const filterDetails = [];
-            if (searchQuery)
-              filterDetails.push(
-                `Tìm kiếm: "${document.getElementById("searchInput").value}"`
-              );
-            if (statusFilter !== "all")
-              filterDetails.push(
-                `Trạng thái: ${
-                  statusFilter === "success"
-                    ? "Thành công"
-                    : statusFilter === "pending"
-                    ? "Đang xử lý"
-                    : statusFilter === "failed"
-                    ? "Thất bại"
-                    : "Hoàn tiền"
-                }`
-              );
-            if (typeFilter !== "all")
-              filterDetails.push(
-                `Loại: ${
-                  typeFilter === "recharge"
-                    ? "Nạp xu"
-                    : typeFilter === "download"
-                    ? "Tải tài liệu"
-                    : "Hoàn tiền"
-                }`
-              );
-            if (dateFrom) filterDetails.push(`Từ ngày: ${dateFrom}`);
-            if (dateTo) filterDetails.push(`Đến ngày: ${dateTo}`);
-            if (amountFilter !== "all")
-              filterDetails.push(`Số tiền: ${amountFilter}`);
+          const settingsBtn = document.getElementById("settingsBtn");
+          if (settingsBtn) {
+            settingsBtn.addEventListener("click", function () {
+              window.location.href = "payment-settings.html";
+              showNotification("Chuyển đến cài đặt thanh toán!", "success");
+            });
+          }
+        })();
 
-            if (filteredTransactions.length === 0) {
-              showNotification(
-                `Không tìm thấy giao dịch nào với bộ lọc: ${filterDetails.join(
-                  ", "
-                )}`,
-                "error"
-              );
-            } else {
-              const message =
-                filterDetails.length > 0
-                  ? `Đã lọc với: ${filterDetails.join(", ")}`
-                  : "Hiển thị tất cả giao dịch";
-              showNotification(message, "success");
-            }
-          });
+        // Add event listener for refresh button
+        (function () {
+          const refreshBtn = document.getElementById("refreshBtn");
+          if (refreshBtn) {
+            refreshBtn.addEventListener("click", function () {
+              console.log("Refresh button clicked");
+              loadTransactionStats();
+              showNotification("Đã làm mới dữ liệu!", "success");
+            });
+          }
+        })();
 
-        document
-          .getElementById("rechargeBtn")
-          .addEventListener("click", function () {
-            window.location.href = "recharge.html";
-            showNotification("Chuyển đến trang nạp tiền!", "success");
-          });
-
-        document
-          .getElementById("settingsBtn")
-          .addEventListener("click", function () {
-            window.location.href = "payment-settings.html";
-            showNotification("Chuyển đến cài đặt thanh toán!", "success");
-          });
-
-        document
-          .getElementById("refreshBtn")
-          .addEventListener("click", function () {
-            location.reload();
-            showNotification("Đang làm mới trang!", "success");
-          });
-
-        document
-          .getElementById("chartTimeRange")
-          .addEventListener("change", function () {
-            currentChartMode = this.value;
-            document.getElementById(
-              "chartTitle"
-            ).textContent = `Tiêu tiền theo ${
-              this.value === "day"
-                ? "ngày"
-                : this.value === "week"
-                ? "tuần"
-                : "tháng"
-            }`;
-            initChart("day", filteredTransactions, "transactionChart");
-          });
+        // Add event listener for chart time range
+        (function () {
+          const timeRangeSelect = document.getElementById("chartTimeRange");
+          if (timeRangeSelect) {
+            timeRangeSelect.addEventListener("change", function () {
+              currentChartMode = this.value;
+              const chartTitle = document.getElementById("chartTitle");
+              if (chartTitle) {
+                chartTitle.textContent = `Tiêu tiền theo ${
+                  this.value === "day"
+                    ? "ngày"
+                    : this.value === "week"
+                    ? "tuần"
+                    : "tháng"
+                }`;
+              }
+              initChart("day", dailyChartData, "transactionChart");
+            });
+          }
+        })();
 
         function updateSummaryTable(transactions) {
           const summary = aggregateTypeData(transactions);
@@ -2385,12 +2507,173 @@
           }
         };
 
-        document
-          .getElementById("exportBtn")
-          .addEventListener("click", window.openExportModal);
+        (function () {
+          const btn = document.getElementById("exportBtn");
+          if (btn) {
+            btn.addEventListener("click", window.openExportModal);
+          }
+        })();
 
-        renderTransactions(transactions);
+        // renderTransactions removed; using server-rendered rows
+
+        function openModal(txCode) {
+          fetch(`/account/transactions/id/${txCode}`)
+            .then((r) => (r.ok ? r.json() : Promise.reject()))
+            .then((data) => {
+              document.getElementById("modalTransactionId").textContent =
+                data.code;
+              document.getElementById("modalType").textContent = data.type;
+              document.getElementById("modalDate").textContent = new Date(
+                data.createdAt
+              ).toLocaleString("vi-VN");
+              document.getElementById("modalAmount").textContent =
+                new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(data.amount);
+              document.getElementById("modalStatus").textContent = data.status;
+              document.getElementById("modalMethod").textContent =
+                data.paymentMethod || "-";
+              var refundEl = document.getElementById("modalRefund");
+              if (refundEl) {
+                const isRefund =
+                  data &&
+                  (data.type === "REFUND" ||
+                    (data.type && data.type.value === "refund"));
+                refundEl.textContent = isRefund ? "Có" : "Không";
+              }
+              document.getElementById("dashboardModal").style.display = "flex";
+            })
+            .catch(() => {
+              showNotification("Không tải được chi tiết giao dịch");
+            });
+        }
+
+        function confirmRefund(txId) {
+          const modal = document.getElementById("refundModal");
+          if (!modal) return;
+          document.getElementById("refundTxId").textContent = txId;
+          modal.style.display = "flex";
+        }
+
+        // Refund modal buttons handlers
+        (function () {
+          const cancelBtn = document.getElementById("refundCancelBtn");
+          const confirmBtn = document.getElementById("refundConfirmBtn");
+          const modal = document.getElementById("refundModal");
+          if (cancelBtn) {
+            cancelBtn.addEventListener("click", function () {
+              if (modal) modal.style.display = "none";
+            });
+          }
+          if (confirmBtn) {
+            confirmBtn.addEventListener("click", function () {
+              const txCode = document.getElementById("refundTxId").textContent;
+              const csrfToken = document
+                .querySelector('meta[name="_csrf"]')
+                .getAttribute("content");
+              const csrfHeader = document
+                .querySelector('meta[name="_csrf_header"]')
+                .getAttribute("content");
+              const headers = {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest",
+              };
+              if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+              const body = new URLSearchParams({}).toString();
+              confirmBtn.disabled = true;
+              fetch(`/account/transactions/id/${txCode}/refund`, {
+                method: "POST",
+                headers,
+                credentials: "same-origin",
+                body,
+              })
+                .then(async (r) => {
+                  const text = await r.text();
+                  let data;
+                  try {
+                    data = text ? JSON.parse(text) : {};
+                  } catch (e) {
+                    data = { success: r.ok, message: text || r.statusText };
+                  }
+                  if (!r.ok)
+                    throw new Error(data.message || `HTTP ${r.status}`);
+                  return data;
+                })
+                .then((res) => {
+                  if (res.success) {
+                    showNotification(
+                      "Đã gửi yêu cầu hoàn tiền. Mã: " +
+                        (res.withdrawalCode || res.refundCode || "-"),
+                      "success"
+                    );
+                    if (modal) modal.style.display = "none";
+                  } else {
+                    showNotification(
+                      res.message || "Không thể yêu cầu hoàn tiền",
+                      "error"
+                    );
+                  }
+                })
+                .catch((err) =>
+                  showNotification(
+                    err.message || "Không thể yêu cầu hoàn tiền",
+                    "error"
+                  )
+                )
+                .finally(() => {
+                  confirmBtn.disabled = false;
+                });
+            });
+          }
+        })();
+
+        // Expose to global so inline onclick works
+        window.openModal = openModal;
+        window.confirmRefund = confirmRefund;
       });
+    </script>
+    <script>
+      // Filter submit
+      (function () {
+        const btn = document.getElementById("filterBtn");
+        if (btn) {
+          btn.addEventListener("click", function () {
+            const q = encodeURIComponent(
+              document.getElementById("searchInput").value || ""
+            );
+            const st = document.getElementById("statusFilter").value || "";
+            const tp = document.getElementById("typeFilter").value || "";
+            const from = document.getElementById("dateFrom").value || "";
+            const to = document.getElementById("dateTo").value || "";
+            const amount =
+              document.getElementById("amountFilter").value || "all";
+            let min = "",
+              max = "";
+            if (amount && amount !== "all") {
+              if (amount === "200001+") {
+                min = "200001";
+              } else {
+                const parts = amount.split("-");
+                min = parts[0];
+                max = parts[1];
+              }
+            }
+            const params = new URLSearchParams();
+            if (q) params.set("q", q);
+            if (st) params.set("status", st);
+            if (tp) params.set("type", tp);
+            if (from) params.set("from", from);
+            if (to) params.set("to", to);
+            if (min) params.set("min", min);
+            if (max) params.set("max", max);
+            window.location.href =
+              "/account/transactions" +
+              (params.toString() ? "?" + params.toString() : "");
+          });
+        }
+      })();
     </script>
   </body>
 </html>

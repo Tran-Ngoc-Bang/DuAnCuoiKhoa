@@ -1,0 +1,71 @@
+name: Auto Deploy to Azure Web App
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  AZURE_WEBAPP_NAME: shared-learning-app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Find JAR file
+        id: find-jar
+        run: |
+          JAR_FILE=$(find target -name "*.jar" | head -1)
+          echo "Found JAR file: $JAR_FILE"
+          echo "jar-path=$JAR_FILE" >> $GITHUB_OUTPUT
+
+          # Copy JAR to root for easier access
+          cp "$JAR_FILE" app.jar
+
+      - name: Deploy to Azure Web App via Kudu
+        run: |
+          # Create a zip file containing the JAR
+          zip -r app.zip app.jar
+
+          # Deploy using Kudu API
+          curl -X POST \
+            -H "Content-Type: application/zip" \
+            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
+            --data-binary @app.zip \
+            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/zipdeploy"
+
+      - name: Set Startup Command
+        run: |
+          # Set startup command via Kudu API
+          curl -X PUT \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${{ secrets.KUDU_CREDENTIALS }}" \
+            -d '{"startupCommand": "java -jar /home/site/wwwroot/app.jar --spring.profiles.active=azure --server.port=80"}' \
+            "https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.scm.eastasia-01.azurewebsites.net/api/settings"
+
+      - name: Health check
+        run: |
+          echo "Waiting for deployment to complete..."
+          sleep 30
+          curl -f https://${{ env.AZURE_WEBAPP_NAME }}-gfayfce4a2e6b8bd.eastasia-01.azurewebsites.net/health/simple || echo "Health check failed"

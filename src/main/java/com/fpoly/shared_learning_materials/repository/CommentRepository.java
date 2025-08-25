@@ -48,4 +48,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
 
 	List<Comment> findByDocumentIdInAndStatus(List<Long> documentIds, String status);
 
+	@Query("SELECT COALESCE(SUM(c.rating), 0) " +
+			"FROM Comment c " +
+			"WHERE c.document.file.uploadedBy.id = :userId AND c.deletedAt IS NULL")
+	Integer sumRatingsByUserDocuments(@Param("userId") Long userId);
 }
