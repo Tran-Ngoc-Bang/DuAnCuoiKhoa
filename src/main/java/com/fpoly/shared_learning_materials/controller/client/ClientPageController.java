@@ -50,6 +50,7 @@ import com.fpoly.shared_learning_materials.repository.DocumentOwnerRepository;
 import com.fpoly.shared_learning_materials.repository.DocumentRepository;
 import com.fpoly.shared_learning_materials.repository.FavoriteRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.repository.DocumentCategoryRepository;
 import com.fpoly.shared_learning_materials.service.CategoryService;
 import com.fpoly.shared_learning_materials.service.DocumentNotificationService;
 import com.fpoly.shared_learning_materials.service.TagService;
@@ -74,10 +75,14 @@ public class ClientPageController {
     private FavoriteRepository favoriteRepository;
 
     @Autowired
+
+    private DocumentCategoryRepository documentCategoryRepository;
+  @Autowired
     private DocumentOwnerRepository documentOwnerRepository;
 
     @Autowired
     private NotificationService notificationService;
+
 
     @Autowired
     private CategoryService categoryService;
@@ -130,6 +135,32 @@ public class ClientPageController {
 
         for (CategoryDTO rootCategory : rootCategories) {
             subcategoriesMap.put(rootCategory.getId(), categoryService.getSubcategoriesTree(rootCategory.getId()));
+        }
+
+        // Tạo map để lưu số lượng tài liệu cho mỗi category (bao gồm cả danh mục cha và con)
+        Map<Long, Long> categoryDocumentCounts = new HashMap<>();
+        try {
+            // Lấy tất cả category IDs (bao gồm cả root categories và subcategories)
+            List<Long> allCategoryIds = new ArrayList<>();
+            
+            // Thêm root category IDs
+            allCategoryIds.addAll(rootCategories.stream().map(CategoryDTO::getId).collect(Collectors.toList()));
+            
+            // Thêm subcategory IDs
+            for (List<CategoryTreeDTO> subcategories : subcategoriesMap.values()) {
+                allCategoryIds.addAll(subcategories.stream().map(CategoryTreeDTO::getId).collect(Collectors.toList()));
+            }
+            
+            // Đếm số lượng tài liệu cho tất cả categories trong một query
+            List<Object[]> categoryCountResults = documentCategoryRepository.countDocumentsByCategoryIds(allCategoryIds);
+            for (Object[] result : categoryCountResults) {
+                Long categoryId = (Long) result[0];
+                Long count = (Long) result[1];
+                categoryDocumentCounts.put(categoryId, count);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error loading category document counts: " + e.getMessage());
         }
 
         // Lấy danh sách tag nổi bật
@@ -222,6 +253,7 @@ public class ClientPageController {
         model.addAttribute("rootCategories", rootCategories);
         model.addAttribute("subcategoriesMap", subcategoriesMap);
         model.addAttribute("displayCategories", displayCategories);
+        model.addAttribute("categoryDocumentCounts", categoryDocumentCounts);
         model.addAttribute("popularTags", popularTags);
         model.addAttribute("numUsers", numUsers);
         model.addAttribute("numNewDocuments", numNewDocuments);
@@ -662,11 +694,19 @@ public class ClientPageController {
     @GetMapping("/tags/search")
     @ResponseBody
     public List<TagDTO> searchTags(@RequestParam("query") String query) {
-        // Tìm tag dựa trên query (ví dụ: tìm theo tên tag)
-        Page<TagDTO> tagsPage = tagService.getAllTags(0, 10, "popular"); // Giới hạn 10 kết quả
-        return tagsPage.getContent().stream()
+        // Tìm kiếm trong TẤT CẢ tags, không chỉ tag phổ biến
+        Page<TagDTO> allTagsPage = tagService.getAllTags(0, 100, "name"); // Lấy nhiều tags hơn để tìm kiếm
+        return allTagsPage.getContent().stream()
                 .filter(tag -> tag.getName().toLowerCase().contains(query.toLowerCase()))
+                .limit(15) // Giới hạn kết quả hiển thị
                 .collect(Collectors.toList());
+    }
 
+    @GetMapping("/tags/all")
+    @ResponseBody
+    public List<TagDTO> getAllTags() {
+        // Lấy tất cả tags để hiển thị khi chưa nhập gì
+        Page<TagDTO> allTagsPage = tagService.getAllTags(0, 50, "popular"); // Lấy 50 tags đầu tiên, sắp xếp theo độ phổ biến
+        return allTagsPage.getContent();
     }
 }

@@ -381,6 +381,274 @@
 .category-list .list-group-item:last-child {
   border-bottom: none;
 }
+
+/* Tag Selector Styles */
+.selected-tags-container {
+    margin-bottom: 15px;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    background: #f8f9fa;
+    min-height: 60px;
+}
+
+.selected-tags-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid #e1e5e9;
+    background: #fff;
+    border-radius: 8px 8px 0 0;
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.selected-tags {
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 40px;
+    align-items: flex-start;
+}
+
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid #bbdefb;
+    transition: all 0.2s ease;
+}
+
+.selected-tag:hover {
+    background: #bbdefb;
+    transform: translateY(-1px);
+}
+
+.selected-tag .remove-tag {
+    margin-left: 8px;
+    cursor: pointer;
+    color: #1976d2;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.selected-tag .remove-tag:hover {
+    color: #d32f2f;
+}
+
+.tag-search-container {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.tag-search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.tag-search-input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.tag-search-input:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+.tag-dropdown-icon {
+    position: absolute;
+    right: 16px;
+    color: #6c757d;
+    pointer-events: none;
+    transition: transform 0.2s ease;
+}
+
+.tag-search-input:focus + .tag-dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.tag-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.tag-dropdown.show {
+    display: block;
+}
+
+.tag-results {
+    padding: 8px 0;
+}
+
+.tag-results-header {
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e1e5e9;
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tag-result-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.tag-result-item:last-child {
+    border-bottom: none;
+}
+
+.tag-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.tag-result-item.selected {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.tag-result-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tag-result-count {
+    font-size: 12px;
+    color: #6c757d;
+    background: #f1f3f4;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.create-new-tag {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e1e5e9;
+    color: #1976d2;
+    font-weight: 500;
+}
+
+.create-new-tag:hover {
+    background-color: #e3f2fd;
+}
+
+.create-new-tag .fas {
+    margin-right: 8px;
+    color: #4caf50;
+}
+
+.popular-tags {
+    margin-top: 15px;
+}
+
+.popular-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.popular-tag-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f3f4;
+    color: #5f6368;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #e1e5e9;
+}
+
+.popular-tag-badge:hover {
+    background: #e8f0fe;
+    color: #1976d2;
+    border-color: #4285f4;
+    transform: translateY(-1px);
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Animation for tag addition */
+@keyframes tagAdded {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.selected-tag.new-tag {
+    animation: tagAdded 0.3s ease-out;
+}
+
+/* Loading and error states */
+.loading-state, .error-state {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.loading-state i, .error-state i {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.loading-state i {
+    color: #4285f4;
+}
+
+.error-state i {
+    color: #dc3545;
+}
+
+.form-hint {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
     </style>
   </head>
 
@@ -624,54 +892,45 @@
                    <!-- Tag - Xuống dưới riêng -->
                     <div class="form-row">
     <div class="form-group">
-        <label for="documentTags">
-            <i class="fas fa-hashtag"></i>
-            Tag (nhập tên tag, cách nhau bằng dấu phẩy)
-        </label>
-        <input
-            type="text"
-            id="documentTags"
-            name="tagNames"
-            th:value="${#strings.listJoin(document.tagNames, ', ')}"
-            placeholder="java, spring-boot, tutorial, backend"
-            class="form-control"
-        />
-        <small class="form-text text-muted">
-            <i class="fas fa-lightbulb"></i>
-            Ví dụ: java, spring-boot, tutorial, backend (giúp tìm kiếm dễ dàng hơn)
-        </small>
-    </div>
-</div>
-
-<!-- Thêm phần mới: Hiển thị tất cả tag và tìm kiếm -->
-<div class="form-row">
-    <div class="form-group">
-        <label>
-            <i class="fas fa-tags"></i>
-            Danh sách tất cả Tag
-        </label>
-        <div class="input-group mb-3">
-            <input
-                type="text"
-                id="tagSearch"
-                class="form-control"
-                placeholder="Tìm kiếm tag..."
-            />
-            <button
-                class="btn btn-primary"
-                type="button"
-                id="searchTagButton"
-            >
-                <i class="fas fa-search"></i> Tìm kiếm
-            </button>
+        <label for="documentTags">Từ khóa (tối đa 20)</label>
+        
+        <!-- Selected Tags Display -->
+        <div id="selectedTagsContainer" class="selected-tags-container">
+            <div class="selected-tags-header">
+                <span class="selected-count">Danh sách từ khóa (<span id="tagCount">0</span>/20)</span>
+            </div>
+            <div id="selectedTags" class="selected-tags"></div>
         </div>
-        <div
-            id="tagListContainer"
-            class="tag-list-container"
-            style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; border-radius: 6px; padding: 10px; background: #fff;"
-        >
-            <ul id="tagList" class="list-group"></ul>
+        
+        <!-- Tag Search Input -->
+        <div class="tag-search-container">
+            <div class="tag-search-input-wrapper">
+                <input type="text" id="tagSearchInput" class="tag-search-input" placeholder="Tìm kiếm từ khóa..." autocomplete="off">
+                <i class="fas fa-chevron-down tag-dropdown-icon"></i>
+            </div>
+            
+            <!-- Dropdown Results -->
+            <div id="tagDropdown" class="tag-dropdown">
+                <div id="tagResults" class="tag-results"></div>
+            </div>
         </div>
+        
+        <div class="form-hint">Thêm từ khóa giúp tài liệu của bạn dễ dàng được tìm thấy hơn</div>
+        
+        <!-- Popular Tags -->
+        <div id="popularTags" class="popular-tags" style="margin-top: 15px;">
+            <strong>Từ khóa phổ biến:</strong>
+            <div class="popular-tags-list">
+                <div th:if="${popularTags != null and not #lists.isEmpty(popularTags)}" th:each="tag : ${popularTags}" class="popular-tag-item">
+                    <span class="popular-tag-badge" th:attr="data-tag=${tag.name}" onclick="addTagFromPopular(this.getAttribute('data-tag'))">
+                        <span th:text="${tag.name}"></span>
+                    </span>
+                </div>
+                <div th:unless="${popularTags != null and not #lists.isEmpty(popularTags)}" style="color: #888;">Không có từ khóa phổ biến.</div>
+            </div>
+        </div>
+        
+        <input type="hidden" id="tagNames" name="tagNames" th:value="${#strings.listJoin(document.tagNames, ', ')}" value="">
     </div>
 </div>
                     <div class="form-row">
@@ -823,7 +1082,262 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
      <script th:src="@{/js/admin/notifications.js}"></script>
+    <script th:src="@{/js/admin/documents.js}"></script>
+  
     <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("documentForm");
+        const documentFile = document.getElementById("documentFile");
+        const fileInfo = document.getElementById("fileInfo");
+
+        // Tab switching functionality
+        const tabBtns = document.querySelectorAll(".tab-btn");
+        const tabPanels = document.querySelectorAll(".tab-panel");
+
+        tabBtns.forEach((btn) => {
+            btn.addEventListener("click", function () {
+                const targetTab = this.getAttribute("data-tab");
+                tabBtns.forEach((b) => b.classList.remove("active"));
+                tabPanels.forEach((p) => p.classList.remove("active"));
+                this.classList.add("active");
+                document.getElementById("tab" + targetTab.charAt(0).toUpperCase() + targetTab.slice(1)).classList.add("active");
+            });
+        });
+
+        // File upload handling
+        if (documentFile) {
+            documentFile.addEventListener("change", function () {
+                const file = this.files[0];
+                if (file) {
+                    const fileName = file.name;
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2) + " MB";
+                    fileInfo.querySelector(".file-name").textContent = fileName;
+                    fileInfo.querySelector(".file-size").textContent = fileSize;
+                    fileInfo.style.display = "flex";
+
+                    const extension = fileName.split(".").pop().toLowerCase();
+                    const icon = fileInfo.querySelector("i");
+                    icon.className = "fas fa-file";
+                    switch (extension) {
+                        case "pdf": icon.className = "fas fa-file-pdf"; break;
+                        case "doc": case "docx": icon.className = "fas fa-file-word"; break;
+                        case "ppt": case "pptx": icon.className = "fas fa-file-powerpoint"; break;
+                        case "xls": case "xlsx": icon.className = "fas fa-file-excel"; break;
+                    }
+                } else {
+                    fileInfo.style.display = "none";
+                }
+            });
+
+            const removeBtn = fileInfo.querySelector(".btn-remove");
+            if (removeBtn) {
+                removeBtn.addEventListener("click", function () {
+                    documentFile.value = "";
+                    fileInfo.style.display = "none";
+                });
+            }
+        }
+
+        // Form validation
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                let isValid = true;
+                const title = document.getElementById("documentTitle");
+                const titleError = document.getElementById("titleError");
+                if (title && !title.value.trim()) {
+                    if (titleError) titleError.style.display = "block";
+                    title.classList.add("is-invalid");
+                    isValid = false;
+                } else if (title && titleError) {
+                    titleError.style.display = "none";
+                    title.classList.remove("is-invalid");
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    const basicTab = document.querySelector('[data-tab="basic"]');
+                    if (basicTab) basicTab.click();
+                }
+            });
+        }
+
+        // Drag and drop for file upload
+        const fileUpload = document.querySelector(".file-upload");
+        if (fileUpload) {
+            ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+                fileUpload.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+            ["dragenter", "dragover"].forEach((eventName) => {
+                fileUpload.addEventListener(eventName, () => fileUpload.classList.add("drag-over"), false);
+            });
+
+            ["dragleave", "drop"].forEach((eventName) => {
+                fileUpload.addEventListener(eventName, () => fileUpload.classList.remove("drag-over"), false);
+            });
+
+            fileUpload.addEventListener("drop", function(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    documentFile.files = files;
+                    documentFile.dispatchEvent(new Event("change"));
+                }
+            }, false);
+        }
+
+        // Initialize category selector
+        initializeCategorySelector();
+      });
+
+      // Category selector functionality
+      let originalCategoryIds = '';
+      function initializeCategorySelector() {
+          const existingCategoryIds = document.getElementById('categoryIdsString')?.value;
+          originalCategoryIds = existingCategoryIds || ''; // Lưu category IDs ban đầu
+          console.log('Original categoryIds:', originalCategoryIds);
+          
+          if (existingCategoryIds) {
+              const categoryIds = existingCategoryIds.split(',').filter(id => id.trim());
+              if (categoryIds.length > 0) {
+                  loadExistingCategoryPath(categoryIds);
+              }
+          }
+      }
+
+      async function loadExistingCategoryPath(categoryIds) {
+          try {
+              for (let i = 0; i < categoryIds.length; i++) {
+                  const categoryId = categoryIds[i];
+                  const levelSelect = document.getElementById(`level${i + 1}Select`);
+                  
+                  if (levelSelect) {
+                      levelSelect.value = categoryId;
+                      if (i < categoryIds.length - 1) {
+                          await loadSubcategories(categoryId, `level${i + 2}Select`);
+                      }
+                  }
+              }
+              updateBreadcrumb();
+              updateFinalParentId();
+          } catch (error) {
+              console.error('Error loading existing category path:', error);
+          }
+      }
+
+      async function loadSubcategories(parentId, targetSelectId) {
+          try {
+              const response = await fetch(`/admin/documents/categories/${parentId}/subcategories`);
+              const subcategories = await response.json();
+              
+              const targetSelect = document.getElementById(targetSelectId);
+              if (targetSelect) {
+                  targetSelect.innerHTML = '<option value="">Chọn danh mục con...</option>';
+                  
+                  subcategories.forEach(category => {
+                      const option = document.createElement('option');
+                      option.value = category.id;
+                      option.textContent = `📁 ${category.name}`;
+                      targetSelect.appendChild(option);
+                  });
+                  
+                  const targetDiv = document.getElementById(targetSelectId.replace('Select', ''));
+                  if (targetDiv) targetDiv.style.display = 'block';
+              }
+          } catch (error) {
+              console.error('Error loading subcategories:', error);
+          }
+      }
+
+      function onLevelChange(level) {
+          const currentSelect = document.getElementById(`level${level}Select`);
+          if (!currentSelect) return;
+          
+          const selectedValue = currentSelect.value;
+          
+          // Hide and reset subsequent levels
+          for (let i = level + 1; i <= 3; i++) {
+              const levelDiv = document.getElementById(`level${i}`);
+              const levelSelect = document.getElementById(`level${i}Select`);
+              if (levelDiv) levelDiv.style.display = 'none';
+              if (levelSelect) levelSelect.innerHTML = '<option value="">Chọn...</option>';
+          }
+          
+          updateCategoryIdsString();
+          updateFinalParentId();
+          
+          if (selectedValue && selectedValue !== '0') {
+              loadSubcategories(selectedValue, `level${level + 1}Select`);
+          }
+          
+          updateBreadcrumb();
+      }
+
+      function updateCategoryIdsString() {
+          const categoryIds = [];
+          for (let i = 1; i <= 3; i++) {
+              const select = document.getElementById(`level${i}Select`);
+              if (select && select.value && select.value !== '0' && select.value !== '') {
+                  categoryIds.push(select.value);
+              }
+          }
+          
+          const categoryIdsStringInput = document.getElementById('categoryIdsString');
+          if (categoryIdsStringInput) {
+              // Nếu không có category nào được chọn, giữ nguyên giá trị ban đầu
+              if (categoryIds.length === 0) {
+                  categoryIdsStringInput.value = originalCategoryIds;
+                  console.log('No categories selected, keeping original:', originalCategoryIds);
+              } else {
+                  categoryIdsStringInput.value = categoryIds.join(',');
+                  console.log('Updated categoryIds:', categoryIds.join(','));
+              }
+          }
+      }
+
+      function updateFinalParentId() {
+          let finalParentId = '0';
+          for (let i = 3; i >= 1; i--) {
+              const select = document.getElementById(`level${i}Select`);
+              if (select && select.value && select.value !== '0' && select.value !== '') {
+                  finalParentId = select.value;
+                  break;
+              }
+          }
+          
+          const finalParentIdInput = document.getElementById('finalParentId');
+          if (finalParentIdInput) {
+              finalParentIdInput.value = finalParentId;
+          }
+      }
+
+      function updateBreadcrumb() {
+          const breadcrumb = document.getElementById('categoryBreadcrumb');
+          const breadcrumbPath = document.getElementById('breadcrumbPath');
+          
+          if (!breadcrumb || !breadcrumbPath) return;
+          
+          let path = [];
+          for (let i = 1; i <= 3; i++) {
+              const select = document.getElementById(`level${i}Select`);
+              if (select && select.value && select.value !== '0') {
+                  const selectedOption = select.options[select.selectedIndex];
+                  path.push(selectedOption.textContent);
+              } else {
+                  break;
+              }
+          }
+          
+          if (path.length > 0) {
+              breadcrumbPath.textContent = path.join(' → ');
+              breadcrumb.style.display = 'block';
+          } else {
+              breadcrumb.style.display = 'none';
+          }
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("documentForm");
         const documentFile = document.getElementById("documentFile");

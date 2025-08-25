@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import com.fpoly.shared_learning_materials.domain.User;
+import com.fpoly.shared_learning_materials.domain.PasswordResetToken;
 import com.fpoly.shared_learning_materials.dto.UserDTO;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.repository.PasswordResetTokenRepository;
 import org.thymeleaf.context.Context;
 
 @Service
@@ -32,6 +34,9 @@ public class UserService {
 
     @Autowired
     private SpringTemplateEngine templateEngine;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
 	/**
 	 * Lấy tất cả người dùng
@@ -177,7 +182,7 @@ public class UserService {
                 })
                 .orElse(false); // Không tìm thấy user
     }
-		private void sendConfirmationEmail(User user) {
+	private void sendConfirmationEmail(User user) {
         // Tạo nội dung email từ template Thymeleaf
         Context context = new Context();
         context.setVariable("fullName", user.getFullName());
@@ -189,5 +194,97 @@ public class UserService {
         if (!sent) {
             throw new RuntimeException("Không thể gửi email xác nhận cho: " + user.getEmail());
         }
+    }
+
+    // ===== FORGOT PASSWORD METHODS =====
+    
+    public boolean sendResetCode(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        
+        User user = userOpt.get();
+        
+        // Xóa token cũ nếu có
+        passwordResetTokenRepository.deleteByEmail(email);
+        
+        // Tạo mã 6 số
+        String resetCode = String.format("%06d", (int)(Math.random() * 1000000));
+        
+        // Tạo token mới
+        PasswordResetToken token = new PasswordResetToken();
+        token.setEmail(email);
+        token.setResetCode(resetCode);
+        token.setToken(resetCode); // Set token field với cùng giá trị resetCode
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+        token.setUsed(false);
+        passwordResetTokenRepository.save(token);
+        
+        // Gửi email với nút link
+        String subject = "Mã xác nhận đặt lại mật khẩu - EduShare";
+        String verifyUrl = "http://localhost:8080/verify-reset-code?email=" + email;
+        String content = String.format(
+            "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>" +
+            "<h2 style='color: #4361ee; text-align: center;'>Mã xác nhận đặt lại mật khẩu</h2>" +
+            "<p>Xin chào <strong>%s</strong>,</p>" +
+            "<p>Mã xác nhận đặt lại mật khẩu của bạn là:</p>" +
+            "<div style='text-align: center; margin: 30px 0;'>" +
+            "<h1 style='color: #2563eb; font-size: 32px; background: #f0f9ff; padding: 20px; border-radius: 8px; display: inline-block; margin: 0;'>%s</h1>" +
+            "</div>" +
+            "<div style='text-align: center; margin: 30px 0;'>" +
+            "<a href='%s' style='background: #4361ee; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;'>Nhập mã xác nhận</a>" +
+            "</div>" +
+            "<p><strong>Mã này có hiệu lực trong 15 phút.</strong></p>" +
+            "<p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>" +
+            "<hr style='margin: 30px 0; border: none; border-top: 1px solid #eee;'>" +
+            "<p style='color: #666; font-size: 14px;'>Trân trọng,<br>EduShare Team</p>" +
+            "</div>",
+            user.getFullName(), resetCode, verifyUrl
+        );
+        
+        return emailConfigService.sendHtmlEmail(user.getEmail(), subject, content);
+    }
+    
+    public boolean verifyResetCode(String email, String code) {
+        Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByEmailAndResetCodeAndUsedFalse(email, code);
+        
+        if (tokenOpt.isEmpty()) {
+            return false;
+        }
+        
+        PasswordResetToken token = tokenOpt.get();
+        return token.isValid();
+    }
+    
+    public boolean resetPassword(String email, String code, String newPassword) {
+        Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByEmailAndResetCodeAndUsedFalse(email, code);
+        
+        if (tokenOpt.isEmpty()) {
+            return false;
+        }
+        
+        PasswordResetToken token = tokenOpt.get();
+        if (!token.isValid()) {
+            return false;
+        }
+        
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        
+        User user = userOpt.get();
+        
+        // Cập nhật mật khẩu
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        
+        // Đánh dấu token đã sử dụng
+        token.setUsed(true);
+        passwordResetTokenRepository.save(token);
+        
+        return true;
     }
 }

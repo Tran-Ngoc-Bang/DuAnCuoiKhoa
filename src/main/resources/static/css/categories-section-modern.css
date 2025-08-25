@@ -463,7 +463,6 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    color: #4361ee;
     font-weight: 600;
     text-decoration: none;
     transition: all 0.3s ease;
@@ -582,4 +581,15 @@
       font-size: 1.3rem;
     }
   }
-  
+  /* Subcat
+egory document count */
+.subcategory-count {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.subcategory-item:hover .subcategory-count {
+  color: #4361ee;
+}

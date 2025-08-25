@@ -1,993 +1,1178 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <title>Thông Báo - EduShare</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" th:href="@{/css/main.css}">
-  <link rel="stylesheet" th:href="@{/css/responsive.css}">
-  <link rel="stylesheet" th:href="@{/css/main-fixes.css}">
-  <link rel="stylesheet" th:href="@{/css/account.css}">
-  <link rel="stylesheet" th:href="@{/css/footer-modern.css}">
-  <link rel="stylesheet" th:href="@{/css/client-header.css}">
-  <link rel="stylesheet" th:href="@{/css/client-footer.css}">
-  <style>
-    :root {
-      --primary: #4361ee;
-      --primary-dark: #3a56d4;
-      --primary-light: rgba(67, 97, 238, 0.1);
-      --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
-      --success: #10b981;
-      --success-light: rgba(16, 185, 129, 0.1);
-      --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
-      --warning: #f59e0b;
-      --warning-light: rgba(245, 158, 11, 0.1);
-      --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
-      --danger: #ef4444;
-      --danger-light: rgba(239, 68, 68, 0.1);
-      --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-400: #9ca3af;
-      --gray-500: #6b7280;
-      --gray-600: #4b5563;
-      --gray-700: #374151;
-      --gray-800: #1f2937;
-      --gray-900: #111827;
-      --radius: 0.375rem;
-      --radius-lg: 0.5rem;
-      --radius-xl: 0.75rem;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      --transition: all 0.3s ease;
-    }
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>Thông Báo - EduShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/account.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer-modern.css}" />
+    <link rel="stylesheet" th:href="@{/css/client-header.css}" />
+    <link rel="stylesheet" th:href="@{/css/client-footer.css}" />
 
-    body {
-      background-color: #f5f7fb;
-      min-height: 100vh;
-    }
-    
-    .dashboard-page {
-      padding-top: 2rem;
-      padding-bottom: 3rem;
-    }
-    
-    .dashboard-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    
-    .dashboard-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-    
-    .date-display {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-      color: var(--gray-600);
-      background-color: white;
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--gray-200);
-    }
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: rgba(67, 97, 238, 0.1);
+        --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+        --success: #10b981;
+        --success-light: rgba(16, 185, 129, 0.1);
+        --success-gradient: linear-gradient(135deg, #10b981, #0d9668);
+        --warning: #f59e0b;
+        --warning-light: rgba(245, 158, 11, 0.1);
+        --warning-gradient: linear-gradient(135deg, #f59e0b, #d58809);
+        --danger: #ef4444;
+        --danger-light: rgba(239, 68, 68, 0.1);
+        --danger-gradient: linear-gradient(135deg, #ef4444, #d63939);
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --radius: 0.375rem;
+        --radius-lg: 0.5rem;
+        --radius-xl: 0.75rem;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --transition: all 0.3s ease;
+      }
 
-    /* Notification Filters */
-    .notification-filters {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .filter-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--gray-200);
-      background-color: white;
-      color: var(--gray-600);
-      border-radius: var(--radius);
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    
-    .filter-btn:hover {
-      color: var(--primary);
-      border-color: var(--primary);
-      background-color: var(--primary-light);
-    }
-    
-    .filter-btn.active {
-      color: white;
-      background: var(--primary-gradient);
-      border-color: var(--primary);
-    }
+      body {
+        background-color: #f5f7fb;
+        min-height: 100vh;
+      }
 
-    /* Notification List */
-    .notification-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    .notification-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1.25rem;
-      background-color: white;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--gray-200);
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition);
-      position: relative;
-    }
-    
-    .notification-item:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-    
-    .notification-item.unread {
-      border-left: 4px solid var(--primary);
-      background-color: #fefefe;
-    }
-    
-    .notification-item.unread:before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      background-color: var(--primary);
-      border-radius: 50%;
-      position: absolute;
-      top: 1.25rem;
-      left: -6px;
-    }
-    
-    /* Notification Icons */
-    .notification-icon {
-      flex-shrink: 0;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-    }
-    
-    .notification-icon.primary {
-      background: var(--primary-light);
-      color: var(--primary);
-    }
-    
-    .notification-icon.success {
-      background: var(--success-light);
-      color: var(--success);
-    }
-    
-    .notification-icon.warning {
-      background: var(--warning-light);
-      color: var(--warning);
-    }
-    
-    .notification-icon.danger {
-      background: var(--danger-light);
-      color: var(--danger);
-    }
-    
-    /* Notification Content */
-    .notification-content {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .notification-title {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--gray-900);
-      margin-bottom: 0.5rem;
-      line-height: 1.4;
-    }
-    
-    .notification-message {
-      color: var(--gray-600);
-      font-size: 0.875rem;
-      line-height: 1.5;
-      margin-bottom: 0.75rem;
-    }
-    
-    .notification-meta {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    
-    .notification-time {
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      font-size: 0.8125rem;
-      color: var(--gray-500);
-    }
-    
-    /* Notification Actions */
-    .notification-actions {
-      flex-shrink: 0;
-    }
-    
-    .mark-read-btn {
-      padding: 0.375rem;
-      background-color: var(--gray-100);
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      color: var(--gray-600);
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 0.875rem;
-    }
-    
-    .mark-read-btn:hover {
-      background-color: var(--success-light);
-      border-color: var(--success);
-      color: var(--success);
-    }
+      .dashboard-page {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+      }
 
-    /* Section Actions Button */
-    .section-actions .mark-read-btn {
-      padding: 0.625rem 1.25rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      background: var(--primary-gradient);
-      color: white;
-      border: 1px solid var(--primary);
-    }
-    
-    .section-actions .mark-read-btn:hover {
-      background: var(--primary-dark);
-      border-color: var(--primary-dark);
-      color: white;
-    }
+      .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
 
-    @media (max-width: 768px) {
-      .notification-filters {
+      .dashboard-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .date-display {
+        display: flex;
+        align-items: center;
         gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--gray-600);
+        background-color: white;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
       }
-      
-      .filter-btn {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.8125rem;
-      }
-      
-      .notification-item {
-        padding: 1rem;
+
+      /* Notification Filters */
+      .notification-filters {
+        display: flex;
+        align-items: center;
         gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
       }
-      
+
+      .filter-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--gray-200);
+        background-color: white;
+        color: var(--gray-600);
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .filter-btn:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+      }
+
+      .filter-btn.active {
+        color: white;
+        background: var(--primary-gradient);
+        border-color: var(--primary);
+      }
+
+      /* Notification List */
+      .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .notification-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.25rem;
+        background-color: white;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        position: relative;
+      }
+
+      .notification-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+
+      .notification-item.unread {
+        border-left: 4px solid var(--primary);
+        background-color: #fefefe;
+      }
+
+      .notification-item.unread:before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background-color: var(--primary);
+        border-radius: 50%;
+        position: absolute;
+        top: 1.25rem;
+        left: -6px;
+      }
+
+      /* Notification Icons */
       .notification-icon {
-        width: 36px;
-        height: 36px;
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .notification-icon.primary {
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+
+      .notification-icon.success {
+        background: var(--success-light);
+        color: var(--success);
+      }
+
+      .notification-icon.warning {
+        background: var(--warning-light);
+        color: var(--warning);
+      }
+
+      .notification-icon.danger {
+        background: var(--danger-light);
+        color: var(--danger);
+      }
+
+      /* Notification Content */
+      .notification-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .notification-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+      }
+
+      .notification-message {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+      }
+
+      .notification-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .notification-time {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.8125rem;
+        color: var(--gray-500);
+      }
+
+      /* Notification Actions */
+      .notification-actions {
+        flex-shrink: 0;
+      }
+
+      .mark-read-btn {
+        padding: 0.375rem;
+        background-color: var(--gray-100);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        color: var(--gray-600);
+        cursor: pointer;
+        transition: var(--transition);
         font-size: 0.875rem;
       }
-    }
-    body {
-      background-color: #f5f7fb;
-      min-height: 100vh;
-    }
-    
-    .dashboard-page {
-      padding-top: 2rem;
-      padding-bottom: 3rem;
-    }
-    
-    .dashboard-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    
-    .dashboard-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-    
-    .date-display {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-      color: var(--gray-600);
-      background-color: white;
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--gray-200);
-    }
-    
-    .refresh-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: var(--primary);
-      background-color: var(--primary-light);
-      border: none;
-      border-radius: var(--radius-lg);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    
-    .refresh-button:hover {
-      background-color: var(--primary);
-      color: white;
-    }
-    
-    .dashboard-content {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      margin-top: 2rem;
-    }
-    
-    .dashboard-sidebar {
-      width: 280px;
-      background-color: white;
-      border-radius: var(--radius-xl);
-      padding: 0;
-      box-shadow: var(--shadow-md);
-      position: sticky;
-      top: 2rem;
-      height: fit-content;
-      overflow: hidden;
-    }
-    
-    .sidebar-header {
-      padding: 1.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--gray-200);
-      margin-bottom: 0;
-      position: relative;
-      background-color: var(--primary-light);
-    }
-    
-    .user-profile {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding-bottom: 0.5rem;
-    }
-    
-    .user-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid white;
-      box-shadow: var(--shadow-md);
-      margin-bottom: 1rem;
-    }
-    
-    .user-name {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      margin-bottom: 0.25rem;
-    }
-    
-    .user-email {
-      font-size: 0.875rem;
-      color: var(--gray-600);
-      margin-bottom: 1rem;
-    }
-    
-    .user-status {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      background-color: var(--primary-light);
-      color: var(--primary);
-      border-radius: 1rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    
-    .user-status-icon {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: var(--primary);
-      margin-right: 0.5rem;
-    }
-    
-    .sidebar-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--gray-800);
-      margin-bottom: 0.5rem;
-    }
-    
-    .sidebar-menu {
-      list-style: none;
-      padding: 0.75rem 0;
-      margin: 0;
-    }
-    
-    .sidebar-menu-title {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: var(--gray-500);
-      margin-top: 1.5rem;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      padding-left: 0.5rem;
-    }
-    
-    .sidebar-menu-item {
-      margin-bottom: 0.25rem;
-    }
-    
-    .sidebar-menu-link {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1.5rem;
-      color: var(--gray-700);
-      text-decoration: none;
-      transition: var(--transition);
-      position: relative;
-      font-size: 0.95rem;
-    }
-    
-    .sidebar-menu-link:hover {
-      color: var(--primary);
-      background-color: var(--primary-light);
-    }
-    
-    .sidebar-menu-link.active {
-      color: var(--primary);
-      font-weight: 600;
-      background-color: var(--primary-light);
-    }
-    
-    .sidebar-menu-link.active::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background-color: var(--primary);
-    }
-    
-    .sidebar-icon {
-      width: 1.25rem;
-      margin-right: 0.75rem;
-      text-align: center;
-    }
-    
-    .sidebar-badge {
-      margin-left: auto;
-      background-color: var(--primary);
-      color: white;
-      font-size: 0.75rem;
-      padding: 0.125rem 0.5rem;
-      border-radius: 1rem;
-    }
-    
-    .dashboard-main {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-      background-color: white;
-      border-radius: var(--radius-xl);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-md);
-      transition: var(--transition);
-      border: 1px solid var(--gray-100);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      justify-content: center;
-    }
-    
-    .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-    
-    .stat-icon {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      position: relative;
-      margin-bottom: 0.75rem;
-      margin-top: 0.5rem;
-    }
-    
-    .stat-icon.primary {
-      background: var(--primary-gradient);
-      color: white;
-    }
-    
-    .stat-icon.success {
-      background: var(--success-gradient);
-      color: white;
-    }
-    
-    .stat-icon.warning {
-      background: var(--warning-gradient);
-      color: white;
-    }
-    
-    .stat-icon.danger {
-      background: var(--danger-gradient);
-      color: white;
-    }
-    
-    .stat-info {
-      width: 100%;
-    }
 
-    .stat-value {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: var(--gray-900);
-      margin-bottom: 0.25rem;
-      line-height: 1.2;
-    }
-    
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--gray-600);
-      margin-bottom: 0.25rem;
-      max-width: 100%;
-      display: block;
-      line-height: 1.2;
-      white-space: normal;
-    }
-    
-    .stat-trend {
-      font-size: 0.75rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .trend-positive {
-      color: var(--success);
-    }
-    
-    .trend-negative {
-      color: var(--danger);
-    }
-    
-    .trend-icon {
-      margin-right: 0.25rem;
-    }
-    
-    .trend-period {
-      color: var(--gray-500);
-      margin-left: 0.25rem;
-    }
-    
-    /* Filter Button Styles */
-    .filter-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    
-    .filter-btn {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.35rem 0.8rem;
-      border-radius: var(--radius-md);
-      font-size: 0.8rem;
-      font-weight: 600;
-      border: 1px solid var(--gray-200);
-      background-color: white;
-      color: var(--gray-700);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .filter-btn i {
-      margin-right: 0.35rem;
-      font-size: 0.8rem;
-    }
-    
-    .filter-btn:hover {
-      background-color: var(--primary-light);
-      color: var(--primary);
-      border-color: var(--primary-light);
-    }
-    
-    .filter-btn.active {
-      background-color: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-    
-    /* Dashboard Sections */
-    .dashboard-section {
-      background-color: white;
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-      box-shadow: var(--shadow-md);
-      margin-bottom: 2.5rem;
-      border: 1px solid var(--gray-100);
-    }
-    
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-    }
-    
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      display: flex;
-      align-items: center;
-    }
-    
-    .section-title-icon {
-      margin-right: 0.75rem;
-      color: var(--primary);
-      font-size: 1.125rem;
-    }
-    
-    .section-actions {
-      display: flex;
-      align-items: center;
-    }
-    
-    .action-button {
-      padding: 0.5rem 0.875rem;
-      border-radius: var(--radius);
-      background-color: var(--gray-100);
-      color: var(--gray-800);
-      border: none;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: var(--transition);
-      font-weight: 500;
-    }
-    
-    .time-range-select {
-      padding: 0.375rem 0.75rem;
-      border-radius: var(--radius);
-      border: 1px solid var(--gray-300);
-      background-color: var(--white);
-      font-size: 0.875rem;
-      color: var(--gray-700);
-      cursor: pointer;
-    }
-    
-    /* Activity Chart */
-    .chart-container {
-      width: 100%;
-      height: 300px;
-    }
-    
-    /* Activity List */
-    .activity-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    .activity-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1.25rem;
-      padding: 1.25rem;
-      border-radius: var(--radius-lg);
-      transition: var(--transition);
-      border: 1px solid transparent;
-    }
-    
-    .activity-item:hover {
-      background-color: var(--gray-50);
-      border-color: var(--gray-200);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    .activity-icon {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.125rem;
-      flex-shrink: 0;
-      box-shadow: var(--shadow-sm);
-    }
-    
-    .activity-content {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .activity-title {
-      font-weight: 600;
-      color: var(--gray-900);
-      margin-bottom: 0.25rem;
-    }
-    
-    .activity-description {
-      font-size: 0.875rem;
-      color: var(--gray-600);
-      margin-bottom: 0.5rem;
-    }
-    
-    .activity-meta {
-      display: flex;
-      font-size: 0.75rem;
-      color: var(--gray-500);
-      gap: 1rem;
-    }
-    
-    .activity-meta-item {
-      display: flex;
-      align-items: center;
-    }
-    
-    .activity-meta-icon {
-      margin-right: 0.25rem;
-    }
-    
-    /* Document Cards */
-    .documents-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.75rem;
-    }
-    
-    .document-card {
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
-      transition: var(--transition);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background-color: white;
-      border: 1px solid var(--gray-100);
-    }
-    
-    .document-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--primary-light);
-    }
-    
-    .document-image {
-      height: 180px;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .document-image::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%);
-      z-index: 1;
-    }
-    
-    .document-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .document-content {
-      padding: 1.5rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .document-title {
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      color: var(--gray-900);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      font-size: 1.1rem;
-      line-height: 1.4;
-    }
-    
-    .document-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      font-size: 0.75rem;
-      color: var(--gray-600);
-      margin-bottom: 0.75rem;
-    }
-    
-    .document-meta-item {
-      display: flex;
-      align-items: center;
-    }
-    
-    .document-meta-icon {
-      margin-right: 0.25rem;
-    }
-    
-    .document-actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: auto;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--gray-200);
-    }
-    
-    .action-button {
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      border: none;
-      background-color: var(--gray-100);
-      color: var(--gray-700);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .action-button:hover {
-      background-color: var(--primary-light);
-      color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    .view-all-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.875rem;
-      margin-top: 1.25rem;
-      text-decoration: none;
-      color: white;
-      font-weight: 600;
-      border-radius: var(--radius-lg);
-      transition: var(--transition);
-      background: var(--primary-gradient);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    .view-all-link:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-      filter: brightness(1.05);
-    }
-    
-    .view-all-icon {
-      margin-left: 0.5rem;
-      transition: all 0.2s;
-    }
-    
-    .view-all-link:hover .view-all-icon {
-      transform: translateX(3px);
-    }
-    
-    /* Responsive */
-    @media (max-width: 1200px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+      .mark-read-btn:hover {
+        background-color: var(--success-light);
+        border-color: var(--success);
+        color: var(--success);
       }
-      
-      .documents-grid {
-        grid-template-columns: repeat(2, 1fr);
+
+      /* Section Actions Button */
+      .section-actions .mark-read-btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        background: var(--primary-gradient);
+        color: white;
+        border: 1px solid var(--primary);
       }
-    }
-    
-    @media (max-width: 992px) {
+
+      .section-actions .mark-read-btn:hover {
+        background: var(--primary-dark);
+        border-color: var(--primary-dark);
+        color: white;
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+      }
+
+      .modal-container {
+        background-color: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        max-width: 480px;
+        width: 90%;
+        max-height: 90vh;
+        overflow: hidden;
+        animation: modalSlideIn 0.3s ease-out;
+      }
+
+      @keyframes modalSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+        background-color: var(--gray-50);
+      }
+
+      .modal-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+      }
+
+      .modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background-color: var(--gray-200);
+        color: var(--gray-600);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+      }
+
+      .modal-close:hover {
+        background-color: var(--gray-300);
+        color: var(--gray-800);
+      }
+
+      .modal-body {
+        padding: 2rem 1.5rem;
+        text-align: center;
+      }
+
+      .modal-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background-color: var(--warning-light);
+        color: var(--warning);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+      }
+
+      .modal-message {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+      }
+
+      .modal-submessage {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-bottom: 0;
+      }
+
+      .modal-footer {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1.5rem;
+        border-top: 1px solid var(--gray-200);
+        background-color: var(--gray-50);
+      }
+
+      .btn {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 1px solid transparent;
+      }
+
+      .btn-secondary {
+        background-color: white;
+        color: var(--gray-700);
+        border-color: var(--gray-300);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--gray-50);
+        border-color: var(--gray-400);
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+      }
+
+      @media (max-width: 768px) {
+        .notification-filters {
+          gap: 0.5rem;
+        }
+
+        .filter-btn {
+          padding: 0.375rem 0.75rem;
+          font-size: 0.8125rem;
+        }
+
+        .notification-item {
+          padding: 1rem;
+          gap: 0.75rem;
+        }
+
+        .notification-icon {
+          width: 36px;
+          height: 36px;
+          font-size: 0.875rem;
+        }
+
+        .modal-container {
+          width: 95%;
+        }
+
+        .modal-header,
+        .modal-body,
+        .modal-footer {
+          padding: 1rem;
+        }
+
+        .modal-footer {
+          flex-direction: column;
+        }
+      }
+      body {
+        background-color: #f5f7fb;
+        min-height: 100vh;
+      }
+
+      .dashboard-page {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+      }
+
+      .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      .dashboard-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .date-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--gray-600);
+        background-color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+      }
+
+      .refresh-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--primary);
+        background-color: var(--primary-light);
+        border: none;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .refresh-button:hover {
+        background-color: var(--primary);
+        color: white;
+      }
+
       .dashboard-content {
-        flex-direction: column;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-top: 2rem;
       }
-      
+
       .dashboard-sidebar {
-        width: 100%;
-        position: static;
+        width: 280px;
+        background-color: white;
+        border-radius: var(--radius-xl);
+        padding: 0;
+        box-shadow: var(--shadow-md);
+        position: sticky;
+        top: 2rem;
+        height: fit-content;
+        overflow: hidden;
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+        margin-bottom: 0;
+        position: relative;
+        background-color: var(--primary-light);
+      }
+
+      .user-profile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 0.5rem;
+      }
+
+      .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid white;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 1rem;
+      }
+
+      .user-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+      }
+
+      .user-email {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-bottom: 1rem;
+      }
+
+      .user-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        background-color: var(--primary-light);
+        color: var(--primary);
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .user-status-icon {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        margin-right: 0.5rem;
+      }
+
+      .sidebar-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0.75rem 0;
+        margin: 0;
+      }
+
+      .sidebar-menu-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--gray-500);
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        padding-left: 0.5rem;
+      }
+
+      .sidebar-menu-item {
+        margin-bottom: 0.25rem;
+      }
+
+      .sidebar-menu-link {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: var(--gray-700);
+        text-decoration: none;
+        transition: var(--transition);
+        position: relative;
+        font-size: 0.95rem;
+      }
+
+      .sidebar-menu-link:hover {
+        color: var(--primary);
+        background-color: var(--primary-light);
+      }
+
+      .sidebar-menu-link.active {
+        color: var(--primary);
+        font-weight: 600;
+        background-color: var(--primary-light);
+      }
+
+      .sidebar-menu-link.active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: var(--primary);
+      }
+
+      .sidebar-icon {
+        width: 1.25rem;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+
+      .sidebar-badge {
+        margin-left: auto;
+        background-color: var(--primary);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: 1rem;
+      }
+
+      .dashboard-main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
         margin-bottom: 2rem;
       }
-      
-      .sidebar-menu {
+
+      .stat-card {
+        background-color: white;
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        border: 1px solid var(--gray-100);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .stat-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        position: relative;
+        margin-bottom: 0.75rem;
+        margin-top: 0.5rem;
+      }
+
+      .stat-icon.primary {
+        background: var(--primary-gradient);
+        color: white;
+      }
+
+      .stat-icon.success {
+        background: var(--success-gradient);
+        color: white;
+      }
+
+      .stat-icon.warning {
+        background: var(--warning-gradient);
+        color: white;
+      }
+
+      .stat-icon.danger {
+        background: var(--danger-gradient);
+        color: white;
+      }
+
+      .stat-info {
+        width: 100%;
+      }
+
+      .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+        line-height: 1.2;
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        margin-bottom: 0.25rem;
+        max-width: 100%;
+        display: block;
+        line-height: 1.2;
+        white-space: normal;
+      }
+
+      .stat-trend {
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .trend-positive {
+        color: var(--success);
+      }
+
+      .trend-negative {
+        color: var(--danger);
+      }
+
+      .trend-icon {
+        margin-right: 0.25rem;
+      }
+
+      .trend-period {
+        color: var(--gray-500);
+        margin-left: 0.25rem;
+      }
+
+      /* Filter Button Styles */
+      .filter-options {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
       }
-      
-      .sidebar-menu-title {
+
+      .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.8rem;
+        border-radius: var(--radius-md);
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid var(--gray-200);
+        background-color: white;
+        color: var(--gray-700);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-btn i {
+        margin-right: 0.35rem;
+        font-size: 0.8rem;
+      }
+
+      .filter-btn:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        border-color: var(--primary-light);
+      }
+
+      .filter-btn.active {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      /* Dashboard Sections */
+      .dashboard-section {
+        background-color: white;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2.5rem;
+        border: 1px solid var(--gray-100);
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+      }
+
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+      }
+
+      .section-title-icon {
+        margin-right: 0.75rem;
+        color: var(--primary);
+        font-size: 1.125rem;
+      }
+
+      .section-actions {
+        display: flex;
+        align-items: center;
+      }
+
+      .action-button {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--radius);
+        background-color: var(--gray-100);
+        color: var(--gray-800);
+        border: none;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+      }
+
+      .time-range-select {
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--gray-300);
+        background-color: var(--white);
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        cursor: pointer;
+      }
+
+      /* Activity Chart */
+      .chart-container {
         width: 100%;
+        height: 300px;
       }
-    }
-    
-    @media (max-width: 768px) {
-      .documents-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .activity-item {
+
+      /* Activity List */
+      .activity-list {
+        display: flex;
         flex-direction: column;
+        gap: 1rem;
       }
-      
+
+      .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        border-radius: var(--radius-lg);
+        transition: var(--transition);
+        border: 1px solid transparent;
+      }
+
+      .activity-item:hover {
+        background-color: var(--gray-50);
+        border-color: var(--gray-200);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-sm);
+      }
+
       .activity-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .activity-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .activity-title {
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+      }
+
+      .activity-description {
+        font-size: 0.875rem;
+        color: var(--gray-600);
         margin-bottom: 0.5rem;
       }
-    }
-    
-    .dashboard-page {
-      margin-top: 2rem;
-    }
-    
-  </style>
-</head>
 
-<body>
+      .activity-meta {
+        display: flex;
+        font-size: 0.75rem;
+        color: var(--gray-500);
+        gap: 1rem;
+      }
+
+      .activity-meta-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .activity-meta-icon {
+        margin-right: 0.25rem;
+      }
+
+      /* Document Cards */
+      .documents-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.75rem;
+      }
+
+      .document-card {
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        border: 1px solid var(--gray-100);
+      }
+
+      .document-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-light);
+      }
+
+      .document-image {
+        height: 180px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .document-image::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.6) 0%,
+          rgba(0, 0, 0, 0) 50%
+        );
+        z-index: 1;
+      }
+
+      .document-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .document-content {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .document-title {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: var(--gray-900);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+
+      .document-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        font-size: 0.75rem;
+        color: var(--gray-600);
+        margin-bottom: 0.75rem;
+      }
+
+      .document-meta-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .document-meta-icon {
+        margin-right: 0.25rem;
+      }
+
+      .document-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: auto;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--gray-200);
+      }
+
+      .action-button {
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: none;
+        background-color: var(--gray-100);
+        color: var(--gray-700);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .action-button:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .view-all-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.875rem;
+        margin-top: 1.25rem;
+        text-decoration: none;
+        color: white;
+        font-weight: 600;
+        border-radius: var(--radius-lg);
+        transition: var(--transition);
+        background: var(--primary-gradient);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .view-all-link:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        filter: brightness(1.05);
+      }
+
+      .view-all-icon {
+        margin-left: 0.5rem;
+        transition: all 0.2s;
+      }
+
+      .view-all-link:hover .view-all-icon {
+        transform: translateX(3px);
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .documents-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 992px) {
+        .dashboard-content {
+          flex-direction: column;
+        }
+
+        .dashboard-sidebar {
+          width: 100%;
+          position: static;
+          margin-bottom: 2rem;
+        }
+
+        .sidebar-menu {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .sidebar-menu-title {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .documents-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .activity-item {
+          flex-direction: column;
+        }
+
+        .activity-icon {
+          margin-bottom: 0.5rem;
+        }
+      }
+
+      .dashboard-page {
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+
+  <body>
     <!-- Header -->
     <div th:replace="~{fragments/client/layout :: header}"></div>
 
-  <!-- Main Content -->
-  <main>
-    <div class="container dashboard-page">
-      <div class="dashboard-content">
-        <!-- Sidebar -->
-        <div th:replace="~{fragments/client/account-sidebar :: account-sidebar}"></div>
-          
+    <!-- Main Content -->
+    <main>
+      <div class="container dashboard-page">
+        <div class="dashboard-content">
+          <!-- Sidebar -->
+          <div
+            th:replace="~{fragments/client/account-sidebar :: account-sidebar}"
+          ></div>
+
           <!-- Main Content -->
           <div class="dashboard-main">
             <!-- Stats Cards -->
@@ -996,43 +1181,55 @@
                 <div class="stat-icon primary">
                   <i class="fas fa-bell"></i>
                 </div>
-                <div class="stat-info">
-                  <div class="stat-value">24</div>
-                  <div class="stat-label">Tổng thông báo</div>
+                <div
+                  class="stat-value"
+                  th:text="${notifications != null ? notifications.size() : 0}"
+                >
+                  0
                 </div>
+                <div class="stat-label">Tổng thông báo</div>
               </div>
-              
+
               <div class="stat-card">
                 <div class="stat-icon warning">
                   <i class="fas fa-envelope"></i>
                 </div>
-                <div class="stat-info">
-                  <div class="stat-value">5</div>
-                  <div class="stat-label">Chưa đọc</div>
+                <div
+                  class="stat-value"
+                  th:text="${unreadCount != null ? unreadCount : 0}"
+                >
+                  0
                 </div>
+                <div class="stat-label">Chưa đọc</div>
               </div>
-              
+
               <div class="stat-card">
                 <div class="stat-icon success">
                   <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="stat-info">
-                  <div class="stat-value">19</div>
-                  <div class="stat-label">Đã đọc</div>
+                <div
+                  class="stat-value"
+                  th:text="${readCount != null ? readCount : 0}"
+                >
+                  0
                 </div>
+                <div class="stat-label">Đã đọc</div>
               </div>
-              
+
               <div class="stat-card">
                 <div class="stat-icon danger">
                   <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="stat-info">
-                  <div class="stat-value">2</div>
-                  <div class="stat-label">Quan trọng</div>
+                <div
+                  class="stat-value"
+                  th:text="${systemCount != null ? systemCount : 0}"
+                >
+                  0
                 </div>
+                <div class="stat-label">Hệ thống</div>
               </div>
             </div>
-            
+
             <!-- Notifications Section -->
             <div class="dashboard-section">
               <div class="section-header">
@@ -1040,400 +1237,297 @@
                   <i class="fas fa-inbox section-title-icon"></i>
                   Thông báo của bạn
                 </h2>
-                <div class="section-actions">
-                  <button class="action-btn mark-read-btn" onclick="markAllAsRead()">
+                <div
+                  class="section-actions"
+                  th:if="${unreadCount != null && unreadCount > 0}"
+                >
+                  <button class="mark-read-btn" onclick="markAllAsRead()">
                     <i class="fas fa-check-double"></i>
                     Đánh dấu đã đọc tất cả
                   </button>
                 </div>
               </div>
-            </div>
-            
-            <!-- Notifications Section -->
-            <div class="dashboard-section">
-              <div class="section-header">
-                <h2 class="section-title">
-                  <i class="fas fa-bell section-title-icon"></i>
-                  Thông báo
-                </h2>
-                <div class="section-actions">
-                  <div class="filter-options">
-                    <button class="filter-btn active" data-filter="all">
-                      <i class="fas fa-list"></i>
-                      Tất cả
-                    </button>
-                    <button class="filter-btn" data-filter="unread">
-                      <i class="fas fa-envelope"></i>
-                      Chưa đọc
-                    </button>
-                    <button class="filter-btn" data-filter="important">
-                      <i class="fas fa-exclamation-triangle"></i>
-                      Quan trọng
-                    </button>
-                    <button class="filter-btn" data-filter="system">
-                      <i class="fas fa-cog"></i>
-                      Hệ thống
-                    </button>
-                    <button class="filter-btn" data-filter="transaction">
-                      <i class="fas fa-credit-card"></i>
-                      Giao dịch
-                    </button>
-                  </div>
-                </div>
+
+              <!-- Filters -->
+              <div class="notification-filters">
+                <button class="filter-btn active" data-filter="all">
+                  <i class="fas fa-list"></i>
+                  Tất cả
+                </button>
+                <button class="filter-btn" data-filter="unread">
+                  <i class="fas fa-envelope"></i>
+                  Chưa đọc
+                </button>
+                <button class="filter-btn" data-filter="system">
+                  <i class="fas fa-cog"></i>
+                  Hệ thống
+                </button>
+                <button class="filter-btn" data-filter="document">
+                  <i class="fas fa-file-alt"></i>
+                  Tài liệu
+                </button>
+                <button class="filter-btn" data-filter="transaction">
+                  <i class="fas fa-credit-card"></i>
+                  Giao dịch
+                </button>
               </div>
-              
+
+              <!-- Notification List -->
               <div class="notification-list" id="notificationList">
-                <!-- Unread Notifications -->
-                <div class="notification-item unread" data-type="important">
-                  <div class="notification-icon danger">
-                    <i class="fas fa-exclamation-triangle"></i>
+                <!-- Error Message -->
+                <div th:if="${error}" class="alert alert-danger">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span th:text="${error}">Có lỗi xảy ra</span>
+                </div>
+
+                <!-- Empty State -->
+                <div
+                  th:if="${notifications == null || notifications.isEmpty()}"
+                  class="empty-state"
+                >
+                  <i class="fas fa-bell-slash"></i>
+                  <h3>Chưa có thông báo nào</h3>
+                  <p>Bạn sẽ nhận được thông báo khi có hoạt động mới.</p>
+                </div>
+
+                <!-- Notifications -->
+                <div
+                  th:each="notification : ${notifications}"
+                  class="notification-item"
+                  th:classappend="${!notification.isRead} ? 'unread' : ''"
+                  th:data-type="${notification.type}"
+                  th:data-id="${notification.id}"
+                >
+                  <div
+                    class="notification-icon"
+                    th:classappend="${notification.type == 'system'} ? 'primary' : 
+                                   (${notification.type == 'document'} ? 'success' : 
+                                   (${notification.type == 'transaction'} ? 'warning' : 'primary'))"
+                  >
+                    <i
+                      th:class="${notification.type == 'system'} ? 'fas fa-cog' : 
+                              (${notification.type == 'document'} ? 'fas fa-file-alt' : 
+                              (${notification.type == 'transaction'} ? 'fas fa-credit-card' : 'fas fa-bell'))"
+                    ></i>
                   </div>
+
                   <div class="notification-content">
-                    <div class="notification-title">Tài khoản cần xác thực email</div>
-                    <div class="notification-message">Vui lòng kiểm tra email và xác thực tài khoản để sử dụng đầy đủ các tính năng của EduShare.</div>
+                    <div
+                      class="notification-title"
+                      th:text="${notification.title}"
+                    >
+                      Tiêu đề thông báo
+                    </div>
+                    <div
+                      class="notification-message"
+                      th:text="${notification.message}"
+                    >
+                      Nội dung thông báo
+                    </div>
                     <div class="notification-meta">
                       <div class="notification-time">
                         <i class="far fa-clock"></i>
-                        5 phút trước
+                        <span
+                          th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}"
+                          >01/01/2024 10:00</span
+                        >
                       </div>
                     </div>
                   </div>
-                  <div class="notification-actions">
-                    <button class="action-btn mark-read-btn" onclick="markAsRead(this)">
+
+                  <div
+                    class="notification-actions"
+                    th:if="${!notification.isRead}"
+                  >
+                    <button
+                      class="mark-read-btn"
+                      th:onclick="'markAsRead(' + ${notification.id} + ')'"
+                    >
                       <i class="fas fa-check"></i>
                     </button>
-                  </div>
-                </div>
-                
-                <div class="notification-item unread" data-type="transaction">
-                  <div class="notification-icon success">
-                    <i class="fas fa-check-circle"></i>
-                  </div>
-                  <div class="notification-content">
-                    <div class="notification-title">Giao dịch thành công</div>
-                    <div class="notification-message">Bạn đã nạp thành công 100.000 VNĐ vào tài khoản. Số xu hiện tại: 500 xu.</div>
-                    <div class="notification-meta">
-                      <div class="notification-time">
-                        <i class="far fa-clock"></i>
-                        2 giờ trước
-                      </div>
-                    </div>
-                  </div>
-                  <div class="notification-actions">
-                    <button class="action-btn mark-read-btn" onclick="markAsRead(this)">
-                      <i class="fas fa-check"></i>
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="notification-item unread" data-type="system">
-                  <div class="notification-icon primary">
-                    <i class="fas fa-file-alt"></i>
-                  </div>
-                  <div class="notification-content">
-                    <div class="notification-title">Tài liệu mới được phê duyệt</div>
-                    <div class="notification-message">Tài liệu "Lập trình ứng dụng web với React" của bạn đã được phê duyệt và xuất bản thành công.</div>
-                    <div class="notification-meta">
-                      <div class="notification-time">
-                        <i class="far fa-clock"></i>
-                        1 ngày trước
-                      </div>
-                    </div>
-                  </div>
-                  <div class="notification-actions">
-                    <button class="action-btn mark-read-btn" onclick="markAsRead(this)">
-                      <i class="fas fa-check"></i>
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="notification-item unread" data-type="system">
-                  <div class="notification-icon warning">
-                    <i class="fas fa-star"></i>
-                  </div>
-                  <div class="notification-content">
-                    <div class="notification-title">Nhận được đánh giá mới</div>
-                    <div class="notification-message">Tài liệu "Nguyên lý kế toán cơ bản" của bạn nhận được đánh giá 5 sao từ người dùng khác.</div>
-                    <div class="notification-meta">
-                      <div class="notification-time">
-                        <i class="far fa-clock"></i>
-                        2 ngày trước
-                      </div>
-                    </div>
-                  </div>
-                  <div class="notification-actions">
-                    <button class="action-btn mark-read-btn" onclick="markAsRead(this)">
-                      <i class="fas fa-check"></i>
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="notification-item unread" data-type="important">
-                  <div class="notification-icon danger">
-                    <i class="fas fa-shield-alt"></i>
-                  </div>
-                  <div class="notification-content">
-                    <div class="notification-title">Phát hiện đăng nhập từ thiết bị mới</div>
-                    <div class="notification-message">Tài khoản của bạn vừa được đăng nhập từ thiết bị mới. Nếu không phải bạn, vui lòng đổi mật khẩu ngay.</div>
-                    <div class="notification-meta">
-                      <div class="notification-time">
-                        <i class="far fa-clock"></i>
-                        3 ngày trước
-                      </div>
-                    </div>
-                  </div>
-                  <div class="notification-actions">
-                    <button class="action-btn mark-read-btn" onclick="markAsRead(this)">
-                      <i class="fas fa-check"></i>
-                    </button>
-                  </div>
-                </div>
-                
-                <!-- Read Notifications -->
-                <div class="notification-item" data-type="transaction">
-                  <div class="notification-icon success">
-                    <i class="fas fa-download"></i>
-                  </div>
-                  <div class="notification-content">
-                    <div class="notification-title">Tải xuống tài liệu thành công</div>
-                    <div class="notification-message">Bạn đã tải xuống tài liệu "Kỹ thuật phân tích dữ liệu với Python". Chi phí: 25 xu.</div>
-                    <div class="notification-meta">
-                      <div class="notification-time">
-                        <i class="far fa-clock"></i>
-                        1 tuần trước
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="notification-item" data-type="system">
-                  <div class="notification-icon primary">
-                    <i class="fas fa-user-plus"></i>
-                  </div>
-                  <div class="notification-content">
-                    <div class="notification-title">Chào mừng đến với EduShare!</div>
-                    <div class="notification-message">Tài khoản của bạn đã được tạo thành công. Hãy khám phá các tài liệu học tập phong phú tại EduShare.</div>
-                    <div class="notification-meta">
-                      <div class="notification-time">
-                        <i class="far fa-clock"></i>
-                        2 tuần trước
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/client/layout :: footer}"></div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal-overlay" style="display: none">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3 class="modal-title">
+            <i class="fas fa-check-double"></i>
+            Xác nhận thao tác
+          </h3>
+          <button class="modal-close" onclick="closeConfirmModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon">
+            <i class="fas fa-question-circle"></i>
+          </div>
+          <p class="modal-message">
+            Bạn có chắc chắn muốn đánh dấu tất cả thông báo là đã đọc?
+          </p>
+          <p class="modal-submessage">Thao tác này không thể hoàn tác.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeConfirmModal()">
+            <i class="fas fa-times"></i>
+            Hủy bỏ
+          </button>
+          <button class="btn btn-primary" onclick="confirmMarkAllAsRead()">
+            <i class="fas fa-check"></i>
+            Xác nhận
+          </button>
         </div>
       </div>
     </div>
-  </main>
-
-  <!-- Footer -->
-  <div th:replace="~{fragments/client/layout :: footer}"></div>
-    <script th:src="@{/js/client-header.js}"></script>
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/account.js}"></script>
-  <script>
-    // Set current date
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'long', 
-      day: 'numeric'
-    });
+    <script th:src="@{/js/client-header.js}"></script>
+    <script>
+      // Get CSRF token
+      function getCsrfToken() {
+        return (
+          document
+            .querySelector('meta[name="_csrf"]')
+            ?.getAttribute("content") || ""
+        );
+      }
 
-    // Active menu highlighting
-    document.addEventListener('DOMContentLoaded', function() {
-      const sidebarLinks = document.querySelectorAll('.sidebar-menu-link');
-      const currentPage = window.location.pathname.split('/').pop();
-      
-      sidebarLinks.forEach(link => {
-        if (link.getAttribute('href') === currentPage) {
-          link.parentElement.classList.add('active');
-        }
-      });
-    });
+      function getCsrfHeader() {
+        return (
+          document
+            .querySelector('meta[name="_csrf_header"]')
+            ?.getAttribute("content") || "X-CSRF-TOKEN"
+        );
+      }
 
-    // Filter notifications functionality
-    // IMPORTANT: Execute IMMEDIATELY instead of waiting for DOMContentLoaded
-    // This ensures the script runs regardless of when the page is fully loaded
-    (function() {
-      // Select all filter buttons
-      const filterButtons = document.querySelectorAll('.filter-btn');
-      const notificationList = document.getElementById('notificationList');
-      
-      if (!notificationList) {
-        console.error('Error: #notificationList element not found!');
-        return; // Exit if notification list not found
-      }
-      
-      // Create empty state element
-      const emptyState = document.createElement('div');
-      emptyState.className = 'notification-empty';
-      emptyState.innerHTML = `
-        <div class="notification-empty-icon">
-          <i class="far fa-bell-slash"></i>
-        </div>
-        <div class="notification-empty-text">Không có thông báo nào</div>
-        <div class="notification-empty-subtext">Tất cả thông báo của bạn sẽ xuất hiện ở đây</div>
-      `;
-      
-      // Filter function
-      function filterNotifications() {
-        // Get the active filter
-        const activeButton = document.querySelector('.filter-btn.active');
-        if (!activeButton) {
-          console.error('Error: No active filter button found!');
-          return;
-        }
-        
-        const activeFilter = activeButton.dataset.filter;
-        const notificationItems = notificationList.querySelectorAll('.notification-item');
-        
-        if (notificationItems.length === 0) {
-          console.warn('Warning: No notification items found!');
-        }
-        
-        let visibleCount = 0;
-        
-        // Apply filtering
-        notificationItems.forEach(item => {
-          let visible = false;
-          
-          if (activeFilter === 'all') {
-            visible = true;
-          } else if (activeFilter === 'unread') {
-            visible = item.classList.contains('unread');
-          } else {
-            visible = item.dataset.type === activeFilter;
-          }
-          
-          // Apply visibility
-          item.style.display = visible ? 'flex' : 'none';
-          if (visible) visibleCount++;
-        });
-        
-        // Show empty state if no items are visible
-        checkEmptyState(visibleCount);
-        
-        console.log(`Filter applied: ${activeFilter}, Visible items: ${visibleCount}`);
-      }
-      
-      // Check and display empty state if needed
-      function checkEmptyState(visibleCount) {
-        // Remove existing empty state if it exists
-        const existingEmptyState = notificationList.querySelector('.notification-empty');
-        if (existingEmptyState) {
-          existingEmptyState.remove();
-        }
-        
-        // Add empty state if no notifications
-        if (visibleCount === 0) {
-          notificationList.appendChild(emptyState.cloneNode(true));
-        }
-      }
-      
-      // Directly attach click events to all filter buttons
-      if (filterButtons.length === 0) {
-        console.error('Error: No filter buttons found!');
-      }
-      
-      filterButtons.forEach(button => {
-        // Remove any existing event listeners
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
-        
-        // Add fresh click event listener
-        newButton.addEventListener('click', function() {
-          // Remove active class from all buttons
-          filterButtons.forEach(btn => btn.classList.remove('active'));
-          // Add active class to clicked button
-          this.classList.add('active');
-          
-          // Apply filtering
-          filterNotifications();
+      // Filter functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        const filterBtns = document.querySelectorAll(".filter-btn");
+        const notificationItems =
+          document.querySelectorAll(".notification-item");
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            // Remove active class from all buttons
+            filterBtns.forEach((b) => b.classList.remove("active"));
+            // Add active class to clicked button
+            this.classList.add("active");
+
+            const filter = this.getAttribute("data-filter");
+
+            notificationItems.forEach((item) => {
+              if (filter === "all") {
+                item.style.display = "flex";
+              } else if (filter === "unread") {
+                item.style.display = item.classList.contains("unread")
+                  ? "flex"
+                  : "none";
+              } else {
+                const itemType = item.getAttribute("data-type");
+                item.style.display = itemType === filter ? "flex" : "none";
+              }
+            });
+          });
         });
       });
-      
-      // Ensure there's an active button
-      if (!document.querySelector('.filter-btn.active')) {
-        const allButton = document.querySelector('.filter-btn[data-filter="all"]');
-        if (allButton) allButton.classList.add('active');
-      }
-      
-      // Run filtering immediately
-      setTimeout(filterNotifications, 100); // Short delay to ensure DOM is ready
-    })();
 
-    // Mark notification as read
-    function markAsRead(button) {
-      const notificationItem = button.closest('.notification-item');
-      notificationItem.classList.remove('unread');
-      button.style.display = 'none';
-      
-      // Update stats
-      updateStats();
-    }
+      // Mark single notification as read
+      function markAsRead(notificationId) {
+        const headers = {
+          "Content-Type": "application/json",
+        };
 
-    // Mark all as read
-    function markAllAsRead() {
-      const unreadItems = document.querySelectorAll('.notification-item.unread');
-      unreadItems.forEach(item => {
-        item.classList.remove('unread');
-        const button = item.querySelector('.mark-read-btn');
-        if (button) button.style.display = 'none';
-      });
-      
-      updateStats();
-    }
-
-    // Update notification stats
-    function updateStats() {
-      const totalNotifications = document.querySelectorAll('.notification-item').length;
-      const unreadNotifications = document.querySelectorAll('.notification-item.unread').length;
-      const readNotifications = totalNotifications - unreadNotifications;
-      
-      // Update stat cards
-      document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = totalNotifications;
-      document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = unreadNotifications;
-      document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = readNotifications;
-      
-      // Update sidebar badge
-      const sidebarBadge = document.querySelector('.sidebar-menu-item.active .sidebar-badge');
-      if (sidebarBadge) {
-        sidebarBadge.textContent = unreadNotifications;
-        if (unreadNotifications === 0) {
-          sidebarBadge.style.display = 'none';
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+        if (csrfToken && csrfHeader) {
+          headers[csrfHeader] = csrfToken;
         }
+
+        fetch(`/account/notifications/${notificationId}/mark-read`, {
+          method: "POST",
+          headers: headers,
+        })
+          .then((response) => response.text())
+          .then((data) => {
+            if (data === "success") {
+              location.reload();
+            } else {
+              alert("Có lỗi xảy ra: " + data);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Có lỗi xảy ra khi đánh dấu đã đọc");
+          });
       }
-    }
 
-    // Refresh notifications
-    function refreshNotifications() {
-      const refreshButton = document.querySelector('.refresh-button');
-      const icon = refreshButton.querySelector('i');
-      
-      // Add rotation animation
-      icon.style.animation = 'spin 1s linear';
-      
-      // Simulate loading
-      setTimeout(() => {
-        icon.style.animation = '';
-        // You can add actual refresh logic here
-      }, 1000);
-    }
-
-    // Add CSS animation for refresh button
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+      // Show confirmation modal
+      function markAllAsRead() {
+        document.getElementById("confirmModal").style.display = "flex";
       }
-    `;
-    document.head.appendChild(style);
-  </script>
 
-</body>
+      // Close modal
+      function closeConfirmModal() {
+        document.getElementById("confirmModal").style.display = "none";
+      }
+
+      // Confirm mark all as read
+      function confirmMarkAllAsRead() {
+        const headers = {
+          "Content-Type": "application/json",
+        };
+
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+        if (csrfToken && csrfHeader) {
+          headers[csrfHeader] = csrfToken;
+        }
+
+        fetch("/account/notifications/mark-all-read", {
+          method: "POST",
+          headers: headers,
+        })
+          .then((response) => response.text())
+          .then((data) => {
+            closeConfirmModal();
+            if (data === "success") {
+              location.reload();
+            } else {
+              alert("Có lỗi xảy ra: " + data);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            closeConfirmModal();
+            alert("Có lỗi xảy ra khi đánh dấu tất cả đã đọc");
+          });
+      }
+
+      // Close modal when clicking outside
+      document.addEventListener("click", function (event) {
+        const modal = document.getElementById("confirmModal");
+        if (event.target === modal) {
+          closeConfirmModal();
+        }
+      });
+
+      // Close modal with Escape key
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closeConfirmModal();
+        }
+      });
+    </script>
+  </body>
 </html>

@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -84,8 +85,10 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/payment/**").permitAll()
 
-                                                .requestMatchers("/", "/home", "/login", "/register", "/confirm")
-                                                .permitAll()
+                                              
+                                                .requestMatchers("/", "/home", "/login", "/register", "/confirm", 
+                                                                "/forgot-password", "/verify-reset-code", "/reset-password").permitAll()
+
 
                                                 .requestMatchers("/coin-packages", "/coin-packages/**").permitAll()
 
@@ -134,8 +137,8 @@ public class SecurityConfig {
 
                                 // Configure CSRF protection
                                 .csrf(csrf -> csrf
-                                                .ignoringRequestMatchers("/api/**") // Ignore CSRF for API endpoints if
-                                                                                    // needed
+                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                                .ignoringRequestMatchers("/api/**") // Ignore CSRF for API endpoints
                                 )
 
                                 // Configure security headers
