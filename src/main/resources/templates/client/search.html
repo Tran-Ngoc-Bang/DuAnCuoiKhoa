@@ -39,6 +39,28 @@
       background-color: #007bff;
     }
   </style>
+  <style>
+    .pagination {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .pagination button {
+      margin: 0 5px;
+      padding: 6px 12px;
+      border: none;
+      background-color: #eee;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .pagination button.active {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -451,6 +473,8 @@
                 </div>
               </div>
             </div>
+            <div id="pagination" class="pagination"></div>
+
 
           </div>
         </div>
@@ -511,6 +535,42 @@
 
     document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
       input.addEventListener('change', updateActiveFilterTitles);
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const itemsPerPage = 6;
+      const resultContainer = document.getElementById("searchResults");
+      const resultCards = Array.from(resultContainer.getElementsByClassName("search-result-card"));
+      const paginationContainer = document.getElementById("pagination");
+
+      function showPage(page) {
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        resultCards.forEach((card, index) => {
+          card.style.display = (index >= start && index < end) ? "block" : "none";
+        });
+
+        renderPaginationButtons(page);
+      }
+
+      function renderPaginationButtons(currentPage) {
+        const totalPages = Math.ceil(resultCards.length / itemsPerPage);
+        paginationContainer.innerHTML = "";
+
+        for (let i = 1; i <= totalPages; i++) {
+          const button = document.createElement("button");
+          button.innerText = i;
+          button.className = (i === currentPage) ? "active" : "";
+          button.addEventListener("click", () => showPage(i));
+          paginationContainer.appendChild(button);
+        }
+      }
+
+      // Init pagination
+      showPage(1);
     });
   </script>
 
