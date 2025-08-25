@@ -79,12 +79,13 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(authz -> authz
                                                 // Public resources
                                                 .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**",
-                                                                "/favicon.ico")
+                                                                "/favicon.ico",
+                                                                "/.well-known/**")
                                                 .permitAll()
-
                                                 .requestMatchers("/payment/**").permitAll()
-                                              
-                                                .requestMatchers("/", "/home", "/login", "/register","/confirm").permitAll()
+
+                                                .requestMatchers("/", "/home", "/login", "/register", "/confirm")
+                                                .permitAll()
 
                                                 .requestMatchers("/coin-packages", "/coin-packages/**").permitAll()
 

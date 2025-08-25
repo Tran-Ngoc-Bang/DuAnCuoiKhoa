@@ -34,11 +34,14 @@ import com.fpoly.shared_learning_materials.repository.DocumentRepository;
 import com.fpoly.shared_learning_materials.repository.FavoriteRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
 import com.fpoly.shared_learning_materials.service.CoinPackageService;
+import com.fpoly.shared_learning_materials.service.WithdrawalService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fpoly.shared_learning_materials.repository.TransactionDetailRepository;
 import com.fpoly.shared_learning_materials.config.CustomUserDetailsService;
 import java.time.format.DateTimeFormatter;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * Controller for user account pages
@@ -65,6 +68,12 @@ public class AccountController {
 
     @Autowired
     private TransactionDetailRepository transactionDetailRepository;
+
+    @Autowired
+    private com.fpoly.shared_learning_materials.service.TransactionService transactionService;
+
+    @Autowired
+    private WithdrawalService withdrawalService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, RedirectAttributes redirectAttributes) {
@@ -222,9 +231,304 @@ public class AccountController {
     }
 
     @GetMapping("/transactions")
-    public String transactions(Model model) {
+    public String transactions(Model model,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "q", required = false) String keyword,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "from", required = false) String fromDate,
+            @RequestParam(value = "to", required = false) String toDate,
+            @RequestParam(value = "min", required = false) java.math.BigDecimal minAmount,
+            @RequestParam(value = "max", required = false) java.math.BigDecimal maxAmount) {
         model.addAttribute("pageTitle", "Lịch sử giao dịch");
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return "redirect:/login";
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return "redirect:/";
+        }
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest
+                .of(Math.max(page, 0), Math.max(size, 1), org.springframework.data.domain.Sort
+                        .by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+
+        com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus statusEnum = null;
+        com.fpoly.shared_learning_materials.domain.Transaction.TransactionType typeEnum = null;
+        try {
+            if (status != null && !status.isBlank())
+                statusEnum = com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus
+                        .valueOf(status.toUpperCase());
+        } catch (Exception ignored) {
+        }
+        try {
+            if (type != null && !type.isBlank())
+                typeEnum = com.fpoly.shared_learning_materials.domain.Transaction.TransactionType
+                        .valueOf(type.toUpperCase());
+        } catch (Exception ignored) {
+        }
+
+        java.time.LocalDateTime startDate = null, endDate = null;
+        try {
+            if (fromDate != null && !fromDate.isBlank()) {
+                startDate = java.time.LocalDate.parse(fromDate).atStartOfDay();
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            if (toDate != null && !toDate.isBlank()) {
+                endDate = java.time.LocalDate.parse(toDate).atTime(23, 59, 59);
+            }
+        } catch (Exception ignored) {
+        }
+
+        org.springframework.data.domain.Page<com.fpoly.shared_learning_materials.domain.Transaction> transactions = transactionService
+                .searchUserTransactions(currentUser, keyword, statusEnum, typeEnum, startDate, endDate, minAmount,
+                        maxAmount, pageable);
+
+        BigDecimal coinBalance = currentUser.getCoinBalance() != null ? currentUser.getCoinBalance()
+                : BigDecimal.ZERO;
+
+        model.addAttribute("coinBalance", coinBalance);
+        model.addAttribute("transactionsPage", transactions);
+        model.addAttribute("q", keyword);
+        model.addAttribute("status", status);
+        model.addAttribute("type", type);
+        model.addAttribute("from", fromDate);
+        model.addAttribute("to", toDate);
+        model.addAttribute("min", minAmount);
+        model.addAttribute("max", maxAmount);
+
+        // Stats: totals by type for the user (only completed)
+        BigDecimal totalPurchase = transactionService.getUserTotalByType(currentUser,
+                com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.PURCHASE,
+                com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.COMPLETED);
+        BigDecimal totalWithdrawal = transactionService.getUserTotalByType(currentUser,
+                com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL,
+                com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.PENDING)
+                .add(transactionService.getUserTotalByType(currentUser,
+                        com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL,
+                        com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.COMPLETED));
+        BigDecimal totalRefund = transactionService.getUserTotalByType(currentUser,
+                com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.REFUND,
+                null);
+        model.addAttribute("statTotalPurchase", totalPurchase);
+        model.addAttribute("statTotalWithdrawal", totalWithdrawal);
+        model.addAttribute("statTotalRefund", totalRefund);
         return "client/account/transactions";
+    }
+
+    @GetMapping("/transactions/json")
+    @ResponseBody
+    public ResponseEntity<?> listMyTransactionsJson(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "50") int size,
+            @RequestParam(value = "q", required = false) String keyword,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "from", required = false) String fromDate,
+            @RequestParam(value = "to", required = false) String toDate,
+            @RequestParam(value = "min", required = false) java.math.BigDecimal minAmount,
+            @RequestParam(value = "max", required = false) java.math.BigDecimal maxAmount) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest
+                .of(Math.max(page, 0), Math.max(size, 1), org.springframework.data.domain.Sort
+                        .by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+
+        com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus statusEnum = null;
+        com.fpoly.shared_learning_materials.domain.Transaction.TransactionType typeEnum = null;
+        try {
+            if (status != null && !status.isBlank())
+                statusEnum = com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus
+                        .valueOf(status.toUpperCase());
+        } catch (Exception ignored) {
+        }
+        try {
+            if (type != null && !type.isBlank())
+                typeEnum = com.fpoly.shared_learning_materials.domain.Transaction.TransactionType
+                        .valueOf(type.toUpperCase());
+        } catch (Exception ignored) {
+        }
+
+        java.time.LocalDateTime startDate = null, endDate = null;
+        try {
+            if (fromDate != null && !fromDate.isBlank()) {
+                startDate = java.time.LocalDate.parse(fromDate).atStartOfDay();
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            if (toDate != null && !toDate.isBlank()) {
+                endDate = java.time.LocalDate.parse(toDate).atTime(23, 59, 59);
+            }
+        } catch (Exception ignored) {
+        }
+
+        org.springframework.data.domain.Page<com.fpoly.shared_learning_materials.domain.Transaction> transactions = transactionService
+                .searchUserTransactions(currentUser, keyword, statusEnum, typeEnum, startDate, endDate, minAmount,
+                        maxAmount, pageable);
+
+        java.util.List<java.util.Map<String, Object>> items = new java.util.ArrayList<>();
+        for (com.fpoly.shared_learning_materials.domain.Transaction tx : transactions.getContent()) {
+            java.util.Map<String, Object> dto = new java.util.HashMap<>();
+            dto.put("id", tx.getId());
+            dto.put("code", tx.getCode());
+            dto.put("type", tx.getType() != null ? tx.getType().name() : null);
+            dto.put("amount", tx.getAmount());
+            dto.put("status", tx.getStatus() != null ? tx.getStatus().name() : null);
+            dto.put("paymentMethod", tx.getPaymentMethod());
+            dto.put("createdAt", tx.getCreatedAt());
+            dto.put("notes", tx.getNotes());
+            items.add(dto);
+        }
+        java.util.Map<String, Object> resp = new java.util.HashMap<>();
+        resp.put("content", items);
+        resp.put("page", transactions.getNumber());
+        resp.put("size", transactions.getSize());
+        resp.put("totalElements", transactions.getTotalElements());
+        resp.put("totalPages", transactions.getTotalPages());
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/transactions/stats")
+    @ResponseBody
+    public ResponseEntity<?> getTransactionStats() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()
+                    || "anonymousUser".equals(authentication.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            System.out.println("Getting stats for user: " + username);
+
+            // Stats cards data
+            long totalTransactions = transactionService.getUserTotalTransactions(currentUser);
+            long completedTransactions = transactionService.getUserTransactionsByStatus(currentUser,
+                    com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.COMPLETED);
+            long pendingTransactions = transactionService.getUserTransactionsByStatus(currentUser,
+                    com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.PENDING);
+            java.math.BigDecimal totalSpent = transactionService.getUserTotalSpent(currentUser);
+
+            System.out.println("Stats calculated: total=" + totalTransactions + ", completed=" + completedTransactions
+                    + ", pending=" + pendingTransactions + ", spent=" + totalSpent);
+
+            // Chart data - last 30 days
+            java.time.LocalDateTime endDate = java.time.LocalDateTime.now();
+            java.time.LocalDateTime startDate = endDate.minusDays(30);
+            java.util.List<java.util.Map<String, Object>> dailyData = transactionService.getUserTransactionStatsByDate(
+                    currentUser, startDate, endDate, "day");
+            java.util.List<java.util.Map<String, Object>> typeData = transactionService.getUserTransactionStatsByType(
+                    currentUser, startDate, endDate);
+
+            System.out.println("Chart data: daily=" + dailyData.size() + " items, type=" + typeData.size() + " items");
+
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("stats", java.util.Map.of(
+                    "totalTransactions", totalTransactions,
+                    "completedTransactions", completedTransactions,
+                    "pendingTransactions", pendingTransactions,
+                    "totalSpent", totalSpent));
+            response.put("dailyData", dailyData);
+            response.put("typeData", typeData);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Error in getTransactionStats: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/transactions/{code}")
+    @ResponseBody
+    public ResponseEntity<?> getMyTransaction(@PathVariable String code) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        Optional<com.fpoly.shared_learning_materials.domain.Transaction> txOpt = transactionService
+                .getTransactionByCode(code);
+        if (txOpt.isEmpty() || txOpt.get().getDeletedAt() != null
+                || !txOpt.get().getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
+        }
+        com.fpoly.shared_learning_materials.domain.Transaction tx = txOpt.get();
+        java.util.Map<String, Object> dto = new java.util.HashMap<>();
+        dto.put("code", tx.getCode());
+        dto.put("type", tx.getType());
+        dto.put("amount", tx.getAmount());
+        dto.put("status", tx.getStatus());
+        dto.put("paymentMethod", tx.getPaymentMethod());
+        dto.put("createdAt", tx.getCreatedAt());
+        dto.put("notes", tx.getNotes());
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/transactions/{code}/refund")
+    @ResponseBody
+    public ResponseEntity<?> requestRefund(@PathVariable String code, @RequestParam(required = false) String reason) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        Optional<com.fpoly.shared_learning_materials.domain.Transaction> txOpt = transactionService
+                .getTransactionByCode(code);
+        if (txOpt.isEmpty() || txOpt.get().getDeletedAt() != null
+                || !txOpt.get().getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
+        }
+        try {
+            com.fpoly.shared_learning_materials.domain.Transaction original = txOpt.get();
+            com.fpoly.shared_learning_materials.domain.Transaction withdrawal = new com.fpoly.shared_learning_materials.domain.Transaction();
+            withdrawal.setUser(original.getUser());
+            withdrawal.setType(com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL);
+            withdrawal.setAmount(original.getAmount());
+            withdrawal.setStatus(com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.PENDING);
+            withdrawal.setPaymentMethod(original.getPaymentMethod());
+            withdrawal.setNotes((reason != null && !reason.trim().isEmpty() ? (reason.trim() + " | ") : "")
+                    + "Refund request for " + original.getCode());
+            com.fpoly.shared_learning_materials.domain.Transaction saved = withdrawalService
+                    .createWithdrawal(withdrawal);
+            return ResponseEntity.ok(java.util.Map.of("success", true, "withdrawalCode", saved.getCode()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     @GetMapping("/recharge")
@@ -286,5 +590,75 @@ public class AccountController {
     public String support(Model model) {
         model.addAttribute("pageTitle", "Hỗ trợ");
         return "client/account/support";
+    }
+
+    @GetMapping("/transactions/id/{id}")
+    @ResponseBody
+    public ResponseEntity<?> getMyTransactionById(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        Optional<com.fpoly.shared_learning_materials.domain.Transaction> txOpt = transactionService
+                .getTransactionById(id);
+        if (txOpt.isEmpty() || txOpt.get().getDeletedAt() != null
+                || !txOpt.get().getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
+        }
+        com.fpoly.shared_learning_materials.domain.Transaction tx = txOpt.get();
+        java.util.Map<String, Object> dto = new java.util.HashMap<>();
+        dto.put("id", tx.getId());
+        dto.put("code", tx.getCode());
+        dto.put("type", tx.getType());
+        dto.put("amount", tx.getAmount());
+        dto.put("status", tx.getStatus());
+        dto.put("paymentMethod", tx.getPaymentMethod());
+        dto.put("createdAt", tx.getCreatedAt());
+        dto.put("notes", tx.getNotes());
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/transactions/id/{id}/refund")
+    @ResponseBody
+    public ResponseEntity<?> requestRefundById(@PathVariable Long id, @RequestParam(required = false) String reason) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        Optional<com.fpoly.shared_learning_materials.domain.Transaction> txOpt = transactionService
+                .getTransactionById(id);
+        if (txOpt.isEmpty() || txOpt.get().getDeletedAt() != null
+                || !txOpt.get().getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
+        }
+        try {
+            com.fpoly.shared_learning_materials.domain.Transaction original = txOpt.get();
+            com.fpoly.shared_learning_materials.domain.Transaction withdrawal = new com.fpoly.shared_learning_materials.domain.Transaction();
+            withdrawal.setUser(original.getUser());
+            withdrawal.setType(com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL);
+            withdrawal.setAmount(original.getAmount());
+            withdrawal.setStatus(com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.PENDING);
+            withdrawal.setPaymentMethod(original.getPaymentMethod());
+            withdrawal.setNotes((reason != null && !reason.trim().isEmpty() ? (reason.trim() + " | ") : "")
+                    + "Refund request for " + original.getCode());
+            com.fpoly.shared_learning_materials.domain.Transaction saved = withdrawalService
+                    .createWithdrawal(withdrawal);
+            return ResponseEntity.ok(java.util.Map.of("success", true, "withdrawalCode", saved.getCode()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }

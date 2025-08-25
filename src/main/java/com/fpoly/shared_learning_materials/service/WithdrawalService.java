@@ -90,12 +90,12 @@ public class WithdrawalService {
         // Set type to WITHDRAWAL
         withdrawal.setType(Transaction.TransactionType.WITHDRAWAL);
 
-        validateWithdrawal(withdrawal);
-
         // Tự động generate code nếu chưa có
         if (withdrawal.getCode() == null || withdrawal.getCode().trim().isEmpty()) {
             withdrawal.setCode(generateWithdrawalCode());
         }
+
+        validateWithdrawal(withdrawal);
 
         // Set default status nếu chưa có
         if (withdrawal.getStatus() == null) {

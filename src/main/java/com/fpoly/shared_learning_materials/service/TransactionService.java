@@ -17,6 +17,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -173,6 +176,37 @@ public class TransactionService {
     }
 
     /**
+     * Lọc giao dịch theo người dùng + keyword/status/type (phân trang)
+     */
+    public Page<Transaction> searchUserTransactions(User user, String keyword,
+            Transaction.TransactionStatus status,
+            Transaction.TransactionType type,
+            java.time.LocalDateTime startDate,
+            java.time.LocalDateTime endDate,
+            java.math.BigDecimal minAmount,
+            java.math.BigDecimal maxAmount,
+            Pageable pageable) {
+        return transactionRepository.findByUserWithFilters(user,
+                (keyword == null || keyword.isBlank()) ? null : keyword.trim(), status, type,
+                startDate, endDate, minAmount, maxAmount, pageable);
+    }
+
+    /**
+     * Thống kê tổng số tiền theo người dùng cho từng loại giao dịch
+     */
+    public BigDecimal getUserTotalByType(User user, Transaction.TransactionType type,
+            Transaction.TransactionStatus status) {
+        return transactionRepository.sumAmountByUserAndTypeAndStatus(user, type, status);
+    }
+
+    /**
+     * Lấy giao dịch theo người dùng (phân trang)
+     */
+    public Page<Transaction> getTransactionsByUser(User user, Pageable pageable) {
+        return transactionRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(user, pageable);
+    }
+
+    /**
      * Thống kê tổng số giao dịch
      */
     public long getTotalTransactions() {
@@ -261,6 +295,35 @@ public class TransactionService {
     }
 
     /**
+     * Yêu cầu hoàn tiền cho giao dịch mua xu đã hoàn thành
+     */
+    public Transaction requestRefund(Transaction original, String reason) {
+        if (original == null) {
+            throw new IllegalArgumentException("Giao dịch không hợp lệ");
+        }
+        if (original.getType() != Transaction.TransactionType.PURCHASE) {
+            throw new IllegalStateException("Chỉ hỗ trợ hoàn tiền cho giao dịch mua xu");
+        }
+        if (original.getStatus() != Transaction.TransactionStatus.COMPLETED) {
+            throw new IllegalStateException("Chỉ hoàn tiền cho giao dịch đã hoàn thành");
+        }
+        // Tạo giao dịch REFUND mới ở trạng thái PENDING
+        Transaction refund = new Transaction();
+        refund.setCode(generateTransactionCode());
+        refund.setType(Transaction.TransactionType.REFUND);
+        refund.setAmount(original.getAmount());
+        refund.setStatus(Transaction.TransactionStatus.PENDING);
+        refund.setPaymentMethod(original.getPaymentMethod());
+        refund.setUser(original.getUser());
+        refund.setNotes(
+                reason != null && !reason.trim().isEmpty() ? ("Refund for " + original.getCode() + ": " + reason.trim())
+                        : ("Refund for " + original.getCode()));
+        refund.setCreatedAt(java.time.LocalDateTime.now());
+        validateTransaction(refund);
+        return transactionRepository.save(refund);
+    }
+
+    /**
      * Validate giao dịch trước khi lưu
      */
     public void validateTransaction(Transaction transaction) {
@@ -289,5 +352,68 @@ public class TransactionService {
         if (!userOpt.isPresent()) {
             throw new IllegalArgumentException("Người dùng không tồn tại");
         }
+    }
+
+    /**
+     * Lấy tổng số giao dịch của user
+     */
+    public long getUserTotalTransactions(User user) {
+        return transactionRepository.countByUserAndDeletedAtIsNull(user);
+    }
+
+    /**
+     * Lấy số giao dịch theo trạng thái của user
+     */
+    public long getUserTransactionsByStatus(User user, Transaction.TransactionStatus status) {
+        return transactionRepository.countByUserAndStatusAndDeletedAtIsNull(user, status);
+    }
+
+    /**
+     * Lấy tổng số tiền đã chi của user
+     */
+    public BigDecimal getUserTotalSpent(User user) {
+        return transactionRepository.sumAmountByUserAndDeletedAtIsNull(user);
+    }
+
+    /**
+     * Lấy thống kê giao dịch theo ngày của user
+     */
+    public List<Map<String, Object>> getUserTransactionStatsByDate(User user, LocalDateTime startDate,
+            LocalDateTime endDate, String groupBy) {
+        List<Object[]> results;
+        if ("day".equals(groupBy)) {
+            results = transactionRepository.getUserTransactionStatsByDay(user, startDate, endDate);
+        } else if ("week".equals(groupBy)) {
+            results = transactionRepository.getUserTransactionStatsByWeek(user, startDate, endDate);
+        } else {
+            results = transactionRepository.getUserTransactionStatsByMonth(user, startDate, endDate);
+        }
+
+        List<Map<String, Object>> data = new ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("date", row[0]);
+            item.put("amount", row[1]);
+            item.put("count", row[2]);
+            data.add(item);
+        }
+        return data;
+    }
+
+    /**
+     * Lấy thống kê giao dịch theo loại của user
+     */
+    public List<Map<String, Object>> getUserTransactionStatsByType(User user, LocalDateTime startDate,
+            LocalDateTime endDate) {
+        List<Object[]> results = transactionRepository.getUserTransactionStatsByType(user, startDate, endDate);
+        List<Map<String, Object>> data = new ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("type", row[0]);
+            item.put("amount", row[1]);
+            item.put("count", row[2]);
+            data.add(item);
+        }
+        return data;
     }
 }
