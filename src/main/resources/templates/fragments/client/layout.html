@@ -17,11 +17,11 @@
 
         <nav class="main-nav">
           <a th:href="@{/}" class="nav-link">Trang chủ</a>
-          <a th:href="@{/upload}" class="nav-link">Tải lên tài liệu</a>
+          <!-- <a th:href="@{/upload}" class="nav-link">Tải lên tài liệu</a> -->
           <a th:href="@{/categories}" class="nav-link">Danh mục</a>
           <a th:href="@{/search?sort=newest}" class="nav-link">Tài liệu mới</a>
           <!-- <a th:href="@{/search?filter=premium}" class="nav-link">Cao cấp</a> -->
-          <a th:href="@{/about}" class="nav-link">Giới thiệu</a>
+          <!-- <a th:href="@{/about}" class="nav-link">Giới thiệu</a> -->
         </nav>
 
         <div class="header-actions">
@@ -67,11 +67,7 @@
                   <i class="fas fa-heart"></i> Yêu thích
                 </a>
                 <div class="dropdown-divider"></div>
-                <form
-                  th:action="@{/logout}"
-                  method="post"
-                  class="dropdown-form"
-                >
+                <form th:action="@{/logout}" method="get" class="dropdown-form">
                   <button type="submit" class="dropdown-item logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
                   </button>

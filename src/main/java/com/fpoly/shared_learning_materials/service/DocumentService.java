@@ -657,14 +657,17 @@ public class DocumentService {
 
     // Helper method to set additional fields
     private void setAdditionalFields(DocumentDTO dto) {
-        // Get author name from DocumentOwner relationship
+        // Get author name and avatar from DocumentOwner relationship
         List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(dto.getId());
         if (!owners.isEmpty()) {
-            dto.setAuthorName(
-                    owners.get(0).getUser().getFullName() != null ? owners.get(0).getUser().getFullName()
-                            : owners.get(0).getUser().getUsername());
+            User author = owners.get(0).getUser();
+            // Use username instead of fullName for featured documents
+            dto.setAuthorName(author.getUsername());
+            // Set author avatar
+            dto.setAuthorAvatar(author.getAvatarUrl());
         } else {
             dto.setAuthorName("Admin"); // Fallback
+            dto.setAuthorAvatar(null); // No avatar for admin
         }
 
         // Get category names
@@ -1931,23 +1934,23 @@ public class DocumentService {
             if (file.isEmpty()) {
                 throw new IllegalArgumentException("File backup trống!");
             }
-            
+
             // Read file content
             String content = new String(file.getBytes());
-            
+
             // Parse JSON
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-            
-            com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>> typeRef = 
-                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {};
+
+            com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>> typeRef = new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {
+            };
             Map<String, Object> backupData = mapper.readValue(content, typeRef);
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> documents = (List<Map<String, Object>>) backupData.get("documents");
-            
+
             int importedCount = 0;
             int skippedCount = 0;
-            
+
             for (Map<String, Object> docData : documents) {
                 try {
                     // Check if document already exists by slug
@@ -1956,13 +1959,13 @@ public class DocumentService {
                         skippedCount++;
                         continue; // Skip existing documents
                     }
-                    
+
                     // Create new document (simplified import - without file upload)
                     Document document = new Document();
                     document.setTitle((String) docData.get("title"));
                     document.setDescription((String) docData.get("description"));
                     document.setSlug(slug);
-                    
+
                     // Handle price
                     Object priceObj = docData.get("price");
                     if (priceObj != null) {
@@ -1970,27 +1973,28 @@ public class DocumentService {
                             document.setPrice(BigDecimal.valueOf(((Number) priceObj).doubleValue()));
                         }
                     }
-                    
+
                     document.setStatus((String) docData.get("status"));
                     document.setVisibility((String) docData.get("visibility"));
                     document.setViewsCount(0L); // Reset counters for imported docs
                     document.setDownloadsCount(0L);
-                    
+
                     // Save document
                     Document savedDoc = documentRepository.save(document);
                     importedCount++;
-                    
+
                     // Note: Categories, tags, and file associations would need more complex logic
                     // This is a simplified import focusing on basic document data
-                    
+
                 } catch (Exception e) {
                     System.err.println("Error importing document: " + docData.get("title") + " - " + e.getMessage());
                     skippedCount++;
                 }
             }
-            
-            return String.format("Import hoàn thành: %d tài liệu được import, %d bị bỏ qua",  importedCount, skippedCount);
-            
+
+            return String.format("Import hoàn thành: %d tài liệu được import, %d bị bỏ qua", importedCount,
+                    skippedCount);
+
         } catch (Exception e) {
             System.err.println("Error importing documents: " + e.getMessage());
             e.printStackTrace();
@@ -1998,13 +2002,13 @@ public class DocumentService {
         }
     }
 
- public String exportAllDocuments() {
+    public String exportAllDocuments() {
         try {
             List<Document> allDocuments = documentRepository.findAll();
-            
+
             // Convert to a simplified format for export
             List<Map<String, Object>> exportData = new ArrayList<>();
-            
+
             for (Document doc : allDocuments) {
                 Map<String, Object> docData = new HashMap<>();
                 docData.put("id", doc.getId());
@@ -2018,7 +2022,7 @@ public class DocumentService {
                 docData.put("downloadsCount", doc.getDownloadsCount());
                 docData.put("createdAt", doc.getCreatedAt());
                 docData.put("updatedAt", doc.getUpdatedAt());
-                
+
                 // Add file info
                 if (doc.getFile() != null) {
                     Map<String, Object> fileData = new HashMap<>();
@@ -2028,108 +2032,110 @@ public class DocumentService {
                     fileData.put("mimeType", doc.getFile().getMimeType());
                     docData.put("file", fileData);
                 }
-                
+
                 // Add categories
                 List<DocumentCategory> categories = documentCategoryRepository.findByDocumentId(doc.getId());
                 List<String> categoryNames = categories.stream()
-                    .map(dc -> dc.getCategory().getName())
-                    .collect(Collectors.toList());
+                        .map(dc -> dc.getCategory().getName())
+                        .collect(Collectors.toList());
                 docData.put("categories", categoryNames);
-                
+
                 // Add tags
                 List<DocumentTag> tags = documentTagRepository.findByDocumentId(doc.getId());
                 List<String> tagNames = tags.stream()
-                    .map(dt -> dt.getTag().getName())
-                    .collect(Collectors.toList());
+                        .map(dt -> dt.getTag().getName())
+                        .collect(Collectors.toList());
                 docData.put("tags", tagNames);
-                
+
                 // Add author
                 List<DocumentOwner> owners = documentOwnerRepository.findByDocumentId(doc.getId());
                 if (!owners.isEmpty()) {
                     docData.put("authorName", owners.get(0).getUser().getFullName());
                     docData.put("authorUsername", owners.get(0).getUser().getUsername());
                 }
-                
+
                 exportData.add(docData);
             }
-            
+
             // Convert to JSON string
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-            
+
             Map<String, Object> result = new HashMap<>();
             result.put("exportDate", LocalDateTime.now());
             result.put("totalDocuments", exportData.size());
             result.put("documents", exportData);
-            
+
             return mapper.writeValueAsString(result);
-            
+
         } catch (Exception e) {
             System.err.println("Error exporting documents: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi export tài liệu: " + e.getMessage());
         }
     }
+
     @Transactional
-  public DocumentDTO createDocument(DocumentDTO documentDTO, byte[] fileContent, String fileName, List<Long> categoryIds,
-          List<String> tagNames, Long userId) {
-      System.out.println("=== CREATE DOCUMENT SERVICE ===");
-      System.out.println("Creating document: " + documentDTO.getTitle());
+    public DocumentDTO createDocument(DocumentDTO documentDTO, byte[] fileContent, String fileName,
+            List<Long> categoryIds,
+            List<String> tagNames, Long userId) {
+        System.out.println("=== CREATE DOCUMENT SERVICE ===");
+        System.out.println("Creating document: " + documentDTO.getTitle());
 
-      try {
-          // Create Document entity
-          Document document = new Document();
-          document.setTitle(documentDTO.getTitle());
-          document.setDescription(documentDTO.getDescription());
-          if (documentDTO.getPrice() == null) {
-              document.setPrice(BigDecimal.ZERO);
-          } else {
-              document.setPrice(documentDTO.getPrice());
-          }
-          document.setStatus(documentDTO.getStatus() != null ? documentDTO.getStatus() : "draft");
-          document.setVisibility(documentDTO.getVisibility() != null ? documentDTO.getVisibility() : "public");
-          document.setViewsCount(0L);
-          document.setDownloadsCount(0L);
+        try {
+            // Create Document entity
+            Document document = new Document();
+            document.setTitle(documentDTO.getTitle());
+            document.setDescription(documentDTO.getDescription());
+            if (documentDTO.getPrice() == null) {
+                document.setPrice(BigDecimal.ZERO);
+            } else {
+                document.setPrice(documentDTO.getPrice());
+            }
+            document.setStatus(documentDTO.getStatus() != null ? documentDTO.getStatus() : "draft");
+            document.setVisibility(documentDTO.getVisibility() != null ? documentDTO.getVisibility() : "public");
+            document.setViewsCount(0L);
+            document.setDownloadsCount(0L);
 
-          // Generate unique slug
-          String baseSlug = generateSlug(documentDTO.getTitle());
-          String uniqueSlug = ensureUniqueSlug(baseSlug);
-          document.setSlug(uniqueSlug);
+            // Generate unique slug
+            String baseSlug = generateSlug(documentDTO.getTitle());
+            String uniqueSlug = ensureUniqueSlug(baseSlug);
+            document.setSlug(uniqueSlug);
 
-          // Handle file upload if provided
-          if (fileContent != null && fileContent.length > 0) {
-              System.out.println("File uploaded: " + fileName);
-              System.out.println("File size: " + fileContent.length);
+            // Handle file upload if provided
+            if (fileContent != null && fileContent.length > 0) {
+                System.out.println("File uploaded: " + fileName);
+                System.out.println("File size: " + fileContent.length);
 
-              // Create File entity
-              File fileEntity = new File();
-              fileEntity.setFileName(fileName);
-              fileEntity.setFileSize((long) fileContent.length);
-              fileEntity.setFileType(getFileType(fileName));
-              fileEntity.setMimeType("application/octet-stream"); // Có thể xác định MIME type chính xác hơn
-              String fileNameWithTimestamp = System.currentTimeMillis() + "_" + fileName;
-              String filePath = "uploads/documents/" + fileNameWithTimestamp;
-              fileEntity.setFilePath(filePath);
+                // Create File entity
+                File fileEntity = new File();
+                fileEntity.setFileName(fileName);
+                fileEntity.setFileSize((long) fileContent.length);
+                fileEntity.setFileType(getFileType(fileName));
+                fileEntity.setMimeType("application/octet-stream"); // Có thể xác định MIME type chính xác hơn
+                String fileNameWithTimestamp = System.currentTimeMillis() + "_" + fileName;
+                String filePath = "uploads/documents/" + fileNameWithTimestamp;
+                fileEntity.setFilePath(filePath);
 
-              // Save file entity first
-              File savedFile = fileRepository.save(fileEntity);
-              System.out.println("File entity saved with ID: " + savedFile.getId());
+                // Save file entity first
+                File savedFile = fileRepository.save(fileEntity);
+                System.out.println("File entity saved with ID: " + savedFile.getId());
 
-              // Save actual file to disk
-              java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/uploads/documents");
-              if (!java.nio.file.Files.exists(uploadPath)) {
-                  java.nio.file.Files.createDirectories(uploadPath);
-                  System.out.println("Created directory: " + uploadPath.toAbsolutePath());
-              }
-              java.nio.file.Path targetPath = uploadPath.resolve(fileNameWithTimestamp);
-              java.nio.file.Files.write(targetPath, fileContent);
-              System.out.println("File saved successfully to: " + targetPath.toAbsolutePath());
-              document.setFile(savedFile);
-          }
+                // Save actual file to disk
+                java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/uploads/documents");
+                if (!java.nio.file.Files.exists(uploadPath)) {
+                    java.nio.file.Files.createDirectories(uploadPath);
+                    System.out.println("Created directory: " + uploadPath.toAbsolutePath());
+                }
+                java.nio.file.Path targetPath = uploadPath.resolve(fileNameWithTimestamp);
+                java.nio.file.Files.write(targetPath, fileContent);
+                System.out.println("File saved successfully to: " + targetPath.toAbsolutePath());
+                document.setFile(savedFile);
+            }
 
-          // Save document
-          Document savedDocument = documentRepository.save(document);
-          System.out.println("Document saved with ID: " + savedDocument.getId());
+            // Save document
+            Document savedDocument = documentRepository.save(document);
+            System.out.println("Document saved with ID: " + savedDocument.getId());
 
             // Create DocumentOwner relationship
             if (userId != null) {
@@ -2194,20 +2200,19 @@ public class DocumentService {
                 System.out.println("Tags assigned: " + tagNames.size());
             }
 
+            // Convert to DTO and return
+            DocumentDTO result = convertToDTO(savedDocument);
+            result.setCategoryIds(categoryIds);
+            result.setTagNames(tagNames);
+            result.setUserId(userId);
+            System.out.println("Document created successfully: " + result.getId());
+            return result;
 
-          // Convert to DTO and return
-          DocumentDTO result = convertToDTO(savedDocument);
-          result.setCategoryIds(categoryIds);
-          result.setTagNames(tagNames);
-          result.setUserId(userId);
-          System.out.println("Document created successfully: " + result.getId());
-          return result;
-
-      } catch (Exception e) {
-          System.err.println("Error creating document: " + e.getMessage());
-          e.printStackTrace();
-          throw new RuntimeException("Lỗi khi tạo tài liệu: " + e.getMessage(), e);
-      }
-  }
+        } catch (Exception e) {
+            System.err.println("Error creating document: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tạo tài liệu: " + e.getMessage(), e);
+        }
+    }
 
 }

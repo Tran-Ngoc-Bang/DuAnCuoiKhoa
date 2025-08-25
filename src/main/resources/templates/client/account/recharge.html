@@ -1171,38 +1171,38 @@
                   <i class="fas fa-coins"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">250</div>
+                  <div class="stat-value" th:text="${#numbers.formatDecimal(statCoinBalance != null ? statCoinBalance : 0, 0, 'COMMA', 0, 'POINT')}">250</div>
                   <div class="stat-label">Xu hiện tại</div>
                 </div>
               </div>
     
               <div class="stat-card">
                 <div class="stat-icon success">
-                  <i class="fas fa-file-pdf"></i>
+                  <i class="fas fa-arrow-up"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">15</div>
-                  <div class="stat-label">Tài liệu đã tải</div>
+                  <div class="stat-value" th:text="${#numbers.formatInteger(statTotalCoinsPurchased != null ? statTotalCoinsPurchased : 0, 0)}">15</div>
+                  <div class="stat-label">Tổng xu đã nạp</div>
                 </div>
               </div>
     
               <div class="stat-card">
                 <div class="stat-icon warning">
-                  <i class="fas fa-star"></i>
+                  <i class="fas fa-receipt"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">Premium</div>
-                  <div class="stat-label">Gói tài khoản</div>
+                  <div class="stat-value" th:text="${#numbers.formatDecimal(statTotalSpent != null ? statTotalSpent : 0, 0, 'COMMA', 0, 'POINT')} + 'đ'">Premium</div>
+                  <div class="stat-label">Tổng đã chi</div>
                 </div>
               </div>
     
               <div class="stat-card">
                 <div class="stat-icon danger">
-                  <i class="fas fa-calendar-check"></i>
+                  <i class="fas fa-clock"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value">10/5/2025</div>
-                  <div class="stat-label">Ngày hết hạn</div>
+                  <div class="stat-value" th:text="${statLastLoginAtText}">10/5/2025</div>
+                  <div class="stat-label">Lần đăng nhập gần nhất</div>
                 </div>
               </div>
             </div>

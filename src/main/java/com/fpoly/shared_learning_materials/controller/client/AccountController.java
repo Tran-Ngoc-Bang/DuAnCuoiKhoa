@@ -7,6 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fpoly.shared_learning_materials.service.CoinPackageService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.repository.TransactionDetailRepository;
+import com.fpoly.shared_learning_materials.config.CustomUserDetailsService;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Controller for user account pages
@@ -18,6 +24,12 @@ public class AccountController {
 
     @Autowired
     private CoinPackageService coinPackageService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TransactionDetailRepository transactionDetailRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -50,9 +62,39 @@ public class AccountController {
     }
 
     @GetMapping("/recharge")
-    public String recharge(Model model) {
+    public String recharge(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         model.addAttribute("pageTitle", "Nạp tiền");
         model.addAttribute("coinPackages", coinPackageService.getActivePackagesForClient());
+
+        // Stats for current user
+        Long userId = null;
+        if (userDetails instanceof CustomUserDetailsService.CustomUserPrincipal) {
+            userId = ((CustomUserDetailsService.CustomUserPrincipal) userDetails).getUserId();
+        }
+        if (userId != null) {
+            final Long currentUserId = userId;
+            var userOpt = userRepository.findByIdAndDeletedAtIsNull(currentUserId);
+            if (userOpt.isPresent()) {
+                var u = userOpt.get();
+                java.math.BigDecimal coinBalance = u.getCoinBalance() != null ? u.getCoinBalance()
+                        : java.math.BigDecimal.ZERO;
+                java.math.BigDecimal totalSpent = u.getTotalSpent() != null ? u.getTotalSpent()
+                        : java.math.BigDecimal.ZERO;
+                java.time.LocalDateTime lastLoginAt = u.getLastLoginAt();
+                Long totalCoinsPurchased = transactionDetailRepository.sumTotalCoinsPurchasedByUser(currentUserId);
+                if (totalCoinsPurchased == null)
+                    totalCoinsPurchased = 0L;
+
+                model.addAttribute("statCoinBalance", coinBalance);
+                model.addAttribute("statTotalCoinsPurchased", totalCoinsPurchased);
+                model.addAttribute("statTotalSpent", totalSpent);
+                model.addAttribute("statLastLoginAt", lastLoginAt);
+                String lastLoginAtText = lastLoginAt != null
+                        ? lastLoginAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                        : "Chưa đăng nhập";
+                model.addAttribute("statLastLoginAtText", lastLoginAtText);
+            }
+        }
         return "client/account/recharge";
     }
 
