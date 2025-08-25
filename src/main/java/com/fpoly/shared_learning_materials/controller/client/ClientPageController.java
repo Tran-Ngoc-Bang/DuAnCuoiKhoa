@@ -77,7 +77,7 @@ public class ClientPageController {
     @Autowired
 
     private DocumentCategoryRepository documentCategoryRepository;
-
+    @Autowired
     private DocumentOwnerRepository documentOwnerRepository;
 
     @Autowired
