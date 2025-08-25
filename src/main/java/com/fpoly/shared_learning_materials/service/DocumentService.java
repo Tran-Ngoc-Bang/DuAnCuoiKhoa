@@ -1336,9 +1336,12 @@ public class DocumentService {
 
             // Update categories
             if (categoryIds != null) {
-                // Remove existing categories
-                documentCategoryRepository.deleteByDocumentId(id);
-
+                // Remove existing categories manually to avoid transaction conflict
+                List<DocumentCategory> existingCategories = documentCategoryRepository.findByDocumentId(id);
+                for (DocumentCategory existingCategory : existingCategories) {
+                    documentCategoryRepository.delete(existingCategory);
+                }
+                
                 // Add new categories
                 for (Long categoryId : categoryIds) {
                     Category category = categoryRepository.findById(categoryId).orElse(null);
@@ -1358,8 +1361,11 @@ public class DocumentService {
 
             // Update tags
             if (tagNames != null) {
-                // Remove existing tags
-                documentTagRepository.deleteByDocumentId(id);
+                // Remove existing tags manually to avoid transaction conflict
+                List<DocumentTag> existingTags = documentTagRepository.findByDocumentId(id);
+                for (DocumentTag existingTag : existingTags) {
+                    documentTagRepository.delete(existingTag);
+                }
 
                 // Add new tags
                 for (String tagName : tagNames) {

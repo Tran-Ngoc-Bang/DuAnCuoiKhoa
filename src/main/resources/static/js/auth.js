@@ -173,9 +173,6 @@ function initRegisterForm() {
   const registerForm = document.getElementById("registerForm");
 
   registerForm.addEventListener("submit", function (e) {
-    // Don't prevent default - let form submit to backend
-    // e.preventDefault();
-
     const firstName = document.getElementById("registerFirstName")
       ? document.getElementById("registerFirstName").value.trim()
       : "";
@@ -189,38 +186,52 @@ function initRegisterForm() {
     ).value;
     const termsAgreement = document.getElementById("termsAgreement").checked;
 
-    // Validate inputs
+    // Validate inputs - prevent form submission if validation fails
     if (!firstName || !lastName) {
+      e.preventDefault();
       showAuthError("Vui lòng nhập đầy đủ họ và tên");
       return;
     }
 
     if (!email) {
+      e.preventDefault();
       showAuthError("Vui lòng nhập địa chỉ email");
       return;
     }
 
     if (!isValidEmail(email)) {
+      e.preventDefault();
       showAuthError("Vui lòng nhập địa chỉ email hợp lệ");
       return;
     }
 
     if (!password) {
+      e.preventDefault();
       showAuthError("Vui lòng tạo mật khẩu");
       return;
     }
 
     if (password.length < 8) {
+      e.preventDefault();
       showAuthError("Mật khẩu phải có ít nhất 8 ký tự");
+      return;
+    }
+    
+    // Validate password strength - require all criteria
+    if (!isPasswordStrong(password)) {
+      e.preventDefault();
+      showAuthError("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
       return;
     }
 
     if (password !== confirmPassword) {
+      e.preventDefault();
       showAuthError("Mật khẩu xác nhận không khớp");
       return;
     }
 
     if (!termsAgreement) {
+      e.preventDefault();
       showAuthError("Bạn phải đồng ý với điều khoản sử dụng");
       return;
     }
@@ -232,29 +243,7 @@ function initRegisterForm() {
       '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
     submitBtn.disabled = true;
 
-    // Simulate registration (in production this would be an AJAX request)
-    setTimeout(function () {
-      // Check if email already exists
-      if (email === "demo@example.com") {
-        showAuthError("Email này đã được sử dụng. Vui lòng chọn email khác.");
-        submitBtn.innerHTML = originalBtnText;
-        submitBtn.disabled = false;
-        return;
-      }
-
-      // Simulate successful registration
-      showAuthSuccess(
-        "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản."
-      );
-
-      // Reset form
-      registerForm.reset();
-
-      // Redirect to login page after successful registration
-      setTimeout(function () {
-        window.location.href = "/login";
-      }, 2000);
-    }, 1500);
+    // Let form submit to backend - backend will handle redirect
   });
 }
 
@@ -281,6 +270,19 @@ function initPasswordToggle() {
   });
 }
 
+// Check if password meets all strength requirements
+function isPasswordStrong(password) {
+  if (!password || password.length < 8) return false;
+  
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+  
+  // Require ALL criteria for strong password
+  return hasLowercase && hasUppercase && hasNumber && hasSpecial;
+}
+
 // Password strength indicator
 function initPasswordStrength() {
   const passwordInput = document.getElementById("registerPassword");
@@ -290,50 +292,48 @@ function initPasswordStrength() {
   passwordInput.addEventListener("input", function () {
     const password = this.value;
     let strength = 0;
+    let strengthLabel = 'Yếu';
+    let strengthColor = '#ff4757';
 
     // Remove all classes from strength bar
     strengthBar.className = "strength-bar";
 
     if (password.length === 0) {
       strengthBar.style.width = "0%";
-      strengthText.textContent = "Yếu";
+      strengthBar.style.backgroundColor = strengthColor;
+      strengthText.textContent = strengthLabel;
       return;
     }
 
-    // Increase strength score based on password characteristics
-    if (password.length >= 8) strength += 1;
-    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 1;
-    if (password.match(/\d+/)) strength += 1;
-    if (password.match(/[^a-zA-Z0-9]/)) strength += 1;
+    // Check password criteria
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
 
-    // Update UI based on strength
-    switch (strength) {
-      case 0:
-        strengthBar.classList.add("weak");
-        strengthBar.style.width = "10%";
-        strengthText.textContent = "Rất yếu";
-        break;
-      case 1:
-        strengthBar.classList.add("weak");
-        strengthBar.style.width = "25%";
-        strengthText.textContent = "Yếu";
-        break;
-      case 2:
-        strengthBar.classList.add("medium");
-        strengthBar.style.width = "50%";
-        strengthText.textContent = "Trung bình";
-        break;
-      case 3:
-        strengthBar.classList.add("strong");
-        strengthBar.style.width = "75%";
-        strengthText.textContent = "Mạnh";
-        break;
-      case 4:
-        strengthBar.classList.add("very-strong");
-        strengthBar.style.width = "100%";
-        strengthText.textContent = "Rất mạnh";
-        break;
+    // Determine strength level
+    if (strength >= 5) {
+      strengthLabel = 'Rất mạnh';
+      strengthColor = '#2ed573';
+    } else if (strength >= 4) {
+      strengthLabel = 'Mạnh';
+      strengthColor = '#5f27cd';
+    } else if (strength >= 3) {
+      strengthLabel = 'Trung bình';
+      strengthColor = '#ffa502';
+    } else if (strength >= 2) {
+      strengthLabel = 'Yếu';
+      strengthColor = '#ff6348';
+    } else {
+      strengthLabel = 'Rất yếu';
+      strengthColor = '#ff4757';
     }
+
+    // Update UI
+    strengthBar.style.width = (strength * 20) + '%';
+    strengthBar.style.backgroundColor = strengthColor;
+    strengthText.textContent = strengthLabel;
   });
 }
 

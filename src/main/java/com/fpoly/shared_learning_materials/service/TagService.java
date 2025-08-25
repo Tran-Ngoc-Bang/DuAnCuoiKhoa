@@ -287,6 +287,15 @@ public class TagService {
     public List<Tag> searchTags(String keyword) {
         return tagRepository.findByNameContainingIgnoreCase(keyword);
     }
+    
+    public List<TagDTO> searchTagsByName(String keyword) {
+        List<Tag> tags = tagRepository.findByNameContainingIgnoreCase(keyword);
+        return tags.stream()
+                .filter(tag -> tag.getDeletedAt() == null) // Only active tags
+                .map(this::convertToDTO)
+                .toList();
+    }
+    
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
     }

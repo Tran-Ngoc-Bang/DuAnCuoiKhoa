@@ -17,23 +17,271 @@
     <link rel="stylesheet" th:href="@{/css/client-header.css}">
     <link rel="stylesheet" th:href="@{/css/client-footer.css}">
     <style>
-     
-    .tag-suggestion {
-        padding: 5px;
+    /* Tag Selector Styles */
+    .selected-tags-container {
+        margin-bottom: 15px;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        background: #f8f9fa;
+        min-height: 60px;
+    }
+    
+    .selected-tags-header {
+        padding: 10px 15px;
+        border-bottom: 1px solid #e1e5e9;
+        background: #fff;
+        border-radius: 8px 8px 0 0;
+        font-size: 14px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .selected-tags {
+        padding: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-height: 40px;
+        align-items: flex-start;
+    }
+    
+    .selected-tag {
+        display: inline-flex;
+        align-items: center;
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid #bbdefb;
+        transition: all 0.2s ease;
+    }
+    
+    .selected-tag:hover {
+        background: #bbdefb;
+        transform: translateY(-1px);
+    }
+    
+    .selected-tag .remove-tag {
+        margin-left: 8px;
         cursor: pointer;
+        color: #1976d2;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 1;
     }
-    .tag-suggestion:hover {
-        background-color: #f0f0f0;
+    
+    .selected-tag .remove-tag:hover {
+        color: #d32f2f;
     }
-    .tag-badge {
-        display: inline-block;
+    
+    .tag-search-container {
+        position: relative;
+        margin-bottom: 10px;
+    }
+    
+    .tag-search-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .tag-search-input {
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: #fff;
+    }
+    
+    .tag-search-input:focus {
+        outline: none;
+        border-color: #4285f4;
+        box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+    }
+    
+    .tag-dropdown-icon {
+        position: absolute;
+        right: 16px;
+        color: #6c757d;
+        pointer-events: none;
+        transition: transform 0.2s ease;
+    }
+    
+    .tag-search-input:focus + .tag-dropdown-icon {
+        transform: rotate(180deg);
+    }
+    
+    .tag-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+    }
+    
+    .tag-dropdown.show {
+        display: block;
+    }
+    
+    .tag-results {
+        padding: 8px 0;
+    }
+    
+    .tag-results-header {
+        padding: 12px 16px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e1e5e9;
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .tag-result-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background-color 0.2s ease;
+        border-bottom: 1px solid #f1f3f4;
+    }
+    
+    .tag-result-item:last-child {
+        border-bottom: none;
+    }
+    
+    .tag-result-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .tag-result-item.selected {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .tag-result-name {
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .tag-result-count {
+        font-size: 12px;
+        color: #6c757d;
+        background: #f1f3f4;
         padding: 2px 8px;
-        background-color: #e0e0e0;
         border-radius: 12px;
-        cursor: pointer;
     }
-    .tag-badge:hover {
-        background-color: #d0d0d0;
+    
+    .create-new-tag {
+        background-color: #f8f9fa;
+        border-top: 1px solid #e1e5e9;
+        color: #1976d2;
+        font-weight: 500;
+    }
+    
+    .create-new-tag:hover {
+        background-color: #e3f2fd;
+    }
+    
+    .create-new-tag .fas {
+        margin-right: 8px;
+        color: #4caf50;
+    }
+    
+    .popular-tags {
+        margin-top: 15px;
+    }
+    
+    .popular-tags-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    
+    .popular-tag-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #f1f3f4;
+        color: #5f6368;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #e1e5e9;
+    }
+    
+    .popular-tag-badge:hover {
+        background: #e8f0fe;
+        color: #1976d2;
+        border-color: #4285f4;
+        transform: translateY(-1px);
+    }
+    
+    .no-results {
+        padding: 20px;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .selected-tags {
+            padding: 10px;
+        }
+        
+        .selected-tag {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+        
+        .tag-search-input {
+            padding: 10px 35px 10px 12px;
+            font-size: 14px;
+        }
+        
+        .popular-tags-list {
+            gap: 6px;
+        }
+        
+        .popular-tag-badge {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+    }
+    
+    /* Animation for tag addition */
+    @keyframes tagAdded {
+        0% {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .selected-tag.new-tag {
+        animation: tagAdded 0.3s ease-out;
     }
     .input-group {
     position: relative;
@@ -46,14 +294,16 @@
 
 .input-group .fas {
     position: absolute;
-    left: 10px;
+    left: 15px;
     color: #555;
-    font-size: 1.2em;
+    font-size: 1.1em;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .input-group .form-input {
     width: 100%;
-    padding: 10px 10px 10px 40px; /* Padding trái để tránh chồng lấp icon */
+    padding: 12px 15px 12px 45px; /* Tăng padding trái để tránh chồng lấp icon */
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1em;
@@ -81,6 +331,60 @@
     color: #dc3545;
     font-size: 0.9em;
     margin-top: 5px;
+}
+
+/* Price Input Specific Styles */
+.price-input .input-group {
+    max-width: 350px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.price-input .input-group .form-input {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    padding: 20px 1px;
+    height: 70px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.price-input .input-group .form-input:focus {
+    border-color: #f39c12;
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+    outline: none;
+}
+
+.price-input .input-group .fas.fa-coins {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #f39c12;
+    font-size: 1.5em;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.price-input label {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+    display: block;
+    text-align: center;
+}
+
+#priceError {
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: center;
 }
 </style>
        
@@ -166,7 +470,7 @@
                 
                 <div class="upload-container">
                     <div class="upload-steps">
-                        <div class="step active"  th:classappend="${currentStep == 1} ? 'active' : ''" data-step="1">
+                        <div class="step"  th:classappend="${currentStep == 1} ? 'active' : (${currentStep > 1} ? 'completed' : '')" data-step="1">
                             <div class="step-number">1</div>
                             <div class="step-label">Tải lên tài liệu</div>
                         </div>
@@ -176,7 +480,7 @@
                         </div>
                         <div class="step" th:classappend="${currentStep == 3} ? 'active' : (${currentStep > 3} ? 'completed' : '')" data-step="3">
                             <div class="step-number">3</div>
-                            <div class="step-label">Cài đặt và xem trước</div>
+                            <div class="step-label">Giá của tài liệu</div>
                         </div>
                         <div class="step" th:classappend="${currentStep == 4} ? 'active' : ''" data-step="4">
                             <div class="step-number">4</div>
@@ -310,24 +614,51 @@
             </div>
             <!-- Hiển thị tag phổ biến và tìm kiếm tag -->
            <div class="form-group">
-                <label for="docTags">Từ khóa</label>
-                <input type="text" id="docTags" class="form-input" placeholder="Nhập để tìm hoặc tạo từ khóa, ngăn cách bởi dấu phẩy" oninput="searchTags()">
-                <div class="form-hint">Thêm từ khóa giúp tài liệu của bạn dễ dàng được tìm thấy hơn</div>
-                <div id="tagSuggestions" class="tag-suggestions" style="display: none; position: absolute; background: white; border: 1px solid #ccc; padding: 5px; z-index: 1000;"></div>
-                <div id="popularTags" class="popular-tags" style="margin-top: 10px;">
-                    <strong>Tag phổ biến:</strong>
-                    <div th:if="${popularTags != null and not #lists.isEmpty(popularTags)}" th:each="tag : ${popularTags}" style="display: inline-block; margin-right: 5px;">
-                        <span class="tag-badge" th:attr="data-tag=${tag.name}" onclick="addTag(this.getAttribute('data-tag'))">#<span th:text="${tag.name}"></span></span>
+                <label for="docTags">Chọn từ khóa tags (tối đa 20)</label>
+                <!-- Tag Search Input -->
+                <div class="tag-search-container">
+                    <div class="tag-search-input-wrapper">
+                        <input type="text" id="tagSearchInput" class="tag-search-input" placeholder="Tìm kiếm từ khóa..." autocomplete="off">
+                        <i class="fas fa-chevron-down tag-dropdown-icon"></i>
                     </div>
-                    <div th:unless="${popularTags != null and not #lists.isEmpty(popularTags)}" style="color: #888;">Không có tag phổ biến.</div>
+                    
+                    <!-- Dropdown Results -->
+                    <div id="tagDropdown" class="tag-dropdown">
+                        <div id="tagResults" class="tag-results"></div>
+                    </div>
                 </div>
-                <input type="hidden" id="tagNames" name="tagNames" value="">
+                <!-- Selected Tags Display -->
+                <div id="selectedTagsContainer" class="selected-tags-container">
+                    <div class="selected-tags-header">
+                        <span class="selected-count">Danh sách từ khóa (<span id="tagCount">0</span>/20)</span>
+                    </div>
+                    <div id="selectedTags" class="selected-tags"></div>
+                </div>
+                
+                
+                
+                <div class="form-hint">Thêm từ khóa giúp tài liệu của bạn dễ dàng được tìm thấy hơn</div>
+                
+                <!-- Popular Tags 
+                <div id="popularTags" class="popular-tags" style="margin-top: 15px;">
+                    <strong>Từ khóa phổ biến:</strong>
+                    <div class="popular-tags-list">
+                        <div th:if="${popularTags != null and not #lists.isEmpty(popularTags)}" th:each="tag : ${popularTags}" class="popular-tag-item">
+                            <span class="popular-tag-badge" th:attr="data-tag=${tag.name}" onclick="addTagFromPopular(this.getAttribute('data-tag'))">
+                                <span th:text="${tag.name}"></span>
+                            </span>
+                        </div>
+                        <div th:unless="${popularTags != null and not #lists.isEmpty(popularTags)}" style="color: #888;">Không có từ khóa phổ biến.</div>
+                    </div>
+                </div>-->
+                
+                <input type="hidden" id="tagNames" name="tags" value="">
             </div>
         </div>
         
         <div class="step-actions">
             <button type="button" class="btn btn-outline prev-step" data-prev="1">Quay lại</button>
-            <button type="submit" class="btn btn-primary next-step" id="step2Next">Tiếp theo</button>
+            <button type="submit" class="btn btn-primary next-step" id="step2Next" onclick="updateHiddenInput()">Tiếp theo</button>
         </div>
     </form>
 </div>
@@ -359,7 +690,7 @@
                                     <div class="price-input">
                                         <label for="docPrice">Giá tài liệu (xu)</label>
                                         <div class="input-group">
-                                            <i class="fas fa-coins"></i>
+                                         
                                             <input type="number" id="docPrice" name="price" class="form-input" placeholder="Nhập số xu" min="10" max="1000" value="50" oninput="validatePrice(this)">
                                             <div id="priceError" class="error-message"></div>
                                         </div>
@@ -485,7 +816,7 @@
                                    </form>
                             </div>
                             
-                            <div class="completion-stats">
+                          <!--  <div class="completion-stats">
                                 <div class="stat-card">
                                     <div class="stat-value" th:text="${#numbers.formatInteger(numDocuments, 0, 'DEFAULT')}">5</div>
                                     <div class="stat-label">Tài liệu đã tải</div>
@@ -498,7 +829,7 @@
                                     <div class="stat-value" th:text="${#numbers.formatInteger(numPoints, 0, 'DEFAULT')}">2,500</div>
                                     <div class="stat-label">Xu đã kiếm được</div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -1008,54 +1339,272 @@
         breadcrumb.style.display = 'block';
     }
 
-    // Logic tìm kiếm và tạo tag
-    function searchTags() {
-        const input = document.getElementById('docTags');
-        const suggestions = document.getElementById('tagSuggestions');
-        const query = input.value.trim();
+    // Tag Selector Logic
+    let selectedTags = [];
+    let searchTimeout;
+    const MAX_TAGS = 20;
 
-        if (query.length < 1) {
-            suggestions.style.display = 'none';
-            return;
-        }
+    function initTagSelector() {
+        const searchInput = document.getElementById('tagSearchInput');
+        const dropdown = document.getElementById('tagDropdown');
+        
+        // Search input events
+        searchInput.addEventListener('input', handleTagSearch);
+        searchInput.addEventListener('focus', function() {
+            if (searchInput.value.trim() === '') {
+                showAllTags(); // Hiển thị tất cả tags khi chưa nhập gì
+            } else {
+                showDropdown();
+            }
+        });
+        searchInput.addEventListener('keydown', handleKeyDown);
+        
+        // Click outside to close dropdown
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.tag-search-container')) {
+                hideDropdown();
+            }
+        });
+        
+        updateTagDisplay();
+    }
 
+    function handleTagSearch(e) {
+        const query = e.target.value.trim();
+        
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            if (query.length > 0) {
+                // Tìm kiếm trong TẤT CẢ tags
+                searchAllTags(query);
+            } else {
+                // Hiển thị tất cả tags khi chưa nhập gì
+                showAllTags();
+            }
+        }, 300);
+    }
+
+    function searchAllTags(query) {
         fetch(`/tags/search?query=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(data => {
-                suggestions.innerHTML = '';
-                data.forEach(tag => {
-                    const div = document.createElement('div');
-                    div.textContent = `#${tag.name}`;
-                    div.className = 'tag-suggestion';
-                    div.onclick = () => addTag(tag.name);
-                    suggestions.appendChild(div);
-                });
-                suggestions.style.display = data.length > 0 ? 'block' : 'none';
+                displaySearchResults(data, query);
             })
-            .catch(error => console.error('Error searching tags:', error));
+            .catch(error => {
+                console.error('Error searching tags:', error);
+                displaySearchResults([], query);
+            });
     }
 
-    function addTag(tagName) {
-        const input = document.getElementById('docTags');
-        const tagNamesInput = document.getElementById('tagNames');
-        let tags = input.value.split(',').map(t => t.trim()).filter(t => t);
-        if (!tags.includes(tagName)) {
-            tags.push(tagName);
-            input.value = tags.join(', ');
+    function displaySearchResults(tags, query) {
+        const resultsContainer = document.getElementById('tagResults');
+        resultsContainer.innerHTML = '';
+        
+        // Thêm header cho kết quả tìm kiếm
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'tag-results-header';
+        headerDiv.innerHTML = `<strong>Kết quả tìm kiếm cho "${query}"</strong>`;
+        resultsContainer.appendChild(headerDiv);
+        
+        // Filter out already selected tags
+        const availableTags = tags.filter(tag => !selectedTags.includes(tag.name));
+        
+        if (availableTags.length > 0) {
+            availableTags.forEach(tag => {
+                const item = createTagResultItem(tag.name, tag.documentCount || 0, false);
+                resultsContainer.appendChild(item);
+            });
         }
-        updateTagNamesInput();
-        document.getElementById('tagSuggestions').style.display = 'none';
+        
+        // Add "Create new tag" option if query doesn't match any existing tag
+        const exactMatch = tags.find(tag => tag.name.toLowerCase() === query.toLowerCase());
+        if (!exactMatch && query.length > 0 && !selectedTags.includes(query)) {
+            const createItem = createTagResultItem(query, 0, true);
+            resultsContainer.appendChild(createItem);
+        }
+        
+        if (availableTags.length === 0 && (!exactMatch || selectedTags.includes(query))) {
+            if (!exactMatch && query.length > 0 && !selectedTags.includes(query)) {
+                // Chỉ hiển thị option tạo mới
+            } else {
+                resultsContainer.innerHTML += '<div class="no-results">Không tìm thấy từ khóa phù hợp</div>';
+            }
+        }
+        
+        showDropdown();
     }
 
-    function updateTagNamesInput() {
-        const input = document.getElementById('docTags');
-        const tagNamesInput = document.getElementById('tagNames');
-        tagNamesInput.value = input.value.split(',').map(t => t.trim()).filter(t => t).join(',');
-        console.log("Updated tagNames:", tagNamesInput.value);
+    function createTagResultItem(tagName, count, isNew) {
+        const item = document.createElement('div');
+        item.className = `tag-result-item ${isNew ? 'create-new-tag' : ''}`;
+        
+        if (isNew) {
+            item.innerHTML = `
+                <span class="tag-result-name">
+                    <i class="fas fa-plus"></i>
+                    Thêm "${tagName}"
+                </span>
+            `;
+        } else {
+            item.innerHTML = `
+                <span class="tag-result-name">${tagName}</span>
+                <span class="tag-result-count">${count} tài liệu</span>
+            `;
+        }
+        
+        item.addEventListener('click', () => addTagToSelection(tagName));
+        return item;
     }
 
-    document.getElementById('docTags').addEventListener('change', updateTagNamesInput);
-    document.getElementById('step2Next').addEventListener('click', updateTagNamesInput);
+    function showAllTags() {
+        // Lấy tất cả tags từ server
+        fetch('/tags/all')
+            .then(response => response.json())
+            .then(data => {
+                displayAllTags(data);
+            })
+            .catch(error => {
+                console.error('Error loading all tags:', error);
+                // Fallback to popular tags if error
+                showPopularTagsFallback();
+            });
+    }
+
+    function displayAllTags(tags) {
+        const resultsContainer = document.getElementById('tagResults');
+        resultsContainer.innerHTML = '';
+        
+        // Thêm header cho tất cả tags
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'tag-results-header';
+        headerDiv.innerHTML = '<strong>Tất cả từ khóa</strong>';
+        resultsContainer.appendChild(headerDiv);
+        
+        if (tags && tags.length > 0) {
+            const availableTags = tags.filter(tag => !selectedTags.includes(tag.name));
+            
+            if (availableTags.length > 0) {
+                availableTags.forEach(tag => {
+                    const item = createTagResultItem(tag.name, tag.documentCount || 0, false);
+                    resultsContainer.appendChild(item);
+                });
+            } else {
+                resultsContainer.innerHTML += '<div class="no-results">Tất cả từ khóa đã được chọn</div>';
+            }
+        } else {
+            resultsContainer.innerHTML += '<div class="no-results">Chưa có từ khóa nào</div>';
+        }
+        
+        showDropdown();
+    }
+
+    function showPopularTagsFallback() {
+        const resultsContainer = document.getElementById('tagResults');
+        resultsContainer.innerHTML = '';
+        
+        // Thêm header cho tag phổ biến
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'tag-results-header';
+        headerDiv.innerHTML = '<strong>Từ khóa phổ biến</strong>';
+        resultsContainer.appendChild(headerDiv);
+        
+        if (popularTags && popularTags.length > 0) {
+            const availableTags = popularTags.filter(tag => !selectedTags.includes(tag.name));
+            
+            if (availableTags.length > 0) {
+                availableTags.slice(0, 10).forEach(tag => {
+                    const item = createTagResultItem(tag.name, tag.documentCount || 0, false);
+                    resultsContainer.appendChild(item);
+                });
+            } else {
+                resultsContainer.innerHTML += '<div class="no-results">Tất cả từ khóa phổ biến đã được chọn</div>';
+            }
+        } else {
+            resultsContainer.innerHTML += '<div class="no-results">Chưa có từ khóa phổ biến</div>';
+        }
+        
+        showDropdown();
+    }
+
+    function addTagToSelection(tagName) {
+        if (selectedTags.length >= MAX_TAGS) {
+            alert(`Bạn chỉ có thể chọn tối đa ${MAX_TAGS} từ khóa`);
+            return;
+        }
+        
+        if (!selectedTags.includes(tagName)) {
+            selectedTags.push(tagName);
+            updateTagDisplay(tagName); // Pass the new tag for animation
+            updateHiddenInput();
+            
+            // Clear search input
+            document.getElementById('tagSearchInput').value = '';
+            hideDropdown();
+        }
+    }
+
+    function addTagFromPopular(tagName) {
+        addTagToSelection(tagName);
+    }
+
+    function removeTag(tagName) {
+        selectedTags = selectedTags.filter(tag => tag !== tagName);
+        updateTagDisplay();
+        updateHiddenInput();
+    }
+
+    function updateTagDisplay(newTag = null) {
+        const container = document.getElementById('selectedTags');
+        const countElement = document.getElementById('tagCount');
+        
+        container.innerHTML = '';
+        countElement.textContent = selectedTags.length;
+        
+        if (selectedTags.length === 0) {
+            container.innerHTML = '<div style="color: #6c757d; font-style: italic;">Chưa có từ khóa nào được chọn</div>';
+        } else {
+            selectedTags.forEach(tagName => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'selected-tag';
+                
+                // Add animation class for new tags
+                if (tagName === newTag) {
+                    tagElement.classList.add('new-tag');
+                }
+                
+                tagElement.innerHTML = `
+                    <span>${tagName}</span>
+                    <span class="remove-tag" onclick="removeTag('${tagName}')">&times;</span>
+                `;
+                container.appendChild(tagElement);
+            });
+        }
+    }
+
+    function updateHiddenInput() {
+        const hiddenInput = document.getElementById('tagNames');
+        hiddenInput.value = selectedTags.join(',');
+    }
+
+    function showDropdown() {
+        document.getElementById('tagDropdown').classList.add('show');
+    }
+
+    function hideDropdown() {
+        document.getElementById('tagDropdown').classList.remove('show');
+    }
+
+    function handleKeyDown(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = e.target.value.trim();
+            if (query) {
+                addTagToSelection(query);
+            }
+        } else if (e.key === 'Escape') {
+            hideDropdown();
+        }
+    }
 
     function validatePrice(input) {
     const errorDiv = document.getElementById('priceError');
@@ -1075,6 +1624,9 @@
 }
     // Khởi tạo khi tải trang
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tag selector
+        initTagSelector();
+        
         const initialParentId = /*[[${documentDTO.parentId != null ? documentDTO.parentId : 0}]]*/ 0;
         if (initialParentId > 0) {
             let currentId = initialParentId;

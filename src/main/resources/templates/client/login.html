@@ -22,6 +22,65 @@
     <link rel="stylesheet" th:href="@{/css/password-recovery.css}" />
     <link rel="stylesheet" th:href="@{/css/client-header.css}" />
     <link rel="stylesheet" th:href="@{/css/client-footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    
+    <!-- Flash Toast Meta Tags -->
+    <meta name="flash-success" th:content="${success}" th:if="${success}"/>
+    <meta name="flash-error" th:content="${error}" th:if="${error}"/>
+    <meta name="flash-warning" th:content="${warning}" th:if="${warning}"/>
+    <meta name="flash-info" th:content="${info}" th:if="${info}"/>
+    
+    <style>
+      /* Force toast colors to override dark mode and admin styles */
+      .toast {
+        background: #ffffff !important;
+        color: #1f2937 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+      }
+      
+      .toast-message {
+        color: #1f2937 !important;
+      }
+      
+      .toast-description {
+        color: #6b7280 !important;
+      }
+      
+      .toast-close {
+        color: #9ca3af !important;
+      }
+      
+      .toast-close:hover {
+        color: #6b7280 !important;
+        background: #f3f4f6 !important;
+      }
+      
+      /* Override any dark mode media queries */
+      @media (prefers-color-scheme: dark) {
+        .toast {
+          background: #ffffff !important;
+          color: #1f2937 !important;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+        }
+        
+        .toast-message {
+          color: #1f2937 !important;
+        }
+        
+        .toast-description {
+          color: #6b7280 !important;
+        }
+        
+        .toast-close {
+          color: #9ca3af !important;
+        }
+        
+        .toast-close:hover {
+          color: #6b7280 !important;
+          background: #f3f4f6 !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- Header -->
@@ -142,6 +201,7 @@
                 class="auth-form active"
                 data-form="login"
               >
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <h2 class="form-title">Chào mừng trở lại</h2>
                 <p class="form-description">
                   Đăng nhập để tiếp tục hành trình học tập của bạn
@@ -188,7 +248,7 @@
                     <span>Ghi nhớ đăng nhập</span>
                   </label>
 
-                  <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                  <a href="/forgot-password" class="">Quên mật khẩu?</a>
                 </div>
 
                 <button
@@ -245,9 +305,14 @@
     <!-- Footer -->
     <div th:replace="~{fragments/client/layout :: footer}"></div>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Scripts -->
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/auth.js}"></script>
     <script th:src="@{/js/client-header.js}"></script>
+    <script th:src="@{/js/admin/toast.js}"></script>
+    <script th:src="@{/js/admin/flash-toast.js}"></script>
   </body>
 </html>

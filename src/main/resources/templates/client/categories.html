@@ -113,7 +113,11 @@
                   <i class="fas fa-laptop-code"></i>
                 </div>
                 <h3  th:text="${category.name}" class="category-title">Công nghệ thông tin</h3>
-                <span th:text="${category.documents} + ' tài liệu'" class="document-count">2,415 tài liệu</span>
+                <span th:if="${categoryDocumentCounts != null and categoryDocumentCounts.get(category.id) != null}" 
+                      th:text="${categoryDocumentCounts.get(category.id)} + ' tài liệu'" 
+                      class="document-count">2,415 tài liệu</span>
+                <span th:unless="${categoryDocumentCounts != null and categoryDocumentCounts.get(category.id) != null}" 
+                      class="document-count">0 tài liệu</span>
               </div>
 
               <div class="category-content">
@@ -126,9 +130,12 @@
                   <li class="subcategory-item">
                     <i class="fas fa-angle-right"></i>
                     <a
-                    th:href="@{/search(category=${subcategory.slug})}" th:text="${subcategory.name}"
+                    th:href="@{/search(category=${subcategory.slug})}"
                       class="subcategory-name"
-                      >Lập trình & Phát triển phần mềm</a
+                      ><span th:text="${subcategory.name}">Lập trình & Phát triển phần mềm</span>
+                      <span th:if="${categoryDocumentCounts != null and categoryDocumentCounts.get(subcategory.id) != null and categoryDocumentCounts.get(subcategory.id) > 0}" 
+                            class="subcategory-count" 
+                            th:text="'(' + ${categoryDocumentCounts.get(subcategory.id)} + ' tài liệu)'"></span></a
                     >
                   </li>
                 </ul>

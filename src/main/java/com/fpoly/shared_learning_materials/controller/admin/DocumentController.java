@@ -180,12 +180,14 @@ public class DocumentController extends BaseAdminController {
     }
     @GetMapping("/tags/search")
     @ResponseBody
-    public List<TagDTO> searchTags(@RequestParam("query") String query) {
-        // Tìm tag dựa trên query (ví dụ: tìm theo tên tag)
-        Page<TagDTO> tagsPage = tagService.getAllTags(0, 10, "popular"); // Giới hạn 10 kết quả
-        return tagsPage.getContent().stream()
-                .filter(tag -> tag.getName().toLowerCase().contains(query.toLowerCase()))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<TagDTO>> searchTags(@RequestParam("q") String query) {
+        try {
+            // Search tags by name containing the query
+            List<TagDTO> tags = tagService.searchTagsByName(query);
+            return ResponseEntity.ok(tags);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
 
@@ -203,6 +205,11 @@ public class DocumentController extends BaseAdminController {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("currentPage", "documents");
         }
+        
+        // Thêm popular tags cho tag selector
+        Page<TagDTO> popularTagsPage = tagService.getAllTags(0, 20, "popular");
+        model.addAttribute("popularTags", popularTagsPage.getContent());
+        
         return "admin/documents/create";
     }
 
@@ -217,7 +224,12 @@ public String createDocument(
         Model model) {
 
     // Log basic info for debugging
-    System.out.println("Creating document: " + documentDTO.getTitle() + ", categories: " + categoryIdsString);
+    System.out.println("=== CREATE DOCUMENT DEBUG ===");
+    System.out.println("Title: " + documentDTO.getTitle());
+    System.out.println("CategoryIdsString: " + categoryIdsString);
+    System.out.println("TagNames: " + tagNames);
+    System.out.println("ParentId: " + documentDTO.getParentId());
+    System.out.println("File: " + (file != null ? file.getOriginalFilename() : "null"));
     System.out.println("==============================");
 
     if (result.hasErrors()) {
@@ -391,6 +403,18 @@ public String createDocument(
         return ResponseEntity.ok(tagDTOs);
     }
 
+    @GetMapping("/tags/all")
+    @ResponseBody
+    public ResponseEntity<List<TagDTO>> getAllTags() {
+        try {
+            // Get all active tags
+            Page<TagDTO> tagsPage = tagService.getAllTags(0, 100, "popular");
+            return ResponseEntity.ok(tagsPage.getContent());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
         DocumentDTO document = documentService.getDocumentById(id);
@@ -407,6 +431,11 @@ public String createDocument(
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("rootCategories", categoryService.getRootCategories());
         model.addAttribute("currentPage", "documents");
+        
+        // Thêm popular tags cho tag selector
+        Page<TagDTO> popularTagsPage = tagService.getAllTags(0, 20, "popular");
+        model.addAttribute("popularTags", popularTagsPage.getContent());
+        
         return "admin/documents/edit";
     }
 
@@ -446,46 +475,24 @@ public String createDocument(
                 redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
                 return "redirect:/admin/documents/" + id + "/edit";
             }
+        } else {
+            // Nếu categoryIdsString rỗng (không thay đổi danh mục), giữ nguyên danh mục hiện tại từ document gốc
+            DocumentDTO originalDocument = documentService.getDocumentById(id);
+            if (originalDocument != null && originalDocument.getCategoryIds() != null) {
+                categoryIds = originalDocument.getCategoryIds();
+                System.out.println("Kept original categoryIds: " + categoryIds);
+            }
         }
-       // Parse categoryIds from string
-    // List<Long> categoryIds = new ArrayList<>();
-    // if (categoryIdsString != null && !categoryIdsString.trim().isEmpty()) {
-    //     try {
-    //         String[] idStrings = categoryIdsString.split(",");
-    //         for (String idString : idStrings) {
-    //             if (!idString.trim().isEmpty()) {
-    //                 categoryIds.add(Long.parseLong(idString.trim()));
-    //             }
-    //         }
-    //     } catch (NumberFormatException e) {
-    //         redirectAttributes.addFlashAttribute("error", "Danh mục không hợp lệ");
-    //         redirectAttributes.addFlashAttribute("document", documentDTO);
-    //         redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-    //         return "redirect:/admin/documents/" + id + "/edit";
-    //     }
-    // } else {
-    //     // Nếu categoryIdsString rỗng (không thay đổi danh mục), giữ nguyên danh mục hiện tại từ document gốc
-    //     DocumentDTO originalDocument = documentService.getDocumentById(id);
-    //     if (originalDocument != null && originalDocument.getCategoryIds() != null) {
-    //         categoryIds = originalDocument.getCategoryIds();
-    //         System.out.println("Kept original categoryIds: " + categoryIds);
-    //     }
-    // }
-
-    // if (categoryIds.isEmpty()) {
-    //     redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
-    //     return "redirect:/admin/documents/" + id + "/edit";
-    // }
 
         System.out.println("Parsed CategoryIds: " + categoryIds + " (size: " + categoryIds.size() + ")");
 
         // Bắt buộc chọn ít nhất 1 danh mục để phân loại tài liệu
-        // if (categoryIds.isEmpty()) {
-        //     redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
-        //     redirectAttributes.addFlashAttribute("document", documentDTO);
-        //     redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
-        //     return "redirect:/admin/documents/" + id + "/edit";
-        // }
+        if (categoryIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn ít nhất một danh mục để phân loại tài liệu");
+            redirectAttributes.addFlashAttribute("document", documentDTO);
+            redirectAttributes.addFlashAttribute("categories", categoryService.getAllCategories());
+            return "redirect:/admin/documents/" + id + "/edit";
+        }
 
         if (categoryIds.size() > 15) {
             redirectAttributes.addFlashAttribute("error", "Bạn chỉ có thể chọn tối đa 15 danh mục");

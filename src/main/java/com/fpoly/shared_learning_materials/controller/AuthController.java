@@ -7,14 +7,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.service.UserService;
+
 
 @Controller
 public class AuthController {
 
     @Autowired
     private UserService userService;
+    
     
     @GetMapping("/login")
     public String showLoginForm(
@@ -23,6 +26,18 @@ public class AuthController {
             @RequestParam(value = "expired", required = false) String expired,
             @RequestParam(value = "registered", required = false) String registered,
             Model model) {
+
+        // Only redirect authenticated users if they're not logging out
+        if (logout == null && SecurityContextHolder.getContext().getAuthentication() != null &&
+            SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
+            !"anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
+            
+            // Check if user is admin
+            boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+            
+            return isAdmin ? "redirect:/admin" : "redirect:/";
+        }
 
         if (error != null) {
             model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
@@ -35,8 +50,9 @@ public class AuthController {
         if (expired != null) {
             model.addAttribute("warning", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
         }
-        if(registered != null) {
-            model.addAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
+        
+        if (registered != null) {
+            model.addAttribute("success", "Đăng ký thành công! Vui lòng xác thực bằng gmail.");
         }
 
         return "client/login";
@@ -44,14 +60,22 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
+        // Redirect authenticated users away from register page
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+            SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
+            !"anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
+            
+            // Check if user is admin
+            boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+            
+            return isAdmin ? "redirect:/admin" : "redirect:/";
+        }
+
         return "client/register";
     }
 
-    @GetMapping("/logout")
-    public String logout(Model model) {
-        SecurityContextHolder.clearContext();
-        return "redirect:/login";
-    }
+
 
     @PostMapping("/register")
     public String processRegisters(
@@ -65,14 +89,20 @@ public class AuthController {
             Model model) {
 // Kiểm tra xác nhận mật khẩu
         if (!password.equals(confirmPassword)) {
-            model.addAttribute("errorMessage", "Mật khẩu và xác nhận mật khẩu không khớp!");
+            model.addAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp!");
+            return "client/register";
+        }
+        
+        // Validate password strength
+        if (!isPasswordStrong(password)) {
+            model.addAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
             return "client/register";
         }
 
         // Gọi service để xử lý đăng ký
         boolean isRegistered = userService.registerUser(firstName, lastName,username, email, password);
         if (!isRegistered) {
-            model.addAttribute("errorMessage", "Tên đăng nhập hoặc email đã được sử dụng. Vui lòng chọn tên khác.");
+            model.addAttribute("error", "Tên đăng nhập hoặc email đã được sử dụng. Vui lòng chọn tên khác.");
             return "client/register";
         }
 
@@ -94,5 +124,93 @@ public class AuthController {
             model.addAttribute("error", "Liên kết xác nhận không hợp lệ hoặc tài khoản đã được kích hoạt!");
         }
         return "client/login";
+    }
+
+    // ===== FORGOT PASSWORD ENDPOINTS =====
+    
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm() {
+        return "client/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(@RequestParam("email") String email, Model model) {
+        boolean emailSent = userService.sendResetCode(email);
+        
+        if (emailSent) {
+            model.addAttribute("success", "Mã xác nhận đã được gửi đến email của bạn! Vui lòng kiểm tra email.");
+            return "client/forgot-password";
+        } else {
+            model.addAttribute("error", "Email không tồn tại trong hệ thống!");
+            return "client/forgot-password";
+        }
+    }
+
+    @GetMapping("/verify-reset-code")
+    public String showVerifyCodeForm(@RequestParam("email") String email, Model model) {
+        model.addAttribute("email", email);
+        return "client/verify-reset-code";
+    }
+
+    @PostMapping("/verify-reset-code")
+    public String processVerifyCode(@RequestParam("email") String email, @RequestParam("code") String code, Model model) {
+        if (userService.verifyResetCode(email, code)) {
+            model.addAttribute("email", email);
+            model.addAttribute("code", code);
+            return "client/reset-password";
+        } else {
+            model.addAttribute("error", "Mã xác nhận không đúng hoặc đã hết hạn!");
+            model.addAttribute("email", email);
+            return "client/verify-reset-code";
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public String processResetPassword(
+            @RequestParam("email") String email,
+            @RequestParam("code") String code,
+            @RequestParam("password") String password,
+            @RequestParam("confirmPassword") String confirmPassword,
+            Model model) {
+        
+        if (!password.equals(confirmPassword)) {
+            model.addAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp!");
+            model.addAttribute("email", email);
+            model.addAttribute("code", code);
+            return "client/reset-password";
+        }
+
+        if (!isPasswordStrong(password)) {
+            model.addAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
+            model.addAttribute("email", email);
+            model.addAttribute("code", code);
+            return "client/reset-password";
+        }
+
+        boolean resetSuccess = userService.resetPassword(email, code, password);
+        
+        if (resetSuccess) {
+            model.addAttribute("success", "Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.");
+            return "client/login";
+        } else {
+            model.addAttribute("error", "Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại!");
+            model.addAttribute("email", email);
+            model.addAttribute("code", code);
+            return "client/reset-password";
+        }
+    }
+    
+    private boolean isPasswordStrong(String password) {
+        if (password == null || password.length() < 8) {
+            return false;
+        }
+        
+        boolean hasLowercase = password.matches(".*[a-z].*");
+        boolean hasUppercase = password.matches(".*[A-Z].*");
+        boolean hasNumber = password.matches(".*[0-9].*");
+        boolean hasSpecial = password.matches(".*[^A-Za-z0-9].*");
+        
+        // Require ALL criteria for strong password
+        return hasLowercase && hasUppercase && hasNumber && hasSpecial;
     }
 }

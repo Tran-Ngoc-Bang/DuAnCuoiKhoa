@@ -139,10 +139,11 @@
           >
             <i class="fas fa-bell sidebar-icon"></i>
             Thông báo
+            <span class="sidebar-badge notification-badge" th:if="${unreadNotificationCount != null && unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
           </a>
         </li>
 
-        <li class="sidebar-menu-item">
+      <!--  <li class="sidebar-menu-item">
           <a
             th:href="@{/account/options}"
             class="sidebar-menu-link"
@@ -151,9 +152,9 @@
             <i class="fas fa-cog sidebar-icon"></i>
             Tùy chọn
           </a>
-        </li>
+        </li>-->
 
-        <li class="sidebar-menu-item">
+      <!-- <li class="sidebar-menu-item">
           <a
             th:href="@{/account/support}"
             class="sidebar-menu-link"
@@ -162,7 +163,7 @@
             <i class="fas fa-headset sidebar-icon"></i>
             Hỗ trợ
           </a>
-        </li>
+        </li>--> 
       </ul>
 
       <script>
