@@ -1,4 +1,3 @@
-
 function setGridView() {
     const container = document.getElementById("docContainer");
     container.classList.add("grid-view");
@@ -27,6 +26,19 @@ function setListView() {
     });
 
     setActiveButton('listBtn');
+}
+
+function setActiveButton(activeId) {
+    const gridBtn = document.getElementById('gridBtn');
+    const listBtn = document.getElementById('listBtn');
+
+    if (activeId === 'gridBtn') {
+        gridBtn.classList.add('active');
+        listBtn.classList.remove('active');
+    } else if (activeId === 'listBtn') {
+        listBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+    }
 }
 
 

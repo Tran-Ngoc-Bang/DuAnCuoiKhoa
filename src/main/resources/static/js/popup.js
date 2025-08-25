@@ -34,23 +34,45 @@ function logActivity(action) {
     localStorage.setItem("activityLog", JSON.stringify(activityLog));
 }
 
+document.querySelectorAll(".fa-bookmark").forEach(icon => {
+    icon.addEventListener("click", function () {
+        const docCard = this.closest('.doc-card-item');
+        const docId = docCard.getAttribute('data-doc-id');
 
-
-document.querySelectorAll(".fa-bookmark").forEach(button => {
-    button.addEventListener("click", function () {
-        this.classList.toggle("fas"); // Đổi icon bookmark
-        this.classList.toggle("far");
-
-        if (this.classList.contains("far")) {
-            showToast("Tài liệu đã được bỏ lưu.");
-            logActivity("Bỏ lưu tài liệu");
-
-        } else {
-            showToast("Tài liệu đã được lưu thành công!");
-            logActivity("Lưu tài liệu");
+        if (!docId) {
+            console.error("Không tìm thấy ID tài liệu.");
+            return;
         }
+
+        fetch(`/account/favorites/toggle/${docId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (!data) return;
+
+                const favorited = data.favorited;
+
+                if (favorited) {
+                    this.classList.remove('far');
+                    this.classList.add('fas');
+                    showToast('Đã lưu tài liệu vào mục yêu thích', 'success');
+                } else {
+                    this.classList.remove('fas');
+                    this.classList.add('far');
+                    showToast('Đã xóa tài liệu khỏi mục yêu thích', 'info');
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi khi gọi API yêu thích:", error);
+                showToast('Có lỗi xảy ra', 'error');
+            });
     });
 });
+
 
 function handleDownload() {
     // Giả lập tải xuống
