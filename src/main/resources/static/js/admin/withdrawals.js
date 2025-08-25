@@ -74,6 +74,8 @@ function initializeEventListeners() {
   if (amountField) {
     amountField.addEventListener("input", handleAmountInput);
     amountField.addEventListener("blur", validateAmount);
+    // Initialize amount converter
+    updateAmountConverter();
   }
 
   // Payment method change handler
@@ -200,10 +202,31 @@ function handleAmountInput(event) {
     }
   }
 
+  // Update amount converter
+  updateAmountConverter();
+
   // Real-time validation
   if (amountField.value) {
     validateAmount();
     validateUserBalance();
+  }
+}
+
+/**
+ * Update amount converter display
+ */
+function updateAmountConverter() {
+  const amountField = document.getElementById("amount");
+  const vndAmountSpan = document.getElementById("vndAmount");
+  
+  if (amountField && vndAmountSpan) {
+    const xuAmount = parseFloat(amountField.value) || 0;
+    const vndAmount = xuAmount * 1000; // 1 xu = 1000 VND
+    
+    vndAmountSpan.textContent = new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(vndAmount);
   }
 }
 
@@ -230,17 +253,17 @@ function validateAmount() {
   if (!amountField.value) return true;
 
   if (isNaN(amount) || amount <= 0) {
-    showFieldError(amountField, "Số tiền phải là số dương");
+    showFieldError(amountField, "Số xu phải là số dương");
     return false;
   }
 
-  if (amount < 50000) {
-    showFieldError(amountField, "Số tiền tối thiểu là 50,000 VND");
+  if (amount < 50) {
+    showFieldError(amountField, "Số xu tối thiểu là 50 xu");
     return false;
   }
 
-  if (amount > 50000000) {
-    showFieldError(amountField, "Số tiền tối đa là 50,000,000 VND");
+  if (amount > 50000) {
+    showFieldError(amountField, "Số xu tối đa là 50,000 xu");
     return false;
   }
 
@@ -293,7 +316,7 @@ function validateWithdrawalForm(event) {
   // Required fields validation
   const requiredFields = [
     { id: "userId", name: "Người dùng" },
-    { id: "amount", name: "Số tiền" },
+    { id: "amount", name: "Số xu" },
     { id: "paymentMethod", name: "Phương thức thanh toán" },
     { id: "status", name: "Trạng thái" },
     { id: "createdAt", name: "Ngày tạo" },
@@ -310,7 +333,7 @@ function validateWithdrawalForm(event) {
 
   // Amount validation
   if (!validateAmount()) {
-    errors.push("Số tiền không hợp lệ");
+    errors.push("Số xu không hợp lệ");
     isValid = false;
   }
 

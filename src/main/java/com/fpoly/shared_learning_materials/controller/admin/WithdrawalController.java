@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import com.fpoly.shared_learning_materials.domain.User;
+import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/admin/withdrawals")
@@ -32,7 +34,7 @@ public class WithdrawalController extends BaseAdminController {
     @Autowired
     private UserService userService;
 
-     public WithdrawalController(NotificationService notificationService, UserRepository userRepository) {
+    public WithdrawalController(NotificationService notificationService, UserRepository userRepository) {
         super(notificationService, userRepository);
     }
 
@@ -103,12 +105,8 @@ public class WithdrawalController extends BaseAdminController {
         model.addAttribute("isFirst", withdrawalPage.isFirst());
         model.addAttribute("isLast", withdrawalPage.isLast());
 
-        // Thêm thống kê withdrawals
-        model.addAttribute("totalWithdrawalsThisMonth", withdrawalService.getTotalWithdrawalsThisMonth());
-        model.addAttribute("totalWithdrawalAmountThisMonth", withdrawalService.getTotalWithdrawalAmountThisMonth());
-        model.addAttribute("pendingWithdrawals", withdrawalService.getPendingWithdrawals());
-        model.addAttribute("withdrawalSuccessRate", withdrawalService.getWithdrawalSuccessRate());
-        model.addAttribute("overdueWithdrawals", withdrawalService.getOverdueWithdrawals());
+        // Thêm thống kê withdrawals (dashboard cards)
+        model.addAttribute("withdrawalStats", withdrawalService.getWithdrawalStatusCounts());
 
         // Thêm enum options
         model.addAttribute("statusOptions", Transaction.TransactionStatus.values());
@@ -176,7 +174,9 @@ public class WithdrawalController extends BaseAdminController {
     public String showDetail(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Transaction> withdrawalOpt = withdrawalService.getWithdrawalById(id);
         if (withdrawalOpt.isPresent()) {
-            model.addAttribute("withdrawal", withdrawalOpt.get());
+            Transaction withdrawal = withdrawalOpt.get();
+            model.addAttribute("withdrawal", withdrawal);
+            model.addAttribute("risk", withdrawalService.getRiskInfo(withdrawal));
             return "admin/withdrawals/detail";
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy withdrawal");
@@ -203,6 +203,7 @@ public class WithdrawalController extends BaseAdminController {
             model.addAttribute("statusOptions", Transaction.TransactionStatus.values());
             model.addAttribute("users", userService.getAllUsers());
             model.addAttribute("isCompleted", withdrawal.getStatus() == Transaction.TransactionStatus.COMPLETED);
+            model.addAttribute("risk", withdrawalService.getRiskInfo(withdrawal));
 
             // Add payment methods
             Map<String, String> paymentMethods = new LinkedHashMap<>();
@@ -238,6 +239,7 @@ public class WithdrawalController extends BaseAdminController {
             model.addAttribute("statusOptions", Transaction.TransactionStatus.values());
             model.addAttribute("users", userService.getAllUsers());
             model.addAttribute("isCompleted", withdrawal.getStatus() == Transaction.TransactionStatus.COMPLETED);
+            model.addAttribute("risk", withdrawalService.getRiskInfo(withdrawal));
 
             // Add payment methods
             Map<String, String> paymentMethods = new LinkedHashMap<>();
@@ -374,10 +376,19 @@ public class WithdrawalController extends BaseAdminController {
                             "Đã xóa " + withdrawalIds.size() + " withdrawal");
                     break;
                 case "status_completed":
-                    withdrawalService.updateWithdrawalsStatus(withdrawalIds,
-                            Transaction.TransactionStatus.COMPLETED);
-                    redirectAttributes.addFlashAttribute("successMessage",
-                            "Đã cập nhật " + withdrawalIds.size() + " withdrawal thành hoàn thành");
+                    // Only allow bulk approve for low risk requests
+                    List<Long> allowedIds = withdrawalService.filterLowRiskWithdrawalIds(withdrawalIds);
+                    List<Long> rejectedIds = withdrawalIds.stream().filter(id -> !allowedIds.contains(id)).toList();
+                    if (!allowedIds.isEmpty()) {
+                        withdrawalService.updateWithdrawalsStatus(allowedIds,
+                                Transaction.TransactionStatus.COMPLETED);
+                    }
+                    String msg = "";
+                    if (!allowedIds.isEmpty())
+                        msg += "Đã duyệt " + allowedIds.size() + " yêu cầu low risk. ";
+                    if (!rejectedIds.isEmpty())
+                        msg += "Bỏ qua " + rejectedIds.size() + " yêu cầu không đủ điều kiện (risk cao).";
+                    redirectAttributes.addFlashAttribute("successMessage", msg.trim());
                     break;
                 case "status_failed":
                     withdrawalService.updateWithdrawalsStatus(withdrawalIds,
@@ -424,5 +435,150 @@ public class WithdrawalController extends BaseAdminController {
             response.put("message", e.getMessage());
         }
         return response;
+    }
+
+    /**
+     * Approve withdrawal request
+     */
+    @PostMapping("/{id}/approve")
+    public String approveWithdrawal(@PathVariable Long id,
+            @RequestParam(required = false) String adminNote,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Transaction> withdrawalOpt = withdrawalService.getWithdrawalById(id);
+            if (withdrawalOpt.isPresent()) {
+                Transaction withdrawal = withdrawalOpt.get();
+
+                // Check if withdrawal is in PENDING or PROCESSING status
+                if (withdrawal.getStatus() != Transaction.TransactionStatus.PENDING
+                        && withdrawal.getStatus() != Transaction.TransactionStatus.PROCESSING) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Chỉ có thể approve withdrawal đang ở trạng thái PENDING/PROCESSING");
+                    return "redirect:/admin/withdrawals/" + id + "/detail";
+                }
+
+                // Risk guard: warn if high risk
+                int risk = withdrawalService.calculateRiskScore(withdrawal);
+                if (risk >= 70) {
+                    redirectAttributes.addFlashAttribute("warningMessage",
+                            "Yêu cầu có risk cao (" + risk + ") – hãy xác minh kỹ trước khi thanh toán.");
+                }
+
+                withdrawalService.approve(withdrawal, adminNote);
+
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Đã approve withdrawal thành công: " + withdrawal.getCode());
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy withdrawal");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Lỗi khi approve withdrawal: " + e.getMessage());
+        }
+        return "redirect:/admin/withdrawals/" + id + "/detail";
+    }
+
+    /**
+     * Reject withdrawal request
+     */
+    @PostMapping("/{id}/reject")
+    public String rejectWithdrawal(@PathVariable Long id,
+            @RequestParam String rejectReason,
+            RedirectAttributes redirectAttributes) {
+        System.out.println("=== REJECT WITHDRAWAL ===");
+        System.out.println("ID: " + id);
+        System.out.println("Reason: " + rejectReason);
+
+        try {
+            Optional<Transaction> withdrawalOpt = withdrawalService.getWithdrawalById(id);
+            if (withdrawalOpt.isPresent()) {
+                Transaction withdrawal = withdrawalOpt.get();
+                System.out.println("Found withdrawal: " + withdrawal.getCode());
+                System.out.println("Current status: " + withdrawal.getStatus());
+
+                // Check if withdrawal is in PENDING or PROCESSING status
+                if (withdrawal.getStatus() != Transaction.TransactionStatus.PENDING
+                        && withdrawal.getStatus() != Transaction.TransactionStatus.PROCESSING) {
+                    System.out.println("Status check failed - cannot reject");
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Chỉ có thể reject withdrawal đang ở trạng thái PENDING/PROCESSING. Trạng thái hiện tại: "
+                                    + withdrawal.getStatus());
+                    return "redirect:/admin/withdrawals/" + id + "/detail";
+                }
+
+                System.out.println("Calling withdrawalService.reject()");
+                withdrawalService.reject(withdrawal, rejectReason);
+                System.out.println("Reject completed successfully");
+
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Đã reject withdrawal và hoàn lại " + withdrawal.getAmount() + " xu cho user: "
+                                + withdrawal.getCode());
+            } else {
+                System.out.println("Withdrawal not found");
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy withdrawal");
+            }
+        } catch (Exception e) {
+            System.err.println("Error in rejectWithdrawal: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Lỗi khi reject withdrawal: " + e.getMessage());
+        }
+        System.out.println("=== REJECT COMPLETE ===");
+        return "redirect:/admin/withdrawals/" + id + "/detail";
+    }
+
+    /**
+     * Process withdrawal (mark as processing)
+     */
+    @PostMapping("/{id}/process")
+    public String processWithdrawal(@PathVariable Long id,
+            @RequestParam(required = false) String processNote,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Transaction> withdrawalOpt = withdrawalService.getWithdrawalById(id);
+            if (withdrawalOpt.isPresent()) {
+                Transaction withdrawal = withdrawalOpt.get();
+
+                // Check if withdrawal is in PENDING status
+                if (withdrawal.getStatus() != Transaction.TransactionStatus.PENDING) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Chỉ có thể process withdrawal đang ở trạng thái PENDING");
+                    return "redirect:/admin/withdrawals/" + id + "/detail";
+                }
+
+                // Update status to PROCESSING
+                withdrawal.setStatus(Transaction.TransactionStatus.PROCESSING);
+
+                // Add process note
+                if (processNote != null && !processNote.trim().isEmpty()) {
+                    String currentNotes = withdrawal.getNotes();
+                    String timestamp = LocalDateTime.now().toString();
+                    String newNote = currentNotes != null
+                            ? currentNotes + "\n[PROCESSING " + timestamp + "] " + processNote.trim()
+                            : "[PROCESSING " + timestamp + "] " + processNote.trim();
+                    withdrawal.setNotes(newNote);
+                } else {
+                    String currentNotes = withdrawal.getNotes();
+                    String timestamp = LocalDateTime.now().toString();
+                    String newNote = currentNotes != null
+                            ? currentNotes + "\n[PROCESSING " + timestamp + "] Admin started processing"
+                            : "[PROCESSING " + timestamp + "] Admin started processing";
+                    withdrawal.setNotes(newNote);
+                }
+
+                withdrawalService.updateWithdrawal(withdrawal);
+
+                // TODO: Send email notification to user
+
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Đã bắt đầu xử lý withdrawal: " + withdrawal.getCode());
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy withdrawal");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Lỗi khi process withdrawal: " + e.getMessage());
+        }
+        return "redirect:/admin/withdrawals/" + id + "/detail";
     }
 }

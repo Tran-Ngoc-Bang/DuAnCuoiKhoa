@@ -64,21 +64,27 @@
 
       <!-- Số tiền -->
       <div class="form-group">
-        <label for="amount">Số tiền (VNĐ) *</label>
+        <label for="amount">Số xu *</label>
         <input
           type="number"
           id="amount"
           name="amount"
           th:field="*{amount}"
-          placeholder="Nhập số tiền rút"
-          step="1000"
-          min="50000"
-          max="50000000"
+          placeholder="Nhập số xu rút"
+          step="1"
+          min="50"
+          max="50000"
           required
         />
         <small class="form-help"
-          >Tối thiểu: 50,000 VND - Tối đa: 50,000,000 VND</small
+          >Tối thiểu: 50 xu - Tối đa: 50,000 xu (tương đương 50,000,000
+          VND)</small
         >
+        <div class="amount-converter">
+          <span class="converter-text"
+            >Quy đổi: <span id="vndAmount">0 VND</span></span
+          >
+        </div>
         <span
           th:if="${#fields.hasErrors('amount')}"
           class="error-message"

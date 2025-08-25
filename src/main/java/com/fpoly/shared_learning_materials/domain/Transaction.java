@@ -37,7 +37,7 @@ public class Transaction {
     private String paymentMethod;
 
     @Size(max = 1000, message = "Ghi chú không được vượt quá 1000 ký tự")
-    @Column(name = "notes", columnDefinition = "TEXT")
+    @Column(name = "notes", columnDefinition = "nvarchar(max)")
     private String notes;
 
     @NotNull(message = "Người dùng không được để trống")

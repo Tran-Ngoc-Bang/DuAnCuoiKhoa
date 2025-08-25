@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1"
+    />
+    <title>Rút tiền - EduShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/responsive.css}" />
+    <link rel="stylesheet" th:href="@{/css/main-fixes.css}" />
+    <link rel="stylesheet" th:href="@{/css/account.css}" />
+    <link rel="stylesheet" th:href="@{/css/footer-modern.css}" />
+    <link rel="stylesheet" th:href="@{/css/client-header.css}" />
+    <link rel="stylesheet" th:href="@{/css/client-footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/client-dashboard.css}" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: rgba(67, 97, 238, 0.1);
+        --success: #10b981;
+        --success-light: rgba(16, 185, 129, 0.1);
+        --warning: #f59e0b;
+        --warning-light: rgba(245, 158, 11, 0.1);
+        --danger: #ef4444;
+        --danger-light: rgba(239, 68, 68, 0.1);
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-900: #111827;
+        --white: #ffffff;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --radius: 0.375rem;
+        --radius-lg: 0.5rem;
+        --radius-xl: 0.75rem;
+        --transition: all 0.3s ease;
+      }
+
+      .withdraw-page {
+        background-color: #f5f7fb;
+        min-height: 100vh;
+        font-family: "Nunito", sans-serif;
+      }
+
+      .dashboard-page {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+      }
+
+      .withdraw-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .withdraw-card {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .withdraw-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .withdraw-header h1 {
+        color: var(--gray-900);
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .withdraw-header p {
+        color: var(--gray-600);
+        font-size: 1rem;
+      }
+
+      .balance-info {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        color: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .balance-amount {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+      }
+
+      .balance-label {
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+
+      .withdraw-form {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: 0.875rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--white);
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .calculator-section {
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .calculator-title {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .calculator-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .calculator-item {
+        background: var(--white);
+        padding: 1rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--gray-200);
+      }
+
+      .calculator-label {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-bottom: 0.25rem;
+      }
+
+      .calculator-value {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-900);
+      }
+
+      .calculator-value.success {
+        color: var(--success);
+      }
+
+      .calculator-value.warning {
+        color: var(--warning);
+      }
+
+      .calculator-value.danger {
+        color: var(--danger);
+      }
+
+      .submit-button {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: var(--white);
+        border: none;
+        border-radius: var(--radius-lg);
+        padding: 1rem 2rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        margin-top: 1rem;
+      }
+
+      .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .submit-button:disabled {
+        background: var(--gray-300);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        font-weight: 500;
+      }
+
+      .alert-success {
+        background: var(--success-light);
+        color: var(--success);
+        border: 1px solid var(--success);
+      }
+
+      .alert-error {
+        background: var(--danger-light);
+        color: var(--danger);
+        border: 1px solid var(--danger);
+      }
+
+      .alert-warning {
+        background: var(--warning-light);
+        color: var(--warning);
+        border: 1px solid var(--warning);
+      }
+
+      .info-box {
+        background: var(--primary-light);
+        border: 1px solid var(--primary);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .info-box h4 {
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .info-box ul {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: var(--gray-700);
+      }
+
+      .info-box li {
+        margin-bottom: 0.25rem;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 1rem;
+      }
+
+      .loading i {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .withdraw-card {
+          padding: 1.5rem;
+        }
+
+        .calculator-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .balance-amount {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="withdraw-page">
+    <!-- Header -->
+    <div th:replace="~{fragments/client/layout :: header}"></div>
+
+    <main>
+      <div class="container dashboard-page">
+        <div class="dashboard-content">
+          <!-- Sidebar -->
+          <div
+            th:replace="~{fragments/client/account-sidebar :: account-sidebar}"
+          ></div>
+
+          <div class="dashboard-main">
+            <div class="withdraw-container">
+              <!-- Balance Info -->
+              <div class="balance-info">
+                <div
+                  class="balance-amount"
+                  th:text="${#numbers.formatDecimal(statCoinBalance, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                >
+                  0 xu
+                </div>
+                <div class="balance-label">Số dư xu hiện tại</div>
+              </div>
+
+              <!-- Info Box -->
+              <div class="info-box">
+                <h4><i class="fas fa-info-circle"></i> Thông tin quan trọng</h4>
+                <ul>
+                  <li>
+                    Số xu tối thiểu để rút:
+                    <strong th:text="${minWithdrawalAmount} + ' xu'"
+                      >50 xu</strong
+                    >
+                  </li>
+                  <li>
+                    Tỷ giá quy đổi:
+                    <strong th:text="${exchangeRate} + ' VND/xu'"
+                      >1000 VND/xu</strong
+                    >
+                  </li>
+                  <li>
+                    Phí rút tiền: 2-5% tùy theo số lượng (càng nhiều càng ít
+                    phí)
+                  </li>
+                  <li>
+                    Thời gian xử lý: 1-3 ngày làm việc
+                    <span
+                      id="fastProcessingBadge"
+                      style="display: none; color: #10b981; font-weight: 700"
+                      >(Xử lý nhanh)</span
+                    >
+                  </li>
+                  <li>Chỉ hỗ trợ tài khoản ngân hàng Việt Nam</li>
+                  <li th:if="${isPremium}">
+                    <i class="fas fa-crown" style="color: #f59e0b"></i> Tài
+                    khoản Premium: giảm 0.5% phí mọi mức
+                  </li>
+                  <li th:if="${isFirstWithdrawal}">
+                    <i class="fas fa-gift" style="color: #10b981"></i> Lần rút
+                    đầu tiên: miễn phí
+                  </li>
+                  <li th:if="${promoActive}">
+                    <i class="fas fa-bolt" style="color: #ef4444"></i> Khuyến
+                    mãi: Giảm phí 50% trong thời gian nhất định
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Withdraw Form -->
+              <div class="document-card">
+                <div class="document-content" style="padding: 1.25rem">
+                  <form id="withdrawForm" class="withdraw-form" novalidate>
+                    <!-- Coin Amount -->
+                    <div class="form-group">
+                      <label for="coinAmount">
+                        <i class="fas fa-coins"></i> Số xu muốn rút
+                      </label>
+                      <input
+                        type="number"
+                        id="coinAmount"
+                        name="coinAmount"
+                        min="50"
+                        step="1"
+                        placeholder="Nhập số xu muốn rút (tối thiểu 50 xu)"
+                        required
+                      />
+                      <small class="text-muted"
+                        >Số dư khả dụng:
+                        <span
+                          th:text="${#numbers.formatDecimal(statCoinBalance, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                          >0 xu</span
+                        ></small
+                      >
+                    </div>
+
+                    <!-- Calculator Section -->
+                    <div
+                      class="calculator-section"
+                      id="calculatorSection"
+                      style="display: none"
+                    >
+                      <div class="calculator-title">
+                        <i class="fas fa-calculator"></i> Chi tiết tính toán
+                        <span
+                          id="trustedBadge"
+                          style="
+                            display: none;
+                            margin-left: 8px;
+                            color: #3b82f6;
+                            font-weight: 600;
+                          "
+                          ><i class="fas fa-shield-alt"></i> Trusted User</span
+                        >
+                        <span
+                          id="etaText"
+                          style="
+                            display: none;
+                            margin-left: 12px;
+                            color: #6b7280;
+                          "
+                        ></span>
+                      </div>
+                      <div class="calculator-grid">
+                        <div class="calculator-item">
+                          <div class="calculator-label">Số xu rút</div>
+                          <div class="calculator-value" id="calcCoinAmount">
+                            0 xu
+                          </div>
+                        </div>
+                        <div class="calculator-item">
+                          <div class="calculator-label">Phí dịch vụ</div>
+                          <div class="calculator-value warning" id="calcFee">
+                            0 xu (0%)
+                          </div>
+                          <div
+                            class="calculator-label"
+                            style="
+                              margin-top: 6px;
+                              font-size: 0.8rem;
+                              color: #6b7280;
+                            "
+                          >
+                            <span id="feeBadges" style="display: none">
+                              <span
+                                id="badgeFirst"
+                                style="
+                                  display: none;
+                                  background: #10b9811a;
+                                  color: #10b981;
+                                  padding: 2px 6px;
+                                  border-radius: 6px;
+                                  margin-right: 6px;
+                                "
+                                >Miễn phí lần đầu</span
+                              >
+                              <span
+                                id="badgePremium"
+                                style="
+                                  display: none;
+                                  background: #f59e0b1a;
+                                  color: #d97706;
+                                  padding: 2px 6px;
+                                  border-radius: 6px;
+                                  margin-right: 6px;
+                                "
+                                >Premium -0.5%</span
+                              >
+                              <span
+                                id="badgePromo"
+                                style="
+                                  display: none;
+                                  background: #ef44441a;
+                                  color: #ef4444;
+                                  padding: 2px 6px;
+                                  border-radius: 6px;
+                                "
+                                >Giảm 50%</span
+                              >
+                            </span>
+                          </div>
+                        </div>
+                        <div class="calculator-item">
+                          <div class="calculator-label">Số xu thực nhận</div>
+                          <div
+                            class="calculator-value success"
+                            id="calcNetAmount"
+                          >
+                            0 xu
+                          </div>
+                        </div>
+                        <div class="calculator-item">
+                          <div class="calculator-label">Số tiền VND</div>
+                          <div
+                            class="calculator-value success"
+                            id="calcVndAmount"
+                          >
+                            0 VND
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-group">
+                      <label for="paymentMethod">
+                        <i class="fas fa-credit-card"></i> Phương thức rút tiền
+                      </label>
+                      <select id="paymentMethod" name="paymentMethod" required>
+                        <option value="">Chọn phương thức rút tiền</option>
+                        <option value="BANK_TRANSFER">
+                          Chuyển khoản ngân hàng
+                        </option>
+                        <option value="E_WALLET">Ví điện tử</option>
+                      </select>
+                    </div>
+
+                    <!-- Bank Information -->
+                    <div id="bankInfoSection" style="display: none">
+                      <div class="form-group">
+                        <label for="bankName">
+                          <i class="fas fa-university"></i> Tên ngân hàng
+                        </label>
+                        <input
+                          type="text"
+                          id="bankName"
+                          name="bankName"
+                          placeholder="VD: Vietcombank, BIDV, Agribank..."
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="bankAccount">
+                          <i class="fas fa-credit-card"></i> Số tài khoản
+                        </label>
+                        <input
+                          type="text"
+                          id="bankAccount"
+                          name="bankAccount"
+                          placeholder="Nhập số tài khoản ngân hàng"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="accountHolder">
+                          <i class="fas fa-user"></i> Chủ tài khoản
+                        </label>
+                        <input
+                          type="text"
+                          id="accountHolder"
+                          name="accountHolder"
+                          placeholder="Tên chủ tài khoản (phải trùng với CMND/CCCD)"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-group">
+                      <label for="notes">
+                        <i class="fas fa-sticky-note"></i> Ghi chú (tùy chọn)
+                      </label>
+                      <textarea
+                        id="notes"
+                        name="notes"
+                        placeholder="Ghi chú thêm cho yêu cầu rút tiền..."
+                      ></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-button" id="submitBtn">
+                      <i class="fas fa-paper-plane"></i> Gửi yêu cầu rút tiền
+                    </button>
+                  </form>
+
+                  <!-- Loading -->
+                  <div class="loading" id="loading">
+                    <i class="fas fa-spinner fa-2x"></i>
+                    <p>Đang xử lý yêu cầu...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/client/layout :: footer}"></div>
+
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/account.js}"></script>
+    <script th:src="@{/js/client-header.js}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const coinAmountInput = document.getElementById("coinAmount");
+        const paymentMethodSelect = document.getElementById("paymentMethod");
+        const bankInfoSection = document.getElementById("bankInfoSection");
+        const calculatorSection = document.getElementById("calculatorSection");
+
+        // Live bank auto-detect on input
+        const bankAccountInput = document.getElementById("bankAccount");
+        if (bankAccountInput) {
+          let bankDetectTimer;
+          bankAccountInput.addEventListener("input", function () {
+            if (bankDetectTimer) clearTimeout(bankDetectTimer);
+            bankDetectTimer = setTimeout(async () => {
+              const acct = bankAccountInput.value.trim();
+              const bankNameField = document.getElementById("bankName");
+
+              // Clear bank name if account number is empty or too short
+              if (!acct || acct.length < 4) {
+                if (bankNameField) {
+                  bankNameField.value = "";
+                }
+                return;
+              }
+
+              // Only detect if account number starts with known bank prefixes
+              const bankPrefixes = ["9704", "9703", "9702", "9701"];
+              const hasValidPrefix = bankPrefixes.some((prefix) =>
+                acct.startsWith(prefix)
+              );
+
+              if (!hasValidPrefix) {
+                return;
+              }
+
+              try {
+                const resp = await fetch("/account/bank/detect", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    [header]: token,
+                  },
+                  body: new URLSearchParams({ accountNumber: acct }),
+                });
+                const bd = await resp.json();
+                if (bd.detected && bd.bankName) {
+                  if (bankNameField) {
+                    bankNameField.value = bd.bankName;
+                  }
+                }
+              } catch (e) {
+                console.error("Bank detection error:", e);
+              }
+            }, 400);
+          });
+        }
+        const withdrawForm = document.getElementById("withdrawForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const loading = document.getElementById("loading");
+
+        // CSRF token
+        const token = document
+          .querySelector('meta[name="_csrf"]')
+          .getAttribute("content");
+        const header = document
+          .querySelector('meta[name="_csrf_header"]')
+          .getAttribute("content");
+
+        // Show/hide bank info based on payment method
+        paymentMethodSelect.addEventListener("change", function () {
+          if (this.value === "BANK_TRANSFER") {
+            bankInfoSection.style.display = "block";
+            document
+              .getElementById("bankName")
+              .setAttribute("required", "required");
+            document
+              .getElementById("bankAccount")
+              .setAttribute("required", "required");
+            document
+              .getElementById("accountHolder")
+              .setAttribute("required", "required");
+          } else {
+            bankInfoSection.style.display = "none";
+            document.getElementById("bankName").removeAttribute("required");
+            document.getElementById("bankAccount").removeAttribute("required");
+            document
+              .getElementById("accountHolder")
+              .removeAttribute("required");
+          }
+        });
+
+        // Calculate withdrawal details when coin amount changes
+        let calculateTimeout;
+        coinAmountInput.addEventListener("input", function () {
+          clearTimeout(calculateTimeout);
+          calculateTimeout = setTimeout(() => {
+            const raw = (coinAmountInput.value || "").trim();
+            if (!raw || isNaN(Number(raw))) {
+              calculatorSection.style.display = "none";
+              return;
+            }
+            calculateWithdrawal();
+          }, 500);
+        });
+
+        function calculateWithdrawal() {
+          const raw = (coinAmountInput.value || "").trim();
+          if (!raw || isNaN(Number(raw))) {
+            calculatorSection.style.display = "none";
+            return;
+          }
+          const coinAmount = parseFloat(raw);
+
+          if (coinAmount < 50) {
+            calculatorSection.style.display = "none";
+            return;
+          }
+
+          fetch("/account/withdraw/calculate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              [header]: token,
+            },
+            body: `coinAmount=${encodeURIComponent(raw)}`,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                document.getElementById("calcCoinAmount").textContent =
+                  data.coinAmount + " xu";
+                document.getElementById("calcFee").textContent =
+                  data.fee + " xu (" + data.feePercentage + "%)";
+                document.getElementById("calcNetAmount").textContent =
+                  data.netAmount + " xu";
+                document.getElementById("calcVndAmount").textContent =
+                  new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(data.vndAmount);
+                // badges
+                const bFirst = document.getElementById("badgeFirst");
+                const bPremium = document.getElementById("badgePremium");
+                const bPromo = document.getElementById("badgePromo");
+                const bTrusted = document.getElementById("trustedBadge");
+                const badges = document.getElementById("feeBadges");
+                if (badges) badges.style.display = "inline";
+                if (bFirst)
+                  bFirst.style.display = data.isFirstWithdrawal
+                    ? "inline-block"
+                    : "none";
+                if (bPremium)
+                  bPremium.style.display = data.isPremium
+                    ? "inline-block"
+                    : "none";
+                if (bPromo)
+                  bPromo.style.display = data.promoActive
+                    ? "inline-block"
+                    : "none";
+                if (bTrusted)
+                  bTrusted.style.display = data.trustedUser
+                    ? "inline-block"
+                    : "none";
+                // ETA
+                const etaText = document.getElementById("etaText");
+                if (etaText && data.etaHours != null) {
+                  const hours = parseInt(data.etaHours, 10);
+                  etaText.textContent = `Dự kiến hoàn tất trong ~${hours} giờ`;
+                  etaText.style.display = "inline";
+                }
+                calculatorSection.style.display = "block";
+              } else {
+                calculatorSection.style.display = "none";
+              }
+            })
+            .catch(() => {
+              calculatorSection.style.display = "none";
+            });
+        }
+
+        // Handle form submission
+        withdrawForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(this);
+          const coinAmount = formData.get("coinAmount");
+          const paymentMethod = formData.get("paymentMethod");
+          const bankAccount = formData.get("bankAccount");
+          const bankName = formData.get("bankName");
+          const accountHolder = formData.get("accountHolder");
+          const notes = formData.get("notes");
+
+          // Validation
+          if (parseFloat(coinAmount) < 50) {
+            showNotification("Số xu tối thiểu để rút là 50 xu", "error");
+            return;
+          }
+
+          if (paymentMethod === "BANK_TRANSFER") {
+            if (!bankAccount || !bankName || !accountHolder) {
+              showNotification(
+                "Vui lòng điền đầy đủ thông tin ngân hàng",
+                "error"
+              );
+              return;
+            }
+          }
+
+          // Show loading
+          submitBtn.disabled = true;
+          loading.style.display = "block";
+
+          // Auto-detect bank name before submit (best-effort)
+          if (paymentMethod === "BANK_TRANSFER" && bankAccount && !bankName) {
+            try {
+              const resp = await fetch("/account/bank/detect", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                  [header]: token,
+                },
+                body: new URLSearchParams({ accountNumber: bankAccount }),
+              });
+              const bd = await resp.json();
+              if (bd.detected && bd.bankName) {
+                document.getElementById("bankName").value = bd.bankName;
+              }
+            } catch (e) {}
+          }
+
+          // Submit request
+          fetch("/account/withdraw/request", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              [header]: token,
+            },
+            body: new URLSearchParams({
+              coinAmount: coinAmount,
+              paymentMethod: paymentMethod,
+              bankAccount: bankAccount || "",
+              bankName: bankName || "",
+              accountHolder: accountHolder || "",
+              notes: notes || "",
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                showNotification(
+                  "Yêu cầu rút tiền đã được gửi thành công! Mã giao dịch: " +
+                    data.withdrawalCode,
+                  "success"
+                );
+                withdrawForm.reset();
+                calculatorSection.style.display = "none";
+                bankInfoSection.style.display = "none";
+
+                // Redirect to transactions page after 2 seconds
+                setTimeout(() => {
+                  window.location.href = "/account/transactions";
+                }, 2000);
+              } else {
+                showNotification(data.message, "error");
+              }
+            })
+            .catch((error) => {
+              console.error("Error submitting withdrawal:", error);
+              showNotification("Có lỗi xảy ra, vui lòng thử lại", "error");
+            })
+            .finally(() => {
+              submitBtn.disabled = false;
+              loading.style.display = "none";
+            });
+        });
+
+        function showNotification(message, type) {
+          // Create notification element
+          const notification = document.createElement("div");
+          notification.className = `alert alert-${type}`;
+          notification.innerHTML = `
+            <i class="fas fa-${
+              type === "success"
+                ? "check-circle"
+                : type === "error"
+                ? "exclamation-circle"
+                : "info-circle"
+            }"></i>
+            ${message}
+          `;
+
+          // Insert at the top of the form
+          withdrawForm.insertBefore(notification, withdrawForm.firstChild);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.remove();
+          }, 5000);
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -68,9 +68,9 @@
             <h3>Tổng tiền rút tháng này</h3>
             <p
               class="stat-number"
-              th:text="${#numbers.formatDecimal(totalWithdrawalAmountThisMonth ?: 0, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+              th:text="${#numbers.formatDecimal(totalWithdrawalAmountThisMonth ?: 0, 0, 'COMMA', 0, 'POINT')} + ' xu'"
             >
-              0 ₫
+              0 xu
             </p>
             <span
               class="stat-change"

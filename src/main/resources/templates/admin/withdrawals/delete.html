@@ -26,8 +26,8 @@
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals-form.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals-delete.css}" />
-     <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
-  <script th:src="@{/js/admin/notifications.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
+    <script th:src="@{/js/admin/notifications.js}"></script>
   </head>
 
   <body class="admin-body">
@@ -107,10 +107,17 @@
                     ></span>
                   </div>
                   <div class="info-row">
-                    <label>Số tiền:</label>
+                    <label>Số xu:</label>
                     <span
                       class="value amount-value"
-                      th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                      th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Quy đổi VND:</label>
+                    <span
+                      class="value amount-value"
+                      th:text="${#numbers.formatDecimal(withdrawal.amount * 1000, 0, 'COMMA', 0, 'POINT')} + ' VND'"
                     ></span>
                   </div>
                   <div class="info-row">
@@ -464,7 +471,7 @@
         }
 
         // Final confirmation dialog
-        let confirmMessage = `Bạn có chắc chắn muốn xóa withdrawal ${withdrawalCode} với số tiền ${withdrawalAmount} VND?`;
+        let confirmMessage = `Bạn có chắc chắn muốn xóa withdrawal ${withdrawalCode} với số tiền ${withdrawalAmount} xu?`;
 
         if (isCompleted) {
           confirmMessage +=

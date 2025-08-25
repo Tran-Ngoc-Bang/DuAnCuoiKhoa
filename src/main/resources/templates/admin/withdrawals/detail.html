@@ -26,8 +26,8 @@
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals-detail.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals-delete.css}" />
-     <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
-  <script th:src="@{/js/admin/notifications.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
+    <script th:src="@{/js/admin/notifications.js}"></script>
   </head>
 
   <body class="admin-body">
@@ -85,6 +85,33 @@
             </div>
 
             <div class="card-content">
+              <!-- Risk & Flags -->
+              <div
+                class="risk-flags"
+                style="display: flex; gap: 10px; margin-bottom: 12px"
+              >
+                <span
+                  th:if="${risk != null}"
+                  th:text="${'Risk score: ' + risk['score'] + ' (' + risk['level'] + ')'}"
+                  th:classappend="${risk['level'] == 'high' ? 'badge badge-danger' : (risk['level'] == 'medium' ? 'badge badge-warning' : 'badge badge-success')}"
+                  class="badge"
+                >
+                  Risk score: 0 (low)
+                </span>
+                <span
+                  th:if="${risk != null and risk['highAmount']}"
+                  class="badge badge-warning"
+                >
+                  Cần xem xét đặc biệt (số xu > 1000)
+                </span>
+                <span
+                  th:if="${risk != null and risk['isNewUser']}"
+                  class="badge badge-info"
+                >
+                  User mới - Cần xác minh
+                </span>
+              </div>
+
               <div class="info-grid">
                 <!-- Basic Information -->
                 <div class="info-section">
@@ -97,10 +124,17 @@
                     ></span>
                   </div>
                   <div class="info-row">
-                    <label>Số tiền:</label>
+                    <label>Số xu:</label>
                     <span
                       class="value amount-value"
-                      th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                      th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                    ></span>
+                  </div>
+                  <div class="info-row">
+                    <label>Quy đổi VND:</label>
+                    <span
+                      class="value amount-value"
+                      th:text="${#numbers.formatDecimal(withdrawal.amount * 1000, 0, 'COMMA', 0, 'POINT')} + ' VND'"
                     ></span>
                   </div>
                   <div class="info-row">
@@ -240,62 +274,27 @@
             </div>
           </div> -->
 
-          <!-- Notes Section -->
-          <!-- <div class="detail-card notes-section">
+          <!-- Notes Section (show reasons, audit trail) -->
+          <div class="detail-card notes-section">
             <div class="card-header">
               <h2>
                 <i class="fas fa-sticky-note"></i>
-                Ghi chú
+                Ghi chú / Lý do
               </h2>
             </div>
-            <div class="card-content"> -->
-          <!-- Existing Notes -->
-          <!-- <div class="existing-notes" th:if="${withdrawal.notes}">
+            <div class="card-content">
+              <div class="existing-notes" th:if="${withdrawal.notes}">
                 <div
                   class="notes-content"
-                  th:utext="${#strings.replace(withdrawal.notes, '&#10;', '<br>')}"
+                  th:utext="${#strings.replace(withdrawal.notes, '\n', '<br/>')}"
                 ></div>
               </div>
               <div class="no-notes" th:unless="${withdrawal.notes}">
                 <i class="fas fa-info-circle"></i>
                 <span>Chưa có ghi chú nào</span>
-              </div> -->
-
-          <!-- Add Note Form -->
-          <!-- <div class="add-note-form">
-                <h4>Thêm ghi chú mới</h4>
-                <form
-                  id="addNoteForm"
-                  th:action="@{/admin/withdrawals/{id}/add-note(id=${withdrawal.id})}"
-                  method="post"
-                >
-                  <div class="form-group">
-                    <textarea
-                      id="noteContent"
-                      name="note"
-                      placeholder="Nhập ghi chú..."
-                      rows="3"
-                      required
-                    ></textarea>
-                  </div>
-                  <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                      <i class="fas fa-plus"></i>
-                      Thêm ghi chú
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-secondary"
-                      onclick="clearNoteForm()"
-                    >
-                      <i class="fas fa-times"></i>
-                      Hủy
-                    </button>
-                  </div>
-                </form>
               </div>
             </div>
-          </div> -->
+          </div>
 
           <!-- Action Buttons -->
           <div class="detail-card action-buttons">
@@ -353,11 +352,78 @@
                 </button> -->
               </div>
 
-              <!-- Status Change Quick Actions -->
+              <!-- Withdrawal Status Actions -->
               <div
-                class="quick-actions"
-                th:if="${withdrawal.status.value != 'completed' && withdrawal.status.value != 'cancelled'}"
+                class="withdrawal-actions"
+                th:if="${withdrawal.status.name() == 'PENDING'}"
               >
+                <h4>Xử lý withdrawal</h4>
+                <div class="status-buttons">
+                  <form
+                    th:action="@{/admin/withdrawals/{id}/process(id=${withdrawal.id})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button type="submit" class="btn btn-warning">
+                      <i class="fas fa-play"></i>
+                      Bắt đầu xử lý
+                    </button>
+                  </form>
+
+                  <form
+                    th:action="@{/admin/withdrawals/{id}/approve(id=${withdrawal.id})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button type="submit" class="btn btn-success">
+                      <i class="fas fa-check"></i>
+                      Approve
+                    </button>
+                  </form>
+
+                  <button
+                    type="button"
+                    class="btn btn-danger js-reject-btn"
+                    onclick="showRejectModal()"
+                    style="display: inline"
+                  >
+                    <i class="fas fa-times"></i>
+                    Reject
+                  </button>
+                </div>
+              </div>
+
+              <div
+                class="withdrawal-actions"
+                th:if="${withdrawal.status.name() == 'PROCESSING'}"
+              >
+                <h4>Xử lý withdrawal</h4>
+                <div class="status-buttons">
+                  <form
+                    th:action="@{/admin/withdrawals/{id}/approve(id=${withdrawal.id})}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button type="submit" class="btn btn-success">
+                      <i class="fas fa-check"></i>
+                      Approve
+                    </button>
+                  </form>
+
+                  <button
+                    type="button"
+                    class="btn btn-danger js-reject-btn"
+                    onclick="showRejectModal()"
+                    style="display: inline"
+                  >
+                    <i class="fas fa-times"></i>
+                    Reject
+                  </button>
+                </div>
+              </div>
+
+              <!-- Status Change Quick Actions -->
+              <div class="quick-actions" th:if="${false}">
                 <h4>Thay đổi trạng thái nhanh</h4>
                 <div class="status-buttons">
                   <form
@@ -407,7 +473,6 @@
                       type="submit"
                       class="btn btn-success btn-sm"
                       th:if="${withdrawal.status.value != 'completed'}"
-                      onclick="return confirm('Đánh dấu withdrawal này là hoàn thành?')"
                     >
                       <i class="fas fa-check"></i>
                       Hoàn thành
@@ -461,7 +526,6 @@
                       type="submit"
                       class="btn btn-danger btn-sm"
                       th:if="${withdrawal.status.value != 'failed'}"
-                      onclick="return confirm('Đánh dấu withdrawal này là thất bại?')"
                     >
                       <i class="fas fa-times"></i>
                       Thất bại
@@ -473,6 +537,82 @@
           </div>
         </div>
       </main>
+    </div>
+
+    <!-- Reject Modal -->
+    <div
+      id="rejectModal"
+      class="modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99999;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(2px);
+      "
+    >
+      <div
+        class="modal-content"
+        style="
+          background: white;
+          padding: 2rem;
+          border-radius: 8px;
+          max-width: 500px;
+          width: 90%;
+        "
+      >
+        <h3 style="margin-bottom: 1rem">Reject Withdrawal</h3>
+        <form
+          id="rejectForm"
+          th:action="@{/admin/withdrawals/{id}/reject(id=${withdrawal.id})}"
+          method="post"
+        >
+          <input
+            type="hidden"
+            th:name="${_csrf.parameterName}"
+            th:value="${_csrf.token}"
+          />
+          <div class="form-group" style="margin-bottom: 1rem">
+            <label
+              for="rejectReason"
+              style="display: block; margin-bottom: 0.5rem; font-weight: 600"
+              >Lý do reject:</label
+            >
+            <textarea
+              id="rejectReason"
+              name="rejectReason"
+              required
+              rows="3"
+              placeholder="Nhập lý do reject..."
+              style="
+                width: 100%;
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+              "
+            ></textarea>
+          </div>
+          <div
+            class="modal-actions"
+            style="display: flex; gap: 1rem; justify-content: flex-end"
+          >
+            <button
+              type="button"
+              onclick="closeRejectModal()"
+              class="btn btn-secondary"
+            >
+              Hủy
+            </button>
+            <button type="submit" class="btn btn-danger">Reject</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Scripts -->
@@ -490,6 +630,36 @@
         const addNoteForm = document.getElementById("addNoteForm");
         if (addNoteForm) {
           addNoteForm.addEventListener("submit", handleAddNote);
+        }
+
+        // Ensure Reject buttons open the modal
+        const rejectButtons = document.querySelectorAll(".js-reject-btn");
+        rejectButtons.forEach(function (btn) {
+          btn.addEventListener("click", function (e) {
+            console.log("Reject button clicked");
+            e.preventDefault();
+            showRejectModal();
+          });
+        });
+
+        // Attach submit listener to modal form for diagnostics
+        const rejectForm = document.getElementById("rejectForm");
+        if (rejectForm) {
+          rejectForm.addEventListener("submit", function () {
+            console.log("Submitting reject form to", rejectForm.action);
+            const btn = rejectForm.querySelector('button[type="submit"]');
+            if (btn) {
+              btn.disabled = true;
+              btn.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+            }
+          });
+          const submitBtn = rejectForm.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.addEventListener("click", function () {
+              console.log("Reject modal submit button clicked");
+            });
+          }
         }
       }
 
@@ -546,6 +716,59 @@
         window.print();
       }
 
+      function showRejectModal() {
+        console.log("Opening reject modal");
+        const modal = document.getElementById("rejectModal");
+        if (!modal) {
+          console.error("Modal not found");
+          return;
+        }
+
+        // Force modal to show
+        modal.style.display = "flex";
+        modal.style.visibility = "visible";
+        modal.style.opacity = "1";
+        modal.style.zIndex = "99999";
+        modal.classList.add("active");
+
+        // Ensure modal content is visible
+        const modalContent = modal.querySelector(".modal-content");
+        if (modalContent) {
+          modalContent.style.display = "block";
+          modalContent.style.visibility = "visible";
+        }
+
+        // Auto-focus textarea
+        try {
+          const ta = document.getElementById("rejectReason");
+          if (ta) {
+            ta.focus();
+            ta.addEventListener(
+              "keydown",
+              function (e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                  const form = document.getElementById("rejectForm");
+                  if (form) form.submit();
+                }
+              },
+              { once: true }
+            );
+          }
+        } catch (_) {}
+
+        console.log("Modal should be visible now");
+      }
+
+      function closeRejectModal() {
+        const modal = document.getElementById("rejectModal");
+        if (!modal) return;
+        modal.classList.remove("active");
+        modal.style.display = "none";
+        modal.style.visibility = "hidden";
+        modal.style.opacity = "0";
+        document.getElementById("rejectReason").value = "";
+      }
+
       function exportWithdrawal() {
         // Create export data
         const withdrawalData = {
@@ -573,6 +796,62 @@
 
         showToast("Đã xuất file thành công", "success");
       }
+
+      function testReject() {
+        console.log("Test reject function called");
+        const withdrawalId = /*[[${withdrawal.id}]]*/ "";
+        const csrfToken = document
+          .querySelector('meta[name="_csrf"]')
+          .getAttribute("content");
+        const csrfHeader = document
+          .querySelector('meta[name="_csrf_header"]')
+          .getAttribute("content");
+
+        console.log("Withdrawal ID:", withdrawalId);
+        console.log("CSRF Token:", csrfToken);
+
+        fetch(`/admin/withdrawals/${withdrawalId}/reject`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            [csrfHeader]: csrfToken,
+          },
+          body: "rejectReason=Test reject from console",
+        })
+          .then((response) => {
+            console.log("Response status:", response.status);
+            console.log("Response ok:", response.ok);
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              console.error("Reject failed");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      // Removed JS interception to allow native form submit for Reject
+      // document.addEventListener("DOMContentLoaded", function () {
+      //   document
+      //     .querySelectorAll("button.btn.btn-danger")
+      //     .forEach(function (btn) {
+      //       if (
+      //         btn.textContent &&
+      //         btn.textContent.trim().toLowerCase() === "reject"
+      //       ) {
+      //         btn.addEventListener(
+      //           "click",
+      //           function (ev) {
+      //             ev.preventDefault();
+      //             openReject();
+      //           },
+      //           { once: false }
+      //         );
+      //       }
+      //     });
+      // });
 
       // Print styles
       const printStyles = `

@@ -237,7 +237,7 @@ public class DataInitializer implements CommandLineRunner {
 
         private void createSampleUsers() {
                 int currentYear = LocalDate.now().getYear();
-            
+
                 User admin = new User();
                 admin.setUsername("admin");
                 admin.setEmail("admin@example.com");
@@ -251,7 +251,7 @@ public class DataInitializer implements CommandLineRunner {
                 admin.setCreatedAt(LocalDateTime.of(currentYear, 1, 10, 10, 0));
                 admin.setUpdatedAt(LocalDateTime.of(currentYear, 1, 10, 10, 0));
                 userRepository.save(admin);
-            
+
                 User user1 = new User();
                 user1.setUsername("user1");
                 user1.setEmail("user1@example.com");
@@ -259,13 +259,13 @@ public class DataInitializer implements CommandLineRunner {
                 user1.setFullName("Người dùng 1");
                 user1.setRole("USER");
                 user1.setStatus("active");
-                user1.setCoinBalance(new BigDecimal("275"));
+                user1.setCoinBalance(new BigDecimal("1000"));
                 user1.setTotalSpent(new BigDecimal("158000.00"));
                 user1.setTotalCoinsPurchased(new BigDecimal("350"));
                 user1.setCreatedAt(LocalDateTime.of(currentYear, 2, 15, 10, 0));
                 user1.setUpdatedAt(LocalDateTime.of(currentYear, 2, 15, 10, 0));
                 userRepository.save(user1);
-            
+
                 User user2 = new User();
                 user2.setUsername("user2");
                 user2.setEmail("user2@example.com");
@@ -273,13 +273,13 @@ public class DataInitializer implements CommandLineRunner {
                 user2.setFullName("Người dùng 2");
                 user2.setRole("USER");
                 user2.setStatus("active");
-                user2.setCoinBalance(new BigDecimal("100"));
+                user2.setCoinBalance(new BigDecimal("1000"));
                 user2.setTotalSpent(new BigDecimal("50000.00"));
-                user2.setTotalCoinsPurchased(new BigDecimal("100"));
+                user2.setTotalCoinsPurchased(new BigDecimal("600"));
                 user2.setCreatedAt(LocalDateTime.of(currentYear, 3, 20, 10, 0));
                 user2.setUpdatedAt(LocalDateTime.of(currentYear, 3, 20, 10, 0));
                 userRepository.save(user2);
-            
+
                 User user3 = new User();
                 user3.setUsername("user3");
                 user3.setEmail("user3@example.com");
@@ -287,13 +287,13 @@ public class DataInitializer implements CommandLineRunner {
                 user3.setFullName("Người dùng 3");
                 user3.setRole("USER");
                 user3.setStatus("active");
-                user3.setCoinBalance(new BigDecimal("50"));
+                user3.setCoinBalance(new BigDecimal("1000"));
                 user3.setTotalSpent(new BigDecimal("20000.00"));
                 user3.setTotalCoinsPurchased(new BigDecimal("70"));
                 user3.setCreatedAt(LocalDateTime.of(currentYear, 4, 5, 10, 0));
                 user3.setUpdatedAt(LocalDateTime.of(currentYear, 4, 5, 10, 0));
                 userRepository.save(user3);
-            
+
                 User user4 = new User();
                 user4.setUsername("user4");
                 user4.setEmail("user4@example.com");
@@ -307,7 +307,7 @@ public class DataInitializer implements CommandLineRunner {
                 user4.setCreatedAt(LocalDateTime.of(currentYear, 5, 18, 10, 0));
                 user4.setUpdatedAt(LocalDateTime.of(currentYear, 5, 18, 10, 0));
                 userRepository.save(user4);
-            
+
                 User user5 = new User();
                 user5.setUsername("user5");
                 user5.setEmail("user5@example.com");
@@ -321,36 +321,8 @@ public class DataInitializer implements CommandLineRunner {
                 user5.setCreatedAt(LocalDateTime.of(currentYear, 6, 22, 10, 0));
                 user5.setUpdatedAt(LocalDateTime.of(currentYear, 6, 22, 10, 0));
                 userRepository.save(user5);
-            
-                User contributor1 = new User();
-                contributor1.setUsername("contributor1");
-                contributor1.setEmail("contributor1@example.com");
-                contributor1.setPasswordHash(passwordEncoder.encode("password"));
-                contributor1.setFullName("Cộng tác viên 1");
-                contributor1.setRole("CONTRIBUTOR");
-                contributor1.setStatus("active");
-                contributor1.setCoinBalance(new BigDecimal("500"));
-                contributor1.setTotalSpent(new BigDecimal("210000.00"));
-                contributor1.setTotalCoinsPurchased(new BigDecimal("600"));
-                contributor1.setCreatedAt(LocalDateTime.of(currentYear, 7, 8, 10, 0));
-                contributor1.setUpdatedAt(LocalDateTime.of(currentYear, 7, 8, 10, 0));
-                userRepository.save(contributor1);
-            
-                User contributor2 = new User();
-                contributor2.setUsername("contributor2");
-                contributor2.setEmail("contributor2@example.com");
-                contributor2.setPasswordHash(passwordEncoder.encode("password"));
-                contributor2.setFullName("Cộng tác viên 2");
-                contributor2.setRole("CONTRIBUTOR");
-                contributor2.setStatus("active");
-                contributor2.setCoinBalance(new BigDecimal("300"));
-                contributor2.setTotalSpent(new BigDecimal("110000.00"));
-                contributor2.setTotalCoinsPurchased(new BigDecimal("400"));
-                contributor2.setCreatedAt(LocalDateTime.of(currentYear, 8, 12, 10, 0));
-                contributor2.setUpdatedAt(LocalDateTime.of(currentYear, 8, 12, 10, 0));
-                userRepository.save(contributor2);
-            }
-            
+
+        }
 
         private void createSampleCoinPackages() {
                 // Get admin user for createdBy field
@@ -457,88 +429,101 @@ public class DataInitializer implements CommandLineRunner {
                         User contributor1, User contributor2) {
                 LocalDateTime now = LocalDateTime.now();
 
+                // Seed trusted history for user3: 3 withdrawals COMPLETED within 90 days
+                if (user3 != null) {
+                        createWithdrawalTransaction("WD_U3_001", new BigDecimal("60.00"),
+                                        Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", user3,
+                                        "Trusted seed 1", now.minusDays(20));
+                        createWithdrawalTransaction("WD_U3_002", new BigDecimal("70.00"),
+                                        Transaction.TransactionStatus.COMPLETED, "E_WALLET", user3,
+                                        "Trusted seed 2", now.minusDays(50));
+                        createWithdrawalTransaction("WD_U3_003", new BigDecimal("80.00"),
+                                        Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", user3,
+                                        "Trusted seed 3", now.minusDays(75));
+                }
+
                 // Withdrawal 1: Pending - Chờ duyệt
-                createWithdrawalTransaction("WD000001", new BigDecimal("25000.00"),
+                createWithdrawalTransaction("WD000001", new BigDecimal("25.00"),
                                 Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", user1,
                                 "Rút tiền về tài khoản ngân hàng Vietcombank", now.minusDays(1));
 
                 // Withdrawal 2: Completed - Đã hoàn thành (tháng này)
-                createWithdrawalTransaction("WD000002", new BigDecimal("150000.00"),
+                createWithdrawalTransaction("WD000002", new BigDecimal("15.00"),
                                 Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", contributor1,
                                 "Rút tiền từ doanh thu bán tài liệu - Đã chuyển khoản thành công", now.minusDays(3));
 
                 // Withdrawal 3: Completed - Đã hoàn thành (tháng này)
-                createWithdrawalTransaction("WD000003", new BigDecimal("75000.00"),
+                createWithdrawalTransaction("WD000003", new BigDecimal("75.00"),
                                 Transaction.TransactionStatus.COMPLETED, "E_WALLET", user2,
                                 "Rút tiền về ví MoMo - Giao dịch thành công", now.minusDays(5));
 
                 // Withdrawal 4: Pending - Chờ duyệt (số tiền lớn)
-                createWithdrawalTransaction("WD000004", new BigDecimal("500000.00"),
+                createWithdrawalTransaction("WD000004", new BigDecimal("45.00"),
                                 Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", contributor2,
                                 "Rút tiền doanh thu tháng - Cần xác minh thông tin ngân hàng", now.minusDays(2));
 
                 // Withdrawal 5: Failed - Thất bại
-                createWithdrawalTransaction("WD000005", new BigDecimal("80000.00"),
+                createWithdrawalTransaction("WD000005", new BigDecimal("80.00"),
                                 Transaction.TransactionStatus.FAILED, "BANK_TRANSFER", user3,
                                 "Rút tiền thất bại - Thông tin tài khoản không chính xác", now.minusDays(7));
 
                 // Withdrawal 6: Cancelled - Đã hủy
-                createWithdrawalTransaction("WD000006", new BigDecimal("30000.00"),
+                createWithdrawalTransaction("WD000006", new BigDecimal("30.00"),
                                 Transaction.TransactionStatus.CANCELLED, "E_WALLET", user4,
                                 "Hủy yêu cầu rút tiền theo yêu cầu của người dùng", now.minusDays(4));
 
                 // Withdrawal 7: Completed - Đã hoàn thành (tháng trước)
-                createWithdrawalTransaction("WD000007", new BigDecimal("120000.00"),
+                createWithdrawalTransaction("WD000007", new BigDecimal("120.00"),
                                 Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", contributor1,
                                 "Rút tiền tháng trước - Đã chuyển khoản", now.minusDays(35));
 
                 // Withdrawal 8: Pending - Chờ duyệt (quá hạn xử lý)
-                createWithdrawalTransaction("WD000008", new BigDecimal("45000.00"),
+                createWithdrawalTransaction("WD000008", new BigDecimal("45.00"),
                                 Transaction.TransactionStatus.PENDING, "E_WALLET", user5,
                                 "Rút tiền về ví ZaloPay - Đang chờ xử lý quá 5 ngày", now.minusDays(6));
 
                 // Withdrawal 9: Completed - Đã hoàn thành (tháng này)
-                createWithdrawalTransaction("WD000009", new BigDecimal("200000.00"),
+                createWithdrawalTransaction("WD000009", new BigDecimal("20.00"),
                                 Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", contributor2,
                                 "Rút tiền doanh thu - Chuyển khoản ACB thành công", now.minusDays(8));
 
                 // Withdrawal 10: Pending - Chờ duyệt (mới)
-                createWithdrawalTransaction("WD000010", new BigDecimal("60000.00"),
+                createWithdrawalTransaction("WD000010", new BigDecimal("60.00"),
                                 Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", user1,
                                 "Rút tiền về tài khoản Techcombank", now.minusDays(1));
 
                 // Withdrawal 11: Failed - Thất bại (lỗi hệ thống)
-                createWithdrawalTransaction("WD000011", new BigDecimal("90000.00"),
+                createWithdrawalTransaction("WD000011", new BigDecimal("90.00"),
                                 Transaction.TransactionStatus.FAILED, "E_WALLET", user2,
                                 "Rút tiền thất bại - Lỗi kết nối với nhà cung cấp dịch vụ", now.minusDays(10));
 
                 // Withdrawal 12: Completed - Đã hoàn thành (tháng này)
-                createWithdrawalTransaction("WD000012", new BigDecimal("35000.00"),
+                createWithdrawalTransaction("WD000012", new BigDecimal("35.00"),
                                 Transaction.TransactionStatus.COMPLETED, "E_WALLET", user3,
                                 "Rút tiền về ví Momo - Giao dịch hoàn tất", now.minusDays(12));
 
                 // Withdrawal 13: Pending - Chờ duyệt (cần xác minh)
-                createWithdrawalTransaction("WD000013", new BigDecimal("300000.00"),
+                createWithdrawalTransaction("WD000013", new BigDecimal("48.00"),
                                 Transaction.TransactionStatus.PENDING, "BANK_TRANSFER", contributor1,
                                 "Rút tiền số lượng lớn - Cần xác minh danh tính", now.minusDays(1));
 
                 // Withdrawal 14: Completed - Đã hoàn thành (tháng trước)
-                createWithdrawalTransaction("WD000014", new BigDecimal("85000.00"),
+                createWithdrawalTransaction("WD000014", new BigDecimal("85.00"),
                                 Transaction.TransactionStatus.COMPLETED, "BANK_TRANSFER", user4,
                                 "Rút tiền tháng trước - Đã chuyển khoản BIDV", now.minusDays(40));
 
                 // Withdrawal 15: Cancelled - Đã hủy (do user)
-                createWithdrawalTransaction("WD000015", new BigDecimal("55000.00"),
+                createWithdrawalTransaction("WD000015", new BigDecimal("55.00"),
                                 Transaction.TransactionStatus.CANCELLED, "E_WALLET", user5,
                                 "Hủy yêu cầu rút tiền - Người dùng thay đổi ý định", now.minusDays(3));
 
                 // Withdrawal 16: Processing - Đang xử lý
-                createWithdrawalTransaction("WD000016", new BigDecimal("180000.00"),
+                createWithdrawalTransaction("WD000016", new BigDecimal("18.00"),
                                 Transaction.TransactionStatus.PROCESSING, "BANK_TRANSFER", contributor1,
                                 "Đang xử lý chuyển khoản - Đã xác minh thông tin", now.minusHours(6));
 
                 // Withdrawal 17: Processing - Đang xử lý (ví điện tử)
-                createWithdrawalTransaction("WD000017", new BigDecimal("95000.00"),
+                createWithdrawalTransaction("WD000017", new BigDecimal("95.00"),
                                 Transaction.TransactionStatus.PROCESSING, "E_WALLET", user2,
                                 "Đang xử lý chuyển tiền về ví MoMo", now.minusHours(2));
         }

@@ -235,6 +235,96 @@ public class TransactionService {
     }
 
     /**
+     * Tính toán balance flow cho dashboard (bao gồm cả withdrawal và recharge)
+     */
+    public Map<String, Object> getBalanceFlowStats(User user) {
+        Map<String, Object> stats = new HashMap<>();
+
+        // Tổng nạp xu (PURCHASE - COMPLETED)
+        BigDecimal totalRecharge = getUserTotalByType(user, Transaction.TransactionType.PURCHASE,
+                Transaction.TransactionStatus.COMPLETED);
+        if (totalRecharge == null)
+            totalRecharge = BigDecimal.ZERO;
+
+        // Tổng rút xu (WITHDRAWAL - COMPLETED)
+        BigDecimal totalWithdrawal = getUserTotalByType(user, Transaction.TransactionType.WITHDRAWAL,
+                Transaction.TransactionStatus.COMPLETED);
+        if (totalWithdrawal == null)
+            totalWithdrawal = BigDecimal.ZERO;
+
+        // Tổng rút xu đang chờ (WITHDRAWAL - PENDING)
+        BigDecimal pendingWithdrawal = getUserTotalByType(user, Transaction.TransactionType.WITHDRAWAL,
+                Transaction.TransactionStatus.PENDING);
+        if (pendingWithdrawal == null)
+            pendingWithdrawal = BigDecimal.ZERO;
+
+        // Tổng rút xu đang xử lý (WITHDRAWAL - PROCESSING)
+        BigDecimal processingWithdrawal = getUserTotalByType(user, Transaction.TransactionType.WITHDRAWAL,
+                Transaction.TransactionStatus.PROCESSING);
+        if (processingWithdrawal == null)
+            processingWithdrawal = BigDecimal.ZERO;
+
+        // Tổng rút xu bị từ chối (WITHDRAWAL - FAILED)
+        BigDecimal failedWithdrawal = getUserTotalByType(user, Transaction.TransactionType.WITHDRAWAL,
+                Transaction.TransactionStatus.FAILED);
+        if (failedWithdrawal == null)
+            failedWithdrawal = BigDecimal.ZERO;
+
+        // Tổng rút xu bị hủy (WITHDRAWAL - CANCELLED)
+        BigDecimal cancelledWithdrawal = getUserTotalByType(user, Transaction.TransactionType.WITHDRAWAL,
+                Transaction.TransactionStatus.CANCELLED);
+        if (cancelledWithdrawal == null)
+            cancelledWithdrawal = BigDecimal.ZERO;
+
+        // Số dư hiện tại
+        BigDecimal currentBalance = user.getCoinBalance() != null ? user.getCoinBalance() : BigDecimal.ZERO;
+
+        // Tổng rút xu đang chờ xử lý (PENDING + PROCESSING)
+        BigDecimal totalPendingWithdrawal = pendingWithdrawal.add(processingWithdrawal);
+
+        // Số dư khả dụng (trừ đi số xu đang chờ rút)
+        BigDecimal availableBalance = currentBalance.subtract(totalPendingWithdrawal);
+        if (availableBalance.compareTo(BigDecimal.ZERO) < 0) {
+            availableBalance = BigDecimal.ZERO;
+        }
+
+        stats.put("totalRecharge", totalRecharge);
+        stats.put("totalWithdrawal", totalWithdrawal);
+        stats.put("pendingWithdrawal", pendingWithdrawal);
+        stats.put("processingWithdrawal", processingWithdrawal);
+        stats.put("failedWithdrawal", failedWithdrawal);
+        stats.put("cancelledWithdrawal", cancelledWithdrawal);
+        stats.put("currentBalance", currentBalance);
+        stats.put("totalPendingWithdrawal", totalPendingWithdrawal);
+        stats.put("availableBalance", availableBalance);
+
+        return stats;
+    }
+
+    /**
+     * Lấy thống kê giao dịch theo tháng cho user
+     */
+    public Map<String, Object> getMonthlyTransactionStats(User user, int months) {
+        Map<String, Object> stats = new HashMap<>();
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusMonths(months);
+
+        // Thống kê nạp xu theo tháng
+        List<Object[]> rechargeStats = transactionRepository.getMonthlyStatsByUserAndType(
+                user, Transaction.TransactionType.PURCHASE, startDate, endDate);
+
+        // Thống kê rút xu theo tháng
+        List<Object[]> withdrawalStats = transactionRepository.getMonthlyStatsByUserAndType(
+                user, Transaction.TransactionType.WITHDRAWAL, startDate, endDate);
+
+        stats.put("rechargeStats", rechargeStats);
+        stats.put("withdrawalStats", withdrawalStats);
+        stats.put("months", months);
+
+        return stats;
+    }
+
+    /**
      * Complete coin purchase and update user balance
      */
     public void completeCoinPurchase(Transaction transaction) {

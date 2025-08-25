@@ -347,6 +347,46 @@
         color: var(--primary);
       }
 
+      .tab-navigation {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--gray-200);
+        padding-bottom: 0;
+      }
+
+      .tab-button {
+        background: none;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        cursor: pointer;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        transition: var(--transition);
+        border-bottom: 3px solid transparent;
+      }
+
+      .tab-button.active {
+        background: var(--white);
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      .tab-button:hover:not(.active) {
+        background: var(--gray-50);
+        color: var(--gray-700);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
       .chart-container {
         width: 100%;
         height: 300px;
@@ -418,12 +458,9 @@
 
       .transaction-table td {
         padding: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-        vertical-align: middle;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 0;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+    white-space: nowrap;
       }
 
       .transaction-table td:not(.action-cell) {
@@ -1211,13 +1248,25 @@
                 </span>
               </div>
 
-              <div class="documents-grid" style="grid-template-columns: 1fr">
-                <div class="document-card">
-                  <div class="document-content" style="padding: 1.25rem">
-                    <h3 class="document-title" style="margin-bottom: 1rem">
-                      <i class="fas fa-filter" style="margin-right: 0.5rem"></i>
-                      Bộ lọc tìm kiếm
-                    </h3>
+              <!-- Tab Navigation -->
+              <div class="tab-navigation" style="margin-bottom: 1.5rem;">
+                <button class="tab-button active" data-tab="transactions">
+                  <i class="fas fa-history"></i> Lịch sử giao dịch
+                </button>
+                <button class="tab-button" data-tab="withdraw">
+                  <i class="fas fa-money-bill-wave"></i> Rút tiền
+                </button>
+              </div>
+
+              <!-- Transactions Tab -->
+              <div id="transactionsTab" class="tab-content active">
+                <div class="documents-grid" style="grid-template-columns: 1fr">
+                  <div class="document-card">
+                    <div class="document-content" style="padding: 1.25rem">
+                      <h3 class="document-title" style="margin-bottom: 1rem">
+                        <i class="fas fa-filter" style="margin-right: 0.5rem"></i>
+                        Bộ lọc tìm kiếm
+                      </h3>
                     <div class="filters">
                       <div class="form-group">
                         <label>Tìm kiếm</label>
@@ -1277,7 +1326,7 @@
                             value="WITHDRAWAL"
                             th:selected="${type == 'WITHDRAWAL'}"
                           >
-                            Tải tài liệu
+                            Rút tiền
                           </option>
                           <option
                             value="REFUND"
@@ -1352,13 +1401,19 @@
                       <tr th:each="tx : ${transactionsPage.content}">
                         <td th:text="${tx.code}">TXN000001</td>
                         <td th:text="${tx.type}">PURCHASE</td>
-                        <td
-                          th:text="${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 2, 'POINT')}"
-                        ></td>
+                        <td>
+                          <!-- Hiển thị số tiền theo loại giao dịch -->
+                          <span th:if="${tx.type.name() == 'PURCHASE' or tx.type.name() == 'REFUND'}">
+                            <span th:text="${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                          </span>
+                          <span th:if="${tx.type.name() == 'WITHDRAWAL'}">
+                            <span th:text="${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT')} + ' xu'"></span>
+                          </span>
+                        </td>
                         <td>
                           <span
                             class="status-badge"
-                            th:classappend="${tx.status.name() == 'COMPLETED'} ? ' status-success' : (${tx.status.name() == 'PENDING'} ? ' status-pending' : ' status-failed')"
+                            th:classappend="${tx.status.name() == 'COMPLETED'} ? ' status-completed' : (${tx.status.name() == 'PENDING'} ? ' status-pending' : (${tx.status.name() == 'PROCESSING'} ? ' status-processing' : (${tx.status.name() == 'CANCELLED'} ? ' status-cancelled' : ' status-failed')))"
                             th:text="${tx.status.displayName}"
                             >Trạng thái</span
                           >
@@ -1374,7 +1429,23 @@
                         >
                           01/01/2025 12:00
                         </td>
-                        <td th:text="${tx.notes}">-</td>
+                        <td>
+                          <div th:if="${tx.type.name() == 'WITHDRAWAL'}">
+                            <div class="withdraw-progress">
+                              <div class="step" th:classappend="${tx.status.name() == 'PENDING' or tx.status.name() == 'PROCESSING' or tx.status.name() == 'COMPLETED'} ? ' active' : ''">Đã nhận</div>
+                              <div class="step" th:classappend="${tx.status.name() == 'PROCESSING' or tx.status.name() == 'COMPLETED'} ? ' active' : ''">Đang xử lý</div>
+                              <div class="step" th:classappend="${tx.status.name() == 'COMPLETED'} ? ' active' : ''">Hoàn thành</div>
+                            </div>
+                            <div class="eta" th:if="${tx.status.name() == 'PENDING' or tx.status.name() == 'PROCESSING'}">
+                              Ước tính hoàn tất: trong 24-48 giờ
+                            </div>
+                            <div class="note-reason" th:if="${(tx.status.name() == 'FAILED' or tx.status.name() == 'CANCELLED') and (tx.notes != null and !#strings.isEmpty(tx.notes))}">
+                              <span style="color:#ef4444; font-weight:600;">Lý do:</span>
+                              <span th:text="${#strings.abbreviate(tx.notes, 120)}"></span>
+                            </div>
+                          </div>
+                          <div th:if="${tx.type.name() != 'WITHDRAWAL'}" th:text="${tx.notes}">-</div>
+                        </td>
                         <td class="action-cell">
                           <button
                             class="action-btn"
@@ -1392,11 +1463,20 @@
                           >
                             <i class="fas fa-undo"></i>&nbsp;Hoàn tiền
                           </button>
+                          <button
+                            class="cancel-btn"
+                            type="button"
+                            th:if="${tx.type.name() == 'WITHDRAWAL' and tx.status.name() == 'PENDING'}"
+                            onclick="cancelWithdrawal(this.dataset.id)"
+                            th:attr="data-id=${tx.id}"
+                          >
+                            <i class="fas fa-times"></i>&nbsp;Hủy
+                          </button>
                         </td>
                       </tr>
                       <tr th:if="${transactionsPage.totalElements == 0}">
                         <td
-                          colspan="8"
+                          colspan="9"
                           style="text-align: center; color: var(--gray-600)"
                         >
                           Không có giao dịch
@@ -1440,6 +1520,128 @@
               </div>
 
               <div class="pagination" id="pagination"></div>
+            </div>
+          </div>
+
+          <!-- Withdraw Tab -->
+          <div id="withdrawTab" class="tab-content" style="display: none;">
+            <div class="withdraw-container" style="max-width: 800px; margin: 0 auto;">
+              <!-- Balance Info -->
+              <div class="balance-info" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem; text-align: center;">
+                <div class="balance-amount" style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;" id="withdrawBalance">0 xu</div>
+                <div class="balance-label" style="font-size: 1rem; opacity: 0.9;">Số dư xu hiện tại <span id="quickPromo" style="display:none; background: rgba(239,68,68,.15); color:#fff; padding:2px 6px; border-radius: 6px; margin-left:8px;">Giảm phí 50%</span></div>
+              </div>
+
+              <!-- Quick Withdraw Form -->
+              <div class="withdraw-card" style="background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); padding: 2rem;">
+                <h3 style="margin-bottom: 1.5rem; color: var(--gray-900);">
+                  <i class="fas fa-money-bill-wave"></i> Rút tiền nhanh
+                </h3>
+                
+                <form id="quickWithdrawForm" style="display: grid; gap: 1.5rem;" novalidate>
+                  <div class="form-group">
+                    <label for="quickCoinAmount">
+                      <i class="fas fa-coins"></i> Số xu muốn rút
+                    </label>
+                    <input
+                      type="number"
+                      id="quickCoinAmount"
+                      name="quickCoinAmount"
+                      min="50"
+                      step="1"
+                      placeholder="Nhập số xu muốn rút (tối thiểu 50 xu)"
+                      required
+                      style="padding: 0.75rem 1rem; border: 2px solid var(--gray-200); border-radius: var(--radius); font-size: 1rem; width: 100%;"
+                    />
+                  </div>
+
+                  <div class="calculator-section" id="quickCalculatorSection" style="display: none; background: var(--gray-50); border: 2px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem;">
+                    <div class="calculator-title" style="font-weight: 600; color: var(--gray-700); margin-bottom: 1rem;">
+                      <i class="fas fa-calculator"></i> Chi tiết tính toán
+                    </div>
+                    <div class="calculator-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                      <div class="calculator-item" style="background: var(--white); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--gray-200);">
+                        <div class="calculator-label" style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem;">Số xu rút</div>
+                        <div class="calculator-value" id="quickCalcCoinAmount" style="font-size: 1.125rem; font-weight: 600; color: var(--gray-900);">0 xu</div>
+                      </div>
+                      <div class="calculator-item">
+                        <div class="calculator-label">Phí dịch vụ</div>
+                        <div class="calculator-value warning" id="quickCalcFee" style="color: var(--warning);">0 xu (0%)</div>
+                      </div>
+                      <div class="calculator-item">
+                        <div class="calculator-label">Số xu thực nhận</div>
+                        <div class="calculator-value success" id="quickCalcNetAmount" style="color: var(--success);">0 xu</div>
+                      </div>
+                      <div class="calculator-item">
+                        <div class="calculator-label">Số tiền VND</div>
+                        <div class="calculator-value success" id="quickCalcVndAmount" style="color: var(--success);">0 VND</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="quickPaymentMethod">
+                      <i class="fas fa-credit-card"></i> Phương thức rút tiền
+                    </label>
+                    <select id="quickPaymentMethod" name="quickPaymentMethod" required style="padding: 0.75rem 1rem; border: 2px solid var(--gray-200); border-radius: var(--radius); font-size: 1rem; width: 100%;">
+                      <option value="">Chọn phương thức rút tiền</option>
+                      <option value="BANK_TRANSFER">Chuyển khoản ngân hàng</option>
+                      <option value="E_WALLET">Ví điện tử</option>
+                    </select>
+                  </div>
+
+                  <div id="quickBankInfoSection" style="display: none;">
+                    <div class="form-group">
+                      <label for="quickBankName">
+                        <i class="fas fa-university"></i> Tên ngân hàng
+                      </label>
+                      <input
+                        type="text"
+                        id="quickBankName"
+                        name="quickBankName"
+                        placeholder="VD: Vietcombank, BIDV, Agribank..."
+                        style="padding: 0.75rem 1rem; border: 2px solid var(--gray-200); border-radius: var(--radius); font-size: 1rem; width: 100%;"
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="quickBankAccount">
+                        <i class="fas fa-credit-card"></i> Số tài khoản
+                      </label>
+                      <input
+                        type="text"
+                        id="quickBankAccount"
+                        name="quickBankAccount"
+                        placeholder="Nhập số tài khoản ngân hàng"
+                        style="padding: 0.75rem 1rem; border: 2px solid var(--gray-200); border-radius: var(--radius); font-size: 1rem; width: 100%;"
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="quickAccountHolder">
+                        <i class="fas fa-user"></i> Chủ tài khoản
+                      </label>
+                      <input
+                        type="text"
+                        id="quickAccountHolder"
+                        name="quickAccountHolder"
+                        placeholder="Tên chủ tài khoản (phải trùng với CMND/CCCD)"
+                        style="padding: 0.75rem 1rem; border: 2px solid var(--gray-200); border-radius: var(--radius); font-size: 1rem; width: 100%;"
+                      />
+                    </div>
+                  </div>
+
+                  <button type="submit" class="submit-button" id="quickSubmitBtn" style="background: linear-gradient(135deg, var(--success), #059669); color: var(--white); border: none; border-radius: var(--radius-lg); padding: 1rem 2rem; font-size: 1.125rem; font-weight: 600; cursor: pointer; width: 100%;">
+                    <i class="fas fa-paper-plane"></i> Gửi yêu cầu rút tiền
+                  </button>
+                </form>
+
+                <div style="margin-top: 2rem; text-align: center;">
+                  <a href="/account/withdraw" class="btn btn-primary" style="background: var(--primary); color: var(--white); padding: 0.75rem 1.5rem; border-radius: var(--radius); text-decoration: none; display: inline-block;">
+                    <i class="fas fa-external-link-alt"></i> Mở trang rút tiền đầy đủ
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1547,6 +1749,279 @@
     <script th:src="@{/js/client-header.js}"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Tab navigation
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+            
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.style.display = 'none');
+            
+            // Add active class to clicked button and show target content
+            button.classList.add('active');
+            document.getElementById(targetTab + 'Tab').style.display = 'block';
+            
+            // Load withdraw data if withdraw tab is selected
+            if (targetTab === 'withdraw') {
+              loadWithdrawData();
+              // Show promo badge if active (fetch calculate with 50 xu just to read flags)
+              fetch('/account/withdraw/calculate', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', [document.querySelector('meta[name="_csrf_header"]').getAttribute('content')]: document.querySelector('meta[name="_csrf"]').getAttribute('content') }, body: 'coinAmount=50' })
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(d => { const el = document.getElementById('quickPromo'); if (el) el.style.display = d && d.promoActive ? 'inline-block' : 'none'; })
+                .catch(() => {});
+            }
+          });
+        });
+
+        // Withdraw functionality
+        function loadWithdrawData() {
+          // Load user balance
+          fetch("/account/transactions/stats")
+            .then(response => response.json())
+            .then(data => {
+              if (data.stats) {
+                const balance = data.stats.coinBalance || 0;
+                document.getElementById('withdrawBalance').textContent = new Intl.NumberFormat("vi-VN").format(balance) + " xu";
+              }
+            })
+            .catch(error => console.error("Error loading withdraw data:", error));
+        }
+
+        // Quick withdraw form functionality
+        const quickCoinAmountInput = document.getElementById('quickCoinAmount');
+        const quickPaymentMethodSelect = document.getElementById('quickPaymentMethod');
+        const quickBankInfoSection = document.getElementById('quickBankInfoSection');
+        const quickCalculatorSection = document.getElementById('quickCalculatorSection');
+        const quickWithdrawForm = document.getElementById('quickWithdrawForm');
+
+        if (quickPaymentMethodSelect) {
+          quickPaymentMethodSelect.addEventListener("change", function() {
+            if (this.value === "BANK_TRANSFER") {
+              quickBankInfoSection.style.display = "block";
+              document.getElementById('quickBankName')?.setAttribute('required','required');
+              document.getElementById('quickBankAccount')?.setAttribute('required','required');
+              document.getElementById('quickAccountHolder')?.setAttribute('required','required');
+            } else {
+              quickBankInfoSection.style.display = "none";
+              document.getElementById('quickBankName')?.removeAttribute('required');
+              document.getElementById('quickBankAccount')?.removeAttribute('required');
+              document.getElementById('quickAccountHolder')?.removeAttribute('required');
+            }
+          });
+        }
+
+        if (quickCoinAmountInput) {
+          let calculateTimeout;
+          quickCoinAmountInput.addEventListener("input", function() {
+            clearTimeout(calculateTimeout);
+            calculateTimeout = setTimeout(() => {
+              calculateQuickWithdrawal();
+            }, 500);
+          });
+        }
+
+        // Live bank auto-detect for quick withdraw form
+        const quickBankAccountInput = document.getElementById('quickBankAccount');
+        if (quickBankAccountInput) {
+          let quickBankDetectTimer;
+          quickBankAccountInput.addEventListener("input", function() {
+            if (quickBankDetectTimer) clearTimeout(quickBankDetectTimer);
+            quickBankDetectTimer = setTimeout(async () => {
+              const acct = quickBankAccountInput.value.trim();
+              const quickBankNameField = document.getElementById('quickBankName');
+              
+              // Clear bank name if account number is empty or too short
+              if (!acct || acct.length < 4) {
+                if (quickBankNameField) {
+                  quickBankNameField.value = "";
+                }
+                return;
+              }
+              
+              // Only detect if account number starts with known bank prefixes
+              const bankPrefixes = ["9704", "9703", "9702", "9701"];
+              const hasValidPrefix = bankPrefixes.some(prefix => acct.startsWith(prefix));
+              
+              if (!hasValidPrefix) {
+                return;
+              }
+              
+              try {
+                const resp = await fetch("/account/bank/detect", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    [document.querySelector('meta[name="_csrf_header"]').getAttribute('content')]: document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                  },
+                  body: new URLSearchParams({ accountNumber: acct }),
+                });
+                const bd = await resp.json();
+                if (bd.detected && bd.bankName) {
+                  if (quickBankNameField) {
+                    quickBankNameField.value = bd.bankName;
+                  }
+                }
+              } catch (e) {
+                console.error("Quick bank detection error:", e);
+              }
+            }, 400);
+          });
+        }
+
+        function calculateQuickWithdrawal() {
+          const coinAmount = parseFloat(quickCoinAmountInput.value);
+          
+          if (coinAmount < 50) {
+            quickCalculatorSection.style.display = "none";
+            return;
+          }
+
+          fetch("/account/withdraw/calculate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              [document.querySelector('meta[name="_csrf_header"]').getAttribute('content')]: document.querySelector('meta[name="_csrf"]').getAttribute('content')
+            },
+            body: `coinAmount=${coinAmount}`
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById("quickCalcCoinAmount").textContent = data.coinAmount + " xu";
+              document.getElementById("quickCalcFee").textContent = data.fee + " xu (" + data.feePercentage + "%)";
+              document.getElementById("quickCalcNetAmount").textContent = data.netAmount + " xu";
+              document.getElementById("quickCalcVndAmount").textContent = new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND"
+              }).format(data.vndAmount);
+              quickCalculatorSection.style.display = "block";
+            } else {
+              showNotification(data.message, "error");
+              quickCalculatorSection.style.display = "none";
+            }
+          })
+          .catch(error => {
+            console.error("Error calculating withdrawal:", error);
+            quickCalculatorSection.style.display = "none";
+          });
+        }
+
+        if (quickWithdrawForm) {
+          quickWithdrawForm.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const coinAmount = formData.get("quickCoinAmount");
+            const paymentMethod = formData.get("quickPaymentMethod");
+            const bankAccount = formData.get("quickBankAccount");
+            const bankName = formData.get("quickBankName");
+            const accountHolder = formData.get("quickAccountHolder");
+
+            // Validation
+            if (parseFloat(coinAmount) < 50) {
+              showNotification("Số xu tối thiểu để rút là 50 xu", "error");
+              return;
+            }
+
+            if (paymentMethod === "BANK_TRANSFER") {
+              if (!bankAccount || !bankName || !accountHolder) {
+                showNotification("Vui lòng điền đầy đủ thông tin ngân hàng", "error");
+                return;
+              }
+            }
+
+            // Auto-detect bank name before submit (best-effort)
+            if (paymentMethod === "BANK_TRANSFER" && bankAccount && !bankName) {
+              try {
+                const resp = await fetch("/account/bank/detect", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    [document.querySelector('meta[name="_csrf_header"]').getAttribute('content')]: document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                  },
+                  body: new URLSearchParams({ accountNumber: bankAccount }),
+                });
+                const bd = await resp.json();
+                if (bd.detected && bd.bankName) {
+                  document.getElementById('quickBankName').value = bd.bankName;
+                }
+              } catch (e) {
+                console.error("Quick bank detection error:", e);
+              }
+            }
+
+            // Submit request
+            fetch("/account/withdraw/request", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                [document.querySelector('meta[name="_csrf_header"]').getAttribute('content')]: document.querySelector('meta[name="_csrf"]').getAttribute('content')
+              },
+              body: new URLSearchParams({
+                coinAmount: coinAmount,
+                paymentMethod: paymentMethod,
+                bankAccount: bankAccount || "",
+                bankName: bankName || "",
+                accountHolder: accountHolder || "",
+                notes: ""
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showNotification("Yêu cầu rút tiền đã được gửi thành công! Mã giao dịch: " + data.withdrawalCode, "success");
+                quickWithdrawForm.reset();
+                quickCalculatorSection.style.display = "none";
+                quickBankInfoSection.style.display = "none";
+                
+                // Refresh the page to show new transaction
+                setTimeout(() => {
+                  location.reload();
+                }, 2000);
+              } else {
+                showNotification(data.message, "error");
+              }
+            })
+            .catch(error => {
+              console.error("Error submitting withdrawal:", error);
+              showNotification("Có lỗi xảy ra, vui lòng thử lại", "error");
+            });
+          });
+        }
+
+        function showNotification(message, type) {
+          // Create notification element
+          const notification = document.createElement("div");
+          notification.className = `alert alert-${type}`;
+          notification.style.cssText = `
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            background: ${type === 'success' ? 'var(--success-light)' : 'var(--danger-light)'};
+            color: ${type === 'success' ? 'var(--success)' : 'var(--danger)'};
+            border: 1px solid ${type === 'success' ? 'var(--success)' : 'var(--danger)'};
+          `;
+          notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            ${message}
+          `;
+          
+          // Insert at the top of the form
+          if (quickWithdrawForm) {
+            quickWithdrawForm.insertBefore(notification, quickWithdrawForm.firstChild);
+          }
+          
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.remove();
+          }, 5000);
+        }
+
         // Load real data from backend
         let transactionStats = {};
         let dailyChartData = [];
@@ -1959,10 +2434,15 @@
                   <tr data-id="${t.id}">
                     <td>${t.id}</td>
                     <td>${t.document}</td>
-                    <td>${new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(t.amount)}</td>
+                    <td>
+                      ${t.type === 'PURCHASE' || t.type === 'REFUND' 
+                        ? new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(t.amount)
+                        : new Intl.NumberFormat("vi-VN").format(t.amount) + ' xu'
+                      }
+                    </td>
                     <td><span class="status-badge ${t.statusClass}">${
                       t.status === "success"
                         ? "Thành công"
@@ -2025,10 +2505,13 @@
               confirm(
                 `Bạn có chắc muốn hoàn tiền cho giao dịch ${transaction.id} (${
                   transaction.document
-                }) với số tiền ${new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(transaction.amount)}?`
+                }) với số tiền ${transaction.type === 'WITHDRAWAL' 
+                  ? new Intl.NumberFormat("vi-VN").format(transaction.amount) + ' xu'
+                  : new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(transaction.amount)
+                }?`
               )
             ) {
               refundTransaction(transactionId);
@@ -2096,10 +2579,12 @@
               transaction.date
             );
             document.getElementById("modalAmount").textContent =
-              new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(transaction.amount);
+              transaction.type === 'WITHDRAWAL' 
+                ? new Intl.NumberFormat("vi-VN").format(transaction.amount) + ' xu'
+                : new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(transaction.amount);
             document.getElementById(
               "modalStatus"
             ).innerHTML = `<span class="status-badge ${
@@ -2189,10 +2674,13 @@
                   70
                 );
                 doc.text(
-                  `Số tiền: ${new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(transaction.amount)}`,
+                  `Số tiền: ${transaction.type === 'WITHDRAWAL' 
+                    ? new Intl.NumberFormat("vi-VN").format(transaction.amount) + ' xu'
+                    : new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(transaction.amount)
+                  }`,
                   20,
                   80
                 );
@@ -2632,6 +3120,42 @@
         // Expose to global so inline onclick works
         window.openModal = openModal;
         window.confirmRefund = confirmRefund;
+        
+        // Cancel withdrawal function
+        window.cancelWithdrawal = function(txId) {
+          if (confirm('Bạn có chắc chắn muốn hủy yêu cầu rút tiền này?')) {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            
+            const headers = {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+            
+            fetch(`/account/withdraw/${txId}/cancel`, {
+              method: 'POST',
+              headers: headers,
+              credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showNotification(data.message, 'success');
+                // Refresh page after 2 seconds
+                setTimeout(() => {
+                  location.reload();
+                }, 2000);
+              } else {
+                showNotification(data.message, 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showNotification('Có lỗi xảy ra, vui lòng thử lại', 'error');
+            });
+          }
+        };
       });
     </script>
     <script>

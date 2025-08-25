@@ -192,4 +192,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                         @Param("user") com.fpoly.shared_learning_materials.domain.User user,
                         @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
+        // Đếm số withdrawals theo user để xác định rút tiền lần đầu
+        long countByUserAndTypeAndDeletedAtIsNull(
+                        @Param("user") com.fpoly.shared_learning_materials.domain.User user,
+                        @Param("type") Transaction.TransactionType type);
+
+        // Lấy thống kê giao dịch theo tháng cho user
+        @Query("SELECT YEAR(t.createdAt) as year, MONTH(t.createdAt) as month, " +
+                        "SUM(t.amount) as totalAmount, COUNT(t) as count " +
+                        "FROM Transaction t " +
+                        "WHERE t.user = :user AND t.type = :type " +
+                        "AND t.createdAt BETWEEN :startDate AND :endDate " +
+                        "AND t.deletedAt IS NULL " +
+                        "GROUP BY YEAR(t.createdAt), MONTH(t.createdAt) " +
+                        "ORDER BY year DESC, month DESC")
+        List<Object[]> getMonthlyStatsByUserAndType(@Param("user") com.fpoly.shared_learning_materials.domain.User user,
+                        @Param("type") Transaction.TransactionType type,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
 }

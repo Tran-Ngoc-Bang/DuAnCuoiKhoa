@@ -20,10 +20,10 @@ public class WithdrawalFormDTO {
     @NotNull(message = "Người dùng không được để trống")
     private Long userId;
 
-    @NotNull(message = "Số tiền không được để trống")
-    @DecimalMin(value = "50000", message = "Số tiền rút tối thiểu là 50,000 VND")
-    @DecimalMax(value = "50000000", message = "Số tiền rút tối đa là 50,000,000 VND")
-    @Digits(integer = 10, fraction = 0, message = "Số tiền phải là số nguyên")
+    @NotNull(message = "Số xu không được để trống")
+    @DecimalMin(value = "50", message = "Số xu rút tối thiểu là 50 xu")
+    @DecimalMax(value = "50000", message = "Số xu rút tối đa là 50,000 xu")
+    @Digits(integer = 10, fraction = 0, message = "Số xu phải là số nguyên")
     private BigDecimal amount;
 
     @NotNull(message = "Trạng thái không được để trống")

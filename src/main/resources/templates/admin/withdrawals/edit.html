@@ -25,8 +25,8 @@
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/withdrawals-form.css}" />
-     <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
-  <script th:src="@{/js/admin/notifications.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
+    <script th:src="@{/js/admin/notifications.js}"></script>
   </head>
 
   <body class="admin-body">
@@ -161,27 +161,33 @@
 
                 <!-- Số tiền - Restricted for completed withdrawals -->
                 <div class="form-group">
-                  <label for="amount">Số tiền (VNĐ) *</label>
+                  <label for="amount">Số xu *</label>
                   <input
                     type="number"
                     id="amount"
                     name="amount"
                     th:field="*{amount}"
-                    placeholder="Nhập số tiền rút"
-                    step="1000"
-                    min="50000"
-                    max="50000000"
+                    placeholder="Nhập số xu rút"
+                    step="1"
+                    min="50"
+                    max="50000"
                     required
                     th:disabled="${isCompleted}"
                     th:class="${isCompleted} ? 'disabled-field' : ''"
                   />
                   <small class="form-help">
-                    Tối thiểu: 50,000 VND - Tối đa: 50,000,000 VND
+                    Tối thiểu: 50 xu - Tối đa: 50,000 xu (tương đương 50,000,000
+                    VND)
                     <span th:if="${isCompleted}" class="text-warning">
-                      <br /><i class="fas fa-lock"></i> Không thể thay đổi số
-                      tiền cho withdrawal đã hoàn thành
+                      <br /><i class="fas fa-lock"></i> Không thể thay đổi số xu
+                      cho withdrawal đã hoàn thành
                     </span>
                   </small>
+                  <div class="amount-converter">
+                    <span class="converter-text"
+                      >Quy đổi: <span id="vndAmount">0 VND</span></span
+                    >
+                  </div>
                   <span
                     th:if="${#fields.hasErrors('amount')}"
                     class="error-message"
@@ -322,8 +328,8 @@
                         <label>Số tiền đã rút:</label>
                         <span
                           class="amount-success"
-                          th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
-                          >1,000,000 VND</span
+                          th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                          >1,000 xu</span
                         >
                       </div>
                     </div>

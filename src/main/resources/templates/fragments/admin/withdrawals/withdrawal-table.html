@@ -70,11 +70,11 @@
                 </div>
               </div>
             </td>
-            <td
-              class="amount"
-              th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
-            >
-              2.500.000 ₫
+            <td class="amount">
+              <!-- Withdrawal luôn hiển thị xu -->
+              <span
+                th:text="${#numbers.formatDecimal(withdrawal.amount, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+              ></span>
             </td>
             <td>
               <div class="payment-method">

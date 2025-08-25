@@ -66,15 +66,15 @@
               </div>
             </div>
 
-            <div class="stat-card">
-              <div class="stat-icon danger">
-                <i class="fas fa-coins"></i>
+                          <div class="stat-card">
+                <div class="stat-icon danger">
+                  <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-value" th:text="${#numbers.formatDecimal(coinBalance, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
+                  <div class="stat-label">Xu khả dụng</div>
+                </div>
               </div>
-              <div class="stat-info">
-                <div class="stat-value" th:text="${#numbers.formatDecimal(coinBalance, 0, 'COMMA', 0, 'POINT')}">0</div>
-                <div class="stat-label">Xu khả dụng</div>
-              </div>
-            </div>
           </div>
 
           <!-- Chart -->
@@ -95,6 +95,58 @@
             </div>
 
             <div class="chart-container" id="activityChart"></div>
+          </div>
+
+          <!-- Balance Flow Section -->
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-wallet section-title-icon"></i>
+                Luồng Xu
+              </h2>
+            </div>
+            
+            <div class="balance-flow-grid">
+              <div class="balance-card">
+                <div class="balance-icon success">
+                  <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="balance-info">
+                  <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.totalRecharge, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 xu</div>
+                  <div class="balance-label">Tổng nạp xu</div>
+                </div>
+              </div>
+
+              <div class="balance-card">
+                <div class="balance-icon danger">
+                  <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="balance-info">
+                  <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.totalWithdrawal, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
+                  <div class="balance-label">Tổng rút xu</div>
+                </div>
+              </div>
+
+              <div class="balance-card">
+                <div class="balance-icon warning">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="balance-info">
+                  <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.totalPendingWithdrawal, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
+                  <div class="balance-label">Đang chờ rút</div>
+                </div>
+              </div>
+
+              <div class="balance-card">
+                <div class="balance-icon primary">
+                  <i class="fas fa-coins"></i>
+                </div>
+                <div class="balance-info">
+                  <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.availableBalance, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
+                  <div class="balance-label">Xu khả dụng</div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>

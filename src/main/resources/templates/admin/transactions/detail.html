@@ -196,11 +196,20 @@
                 </div>
                 <div class="info-row">
                   <div class="info-label">Số tiền:</div>
-                  <div
-                    class="info-value"
-                    th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
-                  >
-                    1.000.000 VNĐ
+                  <div class="info-value">
+                    <!-- Hiển thị số tiền theo loại giao dịch -->
+                    <span
+                      th:if="${transaction.type.name() == 'PURCHASE' or transaction.type.name() == 'REFUND'}"
+                    >
+                      <span
+                        th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+                      ></span>
+                    </span>
+                    <span th:if="${transaction.type.name() == 'WITHDRAWAL'}">
+                      <span
+                        th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                      ></span>
+                    </span>
                   </div>
                 </div>
                 <div class="info-row">
@@ -334,11 +343,20 @@
                 </div>
                 <div class="info-row">
                   <div class="info-label">Số tiền:</div>
-                  <div
-                    class="info-value"
-                    th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
-                  >
-                    900.000 VNĐ
+                  <div class="info-value">
+                    <!-- Hiển thị số tiền theo loại giao dịch -->
+                    <span
+                      th:if="${transaction.type.name() == 'PURCHASE' or transaction.type.name() == 'REFUND'}"
+                    >
+                      <span
+                        th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+                      ></span>
+                    </span>
+                    <span th:if="${transaction.type.name() == 'WITHDRAWAL'}">
+                      <span
+                        th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                      ></span>
+                    </span>
                   </div>
                 </div>
                 <div class="info-divider"></div>

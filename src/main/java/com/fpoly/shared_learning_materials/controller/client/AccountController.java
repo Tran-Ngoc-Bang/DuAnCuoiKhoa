@@ -100,6 +100,8 @@ public class AccountController {
 
         Integer totalRatings = commentRepository.sumRatingsByUserDocuments(currentUser.getId());
 
+        // Balance flow stats cho dashboard
+        java.util.Map<String, Object> balanceStats = transactionService.getBalanceFlowStats(currentUser);
         BigDecimal coinBalance = currentUser.getCoinBalance();
 
         model.addAttribute("pageTitle", "Bảng điều khiển");
@@ -107,6 +109,7 @@ public class AccountController {
         model.addAttribute("totalDownloads", totalDownloads);
         model.addAttribute("totalRatings", totalRatings);
         model.addAttribute("coinBalance", coinBalance);
+        model.addAttribute("balanceStats", balanceStats);
 
         return "client/account/dashboard";
     }
@@ -305,22 +308,13 @@ public class AccountController {
         model.addAttribute("min", minAmount);
         model.addAttribute("max", maxAmount);
 
-        // Stats: totals by type for the user (only completed)
-        BigDecimal totalPurchase = transactionService.getUserTotalByType(currentUser,
-                com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.PURCHASE,
-                com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.COMPLETED);
-        BigDecimal totalWithdrawal = transactionService.getUserTotalByType(currentUser,
-                com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL,
-                com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.PENDING)
-                .add(transactionService.getUserTotalByType(currentUser,
-                        com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL,
-                        com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.COMPLETED));
-        BigDecimal totalRefund = transactionService.getUserTotalByType(currentUser,
-                com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.REFUND,
-                null);
-        model.addAttribute("statTotalPurchase", totalPurchase);
-        model.addAttribute("statTotalWithdrawal", totalWithdrawal);
-        model.addAttribute("statTotalRefund", totalRefund);
+        // Balance flow stats bao gồm cả withdrawal và recharge
+        java.util.Map<String, Object> balanceStats = transactionService.getBalanceFlowStats(currentUser);
+        model.addAttribute("balanceStats", balanceStats);
+        model.addAttribute("statTotalPurchase", balanceStats.get("totalRecharge"));
+        model.addAttribute("statTotalWithdrawal", balanceStats.get("totalWithdrawal"));
+        model.addAttribute("statPendingWithdrawal", balanceStats.get("totalPendingWithdrawal"));
+        model.addAttribute("statAvailableBalance", balanceStats.get("availableBalance"));
         return "client/account/transactions";
     }
 
@@ -395,6 +389,16 @@ public class AccountController {
             dto.put("paymentMethod", tx.getPaymentMethod());
             dto.put("createdAt", tx.getCreatedAt());
             dto.put("notes", tx.getNotes());
+
+            // Thêm thông tin hiển thị theo loại giao dịch
+            if (tx.getType() == com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL) {
+                dto.put("displayAmount", tx.getAmount() + " xu");
+                dto.put("isWithdrawal", true);
+            } else {
+                dto.put("displayAmount", tx.getAmount() + " ₫");
+                dto.put("isWithdrawal", false);
+            }
+
             items.add(dto);
         }
         java.util.Map<String, Object> resp = new java.util.HashMap<>();
@@ -449,7 +453,9 @@ public class AccountController {
                     "totalTransactions", totalTransactions,
                     "completedTransactions", completedTransactions,
                     "pendingTransactions", pendingTransactions,
-                    "totalSpent", totalSpent));
+                    "totalSpent", totalSpent,
+                    "coinBalance",
+                    currentUser.getCoinBalance() != null ? currentUser.getCoinBalance() : java.math.BigDecimal.ZERO));
             response.put("dailyData", dailyData);
             response.put("typeData", typeData);
 
@@ -658,6 +664,373 @@ public class AccountController {
             return ResponseEntity.ok(java.util.Map.of("success", true, "withdrawalCode", saved.getCode()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/withdraw")
+    public String withdraw(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        model.addAttribute("pageTitle", "Rút tiền");
+
+        // Stats for current user
+        Long userId = null;
+        if (userDetails instanceof CustomUserDetailsService.CustomUserPrincipal) {
+            userId = ((CustomUserDetailsService.CustomUserPrincipal) userDetails).getUserId();
+        }
+        // Fallback: lấy qua SecurityContext nếu userId null
+        if (userId == null) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()
+                    && !"anonymousUser".equals(authentication.getPrincipal())) {
+                String username = authentication.getName();
+                Optional<User> uByUsername = userRepository.findByUsernameAndDeletedAtIsNull(username);
+                if (uByUsername.isPresent()) {
+                    userId = uByUsername.get().getId();
+                }
+            }
+        }
+        if (userId != null) {
+            final Long currentUserId = userId;
+            Optional<User> userOpt = userRepository.findByIdAndDeletedAtIsNull(currentUserId);
+            if (userOpt.isPresent()) {
+                User u = userOpt.get();
+                java.math.BigDecimal coinBalance = u.getCoinBalance() != null ? u.getCoinBalance()
+                        : java.math.BigDecimal.ZERO;
+                java.math.BigDecimal totalSpent = u.getTotalSpent() != null ? u.getTotalSpent()
+                        : java.math.BigDecimal.ZERO;
+                java.time.LocalDateTime lastLoginAt = u.getLastLoginAt();
+                Long totalCoinsPurchased = transactionDetailRepository.sumTotalCoinsPurchasedByUser(currentUserId);
+                if (totalCoinsPurchased == null)
+                    totalCoinsPurchased = 0L;
+
+                model.addAttribute("statCoinBalance", coinBalance);
+                model.addAttribute("statTotalCoinsPurchased", totalCoinsPurchased);
+                model.addAttribute("statTotalSpent", totalSpent);
+                model.addAttribute("statLastLoginAt", lastLoginAt);
+                String lastLoginAtText = lastLoginAt != null
+                        ? lastLoginAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                        : "Chưa đăng nhập";
+                model.addAttribute("statLastLoginAtText", lastLoginAtText);
+
+                // Thêm thông tin cho form rút tiền
+                model.addAttribute("minWithdrawalAmount", new java.math.BigDecimal("50")); // 50 xu tối thiểu
+                model.addAttribute("exchangeRate", new java.math.BigDecimal("1000")); // 1 xu = 1000 VND
+
+                // Payment methods
+                java.util.Map<String, String> paymentMethods = new java.util.LinkedHashMap<>();
+                paymentMethods.put("BANK_TRANSFER", "Chuyển khoản ngân hàng");
+                paymentMethods.put("E_WALLET", "Ví điện tử");
+                model.addAttribute("paymentMethods", paymentMethods);
+
+                // Flags for UI
+                boolean isPremium = withdrawalService.isUserPremium(u);
+                boolean isFirst = withdrawalService.isFirstWithdrawal(u);
+                boolean promoActive = withdrawalService.isPromotionActive();
+                model.addAttribute("isPremium", isPremium);
+                model.addAttribute("isFirstWithdrawal", isFirst);
+                model.addAttribute("promoActive", promoActive);
+            }
+        }
+        return "client/account/withdraw";
+    }
+
+    @PostMapping("/withdraw/calculate")
+    @ResponseBody
+    public ResponseEntity<?> calculateWithdrawal(@RequestParam("coinAmount") String coinAmountStr) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()
+                    || "anonymousUser".equals(authentication.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            // Parse safely
+            java.math.BigDecimal coinAmount;
+            try {
+                if (coinAmountStr == null || coinAmountStr.trim().isEmpty()) {
+                    return ResponseEntity.badRequest().body(java.util.Map.of(
+                            "success", false,
+                            "message", "Vui lòng nhập số xu"));
+                }
+                coinAmount = new java.math.BigDecimal(coinAmountStr.trim());
+            } catch (Exception ex) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Số xu không hợp lệ"));
+            }
+
+            // Validate minimum amount
+            java.math.BigDecimal minAmount = withdrawalService.getMinWithdrawalAmount();
+            if (coinAmount.compareTo(minAmount) < 0) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Số xu tối thiểu để rút là " + minAmount + " xu"));
+            }
+
+            // Check user balance
+            java.math.BigDecimal userBalance = currentUser.getCoinBalance() != null ? currentUser.getCoinBalance()
+                    : java.math.BigDecimal.ZERO;
+            if (coinAmount.compareTo(userBalance) > 0) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Số dư xu không đủ để thực hiện giao dịch"));
+            }
+
+            // Calculate
+            java.math.BigDecimal basePct = withdrawalService.getBaseFeePercentage(coinAmount);
+            boolean premium = withdrawalService.isUserPremium(currentUser);
+            boolean first = withdrawalService.isFirstWithdrawal(currentUser);
+            boolean promo = withdrawalService.isPromotionActive();
+            boolean trusted = withdrawalService.isTrustedUser(currentUser);
+
+            java.math.BigDecimal fee = withdrawalService.calculateWithdrawalFee(currentUser, coinAmount);
+            java.math.BigDecimal netAmount = withdrawalService.calculateNetAmount(currentUser, coinAmount);
+            java.math.BigDecimal vndAmount = withdrawalService.calculateVndAmount(currentUser, coinAmount);
+            java.math.BigDecimal exchangeRate = withdrawalService.getExchangeRate();
+
+            java.math.BigDecimal effectivePct = coinAmount.compareTo(java.math.BigDecimal.ZERO) > 0
+                    ? fee.divide(coinAmount, 4, java.math.RoundingMode.HALF_UP)
+                    : java.math.BigDecimal.ZERO;
+
+            java.util.Map<String, Object> etaInfo = withdrawalService.getEtaInfo(currentUser, coinAmount);
+
+            java.util.Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", true);
+            result.put("coinAmount", coinAmount);
+            result.put("fee", fee);
+            result.put("netAmount", netAmount);
+            result.put("vndAmount", vndAmount);
+            result.put("feePercentage", effectivePct.multiply(new java.math.BigDecimal("100")));
+            result.put("baseFeePercentage", basePct.multiply(new java.math.BigDecimal("100")));
+            result.put("isPremium", premium);
+            result.put("isFirstWithdrawal", first);
+            result.put("promoActive", promo);
+            result.put("trustedUser", trusted);
+            result.put("exchangeRate", exchangeRate);
+            result.putAll(etaInfo);
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/withdraw/eta")
+    @ResponseBody
+    public ResponseEntity<?> getWithdrawalEta(@RequestParam java.math.BigDecimal coinAmount) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        java.util.Map<String, Object> eta = withdrawalService.getEtaInfo(currentUser, coinAmount);
+        return ResponseEntity.ok(eta);
+    }
+
+    @PostMapping("/bank/detect")
+    @ResponseBody
+    public ResponseEntity<?> detectBank(@RequestParam String accountNumber) {
+        if (accountNumber == null)
+            accountNumber = "";
+        String sanitized = accountNumber.replaceAll("\\s+", "");
+        String bankName = null;
+
+        // Enhanced bank detection with better validation
+        if (sanitized.length() >= 4) {
+            if (sanitized.startsWith("9704"))
+                bankName = "Vietcombank";
+            else if (sanitized.startsWith("9703"))
+                bankName = "BIDV";
+            else if (sanitized.startsWith("9702"))
+                bankName = "VietinBank";
+            else if (sanitized.startsWith("9701"))
+                bankName = "Agribank";
+        }
+
+        boolean detected = bankName != null;
+        java.util.Map<String, Object> resp = new java.util.HashMap<>();
+        resp.put("detected", detected);
+        resp.put("bankName", bankName != null ? bankName : "");
+        resp.put("accountNumber", sanitized); // Return sanitized number for debugging
+        return ResponseEntity.ok(resp);
+    }
+
+    @PostMapping("/withdraw/request")
+    @ResponseBody
+    public ResponseEntity<?> requestWithdrawal(
+            @RequestParam("coinAmount") String coinAmountStr,
+            @RequestParam String paymentMethod,
+            @RequestParam String bankAccount,
+            @RequestParam String bankName,
+            @RequestParam String accountHolder,
+            @RequestParam(required = false) String notes) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()
+                    || "anonymousUser".equals(authentication.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            // Parse safely
+            java.math.BigDecimal coinAmount;
+            try {
+                if (coinAmountStr == null || coinAmountStr.trim().isEmpty()) {
+                    return ResponseEntity.badRequest().body(java.util.Map.of(
+                            "success", false,
+                            "message", "Vui lòng nhập số xu"));
+                }
+                coinAmount = new java.math.BigDecimal(coinAmountStr.trim());
+            } catch (Exception ex) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Số xu không hợp lệ"));
+            }
+
+            // Validate minimum amount
+            java.math.BigDecimal minAmount = withdrawalService.getMinWithdrawalAmount();
+            if (coinAmount.compareTo(minAmount) < 0) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Số xu tối thiểu để rút là " + minAmount + " xu"));
+            }
+
+            // Validate payment method friendly before persist
+            if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Vui lòng chọn phương thức rút tiền"));
+            }
+
+            // Check user balance
+            java.math.BigDecimal userBalance = currentUser.getCoinBalance() != null ? currentUser.getCoinBalance()
+                    : java.math.BigDecimal.ZERO;
+            if (coinAmount.compareTo(userBalance) > 0) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Số dư xu không đủ để thực hiện giao dịch"));
+            }
+
+            // Calculate fee with all rules
+            boolean premium = withdrawalService.isUserPremium(currentUser);
+            boolean first = withdrawalService.isFirstWithdrawal(currentUser);
+            boolean promo = withdrawalService.isPromotionActive();
+            java.math.BigDecimal basePct = withdrawalService.getBaseFeePercentage(coinAmount);
+            java.math.BigDecimal fee = withdrawalService.calculateWithdrawalFee(currentUser, coinAmount);
+            java.math.BigDecimal netAmount = withdrawalService.calculateNetAmount(currentUser, coinAmount);
+
+            // Create withdrawal transaction
+            com.fpoly.shared_learning_materials.domain.Transaction withdrawal = new com.fpoly.shared_learning_materials.domain.Transaction();
+            withdrawal.setUser(currentUser);
+            withdrawal.setType(com.fpoly.shared_learning_materials.domain.Transaction.TransactionType.WITHDRAWAL);
+            withdrawal.setAmount(coinAmount);
+            withdrawal.setStatus(com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.PENDING);
+            withdrawal.setPaymentMethod(paymentMethod);
+
+            // Build notes with withdrawal details
+            StringBuilder notesBuilder = new StringBuilder();
+            notesBuilder.append("Rút tiền: ").append(coinAmount).append(" xu");
+            notesBuilder.append(" | Phí: ").append(fee).append(" xu (")
+                    .append(coinAmount.compareTo(java.math.BigDecimal.ZERO) > 0
+                            ? fee.divide(coinAmount, 4, java.math.RoundingMode.HALF_UP)
+                                    .multiply(new java.math.BigDecimal("100"))
+                            : java.math.BigDecimal.ZERO)
+                    .append("%)");
+            notesBuilder.append(" | Số xu thực nhận: ").append(netAmount).append(" xu");
+            if (first)
+                notesBuilder.append(" | Miễn phí lần đầu");
+            if (premium)
+                notesBuilder.append(" | Premium -0.5% phí");
+            if (promo)
+                notesBuilder.append(" | Khuyến mãi -50% phí");
+            notesBuilder.append(" | Ngân hàng: ").append(bankName);
+            notesBuilder.append(" | Số tài khoản: ").append(bankAccount);
+            notesBuilder.append(" | Chủ tài khoản: ").append(accountHolder);
+            if (notes != null && !notes.trim().isEmpty()) {
+                notesBuilder.append(" | Ghi chú: ").append(notes.trim());
+            }
+            withdrawal.setNotes(notesBuilder.toString());
+
+            // Save withdrawal với balance check và trừ coin tự động
+            com.fpoly.shared_learning_materials.domain.Transaction saved = withdrawalService
+                    .createWithdrawalWithBalanceCheck(withdrawal);
+
+            return ResponseEntity.ok(java.util.Map.of(
+                    "success", true,
+                    "withdrawalCode", saved.getCode(),
+                    "message", "Yêu cầu rút tiền đã được tạo thành công"));
+        } catch (jakarta.validation.ConstraintViolationException ve) {
+            String msg = ve.getConstraintViolations().stream().findFirst()
+                    .map(cv -> cv.getMessage()).orElse("Dữ liệu không hợp lệ");
+            return ResponseEntity.badRequest().body(java.util.Map.of("success", false, "message", msg));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("success", false, "message", "Có lỗi xảy ra, vui lòng thử lại"));
+        }
+    }
+
+    @PostMapping("/withdraw/{id}/cancel")
+    @ResponseBody
+    public ResponseEntity<?> cancelWithdrawal(@PathVariable Long id) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()
+                    || "anonymousUser".equals(authentication.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            }
+
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            Optional<com.fpoly.shared_learning_materials.domain.Transaction> withdrawalOpt = withdrawalService
+                    .getWithdrawalById(id);
+            if (withdrawalOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Withdrawal not found");
+            }
+
+            com.fpoly.shared_learning_materials.domain.Transaction withdrawal = withdrawalOpt.get();
+
+            // Check if withdrawal belongs to current user
+            if (!withdrawal.getUser().getId().equals(currentUser.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+            }
+
+            // Check if withdrawal can be cancelled (only PENDING status)
+            if (withdrawal
+                    .getStatus() != com.fpoly.shared_learning_materials.domain.Transaction.TransactionStatus.PENDING) {
+                return ResponseEntity.badRequest().body(java.util.Map.of(
+                        "success", false,
+                        "message", "Chỉ có thể hủy yêu cầu rút tiền đang chờ xử lý"));
+            }
+
+            // Cancel withdrawal và hoàn lại coin tự động
+            withdrawalService.cancelWithdrawal(withdrawal);
+
+            return ResponseEntity.ok(java.util.Map.of(
+                    "success", true,
+                    "message", "Đã hủy yêu cầu rút tiền và hoàn lại xu"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(java.util.Map.of("success", false, "message", e.getMessage()));
         }
     }
