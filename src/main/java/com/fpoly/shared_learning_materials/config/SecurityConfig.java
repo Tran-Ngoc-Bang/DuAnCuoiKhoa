@@ -92,7 +92,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
                                                 // User endpoints
-                                                .requestMatchers("/my-transactions", "/profile/**")
+                                                .requestMatchers("/my-transactions", "/profile/**", "/favorites/**")
                                                 .hasAnyRole("USER", "ADMIN")
 
                                                 // All other requests need authentication
