@@ -181,7 +181,15 @@
 
             <div class="auth-forms">
               <!-- Auth Error/Success Message -->
-              <div class="auth-error" th:if="${param.error}">
+              <div class="auth-error" th:if="${param.locked != null}" style="background: #fee; border: 1px solid #f00; padding: 10px; margin: 10px 0; border-radius: 5px; color: #d00;">
+                <i class="fas fa-lock"></i>
+                <span class="error-message">
+                  Tài khoản đã bị khóa do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau 
+                  <span th:text="${param.minutes != null ? param.minutes[0] : '15'}">15</span> phút!
+                </span>
+              </div>
+              
+              <div class="auth-error" th:if="${param.error != null and param.locked == null}" style="background: #fee; border: 1px solid #f00; padding: 10px; margin: 10px 0; border-radius: 5px; color: #d00;">
                 <i class="fas fa-exclamation-circle"></i>
                 <span class="error-message"
                   >Thông tin đăng nhập không chính xác. Vui lòng thử lại.</span

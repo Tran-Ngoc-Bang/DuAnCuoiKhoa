@@ -40,9 +40,28 @@ public class SecurityConfig {
                 return new BCryptPasswordEncoder(12);
         }
 
+        @Autowired
+        @org.springframework.context.annotation.Lazy
+        private com.fpoly.shared_learning_materials.service.UserService userService;
+
         @Bean
         public AuthenticationSuccessHandler authenticationSuccessHandler() {
                 return new SavedRequestAwareAuthenticationSuccessHandler() {
+                        @Override
+                        public void onAuthenticationSuccess(jakarta.servlet.http.HttpServletRequest request,
+                                        jakarta.servlet.http.HttpServletResponse response,
+                                        org.springframework.security.core.Authentication authentication)
+                                        throws java.io.IOException, jakarta.servlet.ServletException {
+
+                                // Cập nhật thông tin đăng nhập cuối
+                                String username = authentication.getName();
+                                String ipAddress = getClientIpAddress(request);
+                                userService.updateLastLogin(username, ipAddress);
+
+                                // Tiếp tục với logic redirect
+                                super.onAuthenticationSuccess(request, response, authentication);
+                        }
+
                         @Override
                         protected String determineTargetUrl(jakarta.servlet.http.HttpServletRequest request,
                                         jakarta.servlet.http.HttpServletResponse response,
@@ -83,6 +102,20 @@ public class SecurityConfig {
                                                 !url.equals("/login") && // Tránh redirect về login
                                                 url.length() < 200; // Giới hạn độ dài
                         }
+
+                        private String getClientIpAddress(jakarta.servlet.http.HttpServletRequest request) {
+                                String xForwardedFor = request.getHeader("X-Forwarded-For");
+                                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+                                        return xForwardedFor.split(",")[0].trim();
+                                }
+
+                                String xRealIp = request.getHeader("X-Real-IP");
+                                if (xRealIp != null && !xRealIp.isEmpty()) {
+                                        return xRealIp;
+                                }
+
+                                return request.getRemoteAddr();
+                        }
                 };
         }
 
@@ -90,31 +123,72 @@ public class SecurityConfig {
         public AuthenticationFailureHandler authenticationFailureHandler() {
                 return new SimpleUrlAuthenticationFailureHandler() {
                         @Override
-                        public void onAuthenticationFailure(HttpServletRequest request,
-                                        HttpServletResponse response, AuthenticationException exception)
-                                        throws IOException, ServletException {
+                        public void onAuthenticationFailure(jakarta.servlet.http.HttpServletRequest request,
+                                        jakarta.servlet.http.HttpServletResponse response,
+                                        org.springframework.security.core.AuthenticationException exception)
+                                        throws java.io.IOException, jakarta.servlet.ServletException {
 
+                                // Lấy username từ request
+                                String username = request.getParameter("username");
                                 String errorMessage = "Tên đăng nhập hoặc mật khẩu không đúng!";
+                                String redirectUrl = "/login?error=true";
 
-                                // Check for specific exceptions
+                                // Check for specific exceptions first (from HEAD)
                                 if (exception instanceof InternalAuthenticationServiceException) {
                                         // Kiểm tra cause của InternalAuthenticationServiceException
                                         Throwable cause = exception.getCause();
                                         if (cause instanceof CustomUserDetailsService.AccountLockedException) {
                                                 errorMessage = cause.getMessage();
+                                                redirectUrl = "/login?error="
+                                                                + java.net.URLEncoder.encode(errorMessage, "UTF-8");
+                                                getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+                                                return;
                                         } else {
                                                 errorMessage = "Lỗi xác thực: " + exception.getMessage();
                                         }
                                 } else if (exception instanceof LockedException) {
                                         errorMessage = exception.getMessage();
+                                        redirectUrl = "/login?error="
+                                                        + java.net.URLEncoder.encode(errorMessage, "UTF-8");
+                                        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+                                        return;
                                 } else if (exception instanceof BadCredentialsException) {
                                         errorMessage = "Tên đăng nhập hoặc mật khẩu không đúng!";
                                 } else if (exception instanceof DisabledException) {
                                         errorMessage = "Tài khoản đã bị vô hiệu hóa!";
+                                        redirectUrl = "/login?error="
+                                                        + java.net.URLEncoder.encode(errorMessage, "UTF-8");
+                                        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+                                        return;
                                 }
 
-                                String targetUrl = "/login?error=" + java.net.URLEncoder.encode(errorMessage, "UTF-8");
-                                getRedirectStrategy().sendRedirect(request, response, targetUrl);
+                                // Handle account locking logic (from feature/nvt)
+                                if (username != null && !username.trim().isEmpty()) {
+                                        // Kiểm tra tài khoản có bị khóa không
+                                        if (userService.isAccountLocked(username)) {
+                                                long remainingMinutes = userService.getRemainingLockTime(username);
+                                                redirectUrl = "/login?locked=true&minutes=" + remainingMinutes;
+                                        } else {
+                                                // Tăng số lần đăng nhập thất bại
+                                                userService.incrementFailedLoginAttempts(username);
+
+                                                // Kiểm tra lại sau khi tăng failed attempts
+                                                if (userService.isAccountLocked(username)) {
+                                                        long remainingMinutes = userService
+                                                                        .getRemainingLockTime(username);
+                                                        redirectUrl = "/login?locked=true&minutes=" + remainingMinutes;
+                                                } else {
+                                                        // Nếu không bị khóa, sử dụng error message từ exception
+                                                        // handling
+                                                        redirectUrl = "/login?error=" + java.net.URLEncoder
+                                                                        .encode(errorMessage, "UTF-8");
+                                                }
+                                        }
+                                }
+
+                                // Redirect với thông báo phù hợp
+                                setDefaultFailureUrl(redirectUrl);
+                                super.onAuthenticationFailure(request, response, exception);
                         }
                 };
         }
