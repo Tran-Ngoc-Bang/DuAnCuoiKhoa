@@ -117,7 +117,6 @@
                   <label for="role">Vai trò</label>
                   <select id="role" th:field="*{role}" class="form-input">
                     <option value="user">Người dùng</option>
-                    <option value="contributor">Cộng tác viên</option>
                     <option value="admin">Quản trị viên</option>
                   </select>
                 </div>
@@ -138,7 +137,7 @@
               <h3 class="section-title"><i class="fas fa-image"></i> Ảnh đại diện</h3>
               <div class="form-group">
                 <div class="avatar-upload-group">
-                  <img id="avatarPreview" th:src="@{/images/default-avatar.png}" alt="Avatar" class="avatar-preview" />
+                  <img id="avatarPreview" th:src="@{/assets/images/default-avatar.png}" alt="Avatar" class="avatar-preview" />
                   <div>
                     <button type="button" class="secondary-btn" onclick="document.getElementById('file').click();">
                       <i class="fas fa-upload"></i> Tải ảnh

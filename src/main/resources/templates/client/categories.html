@@ -160,7 +160,7 @@
           </div>
 
           <div class="topics-wrapper">
-                    <a th:each="tag : ${popularTags}" th:href="@{/search(tags=${tag.name})}" class="topic-tag">
+                    <a th:each="tag : ${popularTags}" th:href="@{/search(q=${tag.name})}" class="topic-tag">
                         <i class="fas fa-hashtag"></i>
                         <span th:text="${tag.name}"></span>
                     </a>

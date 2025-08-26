@@ -953,7 +953,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function getRoleFromBadge(badge) {
         if (!badge) return 'user';
         if (badge.classList.contains('admin')) return 'admin';
-        if (badge.classList.contains('contributor')) return 'contributor';
         return 'user';
     }
 

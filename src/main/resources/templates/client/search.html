@@ -19,28 +19,7 @@
   <link rel="stylesheet" th:href="@{/css/footer-modern.css}">
   <link rel="stylesheet" th:href="@{/css/client-header.css}">
   <link rel="stylesheet" th:href="@{/css/client-footer.css}">
-  <style>
-    .filter-options {
-      max-height: 250px;
-      overflow-y: auto;
-      padding-right: 6px;
-    }
-
-    .filter-options::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .filter-options::-webkit-scrollbar-thumb {
-      background-color: #ccc;
-      border-radius: 4px;
-    }
-
-    .filter-header.active {
-      background-color: #007bff;
-    }
-  </style>
 </head>
-
 <body>
   <!-- Header -->
   <div th:replace="~{fragments/client/layout :: header}"></div>
@@ -149,7 +128,7 @@
             </div>
 
             <div class="search-sort-options">
-              <span class="sort-label">Sắp xếp:</span>
+              <span>Sắp xếp:</span>
               <select id="sortSelect" class="sort-select">
                 <option value="relevance" selected>Độ liên quan</option>
                 <option value="date_desc">Mới nhất</option>

@@ -80,6 +80,8 @@ public class UserService {
 	public void createUser(UserDTO dto) {
 		User user = new User();
 		user.setFullName(dto.getFullName());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
 		user.setEmail(dto.getEmail());
 		user.setUsername(dto.getUsername());
 		user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
