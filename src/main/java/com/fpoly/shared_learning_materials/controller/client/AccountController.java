@@ -56,6 +56,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fpoly.shared_learning_materials.repository.TransactionDetailRepository;
 import com.fpoly.shared_learning_materials.config.CustomUserDetailsService;
+import com.fpoly.shared_learning_materials.service.DocumentService;
+import com.fpoly.shared_learning_materials.domain.Document;
 import java.time.format.DateTimeFormatter;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,6 +100,9 @@ public class AccountController {
 
     @Autowired
     private WithdrawalService withdrawalService;
+
+    @Autowired
+    private DocumentService documentService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, RedirectAttributes redirectAttributes) {
@@ -230,6 +235,98 @@ public class AccountController {
     public String myDocuments(Model model) {
         model.addAttribute("pageTitle", "Tài liệu của tôi");
         return "client/account/documents";
+    }
+
+    @GetMapping("/documents/data")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getDocumentsData(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            @RequestParam(value = "tab", defaultValue = "all") String tab,
+            @RequestParam(value = "q", required = false) String keyword) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest
+                .of(Math.max(page, 0), Math.max(size, 1), org.springframework.data.domain.Sort
+                        .by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+
+        org.springframework.data.domain.Page<Document> documentPage;
+
+        // Sử dụng DocumentService để lấy documents của user
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            documentPage = documentService.searchDocuments(keyword.trim(), null, null, null, null, null, pageable);
+            // Lọc chỉ lấy documents của user hiện tại
+            List<Document> userDocuments = documentPage.getContent().stream()
+                    .filter(doc -> doc.getFile() != null && currentUser.equals(doc.getFile().getUploadedBy()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Tạo Page mới với documents đã lọc
+            documentPage = new org.springframework.data.domain.PageImpl<>(
+                    userDocuments, pageable, userDocuments.size());
+        } else {
+            // Lấy tất cả documents của user
+            List<Document> allUserDocuments = documentService.getAllDocumentsForExport().stream()
+                    .map(docDTO -> documentService.findById(docDTO.getId()))
+                    .filter(doc -> doc != null && doc.getFile() != null
+                            && currentUser.equals(doc.getFile().getUploadedBy()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Lọc theo tab
+            if (!"all".equals(tab.toLowerCase())) {
+                allUserDocuments = allUserDocuments.stream()
+                        .filter(doc -> tab.toLowerCase().equals(doc.getStatus().toLowerCase()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
+            // Phân trang
+            int start = page * size;
+            int end = Math.min(start + size, allUserDocuments.size());
+            List<Document> pageContent = allUserDocuments.subList(start, end);
+
+            documentPage = new org.springframework.data.domain.PageImpl<>(
+                    pageContent, pageable, allUserDocuments.size());
+        }
+
+        List<Map<String, Object>> documents = documentPage.getContent().stream()
+                .map(doc -> {
+                    Map<String, Object> docMap = new HashMap<>();
+                    docMap.put("id", doc.getId());
+                    docMap.put("title", doc.getTitle());
+                    docMap.put("description", doc.getDescription());
+                    docMap.put("price", doc.getPrice());
+                    docMap.put("status", doc.getStatus());
+                    docMap.put("fileType", doc.getFile() != null ? doc.getFile().getFileType() : null);
+                    docMap.put("fileSize", doc.getFile() != null ? doc.getFile().getFileSize() : null);
+                    docMap.put("thumbnailUrl", "/images/default-thumbnail.png"); // Sử dụng thumbnail mặc định
+                    docMap.put("viewsCount", doc.getViewsCount());
+                    docMap.put("downloadsCount", doc.getDownloadsCount());
+                    docMap.put("createdAt", doc.getCreatedAt());
+                    docMap.put("updatedAt", doc.getUpdatedAt());
+                    return docMap;
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", documents);
+        response.put("page", documentPage.getNumber());
+        response.put("size", documentPage.getSize());
+        response.put("totalElements", documentPage.getTotalElements());
+        response.put("totalPages", documentPage.getTotalPages());
+        response.put("first", documentPage.isFirst());
+        response.put("last", documentPage.isLast());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/favorites")

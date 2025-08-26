@@ -75,12 +75,13 @@ public class DataInitializer implements CommandLineRunner {
                 cleanupDuplicateCategories();
 
                 // Initialize sample data
-                if (!userRepository.existsByUsernameAndDeletedAtIsNull("admin")) {
+                if (!userRepository.existsByUsernameAndDeletedAtIsNull("admin") ||
+                                !userRepository.existsByUsernameAndDeletedAtIsNull("user1") ||
+                                !userRepository.existsByUsernameAndDeletedAtIsNull("contributor1")) {
                         createSampleUsers();
-                        // System.out.println("Sample users created successfully!");
+                        System.out.println("Sample users created successfully!");
                 } else {
-                        // System.out.println("Sample users already exist, skipping user
-                        // initialization.");
+                        System.out.println("Sample users already exist, skipping user initialization.");
                 }
 
                 if (!coinPackageRepository.existsByCodeAndDeletedAtIsNull("CP001")) {
@@ -236,92 +237,68 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         private void createSampleUsers() {
+                System.out.println("=== Creating sample users ===");
                 int currentYear = LocalDate.now().getYear();
 
-                User admin = new User();
-                admin.setUsername("admin");
-                admin.setEmail("admin@example.com");
-                admin.setPasswordHash(passwordEncoder.encode("password"));
-                admin.setFullName("Administrator");
-                admin.setRole("admin");
-                admin.setStatus("active");
-                admin.setCoinBalance(BigDecimal.ZERO);
-                admin.setTotalSpent(BigDecimal.ZERO);
-                admin.setTotalCoinsPurchased(BigDecimal.ZERO);
-                admin.setCreatedAt(LocalDateTime.of(currentYear, 1, 10, 10, 0));
-                admin.setUpdatedAt(LocalDateTime.of(currentYear, 1, 10, 10, 0));
-                userRepository.save(admin);
+                // Tạo users một cách an toàn
+                createUserIfNotExists("admin", "admin@example.com", "Administrator", "admin",
+                                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                                LocalDateTime.of(currentYear, 1, 10, 10, 0));
 
-                User user1 = new User();
-                user1.setUsername("user1");
-                user1.setEmail("user1@example.com");
-                user1.setPasswordHash(passwordEncoder.encode("password"));
-                user1.setFullName("Người dùng 1");
-                user1.setRole("user");
-                user1.setStatus("active");
-                user1.setCoinBalance(new BigDecimal("1000"));
-                user1.setTotalSpent(new BigDecimal("158000.00"));
-                user1.setTotalCoinsPurchased(new BigDecimal("350"));
-                user1.setCreatedAt(LocalDateTime.of(currentYear, 2, 15, 10, 0));
-                user1.setUpdatedAt(LocalDateTime.of(currentYear, 2, 15, 10, 0));
-                userRepository.save(user1);
+                createUserIfNotExists("user1", "user1@example.com", "Người dùng 1", "user",
+                                new BigDecimal("1000"), new BigDecimal("158000.00"), new BigDecimal("350"),
+                                LocalDateTime.of(currentYear, 2, 15, 10, 0));
 
-                User user2 = new User();
-                user2.setUsername("user2");
-                user2.setEmail("user2@example.com");
-                user2.setPasswordHash(passwordEncoder.encode("password"));
-                user2.setFullName("Người dùng 2");
-                user2.setRole("user");
-                user2.setStatus("active");
-                user2.setCoinBalance(new BigDecimal("1000"));
-                user2.setTotalSpent(new BigDecimal("50000.00"));
-                user2.setTotalCoinsPurchased(new BigDecimal("600"));
-                user2.setCreatedAt(LocalDateTime.of(currentYear, 3, 20, 10, 0));
-                user2.setUpdatedAt(LocalDateTime.of(currentYear, 3, 20, 10, 0));
-                userRepository.save(user2);
+                createUserIfNotExists("user2", "user2@example.com", "Người dùng 2", "user",
+                                new BigDecimal("1000"), new BigDecimal("50000.00"), new BigDecimal("600"),
+                                LocalDateTime.of(currentYear, 3, 20, 10, 0));
 
-                User user3 = new User();
-                user3.setUsername("user3");
-                user3.setEmail("user3@example.com");
-                user3.setPasswordHash(passwordEncoder.encode("password"));
-                user3.setFullName("Người dùng 3");
-                user3.setRole("user");
-                user3.setStatus("active");
-                user3.setCoinBalance(new BigDecimal("1000"));
-                user3.setTotalSpent(new BigDecimal("20000.00"));
-                user3.setTotalCoinsPurchased(new BigDecimal("70"));
-                user3.setCreatedAt(LocalDateTime.of(currentYear, 4, 5, 10, 0));
-                user3.setUpdatedAt(LocalDateTime.of(currentYear, 4, 5, 10, 0));
-                userRepository.save(user3);
+                createUserIfNotExists("user3", "user3@example.com", "Người dùng 3", "user",
+                                new BigDecimal("1000"), new BigDecimal("20000.00"), new BigDecimal("70"),
+                                LocalDateTime.of(currentYear, 4, 5, 10, 0));
 
-                User user4 = new User();
-                user4.setUsername("user4");
-                user4.setEmail("user4@example.com");
-                user4.setPasswordHash(passwordEncoder.encode("password"));
-                user4.setFullName("Người dùng 4");
-                user4.setRole("user");
-                user4.setStatus("active");
-                user4.setCoinBalance(BigDecimal.ZERO);
-                user4.setTotalSpent(BigDecimal.ZERO);
-                user4.setTotalCoinsPurchased(BigDecimal.ZERO);
-                user4.setCreatedAt(LocalDateTime.of(currentYear, 5, 18, 10, 0));
-                user4.setUpdatedAt(LocalDateTime.of(currentYear, 5, 18, 10, 0));
-                userRepository.save(user4);
+                createUserIfNotExists("user4", "user4@example.com", "Người dùng 4", "user",
+                                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                                LocalDateTime.of(currentYear, 5, 18, 10, 0));
 
-                User user5 = new User();
-                user5.setUsername("user5");
-                user5.setEmail("user5@example.com");
-                user5.setPasswordHash(passwordEncoder.encode("password"));
-                user5.setFullName("Người dùng 5");
-                user5.setRole("user");
-                user5.setStatus("active");
-                user5.setCoinBalance(new BigDecimal("120"));
-                user5.setTotalSpent(new BigDecimal("74000.00"));
-                user5.setTotalCoinsPurchased(new BigDecimal("120"));
-                user5.setCreatedAt(LocalDateTime.of(currentYear, 6, 22, 10, 0));
-                user5.setUpdatedAt(LocalDateTime.of(currentYear, 6, 22, 10, 0));
-                userRepository.save(user5);
+                createUserIfNotExists("user5", "user5@example.com", "Người dùng 5", "user",
+                                new BigDecimal("120"), new BigDecimal("74000.00"), new BigDecimal("120"),
+                                LocalDateTime.of(currentYear, 6, 22, 10, 0));
 
+                createUserIfNotExists("contributor1", "contributor1@example.com", "Người đóng góp 1", "user",
+                                new BigDecimal("2500"), BigDecimal.ZERO, BigDecimal.ZERO,
+                                LocalDateTime.of(currentYear, 1, 5, 9, 0));
+
+                createUserIfNotExists("contributor2", "contributor2@example.com", "Người đóng góp 2", "user",
+                                new BigDecimal("1800"), BigDecimal.ZERO, BigDecimal.ZERO,
+                                LocalDateTime.of(currentYear, 1, 8, 14, 30));
+
+                System.out.println("=== Sample users creation completed ===");
+        }
+
+        private void createUserIfNotExists(String username, String email, String fullName, String role,
+                        BigDecimal coinBalance, BigDecimal totalSpent, BigDecimal totalCoinsPurchased,
+                        LocalDateTime createdAt) {
+                User existingUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+                if (existingUser != null) {
+                        System.out.println("User '" + username + "' already exists, skipping creation");
+                        return;
+                }
+
+                User user = new User();
+                user.setUsername(username);
+                user.setEmail(email);
+                user.setPasswordHash(passwordEncoder.encode("password"));
+                user.setFullName(fullName);
+                user.setRole(role);
+                user.setStatus("active");
+                user.setCoinBalance(coinBalance);
+                user.setTotalSpent(totalSpent);
+                user.setTotalCoinsPurchased(totalCoinsPurchased);
+                user.setCreatedAt(createdAt);
+                user.setUpdatedAt(createdAt);
+                userRepository.save(user);
+                System.out.println("Created user: " + username);
         }
 
         private void createSampleCoinPackages() {
@@ -1599,11 +1576,12 @@ public class DataInitializer implements CommandLineRunner {
 
                 List<Tag> createdTags = new ArrayList<>();
                 for (String tagName : sampleTags) {
-                        Tag existingTag = tagRepository.findByName(tagName).orElse(null);
+                        String slug = tagName.toLowerCase().replaceAll("\\s+", "-");
+                        Tag existingTag = tagRepository.findBySlug(slug).orElse(null);
                         if (existingTag == null) {
                                 Tag tag = new Tag();
                                 tag.setName(tagName);
-                                tag.setSlug(tagName.toLowerCase().replaceAll("\\s+", "-"));
+                                tag.setSlug(slug);
                                 tag.setDescription("Tag for " + tagName);
                                 tag.setCreatedAt(LocalDateTime.now());
                                 tag.setUpdatedAt(LocalDateTime.now());
@@ -1612,6 +1590,7 @@ public class DataInitializer implements CommandLineRunner {
                                 System.out.println("Created tag: " + tagName);
                         } else {
                                 createdTags.add(existingTag);
+                                System.out.println("Found existing tag: " + tagName);
                         }
                 }
 

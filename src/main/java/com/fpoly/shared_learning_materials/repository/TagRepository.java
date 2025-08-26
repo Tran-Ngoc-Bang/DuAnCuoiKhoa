@@ -16,45 +16,49 @@ import com.fpoly.shared_learning_materials.domain.Tag;
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
     boolean existsByName(String name);
-    boolean existsBySlug(String slug);
-    Page<Tag> findByDeletedAtIsNull(Pageable pageable);
-    Optional<Tag> findByName(String name);
-    
 
-    
+    boolean existsBySlug(String slug);
+
+    Optional<Tag> findBySlug(String slug);
+
+    Page<Tag> findByDeletedAtIsNull(Pageable pageable);
+
+    Optional<Tag> findByName(String name);
+
     @Query("SELECT t FROM Tag t WHERE " +
             "(:filter = 'all' OR " +
             "(:filter = 'week' AND t.createdAt >= :startDate) OR " +
             "(:filter = 'month' AND t.createdAt >= :startDate) OR " +
             "(:filter = 'year' AND t.createdAt >= :startDate)) " +
             "AND t.deletedAt IS NULL")
-     Page<Tag> findByFilter(@Param("filter") String filter, @Param("startDate") LocalDateTime startDate, Pageable pageable);
-    
-    
+    Page<Tag> findByFilter(@Param("filter") String filter, @Param("startDate") LocalDateTime startDate,
+            Pageable pageable);
+
     @Query("SELECT t FROM Tag t")
     List<Tag> findAllTags();
-   
+
     @Query("SELECT COUNT(t) FROM Tag t")
     long countAllTags();
-    
+
     @Query("SELECT t FROM Tag t")
     Page<Tag> findAllTags(Pageable pageable);
-    
+
     @Query("SELECT t FROM Tag t WHERE t.createdAt >= :startDate")
     List<Tag> findByCreatedAtAfter(@Param("startDate") LocalDateTime startDate);
-    
+
     @Query("SELECT t FROM Tag t WHERE t.createdAt >= :startDate")
     Page<Tag> findByCreatedAtAfter(@Param("startDate") LocalDateTime startDate, Pageable pageable);
-    
+
     @Query("SELECT t FROM Tag t LEFT JOIN DocumentTag dt ON t.id = dt.tag.id " +
             "GROUP BY t.id, t.createdAt, t.createdBy, t.deletedAt, t.description, t.name, t.slug, t.updatedAt " +
             "ORDER BY COUNT(dt.document) DESC")
-     Page<Tag> findPopularTags(Pageable pageable);
-    
+    Page<Tag> findPopularTags(Pageable pageable);
+
     @Query("SELECT COUNT(t) FROM Tag t WHERE t.createdAt >= :startDate")
     Long countByCreatedAtAfter(@Param("startDate") LocalDateTime startDate);
 
     // Search tags by name (case insensitive)
     Page<Tag> findByNameContainingIgnoreCase(String name, Pageable pageable);
-List<Tag> findByNameContainingIgnoreCase(String name);
+
+    List<Tag> findByNameContainingIgnoreCase(String name);
 }

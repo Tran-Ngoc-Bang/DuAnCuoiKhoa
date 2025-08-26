@@ -29,6 +29,8 @@
     <link rel="stylesheet" th:href="@{/css/footer-modern.css}" />
     <link rel="stylesheet" th:href="@{/css/client-header.css}" />
     <link rel="stylesheet" th:href="@{/css/client-footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/client-dashboard.css}" />
+    <link rel="stylesheet" th:href="@{/css/document-account.css}" />
 
     <style>
       :root {
@@ -377,9 +379,10 @@
 
       .section-header {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.25rem;
+        /* align-items: center; */
+        /* justify-content: space-between; */
+        /* margin-bottom: 1.25rem; */
+        flex-direction: column;
       }
 
       .section-title {
@@ -502,7 +505,7 @@
       .documents-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 1.75rem;
+        gap: 10px;
       }
 
       .document-card {
@@ -512,7 +515,7 @@
         padding: 14px 14px 16px 14px;
         display: flex;
         flex-direction: column;
-        min-width: 210px;
+        min-width: 225px;
         max-width: 240px;
         margin: 0 10px 20px 10px;
         transition: box-shadow 0.2s, transform 0.2s;
@@ -1155,12 +1158,11 @@
                 </h2>
                 <div class="section-actions">
                   <div class="tabs">
-                    <button id="tabCreated" class="tab active">
-                      Tài liệu đã đăng
-                    </button>
-                    <button id="tabDownloaded" class="tab">
-                      Tài liệu đã tải xuống
-                    </button>
+                    <button id="tabAll" class="tab active">Tất cả</button>
+                    <button id="tabUploaded" class="tab">Đã tải lên</button>
+                    <button id="tabPurchased" class="tab">Đã mua</button>
+                    <button id="tabFavorites" class="tab">Yêu thích</button>
+                    <button id="tabTrash" class="tab">Thùng rác</button>
                   </div>
                 </div>
               </div>
@@ -1244,425 +1246,279 @@
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/account.js}"></script>
     <script>
-      // ==== Dữ liệu mẫu ====
-      const documents = [
-        {
-          id: 1,
-          title: "Giới thiệu về Trí tuệ nhân tạo",
-          category: "AI",
-          format: "PDF",
-          price: 0,
-          rating: 4.8,
-          views: 105,
-          downloads: 38,
-          image:
-            "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-          description:
-            "Tài liệu tổng quan về trí tuệ nhân tạo, lịch sử phát triển và các ứng dụng thực tế.",
-          isMine: true,
-        },
-        {
-          id: 2,
-          title: "Bảo mật mạng nâng cao",
-          category: "An ninh",
-          format: "Word",
-          price: 15000,
-          rating: 4.5,
-          views: 230,
-          downloads: 120,
-          image:
-            "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-          description:
-            "Phân tích các kỹ thuật bảo mật mạng và phòng chống tấn công phổ biến.",
-          isMine: false,
-        },
-        {
-          id: 3,
-          title: "Hướng dẫn lập trình Python",
-          category: "CNTT",
-          format: "PPT",
-          price: 10000,
-          rating: 4.9,
-          views: 310,
-          downloads: 200,
-          image:
-            "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
-          description:
-            "Slide bài giảng hướng dẫn từ cơ bản đến nâng cao về lập trình Python.",
-          isMine: false,
-        },
-        {
-          id: 4,
-          title: "Cơ sở dữ liệu quan hệ",
-          category: "CNTT",
-          format: "PDF",
-          price: 5000,
-          rating: 4.2,
-          views: 80,
-          downloads: 45,
-          image:
-            "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
-          description:
-            "Tài liệu về lý thuyết và thực hành cơ sở dữ liệu quan hệ.",
-          isMine: true,
-        },
-        {
-          id: 5,
-          title: "Nhập môn Machine Learning",
-          category: "AI",
-          format: "Word",
-          price: 20000,
-          rating: 4.7,
-          views: 150,
-          downloads: 60,
-          image:
-            "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80",
-          description: "Tài liệu nhập môn về các thuật toán học máy cơ bản.",
-          isMine: false,
-        },
-        {
-          id: 6,
-          title: "An toàn thông tin cho doanh nghiệp",
-          category: "An ninh",
-          format: "PDF",
-          price: 0,
-          rating: 4.3,
-          views: 95,
-          downloads: 30,
-          image:
-            "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
-          description:
-            "Các giải pháp bảo mật thông tin dành cho doanh nghiệp vừa và nhỏ.",
-          isMine: false,
-        },
-        {
-          id: 7,
-          title: "Tài liệu hướng dẫn sử dụng Excel",
-          category: "CNTT",
-          format: "Word",
-          price: 0,
-          rating: 4.0,
-          views: 60,
-          downloads: 25,
-          image:
-            "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80",
-          description:
-            "Hướng dẫn chi tiết các thao tác cơ bản và nâng cao trong Excel.",
-          isMine: true,
-        },
-        {
-          id: 8,
-          title: "Quản trị mạng căn bản",
-          category: "CNTT",
-          format: "PDF",
-          price: 8000,
-          rating: 4.1,
-          views: 70,
-          downloads: 18,
-          image:
-            "https://images.unsplash.com/photo-1465101178521-c1a9136a3c5a?auto=format&fit=crop&w=400&q=80",
-          description: "Tài liệu nhập môn về quản trị mạng máy tính.",
-          isMine: false,
-        },
-        {
-          id: 9,
-          title: "Phân tích dữ liệu với Excel",
-          category: "CNTT",
-          format: "Excel",
-          price: 5000,
-          rating: 4.4,
-          views: 90,
-          downloads: 33,
-          image:
-            "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-          description: "Các kỹ thuật phân tích dữ liệu cơ bản bằng Excel.",
-          isMine: true,
-        },
-        {
-          id: 10,
-          title: "Tổng quan về Blockchain",
-          category: "CNTT",
-          format: "PDF",
-          price: 12000,
-          rating: 4.6,
-          views: 110,
-          downloads: 40,
-          image:
-            "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80",
-          description:
-            "Giới thiệu công nghệ Blockchain và các ứng dụng thực tiễn.",
-          isMine: false,
-        },
+      // ==== State ====
+      let currentTab = "all";
+      let currentPage = 0;
+      let pageSize = 12;
+      let currentQuery = "";
+
+      const tabs = [
+        { id: "tabAll", key: "all" },
+        { id: "tabUploaded", key: "uploaded" },
+        { id: "tabPurchased", key: "purchased" },
+        { id: "tabFavorites", key: "favorites" },
+        { id: "tabTrash", key: "trash" },
       ];
 
-      // Danh sách id tài liệu đã tải xuống (đã mua)
-      const myDownloads = [2, 3, 5, 6, 8, 10];
-
-      // ==== Toast ====
-      function showToast(message) {
-        const toast = document.getElementById("toast");
-        toast.textContent = message;
-        toast.classList.add("show");
-        clearTimeout(showToast.timeout);
-        showToast.timeout = setTimeout(() => {
-          toast.classList.remove("show");
-        }, 2000);
-      }
-
-      // ==== Thống kê ====
-      function updateStats() {
-        document.getElementById("statCreated").textContent = documents.filter(
-          (d) => d.isMine
-        ).length;
-        document.getElementById("statDownloaded").textContent =
-          myDownloads.length;
-        document.getElementById("statViews").textContent = documents
-          .filter((d) => d.isMine)
-          .reduce((sum, d) => sum + d.views, 0);
-      }
-
-      // ==== Phân trang ====
-      let currentPage = 1;
-      const pageSize = 4;
-
-      // ==== Hiển thị danh sách tài liệu ====
-      function renderDocuments(tab = "created", page = 1) {
-        const list = document.getElementById("docList");
-        list.innerHTML = "";
-
-        let filtered;
-        if (tab === "created") {
-          filtered = documents.filter((doc) => doc.isMine);
-        } else if (tab === "downloaded") {
-          filtered = documents.filter(
-            (doc) => myDownloads.includes(doc.id) && !doc.isMine
-          );
-        } else {
-          filtered = [];
-        }
-
-        const search = document
-          .getElementById("searchInput")
-          .value.toLowerCase();
-        const cat = document.getElementById("filterCategory").value;
-        const fmt = document.getElementById("filterFormat").value;
-        const sort = document.getElementById("filterSort")
-          ? document.getElementById("filterSort").value
-          : "";
-
-        filtered = filtered.filter(
-          (doc) =>
-            doc.title.toLowerCase().includes(search) &&
-            (!cat || doc.category === cat) &&
-            (!fmt || doc.format === fmt)
-        );
-
-        if (sort === "newest") filtered.sort((a, b) => b.id - a.id);
-        if (sort === "popular") filtered.sort((a, b) => b.views - a.views);
-        if (sort === "priceAsc") filtered.sort((a, b) => a.price - b.price);
-        if (sort === "priceDesc") filtered.sort((a, b) => b.price - a.price);
-
-        // Phân trang
-        const totalDocs = filtered.length;
-        const totalPages = Math.ceil(totalDocs / pageSize);
-        currentPage = Math.max(1, Math.min(page, totalPages || 1));
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        const docsToShow = filtered.slice(start, end);
-
-        if (docsToShow.length === 0) {
-          list.innerHTML = "<p>Không có tài liệu nào phù hợp.</p>";
-        } else {
-          docsToShow.forEach((doc) => {
-            const card = document.createElement("div");
-            card.className = "document-card";
-            card.innerHTML = `
-        <div class="document-image">
-          <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Document thumbnail">
-        </div>
-        <h3 class="doc-title">${doc.title}</h3>
-        <p class="doc-meta">
-          <span>Định dạng: ${doc.format}</span> | 
-          <span>Danh mục: ${doc.category}</span> | 
-          <span>Tác giả: ${doc.isMine ? "Bạn" : "Tác giả khác"}</span>
-        </p>
-        <div class="card-content" style="display: flex; flex-direction: column; height: 100%;">
-          <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
-            <span class="price" style="font-weight: 600; color: #4361ee;">
-              ${doc.price === 0 ? "Miễn phí" : doc.price + "đ"}
-            </span>
-            <button class="download-btn" style="margin-left: 10px;">
-              <i class="fas fa-download"></i>
-              Tải xuống
-            </button>
-          </div>
-        </div>
-      `;
-
-            // Nút tải xuống bên ngoài (không giới hạn, luôn cho tải)
-            card.querySelector(".download-btn").onclick = (e) => {
-              e.stopPropagation();
-              showToast("Tải xuống thành công!", "success");
-            };
-            // Click vào card vẫn mở modal chi tiết
-            card.addEventListener("click", (e) => {
-              if (!e.target.classList.contains("download-btn")) {
-                openModal(doc.id);
-                showToast("Đã mở: " + doc.title);
-              }
-            });
-            list.appendChild(card);
+      tabs.forEach((t) => {
+        const el = document.getElementById(t.id);
+        if (el) {
+          el.addEventListener("click", () => {
+            document
+              .querySelectorAll(".tabs .tab")
+              .forEach((btn) => btn.classList.remove("active"));
+            el.classList.add("active");
+            currentTab = t.key;
+            currentPage = 0;
+            loadDocuments();
           });
         }
+      });
 
-        renderPagination(totalPages);
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", () => {
+          currentQuery = searchInput.value || "";
+          currentPage = 0;
+          loadDocuments();
+        });
       }
 
-      // ==== Phân trang ====
-      function renderPagination(totalPages) {
-        let pag = document.getElementById("pagination");
-        if (!pag) {
-          pag = document.createElement("div");
-          pag.id = "pagination";
-          pag.className = "pagination";
-          document.getElementById("docList").after(pag);
+      async function loadDocuments() {
+        const list = document.getElementById("docList");
+        const pagination = document.getElementById("pagination");
+        list.innerHTML = "<p>Đang tải...</p>";
+        pagination.innerHTML = "";
+        try {
+          const params = new URLSearchParams({
+            tab: currentTab,
+            page: String(currentPage),
+            size: String(pageSize),
+          });
+          if (currentQuery) params.set("q", currentQuery);
+          const res = await fetch(
+            `/account/documents/data?${params.toString()}`,
+            { headers: { Accept: "application/json" } }
+          );
+          if (!res.ok) throw new Error("Load dữ liệu thất bại");
+          const data = await res.json();
+          renderList(data.content || []);
+          renderPagination(data.page || 0, data.totalPages || 0);
+        } catch (e) {
+          list.innerHTML = `<p>Lỗi: ${e.message}</p>`;
         }
-        pag.innerHTML = "";
+      }
 
-        if (totalPages <= 1) {
-          pag.style.display = "none";
+      function renderList(docs) {
+        const list = document.getElementById("docList");
+        if (!docs.length) {
+          list.innerHTML = "<p>Không có tài liệu phù hợp.</p>";
           return;
         }
-        pag.style.display = "flex";
+        list.innerHTML = "";
+        docs.forEach((doc) => {
+          const card = document.createElement("div");
+          card.className = "document-card";
+          card.dataset.id = doc.id;
+          const priceText = doc.price
+            ? `${Number(doc.price).toLocaleString("vi-VN")} xu`
+            : "Miễn phí";
+          // Tạo badge trạng thái
+          const status = (doc.status || "").toUpperCase();
+          const statusBadge = status
+            ? `<span class="status-badge ${
+                status === "PENDING"
+                  ? "pending"
+                  : status === "REJECTED"
+                  ? "rejected"
+                  : "approved"
+              }">` +
+              `${
+                status === "PENDING"
+                  ? "Đang chờ duyệt"
+                  : status === "REJECTED"
+                  ? "Đã từ chối"
+                  : "Đã duyệt"
+              }` +
+              `</span>`
+            : "";
+          // Định dạng ngày tạo
+          const createdAtText = doc.createdAt
+            ? new Date(doc.createdAt).toLocaleDateString("vi-VN")
+            : "";
 
-        // Nút prev
-        const prev = document.createElement("button");
-        prev.textContent = "«";
-        prev.disabled = currentPage === 1;
-        prev.onclick = () => renderDocuments(currentTab, currentPage - 1);
-        pag.appendChild(prev);
+          card.innerHTML = `
+            <div class="document-price-badge">${priceText}</div>
+            <label class="doc-select">
+              <input type="checkbox" class="doc-checkbox" data-id="${doc.id}" />
+            </label>
+            <div class="document-thumb-wrap">
+              <img src="${
+                doc.thumbnailUrl || "/images/default-thumbnail.png"
+              }" alt="thumbnail" onerror="this.src='/images/default-thumbnail.png'" />
+              <div class="document-overlay">
+                <div class="overlay-actions">
+                  <button class="overlay-btn open"><i class="fas fa-external-link-alt"></i> Xem</button>
+                </div>
+              </div>
+              <div class="document-status">${statusBadge}</div>
+            </div>
+            <h3 class="document-title">${doc.title || "Không tiêu đề"}</h3>
+            ${
+              status === "PENDING"
+                ? `<div class="document-alert pending">Đang chờ duyệt</div>`
+                : ""
+            }
+            ${
+              status === "REJECTED"
+                ? `<div class="document-alert rejected">Tài liệu bị từ chối. Vui lòng chỉnh sửa và gửi lại.</div>`
+                : ""
+            }
+            <div class="document-meta">
+              <div class="document-meta-item"><i class="fas fa-eye"></i> ${
+                doc.viewsCount ?? 0
+              }</div>
+              <div class="document-meta-item"><i class="fas fa-download"></i> ${
+                doc.downloadsCount ?? 0
+              }</div>
+              <div class="document-meta-item"><i class="fas fa-tag"></i> ${
+                doc.fileType || ""
+              }</div>
+              <div class="document-meta-item"><i class="fas fa-calendar-alt"></i> ${createdAtText}</div>
+            </div>
+            <div class="document-actions">
+              <button class="doc-btn view" title="Xem"><i class="fas fa-eye"></i></button>
+              <button class="doc-btn download" title="Tải xuống"><i class="fas fa-download"></i></button>
+              <button class="doc-btn favorite" title="Yêu thích"><i class="fas fa-bookmark"></i></button>
+              <button class="doc-btn share" title="Chia sẻ"><i class="fas fa-share-alt"></i></button>
+              <button class="doc-btn edit" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+            </div>
+          `;
+          // Handlers
+          const openBtn = card.querySelector(".overlay-btn.open");
+          if (openBtn)
+            openBtn.addEventListener(
+              "click",
+              () => (window.location.href = `/documents/${doc.id}`)
+            );
+          const previewBtn = card.querySelector(".overlay-btn.preview");
+          if (previewBtn)
+            previewBtn.addEventListener("click", () =>
+              openPreviewModal(doc.id)
+            );
+          const viewBtn = card.querySelector(".doc-btn.view");
+          viewBtn.addEventListener("click", () => {
+            window.location.href = `/documents/${doc.id}`;
+          });
+          const downloadBtn = card.querySelector(".doc-btn.download");
+          downloadBtn.addEventListener("click", async () => {
+            try {
+              const res = await fetch(`/documents/${doc.id}/purchase`, {
+                method: "POST",
+                headers: { Accept: "application/json" },
+              });
+              if (!res.ok) throw new Error("Không thể tải xuống");
+              window.location.href = `/documents/${doc.id}`;
+            } catch (e) {
+              alert(e.message);
+            }
+          });
+          const favBtn = card.querySelector(".doc-btn.favorite");
+          favBtn.addEventListener("click", async () => {
+            try {
+              const res = await fetch(`/documents/${doc.id}/favorite`, {
+                method: "POST",
+                headers: { Accept: "application/json" },
+              });
+              const data = await res.json();
 
-        // Số trang
-        for (let i = 1; i <= totalPages; i++) {
-          if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-            const btn = document.createElement("button");
-            btn.textContent = i;
-            btn.className = i === currentPage ? "active" : "";
-            btn.onclick = () => renderDocuments(currentTab, i);
-            pag.appendChild(btn);
-          } else if (
-            (i === currentPage - 2 && currentPage > 3) ||
-            (i === currentPage + 2 && currentPage < totalPages - 2)
-          ) {
-            const dots = document.createElement("span");
-            dots.textContent = "...";
-            pag.appendChild(dots);
-          }
-        }
-
-        // Nút next
-        const next = document.createElement("button");
-        next.textContent = "»";
-        next.disabled = currentPage === totalPages;
-        next.onclick = () => renderDocuments(currentTab, currentPage + 1);
-        pag.appendChild(next);
+              const editBtn = card.querySelector(".doc-btn.edit");
+              if (editBtn) {
+                editBtn.addEventListener("click", () => {
+                  window.location.href = `/documents/${doc.id}/edit`;
+                });
+              }
+              if (data && data.success) {
+                favBtn.classList.toggle("active", data.isFavorited);
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          });
+          const shareBtn = card.querySelector(".doc-btn.share");
+          shareBtn.addEventListener("click", async () => {
+            const url = `${window.location.origin}/documents/${doc.id}`;
+            try {
+              await navigator.clipboard.writeText(url);
+              alert("Đã sao chép liên kết chia sẻ");
+            } catch {
+              prompt("Sao chép liên kết:", url);
+            }
+          });
+          list.appendChild(card);
+        });
       }
 
-      // ==== Modal chi tiết ====
-      function openModal(id) {
-        const doc = documents.find((d) => d.id === id);
-        if (!doc) return;
+      function renderPagination(page, totalPages) {
+        const pagination = document.getElementById("pagination");
+        if (totalPages <= 1) {
+          pagination.innerHTML = "";
+          return;
+        }
+        let html = "";
+        for (let i = 0; i < totalPages; i++) {
+          html += `<button class="page-btn ${
+            i === page ? "active" : ""
+          }" data-page="${i}">${i + 1}</button>`;
+        }
+        pagination.innerHTML = html;
+        pagination.querySelectorAll(".page-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            currentPage = Number(btn.dataset.page) || 0;
+            loadDocuments();
+          });
+        });
+      }
 
-        document.getElementById("modalTitle").textContent = doc.title;
-        document.getElementById("modalImg").src = doc.image;
-        document.getElementById("modalCategory").textContent =
-          "Danh mục: " + doc.category;
-        document.getElementById("modalFormat").textContent =
-          "Định dạng: " + doc.format;
-        document.getElementById("modalPrice").textContent =
-          "Giá: " + (doc.price === 0 ? "Miễn phí" : doc.price + "đ");
-        document.getElementById("modalRating").textContent =
-          "Đánh giá: " + doc.rating + " ★";
-        document.getElementById("modalFormat").textContent =
-          "Định dạng: " + doc.format;
-        document.getElementById("modalPrice").textContent =
-          "Giá: " + (doc.price === 0 ? "Miễn phí" : doc.price + "đ");
-        document.getElementById("modalRating").textContent =
-          "Đánh giá: " + doc.rating + " ★";
-        document.getElementById("modalDesc").textContent = doc.description;
-
-        const modal = document.getElementById("modal");
+      function openPreviewModal(id) {
+        const modal = document.getElementById("quickPreviewModal");
+        const frame = document.getElementById("quickPreviewFrame");
+        // Tạm thời mở trang chi tiết trong iframe; sau sẽ thay bằng pdf.js render trang 1-3
+        frame.src = `/documents/${id}`;
         modal.classList.add("show");
-
-        const downloadBtn = document.getElementById("downloadBtn");
-        if (downloadBtn) {
-          downloadBtn.disabled = false;
-          downloadBtn.onclick = () => {
-            showToast("Tải xuống thành công: " + doc.title);
-          };
-        }
-      }
-      // ==== Đóng modal ====
-      document.getElementById("modalClose").addEventListener("click", () => {
-        document.getElementById("modal").classList.remove("show");
-      });
-
-      // ==== Tab hiện tại ====
-      let currentTab = "created";
-      function setActiveTab(tab) {
-        currentTab = tab;
-        document
-          .getElementById("tabCreated")
-          .classList.toggle("active", tab === "created");
-        document
-          .getElementById("tabDownloaded")
-          .classList.toggle("active", tab === "downloaded");
-        renderDocuments(tab, 1);
       }
 
-      // ==== Sự kiện ====
-      document.getElementById("tabCreated").addEventListener("click", () => {
-        setActiveTab("created");
-        showToast("Đã chuyển sang tab Tài liệu đã đăng");
-      });
-      document.getElementById("tabDownloaded").addEventListener("click", () => {
-        setActiveTab("downloaded");
-        showToast("Đã chuyển sang tab Tài liệu đã tải");
-      });
-      document.getElementById("searchInput").addEventListener("input", () => {
-        renderDocuments(currentTab, 1);
-      });
-      document
-        .getElementById("filterCategory")
-        .addEventListener("change", function () {
-          renderDocuments(currentTab, 1);
-          const val = this.value;
-          if (val) showToast('Đã chọn danh mục: "' + val + '"');
-        });
-      document
-        .getElementById("filterFormat")
-        .addEventListener("change", function () {
-          renderDocuments(currentTab, 1);
-          const val = this.value;
-          if (val) showToast('Đã chọn định dạng: "' + val + '"');
-        });
-      if (document.getElementById("filterSort")) {
-        document.getElementById("filterSort").addEventListener("change", () => {
-          renderDocuments(currentTab, 1);
-        });
+      function closePreviewModal() {
+        const modal = document.getElementById("quickPreviewModal");
+        const frame = document.getElementById("quickPreviewFrame");
+        frame.src = "";
+        modal.classList.remove("show");
       }
-      function showToast(message) {
-        const toast = document.getElementById("toast");
-        toast.textContent = message;
-        toast.classList.add("show");
-        clearTimeout(showToast.timeout);
-        showToast.timeout = setTimeout(() => {
-          toast.classList.remove("show");
-        }, 2000);
-      }
-      // ==== Khởi tạo ====
-      updateStats();
-      renderDocuments();
+
+      // init
+      loadDocuments();
     </script>
+
+    <div id="quickPreviewModal" class="modal" style="display: none">
+      <div class="modal-content" style="max-width: 960px; width: 90%">
+        <div class="modal-header">
+          <h2 class="modal-title">Xem nhanh</h2>
+          <button
+            id="previewClose"
+            class="modal-close"
+            onclick="closePreviewModal()"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" style="height: 70vh">
+          <iframe
+            id="quickPreviewFrame"
+            src=""
+            style="width: 100%; height: 100%; border: 0"
+          ></iframe>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
