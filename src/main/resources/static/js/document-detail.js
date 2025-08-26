@@ -731,8 +731,8 @@ function initDocumentActions() {
   }
 }
 
-// Show download confirmation modal
-function showDownloadConfirmationModal() {
+// Show purchase confirmation modal
+function showPurchaseConfirmationModal() {
   // Check if modal already exists
   let downloadModal = document.getElementById('downloadModal');
   
@@ -744,7 +744,6 @@ function showDownloadConfirmationModal() {
     
     // Get document info
     const documentTitle = document.querySelector('.document-title')?.textContent || 'Tài liệu';
-    const documentPrice = document.querySelector('.document-price')?.textContent || '';
     const documentFormat = document.querySelector('.document-format')?.textContent || 'PDF';
     const documentSize = document.querySelector('.info-value[data-info="size"]')?.textContent || '';
     const documentPages = document.querySelector('.info-value[data-info="pages"]')?.textContent || '';
@@ -756,7 +755,7 @@ function showDownloadConfirmationModal() {
           <div class="document-icon">
             <i class="fas fa-file-pdf"></i>
           </div>
-          <h3 class="download-modal-title">Xác nhận tải xuống</h3>
+          <h3 class="download-modal-title">Xác nhận mua tài liệu</h3>
           <div class="download-document-name">${documentTitle}</div>
           <button class="download-modal-close">
             <i class="fas fa-times"></i>
@@ -776,26 +775,51 @@ function showDownloadConfirmationModal() {
               <div class="download-info-value">${documentPages}</div>
               <div class="download-info-label">Số trang</div>
             </div>
-            <div class="download-info-item">
-              <div class="download-info-value">Cao cấp</div>
-              <div class="download-info-label">Phân loại</div>
-            </div>
           </div>
           
-          <div class="download-cost">
-            <div class="download-cost-label">Chi phí:</div>
-            <div class="download-cost-value">
-              <i class="fas fa-coins"></i> ${documentPrice}
+          <div class="purchase-details">
+            <div class="purchase-info">
+              <div class="purchase-info-item">
+                <div class="purchase-info-label">Giá tài liệu:</div>
+                <div class="purchase-info-value" id="modal-price">
+                  <i class="fas fa-coins"></i> <span id="price-value">0</span> xu
+                </div>
+              </div>
+              <div class="purchase-info-item">
+                <div class="purchase-info-label">Số dư hiện tại:</div>
+                <div class="purchase-info-value" id="modal-balance">
+                  <i class="fas fa-wallet"></i> <span id="balance-value">0</span> xu
+                </div>
+              </div>
+              <div class="purchase-info-item">
+                <div class="purchase-info-label">Số dư sau khi mua:</div>
+                <div class="purchase-info-value" id="modal-remaining">
+                  <i class="fas fa-calculator"></i> <span id="remaining-value">0</span> xu
+                </div>
+              </div>
+            </div>
+            
+            <div class="commission-info">
+              <i class="fas fa-info-circle"></i>
+              <strong>Thông tin hoa hồng:</strong> Người bán sẽ nhận 85% giá trị, 15% còn lại là hoa hồng hệ thống.
             </div>
           </div>
           
           <div class="download-actions">
             <button id="confirmDownload" class="download-confirm-btn">
-              <i class="fas fa-download"></i> Xác nhận tải xuống
+              <i class="fas fa-shopping-cart"></i> Xác nhận mua
             </button>
             <button id="cancelDownload" class="download-cancel-btn">
               <i class="fas fa-times"></i> Hủy
             </button>
+            <a href="/account/recharge" class="download-recharge-btn" id="rechargeBtn" style="display: none;">
+              <i class="fas fa-plus-circle"></i> Nạp thêm xu
+            </a>
+          </div>
+          
+          <div class="insufficient-balance" id="insufficientMsg" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            Số dư không đủ. Bạn cần <span id="neededAmount">0</span> xu nữa.
           </div>
         </div>
       </div>
@@ -823,36 +847,111 @@ function showDownloadConfirmationModal() {
       }
     });
     
-    confirmButton.addEventListener('click', () => {
+    confirmButton.addEventListener('click', async () => {
       // Show loading state
       confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
       confirmButton.disabled = true;
       
-      // Simulate API call with timeout
-      setTimeout(() => {
-        // In a real application, this would check if the user has enough coins
-        // For demo purposes, let's assume the user has enough
-        downloadModal.classList.remove('show');
+      try {
+        // Get document ID from buy button
+        const buyBtn = document.getElementById('buy-now-btn');
+        const docId = buyBtn.getAttribute('data-id');
         
-        // Reset button state after modal closes
-        setTimeout(() => {
-          confirmButton.innerHTML = '<i class="fas fa-download"></i> Xác nhận tải xuống';
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+        
+        // Make purchase API call
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (csrfToken && csrfHeader) {
+          headers[csrfHeader] = csrfToken;
+        }
+        
+        const response = await fetch(`/documents/${docId}/purchase`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: headers
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Close modal
+          downloadModal.classList.remove('show');
+          
+          // Show success message
+          showToast('Mua tài liệu thành công! Đang tải xuống...', 'success');
+          
+          // Download file immediately
+          setTimeout(() => {
+            window.location.href = `/documents/${docId}/download`;
+          }, 1000);
+        } else {
+          showToast(result.message || 'Không thể mua tài liệu', 'error');
           confirmButton.disabled = false;
-        }, 300);
-        
-        // Show download progress
-        showToast('Đang tải xuống tài liệu...', 'info');
-        
-        // Simulate download completion
-        setTimeout(() => {
-          showToast('Tải xuống hoàn tất!', 'success');
-        }, 2000);
-      }, 1500);
+          confirmButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Xác nhận mua';
+        }
+      } catch (error) {
+        showToast('Có lỗi xảy ra khi mua tài liệu', 'error');
+        confirmButton.disabled = false;
+        confirmButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Xác nhận mua';
+      }
     });
   }
   
-  // Show modal
-  downloadModal.classList.add('show');
+  // Fetch purchase info and show modal
+  const buyBtn = document.getElementById('buy-now-btn');
+  const docId = buyBtn.getAttribute('data-id');
+  
+  // Fetch purchase info
+  fetch(`/documents/${docId}/purchase/check`, { credentials: 'same-origin' })
+    .then(res => {
+      if (res.status === 401) {
+        window.location.href = '/auth/login';
+        return;
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (!data) return;
+      
+      const price = data.price || 0;
+      const balance = data.balance || 0;
+      const remaining = balance - price;
+      
+      // Update modal content
+      document.getElementById('price-value').textContent = price;
+      document.getElementById('balance-value').textContent = balance;
+      document.getElementById('remaining-value').textContent = remaining;
+      
+      const insufficientMsg = document.getElementById('insufficientMsg');
+      const rechargeBtn = document.getElementById('rechargeBtn');
+      const confirmBtn = document.getElementById('confirmDownload');
+      
+      if (!data.owned && data.sufficient) {
+        insufficientMsg.style.display = 'none';
+        rechargeBtn.style.display = 'none';
+        confirmBtn.disabled = false;
+        document.getElementById('remaining-value').style.color = '#28a745';
+      } else if (!data.owned && !data.sufficient) {
+        insufficientMsg.style.display = 'block';
+        rechargeBtn.style.display = 'inline-block';
+        confirmBtn.disabled = true;
+        document.getElementById('neededAmount').textContent = price - balance;
+        document.getElementById('remaining-value').style.color = '#dc3545';
+      }
+      
+      // Show modal
+      downloadModal.classList.add('show');
+    })
+    .catch(error => {
+      console.error('Error fetching purchase info:', error);
+      // Show modal anyway with default values
+      downloadModal.classList.add('show');
+    });
 }
 
 // Initialize author follow button

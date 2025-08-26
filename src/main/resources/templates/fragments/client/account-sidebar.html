@@ -53,7 +53,7 @@
           >
             <i class="fas fa-file-alt sidebar-icon"></i>
             Tài liệu của tôi
-            <span class="sidebar-badge">15</span>
+            <span class="sidebar-badge" id="sidebar-documents-count">0</span>
           </a>
         </li>
 
@@ -79,21 +79,11 @@
           >
             <i class="fas fa-bookmark sidebar-icon"></i>
             Tài liệu đã lưu
+            <span class="sidebar-badge" id="sidebar-favorites-count">0</span>
           </a>
         </li>
 
         <li class="sidebar-menu-title">Tài khoản</li>
-
-        <li class="sidebar-menu-item">
-          <a
-            th:href="@{/account/profile}"
-            class="sidebar-menu-link"
-            data-page="profile"
-          >
-            <i class="fas fa-user sidebar-icon"></i>
-            Thông tin cá nhân
-          </a>
-        </li>
 
         <li class="sidebar-menu-item">
           <a
@@ -114,7 +104,7 @@
           >
             <i class="fas fa-coins sidebar-icon"></i>
             Nạp xu
-            <span class="sidebar-badge">250</span>
+            <span class="sidebar-badge" id="sidebar-coin-balance">0</span>
           </a>
         </li>
 
@@ -150,12 +140,17 @@
           >
             <i class="fas fa-bell sidebar-icon"></i>
             Thông báo
-            <span class="sidebar-badge notification-badge" th:if="${unreadNotificationCount != null && unreadNotificationCount > 0}" th:text="${unreadNotificationCount}">0</span>
+            <span
+              class="sidebar-badge notification-badge"
+              id="sidebar-notifications-count"
+              th:if="${unreadNotificationCount != null && unreadNotificationCount > 0}"
+              th:text="${unreadNotificationCount}"
+              >0</span
+            >
           </a>
         </li>
 
-
-      <!--  <li class="sidebar-menu-item">
+        <!--  <li class="sidebar-menu-item">
 
        
         <li class="sidebar-menu-item">
@@ -170,7 +165,7 @@
           </a>
         </li>-->
 
-      <!-- <li class="sidebar-menu-item">
+        <!-- <li class="sidebar-menu-item">
           <a
             th:href="@{/account/support}"
             class="sidebar-menu-link"
@@ -180,11 +175,59 @@
             Hỗ trợ
           </a>
 
-        </li>--> 
-
+        </li>-->
       </ul>
 
       <script>
+        // Load sidebar statistics
+        async function loadSidebarStats() {
+          try {
+            const res = await fetch("/account/sidebar-stats", {
+              headers: { Accept: "application/json" },
+            });
+            if (!res.ok) throw new Error("Không thể tải thống kê sidebar");
+            const stats = await res.json();
+
+            // Update document count
+            const documentsBadge = document.getElementById(
+              "sidebar-documents-count"
+            );
+            if (documentsBadge) {
+              documentsBadge.textContent = stats.uploadedDocuments || 0;
+            }
+
+            // Update favorites count
+            const favoritesBadge = document.getElementById(
+              "sidebar-favorites-count"
+            );
+            if (favoritesBadge) {
+              favoritesBadge.textContent = stats.favorites || 0;
+            }
+
+            // Update coin balance
+            const coinBadge = document.getElementById("sidebar-coin-balance");
+            if (coinBadge) {
+              coinBadge.textContent = stats.coinBalance || 0;
+            }
+
+            // Update notifications count
+            const notificationsBadge = document.getElementById(
+              "sidebar-notifications-count"
+            );
+            if (notificationsBadge) {
+              const count = stats.unreadNotifications || 0;
+              if (count > 0) {
+                notificationsBadge.textContent = count;
+                notificationsBadge.style.display = "inline-block";
+              } else {
+                notificationsBadge.style.display = "none";
+              }
+            }
+          } catch (e) {
+            console.error("Lỗi tải thống kê sidebar:", e);
+          }
+        }
+
         // Set active class based on current page
         document.addEventListener("DOMContentLoaded", function () {
           const currentPath = window.location.pathname;
@@ -201,7 +244,13 @@
               link.classList.add("active");
             }
           });
+
+          // Load sidebar stats
+          loadSidebarStats();
         });
+
+        // Auto-refresh sidebar stats every 30 seconds
+        setInterval(loadSidebarStats, 30000);
       </script>
     </div>
   </body>

@@ -42,4 +42,20 @@ document.addEventListener("DOMContentLoaded", function () {
       parent.classList.toggle("open");
     });
   });
+
+  // Admin profile dropdown toggle
+  const adminProfile = document.querySelector(".admin-profile");
+  if (adminProfile) {
+    adminProfile.addEventListener("click", function (e) {
+      e.stopPropagation();
+      this.classList.toggle("active");
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+      if (!adminProfile.contains(e.target)) {
+        adminProfile.classList.remove("active");
+      }
+    });
+  }
 });

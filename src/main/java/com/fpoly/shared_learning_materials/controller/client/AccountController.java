@@ -57,11 +57,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fpoly.shared_learning_materials.repository.TransactionDetailRepository;
 import com.fpoly.shared_learning_materials.config.CustomUserDetailsService;
 import com.fpoly.shared_learning_materials.service.DocumentService;
+import com.fpoly.shared_learning_materials.service.CategoryService;
 import com.fpoly.shared_learning_materials.domain.Document;
+import com.fpoly.shared_learning_materials.repository.DocumentOwnerRepository;
+import com.fpoly.shared_learning_materials.repository.FavoriteRepository;
 import java.time.format.DateTimeFormatter;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import jakarta.servlet.http.HttpServletRequest;
+import com.fpoly.shared_learning_materials.repository.NotificationRepository;
 
 /**
  * Controller for user account pages
@@ -99,10 +103,19 @@ public class AccountController {
     private com.fpoly.shared_learning_materials.service.TransactionService transactionService;
 
     @Autowired
+    private DocumentOwnerRepository documentOwnerRepository;
+
+    @Autowired
     private WithdrawalService withdrawalService;
 
     @Autowired
     private DocumentService documentService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, RedirectAttributes redirectAttributes) {
@@ -225,6 +238,102 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/documents/stats")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getDocumentsStats() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Lấy tất cả documents của user
+        List<Document> allUserDocuments = documentService.getAllDocumentsForExport().stream()
+                .map(docDTO -> documentService.findById(docDTO.getId()))
+                .filter(doc -> doc != null && documentOwnerRepository.existsByUserAndDocument(currentUser, doc))
+                .collect(java.util.stream.Collectors.toList());
+
+        // Thống kê tài liệu đã tải lên
+        long uploadedCount = allUserDocuments.stream()
+                .filter(doc -> {
+                    List<com.fpoly.shared_learning_materials.domain.DocumentOwner> owners = documentOwnerRepository
+                            .findByDocumentId(doc.getId());
+                    return owners.stream()
+                            .anyMatch(owner -> owner.getUser().getId().equals(currentUser.getId()) &&
+                                    "owner".equals(owner.getOwnershipType()));
+                })
+                .count();
+
+        // Thống kê tài liệu đã mua
+        long purchasedCount = allUserDocuments.stream()
+                .filter(doc -> {
+                    List<com.fpoly.shared_learning_materials.domain.DocumentOwner> owners = documentOwnerRepository
+                            .findByDocumentId(doc.getId());
+                    return owners.stream()
+                            .anyMatch(owner -> owner.getUser().getId().equals(currentUser.getId()) &&
+                                    "buyer".equals(owner.getOwnershipType()));
+                })
+                .count();
+
+        // Thống kê tổng lượt xem
+        long totalViews = allUserDocuments.stream()
+                .mapToLong(doc -> doc.getViewsCount() != null ? doc.getViewsCount() : 0)
+                .sum();
+
+        // Thống kê tổng lượt tải
+        long totalDownloads = allUserDocuments.stream()
+                .mapToLong(doc -> doc.getDownloadsCount() != null ? doc.getDownloadsCount() : 0)
+                .sum();
+
+        // Thống kê tổng doanh thu (chỉ tính tài liệu đã tải lên)
+        BigDecimal totalRevenue = allUserDocuments.stream()
+                .filter(doc -> {
+                    List<com.fpoly.shared_learning_materials.domain.DocumentOwner> owners = documentOwnerRepository
+                            .findByDocumentId(doc.getId());
+                    return owners.stream()
+                            .anyMatch(owner -> owner.getUser().getId().equals(currentUser.getId()) &&
+                                    "owner".equals(owner.getOwnershipType()));
+                })
+                .map(doc -> doc.getPrice() != null ? doc.getPrice() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("uploadedCount", uploadedCount);
+        stats.put("purchasedCount", purchasedCount);
+        stats.put("totalViews", totalViews);
+        stats.put("totalDownloads", totalDownloads);
+        stats.put("totalRevenue", totalRevenue);
+
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/documents/categories")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getCategories() {
+        try {
+            List<com.fpoly.shared_learning_materials.dto.CategoryDTO> categories = categoryService
+                    .getActiveCategories();
+            List<Map<String, Object>> result = categories.stream()
+                    .map(cat -> {
+                        Map<String, Object> catMap = new HashMap<>();
+                        catMap.put("id", cat.getId());
+                        catMap.put("name", cat.getName());
+                        catMap.put("slug", cat.getSlug());
+                        return catMap;
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/profile")
     public String profile(Model model) {
         model.addAttribute("pageTitle", "Thông tin cá nhân");
@@ -243,7 +352,10 @@ public class AccountController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "tab", defaultValue = "all") String tab,
-            @RequestParam(value = "q", required = false) String keyword) {
+            @RequestParam(value = "q", required = false) String keyword,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "sort", defaultValue = "newest") String sort) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()
@@ -257,36 +369,132 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        // Xác định sort direction và field
+        org.springframework.data.domain.Sort.Direction sortDirection = org.springframework.data.domain.Sort.Direction.DESC;
+        String sortField = "createdAt";
+
+        switch (sort.toLowerCase()) {
+            case "oldest":
+                sortDirection = org.springframework.data.domain.Sort.Direction.ASC;
+                break;
+            case "popular":
+                sortField = "viewsCount";
+                break;
+            case "downloads":
+                sortField = "downloadsCount";
+                break;
+            case "priceAsc":
+                sortField = "price";
+                sortDirection = org.springframework.data.domain.Sort.Direction.ASC;
+                break;
+            case "priceDesc":
+                sortField = "price";
+                sortDirection = org.springframework.data.domain.Sort.Direction.DESC;
+                break;
+            default:
+                sortField = "createdAt";
+                sortDirection = org.springframework.data.domain.Sort.Direction.DESC;
+        }
+
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest
-                .of(Math.max(page, 0), Math.max(size, 1), org.springframework.data.domain.Sort
-                        .by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+                .of(Math.max(page, 0), Math.max(size, 1),
+                        org.springframework.data.domain.Sort.by(sortDirection, sortField));
 
         org.springframework.data.domain.Page<Document> documentPage;
 
-        // Sử dụng DocumentService để lấy documents của user
+        // Sử dụng DocumentOwner để lấy documents của user
         if (keyword != null && !keyword.trim().isEmpty()) {
-            documentPage = documentService.searchDocuments(keyword.trim(), null, null, null, null, null, pageable);
-            // Lọc chỉ lấy documents của user hiện tại
+            List<String> categoryList = category != null ? List.of(category) : null;
+            List<String> statusList = status != null ? List.of(status) : null;
+            documentPage = documentService.searchDocuments(keyword.trim(), categoryList, null, null, null, null,
+                    pageable);
+            // Lọc chỉ lấy documents của user hiện tại dựa trên DocumentOwner
             List<Document> userDocuments = documentPage.getContent().stream()
-                    .filter(doc -> doc.getFile() != null && currentUser.equals(doc.getFile().getUploadedBy()))
+                    .filter(doc -> documentOwnerRepository.existsByUserAndDocument(currentUser, doc))
                     .collect(java.util.stream.Collectors.toList());
 
             // Tạo Page mới với documents đã lọc
             documentPage = new org.springframework.data.domain.PageImpl<>(
                     userDocuments, pageable, userDocuments.size());
         } else {
-            // Lấy tất cả documents của user
+            // Lấy tất cả documents của user dựa trên DocumentOwner
             List<Document> allUserDocuments = documentService.getAllDocumentsForExport().stream()
                     .map(docDTO -> documentService.findById(docDTO.getId()))
-                    .filter(doc -> doc != null && doc.getFile() != null
-                            && currentUser.equals(doc.getFile().getUploadedBy()))
+                    .filter(doc -> doc != null && documentOwnerRepository.existsByUserAndDocument(currentUser, doc))
                     .collect(java.util.stream.Collectors.toList());
 
             // Lọc theo tab
             if (!"all".equals(tab.toLowerCase())) {
+                if ("uploaded".equals(tab.toLowerCase())) {
+                    // Chỉ lấy tài liệu mà user là owner (đã tải lên)
+                    allUserDocuments = allUserDocuments.stream()
+                            .filter(doc -> {
+                                List<com.fpoly.shared_learning_materials.domain.DocumentOwner> owners = documentOwnerRepository
+                                        .findByDocumentId(doc.getId());
+                                return owners.stream()
+                                        .anyMatch(owner -> owner.getUser().getId().equals(currentUser.getId()) &&
+                                                "owner".equals(owner.getOwnershipType()));
+                            })
+                            .collect(java.util.stream.Collectors.toList());
+                } else if ("purchased".equals(tab.toLowerCase())) {
+                    // Chỉ lấy tài liệu mà user đã mua (buyer)
+                    allUserDocuments = allUserDocuments.stream()
+                            .filter(doc -> {
+                                List<com.fpoly.shared_learning_materials.domain.DocumentOwner> owners = documentOwnerRepository
+                                        .findByDocumentId(doc.getId());
+                                return owners.stream()
+                                        .anyMatch(owner -> owner.getUser().getId().equals(currentUser.getId()) &&
+                                                "buyer".equals(owner.getOwnershipType()));
+                            })
+                            .collect(java.util.stream.Collectors.toList());
+                } else if ("favorites".equals(tab.toLowerCase())) {
+                    // Lấy tài liệu yêu thích
+                    Set<Long> favoriteDocIds = favoriteRepository.findFavoriteDocIdsByUserId(currentUser.getId());
+                    allUserDocuments = allUserDocuments.stream()
+                            .filter(doc -> favoriteDocIds.contains(doc.getId()))
+                            .collect(java.util.stream.Collectors.toList());
+                } else if ("trash".equals(tab.toLowerCase())) {
+                    // Lấy tài liệu đã xóa (soft delete)
+                    allUserDocuments = allUserDocuments.stream()
+                            .filter(doc -> doc.getDeletedAt() != null)
+                            .collect(java.util.stream.Collectors.toList());
+                } else {
+                    // Lọc theo status nếu là tab khác
+                    allUserDocuments = allUserDocuments.stream()
+                            .filter(doc -> tab.toLowerCase().equals(doc.getStatus().toLowerCase()))
+                            .collect(java.util.stream.Collectors.toList());
+                }
+            }
+
+            // Lọc theo category nếu có
+            if (category != null && !category.trim().isEmpty()) {
                 allUserDocuments = allUserDocuments.stream()
-                        .filter(doc -> tab.toLowerCase().equals(doc.getStatus().toLowerCase()))
+                        .filter(doc -> doc.getDocumentCategories().stream()
+                                .anyMatch(dc -> dc.getCategory().getName().equalsIgnoreCase(category) ||
+                                        dc.getCategory().getSlug().equalsIgnoreCase(category)))
                         .collect(java.util.stream.Collectors.toList());
+            }
+
+            // Lọc theo status nếu có
+            if (status != null && !status.trim().isEmpty()) {
+                allUserDocuments = allUserDocuments.stream()
+                        .filter(doc -> status.equalsIgnoreCase(doc.getStatus()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+
+            // Sắp xếp
+            if ("popular".equals(sort)) {
+                allUserDocuments.sort((a, b) -> Long.compare(b.getViewsCount(), a.getViewsCount()));
+            } else if ("downloads".equals(sort)) {
+                allUserDocuments.sort((a, b) -> Long.compare(b.getDownloadsCount(), a.getDownloadsCount()));
+            } else if ("priceAsc".equals(sort)) {
+                allUserDocuments.sort((a, b) -> a.getPrice().compareTo(b.getPrice()));
+            } else if ("priceDesc".equals(sort)) {
+                allUserDocuments.sort((a, b) -> b.getPrice().compareTo(a.getPrice()));
+            } else if ("oldest".equals(sort)) {
+                allUserDocuments.sort((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
+            } else {
+                allUserDocuments.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
             }
 
             // Phân trang
@@ -313,6 +521,30 @@ public class AccountController {
                     docMap.put("downloadsCount", doc.getDownloadsCount());
                     docMap.put("createdAt", doc.getCreatedAt());
                     docMap.put("updatedAt", doc.getUpdatedAt());
+                    docMap.put("deletedAt", doc.getDeletedAt());
+
+                    // Thêm thông tin tác giả
+                    List<com.fpoly.shared_learning_materials.domain.DocumentOwner> owners = documentOwnerRepository
+                            .findByDocumentId(doc.getId());
+                    com.fpoly.shared_learning_materials.domain.DocumentOwner owner = owners.stream()
+                            .filter(o -> "owner".equals(o.getOwnershipType()))
+                            .findFirst()
+                            .orElse(null);
+                    if (owner != null) {
+                        docMap.put("author", owner.getUser().getFullName());
+                        docMap.put("authorId", owner.getUser().getId());
+                    }
+
+                    // Thêm thông tin danh mục
+                    List<String> categories = doc.getDocumentCategories().stream()
+                            .map(dc -> dc.getCategory().getName())
+                            .collect(java.util.stream.Collectors.toList());
+                    docMap.put("categories", categories);
+
+                    // Kiểm tra xem user hiện tại có yêu thích tài liệu này không
+                    boolean isFavorited = favoriteRepository.findByUserAndDocument(currentUser, doc).isPresent();
+                    docMap.put("isFavorited", isFavorited);
+
                     return docMap;
                 })
                 .collect(java.util.stream.Collectors.toList());
@@ -1567,5 +1799,41 @@ public class AccountController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/sidebar-stats")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getSidebarStats() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Thống kê tài liệu đã tải lên
+        long uploadedCount = documentRepository.countByUser(currentUser);
+
+        // Thống kê tài liệu yêu thích
+        long favoritesCount = favoriteRepository.countByUser(currentUser);
+
+        // Thống kê thông báo chưa đọc
+        long unreadNotificationsCount = notificationRepository.countByUserAndIsReadFalse(currentUser);
+
+        // Số dư xu
+        BigDecimal coinBalance = currentUser.getCoinBalance();
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("uploadedDocuments", uploadedCount);
+        stats.put("favorites", favoritesCount);
+        stats.put("unreadNotifications", unreadNotificationsCount);
+        stats.put("coinBalance", coinBalance);
+
+        return ResponseEntity.ok(stats);
     }
 }

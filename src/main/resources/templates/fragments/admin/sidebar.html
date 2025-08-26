@@ -67,11 +67,12 @@
       <!-- Revenue Management Dropdown -->
       <li
         class="admin-menu-item has-submenu"
-        th:classappend="${currentPage == 'coin-packages' || currentPage == 'transactions' || currentPage == 'withdrawals'} ? 'active'"
+        th:classappend="${currentPage == 'coin-packages' || currentPage == 'transactions' || currentPage == 'withdrawals' || currentPage == 'commission'} ? 'active'"
       >
-        <a href="javascript:void(0)">
+        <a href="javascript:void(0)" onclick="toggleSubmenu(this)">
           <i class="fas fa-coins"></i>
           <span>Quản lý doanh thu</span>
+          <i class="fas fa-chevron-down submenu-icon"></i>
         </a>
         <ul class="admin-submenu">
           <li
@@ -102,15 +103,6 @@
             </a>
           </li>
         </ul>
-      </li>
-      <li
-        class="admin-menu-item"
-        th:classappend="${currentPage == 'settings'} ? 'active'"
-      >
-        <a th:href="@{/admin/settings}">
-          <i class="fas fa-cog"></i>
-          <span>Cài đặt</span>
-        </a>
       </li>
       <li class="admin-menu-item">
         <a th:href="@{/logout}">

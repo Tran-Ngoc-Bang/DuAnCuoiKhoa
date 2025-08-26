@@ -246,31 +246,31 @@ public class DataInitializer implements CommandLineRunner {
                                 LocalDateTime.of(currentYear, 1, 10, 10, 0));
 
                 createUserIfNotExists("user1", "user1@example.com", "Người dùng 1", "user",
-                                new BigDecimal("1000"), new BigDecimal("158000.00"), new BigDecimal("350"),
+                                new BigDecimal("2365"), new BigDecimal("328000.00"), new BigDecimal("850"),
                                 LocalDateTime.of(currentYear, 2, 15, 10, 0));
 
                 createUserIfNotExists("user2", "user2@example.com", "Người dùng 2", "user",
-                                new BigDecimal("1000"), new BigDecimal("50000.00"), new BigDecimal("600"),
+                                new BigDecimal("930"), new BigDecimal("50000.00"), new BigDecimal("100"),
                                 LocalDateTime.of(currentYear, 3, 20, 10, 0));
 
                 createUserIfNotExists("user3", "user3@example.com", "Người dùng 3", "user",
-                                new BigDecimal("1000"), new BigDecimal("20000.00"), new BigDecimal("70"),
+                                new BigDecimal("755"), BigDecimal.ZERO, new BigDecimal("0"),
                                 LocalDateTime.of(currentYear, 4, 5, 10, 0));
 
                 createUserIfNotExists("user4", "user4@example.com", "Người dùng 4", "user",
-                                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                                new BigDecimal("100"), BigDecimal.ZERO, BigDecimal.ZERO,
                                 LocalDateTime.of(currentYear, 5, 18, 10, 0));
 
                 createUserIfNotExists("user5", "user5@example.com", "Người dùng 5", "user",
-                                new BigDecimal("120"), new BigDecimal("74000.00"), new BigDecimal("120"),
+                                new BigDecimal("120"), BigDecimal.ZERO, new BigDecimal("0"),
                                 LocalDateTime.of(currentYear, 6, 22, 10, 0));
 
                 createUserIfNotExists("contributor1", "contributor1@example.com", "Người đóng góp 1", "user",
-                                new BigDecimal("2500"), BigDecimal.ZERO, BigDecimal.ZERO,
+                                new BigDecimal("2347"), BigDecimal.ZERO, BigDecimal.ZERO,
                                 LocalDateTime.of(currentYear, 1, 5, 9, 0));
 
                 createUserIfNotExists("contributor2", "contributor2@example.com", "Người đóng góp 2", "user",
-                                new BigDecimal("1800"), BigDecimal.ZERO, BigDecimal.ZERO,
+                                new BigDecimal("1780"), BigDecimal.ZERO, BigDecimal.ZERO,
                                 LocalDateTime.of(currentYear, 1, 8, 14, 30));
 
                 System.out.println("=== Sample users creation completed ===");
@@ -381,14 +381,14 @@ public class DataInitializer implements CommandLineRunner {
 
                         // Tháng 2
                         createTransaction("TXN000002", Transaction.TransactionType.PURCHASE,
-                                        new BigDecimal("100000.00"), Transaction.TransactionStatus.COMPLETED,
+                                        new BigDecimal("170000.00"), Transaction.TransactionStatus.COMPLETED,
                                         "VNPay", user1, "Mua xu gói premium",
                                         LocalDateTime.of(currentYear, 6, 15, 14, 45));
 
                         // Tháng 3
                         createTransaction("TXN000003", Transaction.TransactionType.PURCHASE,
-                                        new BigDecimal("25000.00"), Transaction.TransactionStatus.PENDING,
-                                        "Bank Transfer", user1, "Rút tiền về tài khoản ngân hàng",
+                                        new BigDecimal("108000.00"), Transaction.TransactionStatus.COMPLETED,
+                                        "VNPay", user1, "Mua xu gói standard",
                                         LocalDateTime.of(currentYear, 2, 5, 11, 0));
 
                         // Tháng 4

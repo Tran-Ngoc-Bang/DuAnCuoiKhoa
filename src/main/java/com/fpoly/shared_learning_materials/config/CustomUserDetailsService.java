@@ -129,5 +129,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         public String getRole() {
             return user.getRole();
         }
+
+        public String getAvatarUrl() {
+            return user.getAvatarUrl();
+        }
     }
 }

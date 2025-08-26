@@ -33,6 +33,7 @@
   --status-pending: var(--warning);
   --status-approved: var(--success);
   --status-rejected: var(--error);
+  --error-light: rgba(239, 68, 68, 0.1);
 
   /* Priority Colors */
   --priority-high: var(--error);
@@ -466,6 +467,82 @@
   color: var(--primary);
 }
 
+/* Admin Profile Dropdown */
+.admin-profile {
+  position: relative;
+}
+
+.admin-profile .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.admin-profile.active .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.admin-profile.active .admin-dropdown i {
+  transform: rotate(180deg);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: var(--gray-700);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.dropdown-item:hover {
+  background: var(--gray-50);
+  color: var(--primary);
+}
+
+.dropdown-item i {
+  width: 16px;
+  font-size: 0.875rem;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 8px 0;
+}
+
+.dropdown-form {
+  margin: 0;
+}
+
+.logout-btn {
+  color: var(--error) !important;
+}
+
+.logout-btn:hover {
+  background: var(--error-light) !important;
+  color: var(--error) !important;
+}
+
 /* Admin Container */
 .admin-container {
   display: flex;
@@ -554,9 +631,7 @@
 }
 
 .has-submenu.open .admin-submenu,
-.has-submenu.open .submenu,
-.has-submenu:hover .admin-submenu,
-.has-submenu:hover .submenu {
+.has-submenu.open .submenu {
   max-height: 300px;
 }
 

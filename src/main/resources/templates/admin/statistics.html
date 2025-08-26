@@ -42,8 +42,8 @@
 
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/statistics.css}" />
-     <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
-  <script th:src="@{/js/admin/notifications.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
+    <script th:src="@{/js/admin/notifications.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <style>
       .dropdown select {
@@ -94,7 +94,7 @@
           </div>
         </div>
 
-        <!-- Date Range Picker -->
+        <!-- Date Range Picker 
         <div class="date-filter">
           <div class="date-picker">
             <div class="date-inputs">
@@ -116,7 +116,7 @@
             <button class="time-preset" data-days="365">1 năm</button>
           </div>
           <button class="apply-filter-btn">Áp dụng</button>
-        </div>
+        </div>-->
 
         <!-- Stats Summary -->
         <div class="stats-summary">
@@ -137,26 +137,6 @@
             <div class="stat-content">
               <div class="stat-title">Tài liệu đăng mới</div>
               <div class="stat-value" id="documentCount">-</div>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon users-icon">
-              <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-title">Lượt tải</div>
-              <div class="stat-value">--</div>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon documents-icon">
-              <i class="fas fa-file-alt"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-title">Doanh thu</div>
-              <div class="stat-value" id="revenueAmount">-</div>
             </div>
           </div>
         </div>
@@ -264,50 +244,6 @@
                   </tr>
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          <!-- Revenue Chart -->
-          <div class="analytics-card double-width">
-            <div class="analytics-header">
-              <h3>Doanh thu</h3>
-              <div class="analytics-actions">
-                <div class="chart-type-toggle">
-                  <button class="chart-type active" data-type="bar">
-                    <i class="fas fa-chart-bar"></i>
-                  </button>
-                  <button class="chart-type" data-type="line">
-                    <i class="fas fa-chart-line"></i>
-                  </button>
-                </div>
-                <div class="dropdown">
-                  <select id="revenueTimeRange">
-                    <option value="30">30 Ngày</option>
-                    <option value="90">3 Tháng</option>
-                    <option value="180">6 Tháng</option>
-                    <option value="365">1 Năm</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="analytics-content">
-              <div class="chart-container">
-                <canvas id="revenueChart"></canvas>
-              </div>
-              <div class="chart-stats">
-                <div class="stat-item">
-                  <div class="stat-value">562.8K</div>
-                  <div class="stat-label">Tổng doanh thu</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-value">168.8K</div>
-                  <div class="stat-label">Doanh thu cao nhất (tháng 3)</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-value">94K</div>
-                  <div class="stat-label">Doanh thu trung bình/tháng</div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -954,7 +954,11 @@ public class ClientDocumentController {
                 "owned", owned,
                 "price", price,
                 "balance", balance,
-                "sufficient", sufficient));
+                "sufficient", sufficient,
+                "commission",
+                price.multiply(new java.math.BigDecimal("0.15")).setScale(2, java.math.RoundingMode.HALF_UP),
+                "sellerAmount",
+                price.multiply(new java.math.BigDecimal("0.85")).setScale(2, java.math.RoundingMode.HALF_UP)));
     }
 
     @PostMapping("/{id}/purchase")

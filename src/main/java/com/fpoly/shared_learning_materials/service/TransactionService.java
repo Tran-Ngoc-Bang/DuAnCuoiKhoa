@@ -240,11 +240,17 @@ public class TransactionService {
     public Map<String, Object> getBalanceFlowStats(User user) {
         Map<String, Object> stats = new HashMap<>();
 
-        // Tổng nạp xu (PURCHASE - COMPLETED)
-        BigDecimal totalRecharge = getUserTotalByType(user, Transaction.TransactionType.PURCHASE,
-                Transaction.TransactionStatus.COMPLETED);
+        // Tổng nạp xu (PURCHASE - COMPLETED) - chỉ tính từ giao dịch nạp xu có
+        // TransactionDetail
+        BigDecimal totalRecharge = getTotalCoinsPurchasedByUser(user.getId());
         if (totalRecharge == null)
             totalRecharge = BigDecimal.ZERO;
+
+        // Tổng chi xu (PURCHASE - COMPLETED) - chỉ tính từ giao dịch mua tài liệu không
+        // có TransactionDetail
+        BigDecimal totalSpent = getTotalCoinsSpentOnDocuments(user.getId());
+        if (totalSpent == null)
+            totalSpent = BigDecimal.ZERO;
 
         // Tổng rút xu (WITHDRAWAL - COMPLETED)
         BigDecimal totalWithdrawal = getUserTotalByType(user, Transaction.TransactionType.WITHDRAWAL,
@@ -289,6 +295,7 @@ public class TransactionService {
         }
 
         stats.put("totalRecharge", totalRecharge);
+        stats.put("totalSpent", totalSpent);
         stats.put("totalWithdrawal", totalWithdrawal);
         stats.put("pendingWithdrawal", pendingWithdrawal);
         stats.put("processingWithdrawal", processingWithdrawal);
@@ -456,6 +463,27 @@ public class TransactionService {
      */
     public long getUserTransactionsByStatus(User user, Transaction.TransactionStatus status) {
         return transactionRepository.countByUserAndStatusAndDeletedAtIsNull(user, status);
+    }
+
+    /**
+     * Lấy tổng số xu đã mua của user (từ TransactionDetail)
+     */
+    public BigDecimal getTotalCoinsPurchasedByUser(Long userId) {
+        Long totalCoins = transactionDetailRepository.sumTotalCoinsPurchasedByUser(userId);
+        return totalCoins != null ? new BigDecimal(totalCoins) : BigDecimal.ZERO;
+    }
+
+    /**
+     * Lấy tổng số xu đã chi để mua tài liệu (giao dịch PURCHASE có
+     * TransactionDetail với detailType='document')
+     */
+    public BigDecimal getTotalCoinsSpentOnDocuments(Long userId) {
+        // Lấy tổng số xu từ giao dịch PURCHASE COMPLETED có TransactionDetail với
+        // detailType='document'
+        BigDecimal totalDocumentPurchaseAmount = transactionDetailRepository.sumAmountByUserAndDetailType(
+                userId, "document");
+
+        return totalDocumentPurchaseAmount != null ? totalDocumentPurchaseAmount : BigDecimal.ZERO;
     }
 
     /**

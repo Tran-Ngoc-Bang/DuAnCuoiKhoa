@@ -59,7 +59,8 @@ public class Transaction {
         PURCHASE("purchase", "Mua xu"),
         WITHDRAWAL("withdrawal", "Rút tiền"),
         REFUND("refund", "Hoàn tiền"),
-        DOCUMENT_DOWNLOAD("document_download", "Tải tài liệu");
+        DOCUMENT_DOWNLOAD("document_download", "Tải tài liệu"),
+        DOCUMENT_SALE("document_sale", "Bán tài liệu");
 
         private final String value;
         private final String displayName;

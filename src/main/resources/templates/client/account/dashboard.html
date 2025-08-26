@@ -72,7 +72,7 @@
                 </div>
                 <div class="stat-info">
                   <div class="stat-value" th:text="${#numbers.formatDecimal(coinBalance, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
-                  <div class="stat-label">Xu khả dụng</div>
+                  <div class="stat-label">Số dư xu</div>
                 </div>
               </div>
           </div>
@@ -112,8 +112,18 @@
                   <i class="fas fa-arrow-up"></i>
                 </div>
                 <div class="balance-info">
-                  <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.totalRecharge, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 xu</div>
-                  <div class="balance-label">Tổng nạp</div>
+                  <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.totalRecharge, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
+                  <div class="balance-label">Tổng nạp xu</div>
+                </div>
+              </div>
+
+              <div class="balance-card">
+                <div class="balance-icon warning">
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="balance-info">
+                  <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.totalSpent, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
+                  <div class="balance-label">Tổng chi xu</div>
                 </div>
               </div>
 
@@ -143,7 +153,7 @@
                 </div>
                 <div class="balance-info">
                   <div class="balance-value" th:text="${#numbers.formatDecimal(balanceStats.availableBalance, 0, 'COMMA', 0, 'POINT') + ' xu'}">0 xu</div>
-                  <div class="balance-label">Xu khả dụng</div>
+                  <div class="balance-label">Xu có thể rút</div>
                 </div>
               </div>
             </div>

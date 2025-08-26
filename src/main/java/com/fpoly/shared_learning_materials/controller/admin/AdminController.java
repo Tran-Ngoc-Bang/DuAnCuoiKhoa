@@ -111,6 +111,20 @@ public class AdminController extends BaseAdminController {
         return ResponseEntity.ok(data);
     }
 
+    @GetMapping("/statistics/document-type-distribution")
+    public ResponseEntity<Map<String, Long>> getDocumentTypeDistribution() {
+        List<Object[]> results = documentRepository.countDocumentsByFileType();
+
+        Map<String, Long> data = new LinkedHashMap<>();
+        for (Object[] row : results) {
+            String fileType = (String) row[0];
+            Long documentCount = (Long) row[1];
+            data.put(fileType, documentCount);
+        }
+
+        return ResponseEntity.ok(data);
+    }
+
     @GetMapping("/statistics/summary")
     public ResponseEntity<Map<String, Object>> getStatisticsSummary(
             @RequestParam(required = false) String start,
@@ -127,29 +141,44 @@ public class AdminController extends BaseAdminController {
         long userCount;
         long documentCount;
         BigDecimal revenue;
+        BigDecimal totalCoinsSpent;
 
         if (startDate != null && endDate != null) {
             userCount = userRepository.countByCreatedAtBetweenAndDeletedAtIsNull(startDate, endDate);
             documentCount = documentRepository.countByCreatedAtBetweenAndDeletedAtIsNull(startDate, endDate);
+            // Doanh thu từ giao dịch nạp xu (PURCHASE) - đây là tiền VND
             revenue = transactionRepository.sumAmountByTypeAndStatusAndCreatedAtBetween(
                     Transaction.TransactionType.PURCHASE,
+                    Transaction.TransactionStatus.COMPLETED,
+                    startDate, endDate);
+            // Tổng xu đã chi để mua tài liệu (DOCUMENT_DOWNLOAD)
+            totalCoinsSpent = transactionRepository.sumAmountByTypeAndStatusAndCreatedAtBetween(
+                    Transaction.TransactionType.DOCUMENT_DOWNLOAD,
                     Transaction.TransactionStatus.COMPLETED,
                     startDate, endDate);
         } else {
             userCount = userRepository.countByDeletedAtIsNull();
             documentCount = documentRepository.countByDeletedAtIsNull();
+            // Doanh thu từ giao dịch nạp xu (PURCHASE) - đây là tiền VND
             revenue = transactionRepository.sumAmountByTypeAndStatus(
                     Transaction.TransactionType.PURCHASE,
+                    Transaction.TransactionStatus.COMPLETED);
+            // Tổng xu đã chi để mua tài liệu (DOCUMENT_DOWNLOAD)
+            totalCoinsSpent = transactionRepository.sumAmountByTypeAndStatus(
+                    Transaction.TransactionType.DOCUMENT_DOWNLOAD,
                     Transaction.TransactionStatus.COMPLETED);
         }
 
         if (revenue == null)
             revenue = BigDecimal.ZERO;
+        if (totalCoinsSpent == null)
+            totalCoinsSpent = BigDecimal.ZERO;
 
         Map<String, Object> result = new HashMap<>();
         result.put("userCount", userCount);
         result.put("documentCount", documentCount);
         result.put("revenueAmount", revenue);
+        result.put("totalCoinsSpent", totalCoinsSpent);
 
         return ResponseEntity.ok(result);
     }

@@ -19,4 +19,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long>, JpaSp
         Set<Long> findFavoriteDocIdsByUserId(@Param("userId") Long userId);
 
         Set<Favorite> findByUser(User user);
+
+        @Query("SELECT COUNT(f) FROM Favorite f WHERE f.user = :user")
+        long countByUser(@Param("user") User user);
 }

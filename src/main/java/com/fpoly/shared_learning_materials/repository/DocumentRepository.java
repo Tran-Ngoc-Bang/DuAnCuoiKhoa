@@ -99,6 +99,9 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
         @Query("SELECT COALESCE(SUM(d.downloadsCount), 0) FROM Document d WHERE d.file.uploadedBy = :user AND d.deletedAt IS NULL")
         Long sumDownloadsByUser(@Param("user") User user);
 
+        @Query("SELECT d.file.fileType, COUNT(d) FROM Document d WHERE d.deletedAt IS NULL GROUP BY d.file.fileType ORDER BY COUNT(d) DESC")
+        List<Object[]> countDocumentsByFileType();
+
         @Query("SELECT COALESCE(SUM(d.downloadsCount), 0) FROM Document d WHERE d.file.uploadedBy.id = :userId AND d.createdAt BETWEEN :from AND :to AND d.deletedAt IS NULL")
         int countDownloadsBetween(@Param("userId") Long userId,
                         @Param("from") LocalDateTime from,

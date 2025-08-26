@@ -10,6 +10,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1"
     />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Tài liệu - EduShare</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1103,6 +1105,60 @@
         bottom: 48px;
         pointer-events: auto;
       }
+      .document-author {
+        background: none;
+        padding: 4px 0;
+        margin: 4px 0;
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+        line-height: 1.4;
+      }
+
+      .document-categories {
+        background: none;
+        padding: 4px 0;
+        margin: 4px 0;
+        font-size: 12px;
+        color: #6b7280;
+        font-style: italic;
+        line-height: 1.4;
+      }
+
+      .document-meta {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .document-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #374151;
+        padding: 2px 0;
+      }
+
+      .document-meta-item i {
+        color: #6b7280;
+        width: 14px;
+        text-align: center;
+      }
+      .document-meta {
+        margin-top: 12px;
+        display: flex;
+        gap: 6px;
+        flex-direction: row-reverse;
+        align-content: space-between;
+        justify-content: flex-end;
+      }
+      .document-author {
+        background: none;
+        padding-bottom: 62px !important;
+        padding-left: 55px;
+      }
     </style>
   </head>
 
@@ -1125,17 +1181,17 @@
                   <i class="fas fa-file-alt"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value" id="statCreated">0</div>
-                  <div class="stat-label">Tài liệu đã đăng</div>
+                  <div class="stat-value" id="statUploaded">0</div>
+                  <div class="stat-label">Tài liệu đã tải lên</div>
                 </div>
               </div>
               <div class="stat-card">
                 <div class="stat-icon success">
-                  <i class="fas fa-download"></i>
+                  <i class="fas fa-shopping-cart"></i>
                 </div>
                 <div class="stat-info">
-                  <div class="stat-value" id="statDownloaded">0</div>
-                  <div class="stat-label">Đã tải xuống</div>
+                  <div class="stat-value" id="statPurchased">0</div>
+                  <div class="stat-label">Tài liệu đã mua</div>
                 </div>
               </div>
               <div class="stat-card">
@@ -1144,7 +1200,16 @@
                 </div>
                 <div class="stat-info">
                   <div class="stat-value" id="statViews">0</div>
-                  <div class="stat-label">Lượt xem</div>
+                  <div class="stat-label">Tổng lượt xem</div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon danger">
+                  <i class="fas fa-download"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-value" id="statDownloads">0</div>
+                  <div class="stat-label">Tổng lượt tải</div>
                 </div>
               </div>
             </div>
@@ -1152,16 +1217,20 @@
             <!-- Documents Section -->
             <div class="dashboard-section">
               <div class="section-header">
-                <h2 class="section-title">
-                  <i class="fas fa-file-alt section-title-icon"></i>
-                  Tài liệu của tôi
-                </h2>
+                <div class="section-title-row">
+                  <h2 class="section-title">
+                    <i class="fas fa-file-alt section-title-icon"></i>
+                    Tài liệu của tôi
+                  </h2>
+                </div>
                 <div class="section-actions">
                   <div class="tabs">
                     <button id="tabAll" class="tab active">Tất cả</button>
                     <button id="tabUploaded" class="tab">Đã tải lên</button>
                     <button id="tabPurchased" class="tab">Đã mua</button>
-                    <button id="tabFavorites" class="tab">Yêu thích</button>
+                    <button id="tabFavorites" class="tab">
+                      Tài liệu đã lưu
+                    </button>
                     <button id="tabTrash" class="tab">Thùng rác</button>
                   </div>
                 </div>
@@ -1171,27 +1240,25 @@
                 <input
                   id="searchInput"
                   type="text"
-                  placeholder="🔍 Tìm tiêu đề..."
+                  placeholder="🔍 Tìm kiếm tài liệu..."
                 />
                 <select id="filterCategory">
-                  <option value="">Danh mục</option>
-                  <option value="CNTT">Công nghệ thông tin</option>
-                  <option value="An ninh">An toàn thông tin</option>
-                  <option value="AI">Trí tuệ nhân tạo</option>
+                  <option value="">Tất cả danh mục</option>
+                  <!-- Categories will be loaded dynamically -->
                 </select>
-                <select id="filterFormat">
-                  <option value="">Định dạng</option>
-                  <option value="PDF">PDF</option>
-                  <option value="Word">Word</option>
-                  <option value="PPT">PPT</option>
-                  <option value="Excel">Excel</option>
+                <select id="filterStatus">
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="pending">Đang chờ duyệt</option>
+                  <option value="approved">Đã duyệt</option>
+                  <option value="rejected">Bị từ chối</option>
                 </select>
                 <select id="filterSort">
-                  <option value="">Sắp xếp</option>
                   <option value="newest">Mới nhất</option>
-                  <option value="popular">Phổ biến</option>
-                  <option value="priceAsc">Giá tăng</option>
-                  <option value="priceDesc">Giá giảm</option>
+                  <option value="oldest">Cũ nhất</option>
+                  <option value="popular">Nhiều lượt xem</option>
+                  <option value="downloads">Nhiều lượt tải</option>
+                  <option value="priceAsc">Giá tăng dần</option>
+                  <option value="priceDesc">Giá giảm dần</option>
                 </select>
               </div>
 
@@ -1251,6 +1318,34 @@
       let currentPage = 0;
       let pageSize = 12;
       let currentQuery = "";
+      let currentCategory = "";
+      let currentStatus = "";
+      let currentSort = "newest";
+
+      // CSRF token helpers
+      function getCsrfToken() {
+        return document
+          .querySelector('meta[name="_csrf"]')
+          ?.getAttribute("content");
+      }
+
+      function getCsrfHeader() {
+        return (
+          document
+            .querySelector('meta[name="_csrf_header"]')
+            ?.getAttribute("content") || "X-CSRF-TOKEN"
+        );
+      }
+
+      function getCsrfHeaders() {
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+        const headers = { Accept: "application/json" };
+        if (csrfToken && csrfHeader) {
+          headers[csrfHeader] = csrfToken;
+        }
+        return headers;
+      }
 
       const tabs = [
         { id: "tabAll", key: "all" },
@@ -1275,6 +1370,7 @@
         }
       });
 
+      // Search input
       const searchInput = document.getElementById("searchInput");
       if (searchInput) {
         searchInput.addEventListener("input", () => {
@@ -1284,35 +1380,111 @@
         });
       }
 
+      // Category filter
+      const filterCategory = document.getElementById("filterCategory");
+      if (filterCategory) {
+        filterCategory.addEventListener("change", () => {
+          currentCategory = filterCategory.value || "";
+          currentPage = 0;
+          loadDocuments();
+        });
+      }
+
+      // Status filter
+      const filterStatus = document.getElementById("filterStatus");
+      if (filterStatus) {
+        filterStatus.addEventListener("change", () => {
+          currentStatus = filterStatus.value || "";
+          currentPage = 0;
+          loadDocuments();
+        });
+      }
+
+      // Sort filter
+      const filterSort = document.getElementById("filterSort");
+      if (filterSort) {
+        filterSort.addEventListener("change", () => {
+          currentSort = filterSort.value || "newest";
+          currentPage = 0;
+          loadDocuments();
+        });
+      }
+
       async function loadDocuments() {
         const list = document.getElementById("docList");
         const pagination = document.getElementById("pagination");
-        list.innerHTML = "<p>Đang tải...</p>";
+
+        // Show loading state
+        list.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #666;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 16px;"></i>
+            <p>Đang tải tài liệu...</p>
+          </div>
+        `;
         pagination.innerHTML = "";
+
         try {
           const params = new URLSearchParams({
             tab: currentTab,
             page: String(currentPage),
             size: String(pageSize),
+            sort: currentSort,
           });
           if (currentQuery) params.set("q", currentQuery);
+          if (currentCategory) params.set("category", currentCategory);
+          if (currentStatus) params.set("status", currentStatus);
+
           const res = await fetch(
             `/account/documents/data?${params.toString()}`,
-            { headers: { Accept: "application/json" } }
+            { headers: getCsrfHeaders() }
           );
-          if (!res.ok) throw new Error("Load dữ liệu thất bại");
+
+          if (!res.ok) {
+            if (res.status === 401) {
+              window.location.href = "/login";
+              return;
+            }
+            throw new Error(`Lỗi ${res.status}: ${res.statusText}`);
+          }
+
           const data = await res.json();
           renderList(data.content || []);
           renderPagination(data.page || 0, data.totalPages || 0);
+
+          // Update URL without reloading
+          const url = new URL(window.location);
+          url.searchParams.set("tab", currentTab);
+          url.searchParams.set("page", currentPage);
+          if (currentQuery) url.searchParams.set("q", currentQuery);
+          if (currentCategory)
+            url.searchParams.set("category", currentCategory);
+          if (currentStatus) url.searchParams.set("status", currentStatus);
+          if (currentSort) url.searchParams.set("sort", currentSort);
+          window.history.pushState({}, "", url);
         } catch (e) {
-          list.innerHTML = `<p>Lỗi: ${e.message}</p>`;
+          list.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+              <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px; color: #ef4444;"></i>
+              <p style="font-size: 18px; margin-bottom: 8px;">Không thể tải dữ liệu</p>
+              <p style="font-size: 14px; margin-bottom: 16px; opacity: 0.7;">${e.message}</p>
+              <button onclick="loadDocuments()" style="background: #4361ee; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                Thử lại
+              </button>
+            </div>
+          `;
         }
       }
 
       function renderList(docs) {
         const list = document.getElementById("docList");
         if (!docs.length) {
-          list.innerHTML = "<p>Không có tài liệu phù hợp.</p>";
+          list.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+              <i class="fas fa-file-alt" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+              <p style="font-size: 18px; margin-bottom: 8px;">Không tìm thấy tài liệu phù hợp</p>
+              <p style="font-size: 14px; opacity: 0.7;">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+            </div>
+          `;
           return;
         }
         list.innerHTML = "";
@@ -1320,9 +1492,11 @@
           const card = document.createElement("div");
           card.className = "document-card";
           card.dataset.id = doc.id;
+
           const priceText = doc.price
             ? `${Number(doc.price).toLocaleString("vi-VN")} xu`
             : "Miễn phí";
+
           // Tạo badge trạng thái
           const status = (doc.status || "").toUpperCase();
           const statusBadge = status
@@ -1337,14 +1511,30 @@
                 status === "PENDING"
                   ? "Đang chờ duyệt"
                   : status === "REJECTED"
-                  ? "Đã từ chối"
+                  ? "Bị từ chối"
                   : "Đã duyệt"
               }` +
               `</span>`
             : "";
+
           // Định dạng ngày tạo
           const createdAtText = doc.createdAt
             ? new Date(doc.createdAt).toLocaleDateString("vi-VN")
+            : "";
+
+          // Thông tin tác giả
+          const authorText = doc.author ? `Tác giả: ${doc.author}` : "";
+
+          // Danh mục
+          const categoriesText =
+            doc.categories && doc.categories.length > 0
+              ? doc.categories.join(", ")
+              : "";
+
+          // Kiểm tra tài liệu đã bị xóa
+          const isDeleted = doc.deletedAt != null;
+          const deletedNote = isDeleted
+            ? '<div class="document-alert deleted">Tài liệu không còn khả dụng</div>'
             : "";
 
           card.innerHTML = `
@@ -1365,13 +1555,29 @@
             </div>
             <h3 class="document-title">${doc.title || "Không tiêu đề"}</h3>
             ${
+              authorText
+                ? `<div class="document-author">${authorText}</div>`
+                : ""
+            }
+            ${
+              categoriesText
+                ? `<div class="document-categories">${categoriesText}</div>`
+                : ""
+            }
+            ${deletedNote}
+            ${
               status === "PENDING"
-                ? `<div class="document-alert pending">Đang chờ duyệt</div>`
+                ? `<div class="document-alert pending">Tài liệu đang chờ admin duyệt</div>`
                 : ""
             }
             ${
               status === "REJECTED"
-                ? `<div class="document-alert rejected">Tài liệu bị từ chối. Vui lòng chỉnh sửa và gửi lại.</div>`
+                ? `<div class="document-alert rejected">Tài liệu bị từ chối. Vui lòng liên hệ admin để biết thêm chi tiết.</div>`
+                : ""
+            }
+            ${
+              status === "APPROVED" && currentTab === "uploaded"
+                ? `<div class="document-alert approved">Tài liệu đã được duyệt</div>`
                 : ""
             }
             <div class="document-meta">
@@ -1387,74 +1593,27 @@
               <div class="document-meta-item"><i class="fas fa-calendar-alt"></i> ${createdAtText}</div>
             </div>
             <div class="document-actions">
-              <button class="doc-btn view" title="Xem"><i class="fas fa-eye"></i></button>
+              <button class="doc-btn view" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
               <button class="doc-btn download" title="Tải xuống"><i class="fas fa-download"></i></button>
-              <button class="doc-btn favorite" title="Yêu thích"><i class="fas fa-bookmark"></i></button>
-              <button class="doc-btn share" title="Chia sẻ"><i class="fas fa-share-alt"></i></button>
-              <button class="doc-btn edit" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+              <button class="doc-btn favorite ${
+                doc.isFavorited ? "active" : ""
+              }" title="Yêu thích"><i class="fas fa-bookmark"></i></button>
+              ${
+                currentTab === "uploaded" && doc.status === "approved"
+                  ? '<button class="doc-btn edit" title="Chỉnh sửa tài liệu"><i class="fas fa-edit"></i></button>'
+                  : ""
+              }
+              ${
+                currentTab === "uploaded" && doc.status === "approved"
+                  ? '<button class="doc-btn delete" title="Xóa tài liệu"><i class="fas fa-trash"></i></button>'
+                  : ""
+              }
             </div>
           `;
-          // Handlers
-          const openBtn = card.querySelector(".overlay-btn.open");
-          if (openBtn)
-            openBtn.addEventListener(
-              "click",
-              () => (window.location.href = `/documents/${doc.id}`)
-            );
-          const previewBtn = card.querySelector(".overlay-btn.preview");
-          if (previewBtn)
-            previewBtn.addEventListener("click", () =>
-              openPreviewModal(doc.id)
-            );
-          const viewBtn = card.querySelector(".doc-btn.view");
-          viewBtn.addEventListener("click", () => {
-            window.location.href = `/documents/${doc.id}`;
-          });
-          const downloadBtn = card.querySelector(".doc-btn.download");
-          downloadBtn.addEventListener("click", async () => {
-            try {
-              const res = await fetch(`/documents/${doc.id}/purchase`, {
-                method: "POST",
-                headers: { Accept: "application/json" },
-              });
-              if (!res.ok) throw new Error("Không thể tải xuống");
-              window.location.href = `/documents/${doc.id}`;
-            } catch (e) {
-              alert(e.message);
-            }
-          });
-          const favBtn = card.querySelector(".doc-btn.favorite");
-          favBtn.addEventListener("click", async () => {
-            try {
-              const res = await fetch(`/documents/${doc.id}/favorite`, {
-                method: "POST",
-                headers: { Accept: "application/json" },
-              });
-              const data = await res.json();
 
-              const editBtn = card.querySelector(".doc-btn.edit");
-              if (editBtn) {
-                editBtn.addEventListener("click", () => {
-                  window.location.href = `/documents/${doc.id}/edit`;
-                });
-              }
-              if (data && data.success) {
-                favBtn.classList.toggle("active", data.isFavorited);
-              }
-            } catch (e) {
-              console.error(e);
-            }
-          });
-          const shareBtn = card.querySelector(".doc-btn.share");
-          shareBtn.addEventListener("click", async () => {
-            const url = `${window.location.origin}/documents/${doc.id}`;
-            try {
-              await navigator.clipboard.writeText(url);
-              alert("Đã sao chép liên kết chia sẻ");
-            } catch {
-              prompt("Sao chép liên kết:", url);
-            }
-          });
+          // Thêm event handlers
+          addDocumentEventHandlers(card, doc);
+
           list.appendChild(card);
         });
       }
@@ -1495,8 +1654,251 @@
         modal.classList.remove("show");
       }
 
+      // Load categories
+      async function loadCategories() {
+        try {
+          const res = await fetch("/account/documents/categories", {
+            headers: getCsrfHeaders(),
+          });
+          if (!res.ok) throw new Error("Không thể tải danh mục");
+          const categories = await res.json();
+
+          const filterCategory = document.getElementById("filterCategory");
+          // Keep the first option "Tất cả danh mục"
+          filterCategory.innerHTML =
+            '<option value="">Tất cả danh mục</option>';
+
+          categories.forEach((cat) => {
+            const option = document.createElement("option");
+            option.value = cat.slug; // Use slug for filtering
+            option.textContent = cat.name; // Display name to user
+            filterCategory.appendChild(option);
+          });
+        } catch (e) {
+          console.error("Lỗi tải danh mục:", e);
+        }
+      }
+
+      // Load thống kê
+      async function loadStats() {
+        try {
+          const res = await fetch("/account/documents/stats", {
+            headers: getCsrfHeaders(),
+          });
+          if (!res.ok) throw new Error("Không thể tải thống kê");
+          const stats = await res.json();
+
+          document.getElementById("statUploaded").textContent =
+            stats.uploadedCount || 0;
+          document.getElementById("statPurchased").textContent =
+            stats.purchasedCount || 0;
+          document.getElementById("statViews").textContent =
+            stats.totalViews || 0;
+          document.getElementById("statDownloads").textContent =
+            stats.totalDownloads || 0;
+        } catch (e) {
+          console.error("Lỗi tải thống kê:", e);
+        }
+      }
+
+      // Update sidebar badges
+      function updateSidebarBadges() {
+        // Call the sidebar stats function if it exists
+        if (typeof loadSidebarStats === "function") {
+          loadSidebarStats();
+        }
+      }
+
+      // Event handlers cho các nút
+      function addDocumentEventHandlers(card, doc) {
+        const openBtn = card.querySelector(".overlay-btn.open");
+        if (openBtn) {
+          openBtn.addEventListener("click", () => {
+            window.location.href = `/documents/${doc.id}`;
+          });
+        }
+
+        const viewBtn = card.querySelector(".doc-btn.view");
+        if (viewBtn) {
+          viewBtn.addEventListener("click", () => {
+            window.location.href = `/documents/${doc.id}`;
+          });
+        }
+
+        const downloadBtn = card.querySelector(".doc-btn.download");
+        if (downloadBtn) {
+          downloadBtn.addEventListener("click", async () => {
+            try {
+              window.location.href = `/documents/${doc.id}/download`;
+            } catch (e) {
+              showToast("Không thể tải xuống: " + e.message, "error");
+            }
+          });
+        }
+
+        const favBtn = card.querySelector(".doc-btn.favorite");
+        if (favBtn) {
+          favBtn.addEventListener("click", async () => {
+            try {
+              console.log(
+                "Toggling favorite for document:",
+                doc.id,
+                "Current state:",
+                doc.isFavorited
+              );
+
+              const res = await fetch(`/documents/${doc.id}/favorite`, {
+                method: "POST",
+                headers: getCsrfHeaders(),
+              });
+              const data = await res.json();
+              console.log("Favorite response:", data);
+
+              if (data && data.success) {
+                // Update button state based on response
+                favBtn.classList.toggle("active", data.favorited);
+
+                // Update the document state for consistency
+                doc.isFavorited = data.favorited;
+
+                // Show appropriate toast message
+                if (data.favorited) {
+                  showToast("Đã thêm vào yêu thích", "success");
+                } else {
+                  showToast("Đã xóa khỏi yêu thích", "success");
+                }
+
+                // Update sidebar badges
+                updateSidebarBadges();
+              } else if (data && data.error) {
+                showToast("Lỗi: " + data.error, "error");
+              }
+            } catch (e) {
+              console.error("Error toggling favorite:", e);
+              showToast("Lỗi: " + e.message, "error");
+            }
+          });
+        }
+
+        const editBtn = card.querySelector(".doc-btn.edit");
+        if (editBtn) {
+          editBtn.addEventListener("click", () => {
+            if (doc.status === "approved") {
+              window.location.href = `/documents/${doc.id}/edit`;
+            } else {
+              showToast(
+                "Chỉ có thể chỉnh sửa tài liệu đã được duyệt",
+                "warning"
+              );
+            }
+          });
+        }
+
+        const deleteBtn = card.querySelector(".doc-btn.delete");
+        if (deleteBtn) {
+          deleteBtn.addEventListener("click", async () => {
+            if (doc.status !== "approved") {
+              showToast("Chỉ có thể xóa tài liệu đã được duyệt", "warning");
+              return;
+            }
+
+            if (confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) {
+              try {
+                const res = await fetch(`/documents/${doc.id}`, {
+                  method: "DELETE",
+                  headers: getCsrfHeaders(),
+                });
+                if (res.ok) {
+                  showToast("Đã xóa tài liệu thành công", "success");
+                  loadDocuments();
+                  loadStats();
+                  updateSidebarBadges();
+                } else {
+                  showToast("Lỗi khi xóa tài liệu", "error");
+                }
+              } catch (e) {
+                showToast("Lỗi: " + e.message, "error");
+              }
+            }
+          });
+        }
+      }
+
+      // Toast notification
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.classList.add("show");
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      // Load URL parameters on page load
+      function loadUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get("tab");
+        const page = urlParams.get("page");
+        const q = urlParams.get("q");
+        const category = urlParams.get("category");
+        const status = urlParams.get("status");
+        const sort = urlParams.get("sort");
+
+        if (tab && tabs.find((t) => t.key === tab)) {
+          currentTab = tab;
+          document
+            .querySelectorAll(".tabs .tab")
+            .forEach((btn) => btn.classList.remove("active"));
+          document
+            .getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`)
+            .classList.add("active");
+        }
+
+        if (page) currentPage = parseInt(page);
+        if (q) {
+          currentQuery = q;
+          searchInput.value = q;
+        }
+        if (category) {
+          currentCategory = category;
+          filterCategory.value = category;
+        }
+        if (status) {
+          currentStatus = status;
+          filterStatus.value = status;
+        }
+        if (sort) {
+          currentSort = sort;
+          filterSort.value = sort;
+        }
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        // Ctrl/Cmd + K to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+          e.preventDefault();
+          searchInput.focus();
+        }
+
+        // Escape to clear search
+        if (e.key === "Escape" && document.activeElement === searchInput) {
+          searchInput.value = "";
+          currentQuery = "";
+          currentPage = 0;
+          loadDocuments();
+        }
+      });
+
+      // Auto-refresh stats every 30 seconds
+      setInterval(loadStats, 30000);
+
       // init
+      loadUrlParams();
+      loadCategories();
       loadDocuments();
+      loadStats();
     </script>
 
     <div id="quickPreviewModal" class="modal" style="display: none">

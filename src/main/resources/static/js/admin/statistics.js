@@ -10,8 +10,20 @@ document.addEventListener('DOMContentLoaded', function () {
 			document.getElementById('userCount').textContent = data.userCount.toLocaleString();
 			document.getElementById('documentCount').textContent = data.documentCount.toLocaleString();
 
-			const revenue = new Intl.NumberFormat('vi-VN').format(data.revenueAmount);
-			document.getElementById('revenueAmount').textContent = `${revenue}`;
+			const revenue = new Intl.NumberFormat('vi-VN', {
+				style: 'currency',
+				currency: 'VND'
+			}).format(data.revenueAmount);
+			document.getElementById('revenueAmount').textContent = revenue;
+
+			// Hiển thị tổng xu đã chi (nếu có element)
+			if (data.totalCoinsSpent !== undefined) {
+				const totalCoinsSpent = new Intl.NumberFormat('vi-VN').format(data.totalCoinsSpent) + ' xu';
+				const coinsSpentElement = document.getElementById('coinsSpentAmount');
+				if (coinsSpentElement) {
+					coinsSpentElement.textContent = totalCoinsSpent;
+				}
+			}
 		})
 		.catch(err => {
 			console.error("Lỗi khi load thống kê:", err);
@@ -243,40 +255,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Document Type Chart
 	const documentTypeChartCtx = document.getElementById('documentTypeChart').getContext('2d');
-	const documentTypeChart = new Chart(documentTypeChartCtx, {
-		type: 'doughnut',
-		data: {
-			labels: ['PDF', 'Word', 'PowerPoint', 'Excel', 'Khác'],
-			datasets: [{
-				data: [45, 25, 15, 10, 5],
-				backgroundColor: [
-					'#ef4444', '#4361ee', '#f59e0b', '#10b981', '#8b5cf6'
-				]
-			}]
-		},
-		options: {
-			cutout: '60%',
-			plugins: {
-				legend: {
-					position: 'bottom',
-					labels: {
-						padding: 20,
-						boxWidth: 12,
-						font: {
-							size: 11
-						}
-					}
+	let documentTypeChart;
+
+	fetch('/admin/statistics/document-type-distribution')
+		.then(response => response.json())
+		.then(data => {
+			const labels = Object.keys(data);
+			const values = Object.values(data);
+			const total = values.reduce((a, b) => a + b, 0);
+
+			const percentages = values.map(v => ((v / total) * 100).toFixed(1));
+
+			documentTypeChart = new Chart(documentTypeChartCtx, {
+				type: 'doughnut',
+				data: {
+					labels: labels,
+					datasets: [{
+						data: percentages,
+						backgroundColor: [
+							'#ef4444', '#4361ee', '#f59e0b', '#10b981', '#8b5cf6',
+							'#14b8a6', '#3b82f6', '#f43f5e', '#ec4899', '#8b5cf6'
+						]
+					}]
 				},
-				tooltip: {
-					callbacks: {
-						label: function (context) {
-							return context.label + ': ' + context.parsed + '%';
+				options: {
+					cutout: '60%',
+					plugins: {
+						legend: {
+							position: 'bottom',
+							labels: {
+								padding: 20,
+								boxWidth: 12,
+								font: {
+									size: 11
+								}
+							}
+						},
+						tooltip: {
+							callbacks: {
+								label: function (context) {
+									return context.label + ': ' + context.parsed + '%';
+								}
+							}
 						}
 					}
 				}
-			}
-		}
-	});
+			});
+		})
+		.catch(error => {
+			console.error("Lỗi khi load biểu đồ phân loại tài liệu:", error);
+		});
 
 	const revenueChartCtx = document.getElementById('revenueChart').getContext('2d');
 
@@ -299,7 +327,10 @@ document.addEventListener('DOMContentLoaded', function () {
 				tooltip: {
 					callbacks: {
 						label: function (context) {
-							return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' xu';
+							return context.dataset.label + ': ' + new Intl.NumberFormat('vi-VN', {
+								style: 'currency',
+								currency: 'VND'
+							}).format(context.parsed.y);
 						}
 					}
 				}
@@ -365,16 +396,25 @@ document.addEventListener('DOMContentLoaded', function () {
 				revenueChart.update();
 
 				document.querySelector('.chart-stats .stat-item:nth-child(1) .stat-value')
-					.textContent = new Intl.NumberFormat('vi-VN').format(data.total) + ' xu';
+					.textContent = new Intl.NumberFormat('vi-VN', {
+						style: 'currency',
+						currency: 'VND'
+					}).format(data.total);
 
 				document.querySelector('.chart-stats .stat-item:nth-child(2) .stat-value')
-					.textContent = new Intl.NumberFormat('vi-VN').format(data.max) + ' xu';
+					.textContent = new Intl.NumberFormat('vi-VN', {
+						style: 'currency',
+						currency: 'VND'
+					}).format(data.max);
 
 				document.querySelector('.chart-stats .stat-item:nth-child(2) .stat-label')
 					.textContent = `Doanh thu cao nhất (${data.maxLabel})`;
 
 				document.querySelector('.chart-stats .stat-item:nth-child(3) .stat-value')
-					.textContent = new Intl.NumberFormat('vi-VN').format(data.average) + ' xu';
+					.textContent = new Intl.NumberFormat('vi-VN', {
+						style: 'currency',
+						currency: 'VND'
+					}).format(data.average);
 			})
 			.catch(err => {
 				console.error('Lỗi khi load doanh thu:', err);

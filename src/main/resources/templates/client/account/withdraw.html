@@ -352,7 +352,7 @@
               <div class="balance-info">
                 <div
                   class="balance-amount"
-                  th:text="${#numbers.formatDecimal(statCoinBalance, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                  th:text="${#numbers.formatDecimal(statCoinBalance, 0, 'COMMA', 0, 'POINT') + ' xu'}"
                 >
                   0 xu
                 </div>
@@ -424,7 +424,7 @@
                       <small class="text-muted"
                         >Số dư khả dụng:
                         <span
-                          th:text="${#numbers.formatDecimal(statCoinBalance, 0, 'COMMA', 0, 'POINT')} + ' xu'"
+                          th:text="${#numbers.formatDecimal(statCoinBalance, 0, 'COMMA', 0, 'POINT') + ' xu'}"
                           >0 xu</span
                         ></small
                       >
