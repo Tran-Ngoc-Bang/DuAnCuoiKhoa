@@ -11,14 +11,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fpoly.shared_learning_materials.service.UserService;
 
-
 @Controller
 public class AuthController {
 
     @Autowired
     private UserService userService;
-    
-    
+
     @GetMapping("/login")
     public String showLoginForm(
             @RequestParam(value = "error", required = false) String error,
@@ -27,20 +25,27 @@ public class AuthController {
             @RequestParam(value = "registered", required = false) String registered,
             Model model) {
 
+        // Log để debug
+        System.out.println("Login page accessed with params - error: " + error + ", logout: " + logout + ", expired: "
+                + expired + ", registered: " + registered);
+
         // Only redirect authenticated users if they're not logging out
         if (logout == null && SecurityContextHolder.getContext().getAuthentication() != null &&
-            SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
-            !"anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
-            
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
+                !"anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
+
             // Check if user is admin
             boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                     .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-            
-            return isAdmin ? "redirect:/admin" : "redirect:/";
+
+            String redirectUrl = isAdmin ? "/admin" : "/";
+            System.out.println("User already authenticated, redirecting to: " + redirectUrl);
+            return "redirect:" + redirectUrl;
         }
 
+        // Add error message if present
         if (error != null) {
-            model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
+            model.addAttribute("error", error);
         }
 
         if (logout != null) {
@@ -50,7 +55,7 @@ public class AuthController {
         if (expired != null) {
             model.addAttribute("warning", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
         }
-        
+
         if (registered != null) {
             model.addAttribute("success", "Đăng ký thành công! Vui lòng xác thực bằng gmail.");
         }
@@ -62,20 +67,18 @@ public class AuthController {
     public String showRegisterForm(Model model) {
         // Redirect authenticated users away from register page
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
-            SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
-            !"anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
-            
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
+                !"anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
+
             // Check if user is admin
             boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                     .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-            
+
             return isAdmin ? "redirect:/admin" : "redirect:/";
         }
 
         return "client/register";
     }
-
-
 
     @PostMapping("/register")
     public String processRegisters(
@@ -84,23 +87,24 @@ public class AuthController {
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-             @RequestParam("confirmPassword") String confirmPassword,
+            @RequestParam("confirmPassword") String confirmPassword,
             @RequestParam(value = "termsAgreement", required = false) String termsAgreement,
             Model model) {
-// Kiểm tra xác nhận mật khẩu
+        // Kiểm tra xác nhận mật khẩu
         if (!password.equals(confirmPassword)) {
             model.addAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp!");
             return "client/register";
         }
-        
+
         // Validate password strength
         if (!isPasswordStrong(password)) {
-            model.addAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
+            model.addAttribute("error",
+                    "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
             return "client/register";
         }
 
         // Gọi service để xử lý đăng ký
-        boolean isRegistered = userService.registerUser(firstName, lastName,username, email, password);
+        boolean isRegistered = userService.registerUser(firstName, lastName, username, email, password);
         if (!isRegistered) {
             model.addAttribute("error", "Tên đăng nhập hoặc email đã được sử dụng. Vui lòng chọn tên khác.");
             return "client/register";
@@ -115,6 +119,13 @@ public class AuthController {
         model.addAttribute("message", "Bạn không có quyền truy cập trang này!");
         return "error/access-denied";
     }
+
+    @PostMapping("/access-denied")
+    public String accessDeniedPost(Model model) {
+        model.addAttribute("message", "Bạn không có quyền truy cập trang này!");
+        return "error/access-denied";
+    }
+
     @GetMapping("/confirm")
     public String confirmUser(@RequestParam("username") String username, Model model) {
         boolean isConfirmed = userService.confirmUser(username);
@@ -127,7 +138,7 @@ public class AuthController {
     }
 
     // ===== FORGOT PASSWORD ENDPOINTS =====
-    
+
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
         return "client/forgot-password";
@@ -136,7 +147,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public String processForgotPassword(@RequestParam("email") String email, Model model) {
         boolean emailSent = userService.sendResetCode(email);
-        
+
         if (emailSent) {
             model.addAttribute("success", "Mã xác nhận đã được gửi đến email của bạn! Vui lòng kiểm tra email.");
             return "client/forgot-password";
@@ -153,7 +164,8 @@ public class AuthController {
     }
 
     @PostMapping("/verify-reset-code")
-    public String processVerifyCode(@RequestParam("email") String email, @RequestParam("code") String code, Model model) {
+    public String processVerifyCode(@RequestParam("email") String email, @RequestParam("code") String code,
+            Model model) {
         if (userService.verifyResetCode(email, code)) {
             model.addAttribute("email", email);
             model.addAttribute("code", code);
@@ -172,7 +184,7 @@ public class AuthController {
             @RequestParam("password") String password,
             @RequestParam("confirmPassword") String confirmPassword,
             Model model) {
-        
+
         if (!password.equals(confirmPassword)) {
             model.addAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp!");
             model.addAttribute("email", email);
@@ -181,14 +193,15 @@ public class AuthController {
         }
 
         if (!isPasswordStrong(password)) {
-            model.addAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
+            model.addAttribute("error",
+                    "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
             model.addAttribute("email", email);
             model.addAttribute("code", code);
             return "client/reset-password";
         }
 
         boolean resetSuccess = userService.resetPassword(email, code, password);
-        
+
         if (resetSuccess) {
             model.addAttribute("success", "Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.");
             return "client/login";
@@ -199,17 +212,17 @@ public class AuthController {
             return "client/reset-password";
         }
     }
-    
+
     private boolean isPasswordStrong(String password) {
         if (password == null || password.length() < 8) {
             return false;
         }
-        
+
         boolean hasLowercase = password.matches(".*[a-z].*");
         boolean hasUppercase = password.matches(".*[A-Z].*");
         boolean hasNumber = password.matches(".*[0-9].*");
         boolean hasSpecial = password.matches(".*[^A-Za-z0-9].*");
-        
+
         // Require ALL criteria for strong password
         return hasLowercase && hasUppercase && hasNumber && hasSpecial;
     }

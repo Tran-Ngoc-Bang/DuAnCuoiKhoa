@@ -321,7 +321,15 @@ passwordStrengthDiv.appendChild(passwordStrengthWrapper);
 newPasswordInput.addEventListener('input', () => {
     const val = newPasswordInput.value;
 
-
+    // Kiểm tra dấu cách
+    if (val.includes(' ')) {
+        passwordHint.textContent = "❌ Mật khẩu không được chứa dấu cách.";
+        passwordHint.style.color = '#F44336';
+        passwordStrengthWrapper.style.display = 'none';
+        passwordStrengthText.textContent = '';
+        passwordStrengthFill.style.width = '0%';
+        return;
+    }
 
     if (val.length > 20) {
         passwordHint.textContent = "❌ Mật khẩu không được vượt quá 20 ký tự.";
@@ -331,7 +339,6 @@ newPasswordInput.addEventListener('input', () => {
         passwordStrengthFill.style.width = '0%';
         return;
     }
-
 
     if (val.length === 0) {
         passwordStrengthWrapper.style.display = 'none';

@@ -22,7 +22,7 @@
     <link rel="stylesheet" th:href="@{/css/main.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
-    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
     <style>
       .report-container {
         max-width: 800px;
@@ -103,7 +103,6 @@
     </style>
   </head>
   <body class="admin-page">
-    
     <div th:replace="~{fragments/admin/layout :: header}"></div>
     <!-- Admin Container -->
     <div class="admin-container">
@@ -124,96 +123,104 @@
         </div>
 
         <div class="report-container">
-        <div class="report-header">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-flag text-danger me-3" style="font-size: 2rem;"></i>
-            <div>
-              <h2 class="mb-1">Báo cáo bình luận vi phạm</h2>
-              <p class="text-muted mb-0">
-                Vui lòng cung cấp thông tin chi tiết về vi phạm
-              </p>
+          <div class="report-header">
+            <div class="d-flex align-items-center">
+              <i
+                class="fas fa-flag text-danger me-3"
+                style="font-size: 2rem"
+              ></i>
+              <div>
+                <h2 class="mb-1">Báo cáo bình luận vi phạm</h2>
+                <p class="text-muted mb-0">
+                  Vui lòng cung cấp thông tin chi tiết về vi phạm
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Success/Error Messages -->
-        <div th:if="${success}" class="alert alert-success">
-          <i class="fas fa-check-circle"></i>
-          <span th:text="${success}"></span>
-        </div>
-        <div th:if="${error}" class="alert alert-danger">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span th:text="${error}"></span>
-        </div>
-
-        <!-- Comment Preview -->
-        <div th:if="${comment}" class="comment-preview">
-          <div class="comment-author">
-            <i class="fas fa-user"></i>
-            <span
-              th:text="${comment.user?.fullName ?: comment.user?.username ?: 'Người dùng'}"
-            ></span>
+          <!-- Success/Error Messages -->
+          <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}"></span>
           </div>
-          <div class="comment-content" th:text="${comment.content}"></div>
-        </div>
-
-        <!-- Report Form -->
-        <form th:action="@{/admin/reportcomment}" method="post">
-          <!-- Hidden fields -->
-          <input type="hidden" name="commentId" th:value="${commentId}" />
-          <input type="hidden" name="documentId" th:value="${documentId}" />
-          <input type="hidden" name="returnUrl" th:value="${returnUrl}" />
-
-          <!-- Report Type -->
-          <div class="mb-3">
-            <label for="type" class="form-label">
-              <i class="fas fa-tag"></i> Loại vi phạm
-              <span class="text-danger">*</span>
-            </label>
-            <select class="form-select" id="type" name="type" required>
-              <option value="">-- Chọn loại vi phạm --</option>
-              <option value="spam">Spam</option>
-              <option value="harassment">Quấy rối</option>
-              <option value="inappropriate">Nội dung không phù hợp</option>
-              <option value="copyright">Vi phạm bản quyền</option>
-              <option value="fake">Thông tin sai lệch</option>
-              <option value="other">Khác</option>
-            </select>
+          <div th:if="${error}" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
           </div>
 
-          <!-- Reason -->
-          <div class="mb-4">
-            <label for="reason" class="form-label">
-              <i class="fas fa-comment-alt"></i> Mô tả chi tiết
-              <span class="text-danger">*</span>
-            </label>
-            <textarea
-              class="form-control"
-              id="reason"
-              name="reason"
-              rows="5"
-              placeholder="Vui lòng mô tả chi tiết về vi phạm..."
-              required
-            ></textarea>
-            <small class="form-text text-muted">
-              Cung cấp thông tin chi tiết giúp chúng tôi xử lý báo cáo nhanh
-              chóng hơn.
-            </small>
+          <!-- Comment Preview -->
+          <div th:if="${comment}" class="comment-preview">
+            <div class="comment-author">
+              <i class="fas fa-user"></i>
+              <span
+                th:text="${comment.user?.fullName ?: comment.user?.username ?: 'Người dùng'}"
+              ></span>
+            </div>
+            <div class="comment-content" th:text="${comment.content}"></div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="d-flex gap-3 justify-content-center">
-            <button type="submit" class="btn btn-report">
-              <i class="fas fa-paper-plane"></i> Gửi báo cáo
-            </button>
-            <a
-              th:href="${returnUrl ?: '/admin/documents'}"
-              class="btn btn-cancel"
-            >
-              <i class="fas fa-times"></i> Hủy bỏ
-            </a>
-          </div>
-        </form>
+          <!-- Report Form -->
+          <form th:action="@{/admin/reportcomment}" method="post">
+            <!-- Hidden fields -->
+            <input
+              type="hidden"
+              th:name="${_csrf.parameterName}"
+              th:value="${_csrf.token}"
+            />
+            <input type="hidden" name="commentId" th:value="${commentId}" />
+            <input type="hidden" name="documentId" th:value="${documentId}" />
+            <input type="hidden" name="returnUrl" th:value="${returnUrl}" />
+
+            <!-- Report Type -->
+            <div class="mb-3">
+              <label for="type" class="form-label">
+                <i class="fas fa-tag"></i> Loại vi phạm
+                <span class="text-danger">*</span>
+              </label>
+              <select class="form-select" id="type" name="type" required>
+                <option value="">-- Chọn loại vi phạm --</option>
+                <option value="spam">Spam</option>
+                <option value="harassment">Quấy rối</option>
+                <option value="inappropriate">Nội dung không phù hợp</option>
+                <option value="copyright">Vi phạm bản quyền</option>
+                <option value="fake">Thông tin sai lệch</option>
+                <option value="other">Khác</option>
+              </select>
+            </div>
+
+            <!-- Reason -->
+            <div class="mb-4">
+              <label for="reason" class="form-label">
+                <i class="fas fa-comment-alt"></i> Mô tả chi tiết
+                <span class="text-danger">*</span>
+              </label>
+              <textarea
+                class="form-control"
+                id="reason"
+                name="reason"
+                rows="5"
+                placeholder="Vui lòng mô tả chi tiết về vi phạm..."
+                required
+              ></textarea>
+              <small class="form-text text-muted">
+                Cung cấp thông tin chi tiết giúp chúng tôi xử lý báo cáo nhanh
+                chóng hơn.
+              </small>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 justify-content-center">
+              <button type="submit" class="btn btn-report">
+                <i class="fas fa-paper-plane"></i> Gửi báo cáo
+              </button>
+              <a
+                th:href="${returnUrl ?: '/admin/documents'}"
+                class="btn btn-cancel"
+              >
+                <i class="fas fa-times"></i> Hủy bỏ
+              </a>
+            </div>
+          </form>
         </div>
       </main>
     </div>

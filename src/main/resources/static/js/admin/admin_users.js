@@ -82,7 +82,11 @@ function validateField(field) {
     
     // Password validation
     if (fieldName === 'password' && value) {
-        if (value.length < 6) {
+        // Kiểm tra dấu cách
+        if (value.includes(' ')) {
+            isValid = false;
+            errorMessage = 'Mật khẩu không được chứa dấu cách';
+        } else if (value.length < 6) {
             isValid = false;
             errorMessage = 'Mật khẩu phải có ít nhất 6 ký tự';
         }
@@ -168,6 +172,11 @@ function initPasswordStrength() {
 function calculatePasswordStrength(password) {
     let score = 0;
     
+    // Kiểm tra dấu cách trước
+    if (password.includes(' ')) {
+        return 'invalid'; // Trả về invalid nếu có dấu cách
+    }
+    
     if (password.length >= 8) score += 1;
     if (/[a-z]/.test(password)) score += 1;
     if (/[A-Z]/.test(password)) score += 1;
@@ -192,12 +201,14 @@ function updatePasswordStrengthIndicator(strength) {
     }
     
     const strengthText = {
+        'invalid': 'Không hợp lệ (có dấu cách)',
         'weak': 'Yếu',
         'medium': 'Trung bình',
         'strong': 'Mạnh'
     };
     
     const strengthClass = {
+        'invalid': 'strength-invalid',
         'weak': 'strength-weak',
         'medium': 'strength-medium',
         'strong': 'strength-strong'

@@ -39,42 +39,40 @@ public class UserController extends BaseAdminController {
 	private UserService userService;
 
 	public UserController(NotificationService notificationService, UserRepository userRepository) {
-        super(notificationService, userRepository);
-    }
+		super(notificationService, userRepository);
+	}
 
 	@GetMapping
 	public String showUsersPage(
-	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "5") int size,
-	    @RequestParam(required = false) String keyword,
-	    @RequestParam(required = false) String role,
-	    @RequestParam(required = false) String status,
-	    @RequestParam(required = false) String sort,     
-	    @RequestParam(required = false) String dir,       
-	    Model model) {
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size,
+			@RequestParam(required = false) String keyword,
+			@RequestParam(required = false) String role,
+			@RequestParam(required = false) String status,
+			@RequestParam(required = false) String sort,
+			@RequestParam(required = false) String dir,
+			Model model) {
 
-	    String sortBy = (sort != null) ? sort : "createdAt";
-	    Sort.Direction direction = ("desc".equalsIgnoreCase(dir)) ? Sort.Direction.DESC : Sort.Direction.ASC;
+		String sortBy = (sort != null) ? sort : "createdAt";
+		Sort.Direction direction = ("desc".equalsIgnoreCase(dir)) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
-	    Page<User> usersPage = userService.searchUsers(keyword, role, status, page, size, sortBy, direction);
+		Page<User> usersPage = userService.searchUsers(keyword, role, status, page, size, sortBy, direction);
 
-	    model.addAttribute("usersPage", usersPage);
-	    model.addAttribute("currentPage", "users");
-	    model.addAttribute("totalPages", usersPage.getTotalPages());
+		model.addAttribute("usersPage", usersPage);
+		model.addAttribute("currentPage", "users");
+		model.addAttribute("totalPages", usersPage.getTotalPages());
 
-	    model.addAttribute("keyword", keyword);
-	    model.addAttribute("selectedRole", role);
-	    model.addAttribute("selectedStatus", status);
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("selectedRole", role);
+		model.addAttribute("selectedStatus", status);
 
-	    model.addAttribute("sort", sortBy);     
-	    model.addAttribute("dir", direction.toString().toLowerCase()); 
-	    model.addAttribute("current", page);
+		model.addAttribute("sort", sortBy);
+		model.addAttribute("dir", direction.toString().toLowerCase());
+		model.addAttribute("current", page);
 
-	    return "admin/users/index";
+		return "admin/users/index";
 	}
 
-	
-	
 	@GetMapping("/{id}/detail")
 	public String detail(@PathVariable Long id, Model model,
 			RedirectAttributes redirectAttrs) {
@@ -96,38 +94,52 @@ public class UserController extends BaseAdminController {
 		model.addAttribute("currentPage", "users");
 		return "admin/users/create";
 	}
+
 	@PostMapping("/create")
 	public String createUser(@ModelAttribute("userDTO") @Valid UserDTO userDTO,
-	                         BindingResult result,
-	                         Model model,
-	                         RedirectAttributes redirectAttrs) {
+			BindingResult result,
+			Model model,
+			RedirectAttributes redirectAttrs) {
 
-	    if (result.hasErrors()) {
-	    	model.addAttribute("currentPage", "users");
-	        return "admin/users/create";
-	    }
+		// Kiểm tra mật khẩu có dấu cách không
+		if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()
+				&& userDTO.getPassword().trim().isEmpty()) {
+			model.addAttribute("passwordError", "Mật khẩu không được chỉ chứa dấu cách");
+			model.addAttribute("currentPage", "users");
+			return "admin/users/create";
+		}
 
-	    if (userService.emailExists(userDTO.getEmail())) {
-	        model.addAttribute("emailError", "Email này đã được sử dụng");
-	        model.addAttribute("currentPage", "users");
-	        return "admin/users/create";
-	    }
+		if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty() && userDTO.getPassword().contains(" ")) {
+			model.addAttribute("passwordError", "Mật khẩu không được chứa dấu cách");
+			model.addAttribute("currentPage", "users");
+			return "admin/users/create";
+		}
 
-	    if (userService.usernameExists(userDTO.getUsername())) {
-	        model.addAttribute("usernameError", "Tên đăng nhập này đã tồn tại");
-	        model.addAttribute("currentPage", "users");
-	        return "admin/users/create";
-	    }
+		if (result.hasErrors()) {
+			model.addAttribute("currentPage", "users");
+			return "admin/users/create";
+		}
 
-	    Optional<String> uploaded = ImageUtils.upload(userDTO.getFile());
-	    uploaded.ifPresent(userDTO::setAvatarUrl);
+		if (userService.emailExists(userDTO.getEmail())) {
+			model.addAttribute("emailError", "Email này đã được sử dụng");
+			model.addAttribute("currentPage", "users");
+			return "admin/users/create";
+		}
 
-	    userService.createUser(userDTO);
+		if (userService.usernameExists(userDTO.getUsername())) {
+			model.addAttribute("usernameError", "Tên đăng nhập này đã tồn tại");
+			model.addAttribute("currentPage", "users");
+			return "admin/users/create";
+		}
 
-	    redirectAttrs.addFlashAttribute("successMessage", "Tạo người dùng thành công");
-	    return "redirect:/admin/users";
+		Optional<String> uploaded = ImageUtils.upload(userDTO.getFile());
+		uploaded.ifPresent(userDTO::setAvatarUrl);
+
+		userService.createUser(userDTO);
+
+		redirectAttrs.addFlashAttribute("successMessage", "Tạo người dùng thành công");
+		return "redirect:/admin/users";
 	}
-
 
 	@GetMapping("/{id}/edit")
 	public String showEditForm(@PathVariable Long id,
@@ -144,55 +156,66 @@ public class UserController extends BaseAdminController {
 		model.addAttribute("currentPage", "users");
 		return "admin/users/edit";
 	}
-	
 
 	@PostMapping("/{id}/edit")
 	public String updateUser(@PathVariable Long id,
-	                         @ModelAttribute("userDTO") @Valid UserDTO userDTO,
-	                         BindingResult result,
-	                         Model model,
-	                         RedirectAttributes redirectAttrs) {
+			@ModelAttribute("userDTO") @Valid UserDTO userDTO,
+			BindingResult result,
+			Model model,
+			RedirectAttributes redirectAttrs) {
 
-	    Optional<User> optExisting = userService.findById(id);
-	    if (!optExisting.isPresent()) {
-	        redirectAttrs.addFlashAttribute("errorMessage", "Người dùng không tồn tại");
-	        return "redirect:/admin/users";
-	    }
+		Optional<User> optExisting = userService.findById(id);
+		if (!optExisting.isPresent()) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Người dùng không tồn tại");
+			return "redirect:/admin/users";
+		}
 
-	    User existing = optExisting.get();
+		User existing = optExisting.get();
 
-	    if (result.hasErrors()) {
-	        userDTO.setId(id);
-	        model.addAttribute("readonly", false);
-	        model.addAttribute("currentPage", "users");
-	        return "admin/users/edit";
-	    }
+		// Kiểm tra mật khẩu có dấu cách không
+		if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()
+				&& userDTO.getPassword().trim().isEmpty()) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Mật khẩu không được chỉ chứa dấu cách");
+			return "redirect:/admin/users/" + id + "/edit";
+		}
 
-	    if (!existing.getEmail().equals(userDTO.getEmail()) && userService.emailExists(userDTO.getEmail())) {
-	        model.addAttribute("emailError", "Email này đã được sử dụng");
-	        userDTO.setId(id);
-	        model.addAttribute("readonly", false);
-	        model.addAttribute("currentPage", "users");
-	        return "admin/users/edit";
-	    }
+		if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty() && userDTO.getPassword().contains(" ")) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Mật khẩu không được chứa dấu cách");
+			return "redirect:/admin/users/" + id + "/edit";
+		}
 
-	    if (!existing.getUsername().equals(userDTO.getUsername()) && userService.usernameExists(userDTO.getUsername())) {
-	        model.addAttribute("usernameError", "Tên đăng nhập này đã tồn tại");
-	        userDTO.setId(id);
-	        model.addAttribute("readonly", false);
-	        model.addAttribute("currentPage", "users");
-	        return "admin/users/edit";
-	    }
+		if (result.hasErrors()) {
+			userDTO.setId(id);
+			model.addAttribute("readonly", false);
+			model.addAttribute("currentPage", "users");
+			return "admin/users/edit";
+		}
 
-	    Optional<String> uploaded = ImageUtils.upload(userDTO.getFile());
-	    uploaded.ifPresent(userDTO::setAvatarUrl);
+		if (!existing.getEmail().equals(userDTO.getEmail()) && userService.emailExists(userDTO.getEmail())) {
+			model.addAttribute("emailError", "Email này đã được sử dụng");
+			userDTO.setId(id);
+			model.addAttribute("readonly", false);
+			model.addAttribute("currentPage", "users");
+			return "admin/users/edit";
+		}
 
-	    userService.updateUserFromDTO(id, userDTO);
+		if (!existing.getUsername().equals(userDTO.getUsername())
+				&& userService.usernameExists(userDTO.getUsername())) {
+			model.addAttribute("usernameError", "Tên đăng nhập này đã tồn tại");
+			userDTO.setId(id);
+			model.addAttribute("readonly", false);
+			model.addAttribute("currentPage", "users");
+			return "admin/users/edit";
+		}
 
-	    redirectAttrs.addFlashAttribute("successMessage", "Cập nhật người dùng thành công");
-	    return "redirect:/admin/users";
+		Optional<String> uploaded = ImageUtils.upload(userDTO.getFile());
+		uploaded.ifPresent(userDTO::setAvatarUrl);
+
+		userService.updateUserFromDTO(id, userDTO);
+
+		redirectAttrs.addFlashAttribute("successMessage", "Cập nhật người dùng thành công");
+		return "redirect:/admin/users";
 	}
-
 
 	@GetMapping("/{id}/lock")
 	public String lockUser(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttrs) {
@@ -227,7 +250,8 @@ public class UserController extends BaseAdminController {
 	}
 
 	@GetMapping("/{id}/delete")
-	public String softDeleteUser(@PathVariable Long id, HttpServletRequest request, Model model, RedirectAttributes redirectAttrs) {
+	public String softDeleteUser(@PathVariable Long id, HttpServletRequest request, Model model,
+			RedirectAttributes redirectAttrs) {
 		Optional<UserDTO> optDto = userService.getUserDTOById(id);
 		if (!optDto.isPresent()) {
 			redirectAttrs.addFlashAttribute("errorMessage", "Người dùng không tồn tại");
@@ -238,7 +262,7 @@ public class UserController extends BaseAdminController {
 		model.addAttribute("currentPage", "users");
 		return "admin/users/delete";
 	}
-	
+
 	@GetMapping("/{id}/fullDelete")
 	public String fullDelete(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttrs) {
 		userService.softDelete(id);

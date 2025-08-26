@@ -23,20 +23,38 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("Loading user by username: " + username);
+
         User user = userRepository.findByUsernameAndDeletedAtIsNull(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> {
+                    System.out.println("User not found: " + username);
+                    return new UsernameNotFoundException("User not found: " + username);
+                });
+
+        System.out.println(
+                "User found: " + user.getUsername() + ", status: " + user.getStatus() + ", role: " + user.getRole());
 
         // Check if user is active
         if (!"active".equals(user.getStatus())) {
-            throw new UsernameNotFoundException("User account is not active: " + username);
+            System.out.println("User account is not active: " + user.getStatus());
+            throw new AccountLockedException("Tài khoản đã bị khóa bởi quản trị viên");
         }
 
-        // Check if user is locked
+        // Check if user is locked due to failed attempts
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(java.time.LocalDateTime.now())) {
-            throw new UsernameNotFoundException("User account is locked: " + username);
+            System.out.println("User account is locked until: " + user.getLockedUntil());
+            throw new AccountLockedException("Tài khoản đã bị khóa do nhập sai mật khẩu quá nhiều lần");
         }
 
+        System.out.println("User authentication successful: " + username);
         return new CustomUserPrincipal(user);
+    }
+
+    // Custom exception for locked accounts
+    public static class AccountLockedException extends org.springframework.security.authentication.LockedException {
+        public AccountLockedException(String msg) {
+            super(msg);
+        }
     }
 
     public static class CustomUserPrincipal implements UserDetails {

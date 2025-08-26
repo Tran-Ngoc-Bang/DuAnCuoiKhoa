@@ -16,6 +16,16 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -38,20 +48,29 @@ public class SecurityConfig {
                                         jakarta.servlet.http.HttpServletResponse response,
                                         org.springframework.security.core.Authentication authentication) {
 
-                                // Lấy saved request URL
+                                // Lấy saved request URL từ session
                                 String targetUrl = super.determineTargetUrl(request, response, authentication);
 
+                                // Log để debug
+                                System.out.println("Original targetUrl: " + targetUrl);
+                                System.out.println("Request URI: " + request.getRequestURI());
+                                System.out.println("User authorities: " + authentication.getAuthorities());
+
                                 // Kiểm tra URL có hợp lệ và an toàn không
-                                if (targetUrl != null && !targetUrl.equals("/") && isValidRedirectUrl(targetUrl)) {
+                                if (targetUrl != null && !targetUrl.equals("/") && !targetUrl.equals("/login")
+                                                && isValidRedirectUrl(targetUrl)) {
+                                        System.out.println("Using saved targetUrl: " + targetUrl);
                                         return targetUrl;
                                 }
 
-                                // Fallback theo role
+                                // Fallback theo role - tránh redirect loop
                                 boolean isAdmin = authentication.getAuthorities().stream()
                                                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority()
                                                                 .equals("ROLE_ADMIN"));
 
-                                return isAdmin ? "/admin" : "/";
+                                String fallbackUrl = isAdmin ? "/admin" : "/";
+                                System.out.println("Using fallback URL: " + fallbackUrl);
+                                return fallbackUrl;
                         }
 
                         private boolean isValidRedirectUrl(String url) {
@@ -61,6 +80,7 @@ public class SecurityConfig {
                                                 !url.startsWith("//") &&
                                                 !url.contains("javascript:") &&
                                                 !url.contains("data:") &&
+                                                !url.equals("/login") && // Tránh redirect về login
                                                 url.length() < 200; // Giới hạn độ dài
                         }
                 };
@@ -68,9 +88,35 @@ public class SecurityConfig {
 
         @Bean
         public AuthenticationFailureHandler authenticationFailureHandler() {
-                SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler();
-                handler.setDefaultFailureUrl("/login?error=true");
-                return handler;
+                return new SimpleUrlAuthenticationFailureHandler() {
+                        @Override
+                        public void onAuthenticationFailure(HttpServletRequest request,
+                                        HttpServletResponse response, AuthenticationException exception)
+                                        throws IOException, ServletException {
+
+                                String errorMessage = "Tên đăng nhập hoặc mật khẩu không đúng!";
+
+                                // Check for specific exceptions
+                                if (exception instanceof InternalAuthenticationServiceException) {
+                                        // Kiểm tra cause của InternalAuthenticationServiceException
+                                        Throwable cause = exception.getCause();
+                                        if (cause instanceof CustomUserDetailsService.AccountLockedException) {
+                                                errorMessage = cause.getMessage();
+                                        } else {
+                                                errorMessage = "Lỗi xác thực: " + exception.getMessage();
+                                        }
+                                } else if (exception instanceof LockedException) {
+                                        errorMessage = exception.getMessage();
+                                } else if (exception instanceof BadCredentialsException) {
+                                        errorMessage = "Tên đăng nhập hoặc mật khẩu không đúng!";
+                                } else if (exception instanceof DisabledException) {
+                                        errorMessage = "Tài khoản đã bị vô hiệu hóa!";
+                                }
+
+                                String targetUrl = "/login?error=" + java.net.URLEncoder.encode(errorMessage, "UTF-8");
+                                getRedirectStrategy().sendRedirect(request, response, targetUrl);
+                        }
+                };
         }
 
         @Bean
@@ -85,10 +131,10 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/payment/**").permitAll()
 
-                                              
-                                                .requestMatchers("/", "/home", "/login", "/register", "/confirm", 
-                                                                "/forgot-password", "/verify-reset-code", "/reset-password").permitAll()
-
+                                                .requestMatchers("/", "/home", "/login", "/register", "/confirm",
+                                                                "/forgot-password", "/verify-reset-code",
+                                                                "/reset-password")
+                                                .permitAll()
 
                                                 .requestMatchers("/coin-packages", "/coin-packages/**").permitAll()
 
@@ -118,7 +164,7 @@ public class SecurityConfig {
                                                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
                                                 .logoutSuccessUrl("/login?logout=true")
                                                 .invalidateHttpSession(true)
-                                                .deleteCookies("JSESSIONID")
+                                                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
                                                 .clearAuthentication(true)
                                                 .permitAll())
 
@@ -138,8 +184,10 @@ public class SecurityConfig {
                                 // Configure CSRF protection
                                 .csrf(csrf -> csrf
                                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                                .ignoringRequestMatchers("/api/**") // Ignore CSRF for API endpoints
-                                )
+                                                .ignoringRequestMatchers("/api/**", "/login") // Ignore CSRF for API
+                                                                                              // endpoints and login
+                                                .csrfTokenRequestHandler(
+                                                                new org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler()))
 
                                 // Configure security headers
                                 .headers(headers -> headers
