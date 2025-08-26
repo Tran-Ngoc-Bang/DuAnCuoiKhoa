@@ -24,8 +24,8 @@ btnConfirmPassword.addEventListener('click', () => {
   const isValid = /[a-z]/.test(newPass) &&
     /[A-Z]/.test(newPass) &&
     /[0-9]/.test(newPass) &&
-    /[\W]/.test(newPass);
-
+    /[\W]/.test(newPass) &&
+    !newPass.includes(' '); // Thêm kiểm tra dấu cách
 
   // ❗ Kiểm tra đã nhập mật khẩu hiện tại chưa
   if (!currentPass) {
@@ -33,7 +33,11 @@ btnConfirmPassword.addEventListener('click', () => {
     return;
   }
 
-
+  // Kiểm tra dấu cách trong mật khẩu mới
+  if (newPass.includes(' ')) {
+    showPopup('❌ Mật khẩu không được chứa dấu cách.', 'error');
+    return;
+  }
 
   if (!isLengthOk || !isValid) {
     showPopup('❌ Mật khẩu chưa đáp ứng yêu cầu. Vui lòng kiểm tra lại.', 'error');
