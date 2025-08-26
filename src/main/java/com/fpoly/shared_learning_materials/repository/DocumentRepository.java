@@ -114,4 +114,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
                         @Param("from") LocalDateTime from,
                         @Param("to") LocalDateTime to);
 
+        // Lấy tài liệu theo status và chưa bị xóa, sắp xếp theo thời gian tạo giảm dần
+        List<Document> findByStatusAndDeletedAtIsNullOrderByCreatedAtDesc(String status);
+
 }

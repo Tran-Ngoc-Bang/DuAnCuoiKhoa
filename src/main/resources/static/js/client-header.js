@@ -166,3 +166,36 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     }
   });
 });
+
+// Page navigation smooth handler to reduce jank
+(function() {
+  let isNavigating = false;
+  function handleLinkClick(e) {
+    const link = e.currentTarget;
+    const url = link.getAttribute('href');
+    if (!url || url.startsWith('#') || url.startsWith('javascript:')) return;
+    // Chỉ áp dụng cho link nội bộ
+    const isInternal = url.startsWith('/') || url.startsWith(window.location.origin);
+    if (!isInternal) return;
+
+    // Thêm class để tắt transition/animation trong lúc chuyển trang
+    if (!isNavigating) {
+      isNavigating = true;
+      document.documentElement.classList.add('is-navigating');
+      // Cho phép browser bắt đầu điều hướng
+      // Không preventDefault để không chặn điều hướng gốc
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href]').forEach(a => {
+      a.addEventListener('click', handleLinkClick, { passive: true });
+    });
+  });
+
+  window.addEventListener('pageshow', function() {
+    // Xóa trạng thái khi trang mới đã hiển thị (bộ nhớ cache bfcache)
+    document.documentElement.classList.remove('is-navigating');
+    isNavigating = false;
+  }, { passive: true });
+})();

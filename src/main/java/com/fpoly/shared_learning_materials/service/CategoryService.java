@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import com.fpoly.shared_learning_materials.domain.Category;
 import com.fpoly.shared_learning_materials.domain.CategoryHierarchy;
@@ -44,10 +45,12 @@ public class CategoryService {
     @Autowired
     private DocumentTagRepository documentTagRepository;
 
+    @Cacheable(value = "categories", key = "'all'")
     public List<CategoryDTO> getAllCategories() {
         return getCategoriesByDeletedStatus(null); // Lấy tất cả
     }
 
+    @Cacheable(value = "categories", key = "'active_all'")
     public List<CategoryDTO> getActiveCategories() {
         return getCategoriesByDeletedStatus(false); // Chỉ lấy chưa xóa
     }
@@ -61,6 +64,7 @@ public class CategoryService {
         return getRootCategoriesByDeletedStatus(null);
     }
 
+    @Cacheable(value = "categories", key = "'active_root'")
     public List<CategoryDTO> getActiveRootCategories() {
         return getRootCategoriesByDeletedStatus(false);
     }
@@ -529,7 +533,7 @@ public class CategoryService {
         return subcategoryIds;
     }
 
-    // Get subcategories tree for a parent category
+    @Cacheable(value = "subcategories", key = "#parentId")
     public List<CategoryTreeDTO> getSubcategoriesTree(Long parentId) {
         List<CategoryHierarchy> hierarchies = categoryHierarchyRepository.findByIdParentId(parentId);
         List<Category> allCategories = categoryRepository.findAll();
@@ -571,7 +575,7 @@ public class CategoryService {
         return tree;
     }
 
-    // Get subcategories tree for a parent category - OPTIMIZED VERSION
+    @Cacheable(value = "subcategories", key = "'opt_' + #parentId")
     public List<CategoryTreeDTO> getSubcategoriesTreeOptimized(Long parentId) {
         List<CategoryHierarchy> hierarchies = categoryHierarchyRepository.findByIdParentId(parentId);
         List<Category> allCategories = categoryRepository.findAll();

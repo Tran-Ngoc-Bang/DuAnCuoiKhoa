@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -56,6 +57,8 @@ import com.fpoly.shared_learning_materials.service.DocumentNotificationService;
 import com.fpoly.shared_learning_materials.service.TagService;
 
 import jakarta.servlet.http.HttpSession;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Controller for main client pages
@@ -77,12 +80,11 @@ public class ClientPageController {
     @Autowired
 
     private DocumentCategoryRepository documentCategoryRepository;
-  @Autowired
+    @Autowired
     private DocumentOwnerRepository documentOwnerRepository;
 
     @Autowired
     private NotificationService notificationService;
-
 
     @Autowired
     private CategoryService categoryService;
@@ -99,7 +101,6 @@ public class ClientPageController {
         return "client/about";
     }
 
-    
     @GetMapping("/account/favorites/toggle/{documentId}")
     @ResponseBody
     public ResponseEntity<?> toggleFavorite(@PathVariable Long documentId, Authentication authentication) {
@@ -137,28 +138,30 @@ public class ClientPageController {
             subcategoriesMap.put(rootCategory.getId(), categoryService.getSubcategoriesTree(rootCategory.getId()));
         }
 
-        // Tạo map để lưu số lượng tài liệu cho mỗi category (bao gồm cả danh mục cha và con)
+        // Tạo map để lưu số lượng tài liệu cho mỗi category (bao gồm cả danh mục cha và
+        // con)
         Map<Long, Long> categoryDocumentCounts = new HashMap<>();
         try {
             // Lấy tất cả category IDs (bao gồm cả root categories và subcategories)
             List<Long> allCategoryIds = new ArrayList<>();
-            
+
             // Thêm root category IDs
             allCategoryIds.addAll(rootCategories.stream().map(CategoryDTO::getId).collect(Collectors.toList()));
-            
+
             // Thêm subcategory IDs
             for (List<CategoryTreeDTO> subcategories : subcategoriesMap.values()) {
                 allCategoryIds.addAll(subcategories.stream().map(CategoryTreeDTO::getId).collect(Collectors.toList()));
             }
-            
+
             // Đếm số lượng tài liệu cho tất cả categories trong một query
-            List<Object[]> categoryCountResults = documentCategoryRepository.countDocumentsByCategoryIds(allCategoryIds);
+            List<Object[]> categoryCountResults = documentCategoryRepository
+                    .countDocumentsByCategoryIds(allCategoryIds);
             for (Object[] result : categoryCountResults) {
                 Long categoryId = (Long) result[0];
                 Long count = (Long) result[1];
                 categoryDocumentCounts.put(categoryId, count);
             }
-            
+
         } catch (Exception e) {
             System.err.println("Error loading category document counts: " + e.getMessage());
         }
@@ -292,8 +295,24 @@ public class ClientPageController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Document> searchResults = documentService.searchDocuments(q, category, format, price, rating, time,
-                pageable);
+        // Nếu không có từ khóa tìm kiếm, hiển thị tài liệu phổ biến và mới nhất
+        Page<DocumentDTO> searchResults;
+        if (q == null || q.trim().isEmpty()) {
+            // Hiển thị tài liệu phổ biến và mới nhất
+            searchResults = documentService.getPopularAndRecentDocuments(pageable);
+            model.addAttribute("isDefaultView", true);
+        } else {
+            // Tìm kiếm theo từ khóa và bộ lọc
+            Page<Document> documentPage = documentService.searchDocuments(q, category, format, price, rating, time,
+                    pageable);
+            // Convert to DTOs
+            List<DocumentDTO> dtoList = documentPage.getContent().stream()
+                    .map(documentService::convertDocumentToDTO)
+                    .collect(Collectors.toList());
+
+            searchResults = new PageImpl<>(dtoList, pageable, documentPage.getTotalElements());
+            model.addAttribute("isDefaultView", false);
+        }
 
         model.addAttribute("searchResults", searchResults);
         model.addAttribute("query", q);
@@ -383,9 +402,9 @@ public class ClientPageController {
             return "redirect:/upload";
         }
 
-        // Kiểm tra kích thước file (100MB)
-        if (file.getSize() > 100 * 1024 * 1024) {
-            redirectAttributes.addFlashAttribute("error", "Kích thước file vượt quá 100MB");
+        // Kiểm tra kích thước file (50MB theo yêu cầu)
+        if (file.getSize() > 50 * 1024 * 1024) {
+            redirectAttributes.addFlashAttribute("error", "Kích thước file vượt quá 50MB");
             return "redirect:/upload";
         }
 
@@ -706,7 +725,8 @@ public class ClientPageController {
     @ResponseBody
     public List<TagDTO> getAllTags() {
         // Lấy tất cả tags để hiển thị khi chưa nhập gì
-        Page<TagDTO> allTagsPage = tagService.getAllTags(0, 50, "popular"); // Lấy 50 tags đầu tiên, sắp xếp theo độ phổ biến
+        Page<TagDTO> allTagsPage = tagService.getAllTags(0, 50, "popular"); // Lấy 50 tags đầu tiên, sắp xếp theo độ phổ
+                                                                            // biến
         return allTagsPage.getContent();
     }
 }

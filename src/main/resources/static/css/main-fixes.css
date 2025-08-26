@@ -253,3 +253,10 @@ main {
         grid-template-columns: 1fr;
     }
 }
+
+/* Disable transitions/animations during navigation to avoid jank */
+html.is-navigating *,
+html.is-navigating {
+  transition: none !important;
+  animation: none !important;
+}

@@ -8,299 +8,76 @@
   overflow: hidden;
   color: var(--white);
   box-shadow: inset 0 -10px 30px rgba(0, 0, 0, 0.1);
+  contain: layout paint style;
 }
 
-.section-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  overflow: hidden;
-  opacity: 1;
-  pointer-events: none; /* Đảm bảo người dùng có thể click xuyên qua */
-  background: 
-    radial-gradient(1200px circle at 10% 20%, rgba(236, 248, 255, 0.6) 0%, transparent 30%),
-    radial-gradient(1000px circle at 85% 60%, rgba(240, 247, 255, 0.5) 0%, transparent 40%),
-    radial-gradient(800px circle at 50% 40%, rgba(238, 242, 255, 0.4) 0%, transparent 35%),
-    linear-gradient(135deg, rgba(30, 41, 89, 0.08) 0%, rgba(30, 64, 175, 0.03) 100%);
+/* Reduce motion globally for this section if user/system prefers */
+@media (prefers-reduced-motion: reduce) {
+  .categories * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-/* Shape 1 - Nền chính */
-.shape-category-1 {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
-  background: linear-gradient(135deg, rgba(67, 97, 238, 0.15), rgba(114, 137, 255, 0.08));
-  top: -250px;
-  right: -150px;
-  animation: float 15s ease-in-out infinite;
-  filter: blur(2px);
-  box-shadow: 0 15px 60px rgba(67, 97, 238, 0.15);
-  transition: all 0.5s ease;
-  opacity: 0.9;
-}
-
-/* Shape 2 - Hình nhỏ nhạt bên trái dưới */
+/* Optimize section background shapes */
+.section-background,
+.shape-category-1,
 .shape-category-2 {
-  position: absolute;
-  width: 450px;
-  height: 450px;
-  border-radius: 30% 70% 70% 30% / 30% 46% 54% 70%;
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(147, 37, 247, 0.08));
-  bottom: -200px;
-  left: -100px;
-  animation: float-reverse 18s ease-in-out infinite;
-  filter: blur(1.5px);
-  box-shadow: 0 15px 60px rgba(247, 37, 133, 0.12);
-  transform-origin: center bottom;
-  opacity: 0.85;
+  will-change: transform, opacity;
 }
 
-/* Thêm các shapes mới */
-.section-background::before {
-  content: '';
-  position: absolute;
-  width: 250px;
-  height: 250px;
-  border-radius: 42% 58% 63% 37% / 34% 56% 44% 66%;
-  background: linear-gradient(to right, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.08));
-  top: 40%;
-  right: 25%;
-  animation: spin 30s linear infinite, float-slow 25s ease-in-out infinite;
-  z-index: -1;
-  opacity: 0.75;
-  box-shadow: 0 10px 40px rgba(6, 182, 212, 0.1);
+/* Soften animated shapes to reduce paint cost */
+.shape-category-1 {
+  box-shadow: 0 10px 30px rgba(67, 97, 238, 0.15);
 }
 
-.section-background::after {
-  content: '';
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  border-radius: 41% 59% 40% 60% / 65% 41% 59% 35%;
-  background: linear-gradient(to right, rgba(249, 115, 22, 0.1), rgba(236, 72, 153, 0.06));
-  top: 15%;
-  left: 20%;
-  animation: float 20s ease-in-out infinite, spin-reverse 40s linear infinite;
-  z-index: -1;
-  opacity: 0.8;
-  box-shadow: 0 8px 35px rgba(249, 115, 22, 0.1);
+/* Grid container optimizations (in case defined elsewhere) */
+.categories-grid {
+  contain: layout paint style;
 }
 
-/* Shape 3 ở giữa */
-.section-background .shape-category-1::before {
-  content: '';
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
-  background: linear-gradient(-45deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.08));
-  bottom: 20%;
-  left: 20%;
-  animation: float-mini 12s ease-in-out infinite, spin 35s linear infinite;
-  filter: blur(1px);
-  opacity: 0.9;
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
-}
-
-/* Shape 4 nhỏ nhất */
-.section-background .shape-category-2::after {
-  content: '';
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border-radius: 40% 60% 55% 45% / 60% 45% 55% 40%;
-  background: linear-gradient(45deg, rgba(124, 58, 237, 0.12), rgba(139, 92, 246, 0.08));
-  top: 30%;
-  right: 25%;
-  animation: float-mini 10s ease-in-out infinite reverse, spin-slow 45s linear infinite;
-  filter: blur(1px);
-  opacity: 0.85;
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.12);
-}
-
-/* Animation keyframes */
-@keyframes float {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(10px, -12px) rotate(2deg);
-  }
-  50% {
-    transform: translate(0, 18px) rotate(0deg);
-  }
-  75% {
-    transform: translate(-10px, -12px) rotate(-2deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-@keyframes float-reverse {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(-12px, 10px) rotate(-2deg);
-  }
-  50% {
-    transform: translate(0, -15px) rotate(0deg);
-  }
-  75% {
-    transform: translate(12px, 10px) rotate(2deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-@keyframes float-slow {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  33% {
-    transform: translate(15px, -15px) rotate(3deg);
-  }
-  66% {
-    transform: translate(-15px, 15px) rotate(-3deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-@keyframes float-mini {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(6px, -8px) rotate(5deg);
-  }
-  50% {
-    transform: translate(0, 10px) rotate(0deg);
-  }
-  75% {
-    transform: translate(-6px, -8px) rotate(-5deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes spin-reverse {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
-/* Hover effect for section */
-.categories:hover .shape-category-1 {
-  transform: scale(1.05) translate(-15px, 15px);
-  filter: blur(1.5px);
-  opacity: 0.95;
-}
-
-.categories:hover .shape-category-2 {
-  transform: scale(1.05) translate(15px, -15px);
-  filter: blur(1px);
-  opacity: 0.9;
-}
-
-.categories:hover .section-background::before {
-  animation-play-state: paused;
-  transform: scale(1.1);
-}
-
-.categories:hover .section-background::after {
-  animation-play-state: paused;
-  transform: scale(1.1);
-  gap: var(--spacing-8);
-  margin-bottom: var(--spacing-16);
-}
-
+/* Card: performance tweaks */
 .category-card {
   position: relative;
   background-color: var(--white);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.10);
+  transition-property: transform, box-shadow, border-color, color, background-color, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
   border: 1px solid rgba(226, 232, 240, 0.8);
   height: 100%;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(5px);
+  /* backdrop-filter is heavy on scroll — disable by default */
+  backdrop-filter: none;
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(249, 250, 251, 0.8));
-  padding: var(--spacing-4); /* Thêm padding bên trong để nội dung không bị sát ráp */
-  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước thực */
+  padding: var(--spacing-4);
+  box-sizing: border-box;
+  content-visibility: auto;
+  contain-intrinsic-size: 280px 380px;
+  contain: content;
+  will-change: transform;
 }
 
-.category-card::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  bottom: -50%;
-  left: -50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.5s;
+/* Enable very light blur only on hover if supported */
+@supports ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
+  .category-card:hover {
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
 }
 
 .category-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   border-color: rgba(99, 102, 241, 0.4);
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(249, 250, 251, 0.9));
 }
 
-.category-card:hover::after {
-  opacity: 0.4;
-}
 
-.category-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-  transform: translateX(-100%);
-  transition: 0.6s;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.category-card:hover::before {
-  transform: translateX(100%);
-}
 
 .card-top {
   position: relative;
@@ -319,32 +96,16 @@
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
   position: relative;
   overflow: hidden;
   z-index: 2;
-  flex-shrink: 0; /* Ngăn icon co lại khi không đủ không gian */
+  flex-shrink: 0;
+  will-change: transform;
 }
 
-.category-icon::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.15), transparent);
-  transform: translateY(50%);
-  opacity: 0;
-  transition: all 0.3s ease-out;
-  z-index: -1;
-}
 
-.category-card:hover .category-icon::after {
-  transform: translateY(0);
-  opacity: 1;
-}
 
 .it-icon {
   background: linear-gradient(135deg, #4361ee, #3a0ca3);
@@ -431,8 +192,8 @@
 }
 
 .category-card:hover .category-icon {
-  transform: scale(1.08) rotate(-5deg);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.15);
 }
 
 .category-card:hover .it-icon {
@@ -502,7 +263,7 @@
   transition: all 0.3s ease;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(226, 232, 240, 0.8);
-  backdrop-filter: blur(5px);
+  backdrop-filter: none;
   margin-left: auto; /* Đẩy badge sang bên phải */
   display: flex;
   align-items: center;
@@ -543,20 +304,6 @@
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.category-title::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary), transparent);
-  transition: width 0.4s ease;
-}
-
-.category-card:hover .category-title::after {
-  width: 100%;
-}
 
 .category-card:hover .category-title {
   background: linear-gradient(90deg, var(--primary), var(--secondary));
@@ -607,18 +354,6 @@
   overflow: hidden;
 }
 
-.category-tag::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: -1;
-}
 
 /* Hiệu ứng nổi cho category-tag khi hover */
 .category-card:hover .category-tag {
@@ -644,10 +379,6 @@
 
 .category-card:hover .category-tag:nth-child(4) {
   transition-delay: 0.2s;
-}
-
-.category-card:hover .category-tag::before {
-  opacity: 1;
 }
 
 .card-top {
@@ -761,18 +492,6 @@
   width: auto;
 }
 
-.explore-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  transition: width 0.3s ease;
-  z-index: -1;
-  border-radius: var(--radius-lg); /* Thêm border-radius để phù hợp với nút */
-}
 
 .explore-btn:hover {
   color: var(--white);
@@ -781,9 +500,7 @@
   border-color: transparent;
 }
 
-.explore-btn:hover::before {
-  width: 100%;
-}
+
 
 .explore-btn i {
   transition: transform 0.3s ease;

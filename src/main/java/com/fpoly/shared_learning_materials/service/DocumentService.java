@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -28,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.cache.annotation.Cacheable;
 
 @Service
 public class DocumentService {
@@ -1344,7 +1348,7 @@ public class DocumentService {
                 for (DocumentCategory existingCategory : existingCategories) {
                     documentCategoryRepository.delete(existingCategory);
                 }
-                
+
                 // Add new categories
                 for (Long categoryId : categoryIds) {
                     Category category = categoryRepository.findById(categoryId).orElse(null);
@@ -1727,62 +1731,12 @@ public class DocumentService {
             String time,
             Pageable pageable) {
 
-        Page<Document> pageResult = documentRepository.findByKeyword(q, Pageable.unpaged());
-        System.out.println("Count of documents found: " + pageResult.getTotalElements());
+        Specification<Document> spec = buildSearchSpecification(q, categorySlugs, formats, priceFilters, time);
+        Page<Document> pageResult = documentRepository.findAll(spec, pageable);
+
         List<Document> documents = pageResult.getContent();
 
-        // Filter: Category
-        if (categorySlugs != null && !categorySlugs.isEmpty()) {
-            documents = documents.stream()
-                    .filter(doc -> doc.getDocumentCategories().stream()
-                            .anyMatch(dc -> categorySlugs.contains(dc.getCategory().getSlug())))
-                    .collect(Collectors.toList());
-        }
-
-        // Filter: File format
-        if (formats != null && !formats.isEmpty()) {
-            Set<String> lowerCaseFormats = formats.stream()
-                    .map(String::toLowerCase)
-                    .collect(Collectors.toSet());
-
-            documents = documents.stream()
-                    .filter(doc -> doc.getFile() != null
-                            && doc.getFile().getFileType() != null
-                            && lowerCaseFormats.contains(doc.getFile().getFileType().toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        // Filter: Price
-        if (priceFilters != null && !priceFilters.isEmpty()) {
-            documents = documents.stream()
-                    .filter(doc -> {
-                        if (priceFilters.contains("free") && doc.getPrice().compareTo(BigDecimal.ZERO) == 0)
-                            return true;
-                        if (priceFilters.contains("paid") && doc.getPrice().compareTo(BigDecimal.ZERO) > 0)
-                            return true;
-                        return false;
-                    })
-                    .collect(Collectors.toList());
-        }
-
-        // Filter: Time (createdAt)
-        if (time != null && !time.equals("any")) {
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime after = switch (time) {
-                case "week" -> now.minusDays(7);
-                case "month" -> now.minusDays(30);
-                case "year" -> now.minusYears(1);
-                default -> null;
-            };
-
-            if (after != null) {
-                documents = documents.stream()
-                        .filter(doc -> doc.getCreatedAt() != null && doc.getCreatedAt().isAfter(after))
-                        .collect(Collectors.toList());
-            }
-        }
-
-        // Filter: Rating
+        // Optional: Filter by rating on the current page only (quick win)
         if (ratingStr != null && !ratingStr.equals("any")) {
             try {
                 int minRating = Integer.parseInt(ratingStr);
@@ -1793,17 +1747,77 @@ public class DocumentService {
                         })
                         .collect(Collectors.toList());
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                // ignore invalid rating
             }
         }
 
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), documents.size());
-        List<Document> pagedList = (start <= end) ? documents.subList(start, end) : new ArrayList<>();
+        return new PageImpl<>(documents, pageable, pageResult.getTotalElements());
+    }
 
-        System.out.println("Count of documents final: " + pagedList.size());
+    private Specification<Document> buildSearchSpecification(String q,
+            List<String> categorySlugs,
+            List<String> formats,
+            List<String> priceFilters,
+            String time) {
+        return (root, query, cb) -> {
+            // Avoid duplicates when joining
+            query.distinct(true);
 
-        return new PageImpl<>(pagedList, pageable, documents.size());
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+            // Only active documents
+            predicates.add(cb.isNull(root.get("deletedAt")));
+
+            // Keyword in title or description
+            if (q != null && !q.trim().isEmpty()) {
+                String like = "%" + q.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), like),
+                        cb.like(cb.lower(root.get("description")), like)));
+            }
+
+            // Category filter via join documentCategories -> category.slug
+            if (categorySlugs != null && !categorySlugs.isEmpty()) {
+                Join<Object, Object> dc = root.join("documentCategories", JoinType.LEFT);
+                Join<Object, Object> cat = dc.join("category", JoinType.LEFT);
+                predicates.add(cat.get("slug").in(categorySlugs));
+            }
+
+            // Format filter via file.fileType
+            if (formats != null && !formats.isEmpty()) {
+                Join<Object, Object> file = root.join("file", JoinType.LEFT);
+                List<String> lower = formats.stream().map(String::toLowerCase).toList();
+                predicates.add(cb.lower(file.get("fileType")).in(lower));
+            }
+
+            // Price filter
+            if (priceFilters != null && !priceFilters.isEmpty()) {
+                boolean wantFree = priceFilters.contains("free");
+                boolean wantPaid = priceFilters.contains("paid");
+                if (wantFree && !wantPaid) {
+                    predicates.add(cb.equal(root.get("price"), java.math.BigDecimal.ZERO));
+                } else if (!wantFree && wantPaid) {
+                    predicates.add(cb.greaterThan(root.get("price"), java.math.BigDecimal.ZERO));
+                }
+                // if both selected, skip adding predicate
+            }
+
+            // Time filter on createdAt
+            if (time != null && !time.equals("any")) {
+                java.time.LocalDateTime now = java.time.LocalDateTime.now();
+                java.time.LocalDateTime after = switch (time) {
+                    case "week" -> now.minusDays(7);
+                    case "month" -> now.minusDays(30);
+                    case "year" -> now.minusYears(1);
+                    default -> null;
+                };
+                if (after != null) {
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), after));
+                }
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
     }
 
     public Map<String, Long> countFormats(String q) {
@@ -1892,6 +1906,65 @@ public class DocumentService {
         return result;
     }
 
+    /**
+     * Lấy tài liệu phổ biến và mới nhất cho trang tìm kiếm mặc định
+     * Kết hợp tài liệu có lượt xem/tải cao và tài liệu mới nhất
+     */
+    public Page<DocumentDTO> getPopularAndRecentDocuments(Pageable pageable) {
+        try {
+            System.out.println("=== GET POPULAR AND RECENT DOCUMENTS ===");
+
+            // Lấy tài liệu có status APPROVED và chưa bị xóa
+            List<Document> allDocuments = documentRepository
+                    .findByStatusAndDeletedAtIsNullOrderByCreatedAtDesc("APPROVED");
+
+            // Sắp xếp theo độ phổ biến (lượt xem + lượt tải) và thời gian tạo
+            List<Document> sortedDocuments = allDocuments.stream()
+                    .sorted((doc1, doc2) -> {
+                        // Tính điểm phổ biến = lượt xem + lượt tải
+                        long popularity1 = (doc1.getViewsCount() != null ? doc1.getViewsCount() : 0) +
+                                (doc1.getDownloadsCount() != null ? doc1.getDownloadsCount() : 0);
+                        long popularity2 = (doc2.getViewsCount() != null ? doc2.getViewsCount() : 0) +
+                                (doc2.getDownloadsCount() != null ? doc2.getDownloadsCount() : 0);
+
+                        // Ưu tiên tài liệu phổ biến trước, sau đó đến tài liệu mới
+                        if (popularity1 != popularity2) {
+                            return Long.compare(popularity2, popularity1); // Giảm dần
+                        } else {
+                            // Nếu độ phổ biến bằng nhau, ưu tiên tài liệu mới hơn
+                            if (doc1.getCreatedAt() != null && doc2.getCreatedAt() != null) {
+                                return doc2.getCreatedAt().compareTo(doc1.getCreatedAt());
+                            }
+                            return 0;
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            // Convert to DTOs
+            List<DocumentDTO> dtoList = sortedDocuments.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+            // Set additional fields for each DTO
+            for (DocumentDTO dto : dtoList) {
+                setAdditionalFields(dto);
+            }
+
+            // Áp dụng phân trang
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), dtoList.size());
+            List<DocumentDTO> pagedList = (start <= end) ? dtoList.subList(start, end) : new ArrayList<>();
+
+            System.out.println("Found " + pagedList.size() + " popular and recent documents");
+            return new PageImpl<>(pagedList, pageable, dtoList.size());
+
+        } catch (Exception e) {
+            System.err.println("Error getting popular and recent documents: " + e.getMessage());
+            e.printStackTrace();
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+    }
+
     public List<Document> getRelatedDocuments(Document document, int limit) {
         List<Long> categoryIds = document.getDocumentCategories().stream()
                 .map(dc -> dc.getCategory().getId())
@@ -1904,6 +1977,7 @@ public class DocumentService {
     }
 
     // Get featured documents for homepage
+    @Cacheable(value = "featuredDocuments", key = "#limit")
     public List<DocumentDTO> getFeaturedDocuments(int limit) {
         try {
             System.out.println("=== GET FEATURED DOCUMENTS ===");
@@ -2219,6 +2293,15 @@ public class DocumentService {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tạo tài liệu: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Convert Document entity to DTO with all additional fields
+     */
+    public DocumentDTO convertDocumentToDTO(Document document) {
+        DocumentDTO dto = convertToDTO(document);
+        setAdditionalFields(dto);
+        return dto;
     }
 
 }

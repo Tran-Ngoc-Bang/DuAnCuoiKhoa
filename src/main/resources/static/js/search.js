@@ -80,8 +80,23 @@ function initLayoutToggle() {
         // Get the layout type (grid or list)
         const layout = this.getAttribute('data-layout');
 
+        // Performance: freeze height and disable transitions during the switch
+        const previousHeight = searchResults.offsetHeight;
+        searchResults.style.height = previousHeight + 'px';
+        searchResults.classList.add('is-switching');
+
         // Update search results layout
-        searchResults.className = `search-results ${layout}-view`;
+        searchResults.className = `search-results ${layout}-view is-switching`;
+
+        // Defer unfreezing to next frames to let layout settle
+        requestAnimationFrame(() => {
+          // Remove explicit height to allow natural height after layout applied
+          searchResults.style.height = '';
+          // Remove switching flag in another frame to avoid animating the reflow
+          requestAnimationFrame(() => {
+            searchResults.classList.remove('is-switching');
+          });
+        });
 
         // Save layout preference in localStorage for persistence
         localStorage.setItem('search_layout_preference', layout);
@@ -551,6 +566,11 @@ function sortSearchResults(sortBy) {
   const container = document.getElementById('searchResults');
   const cards = Array.from(container.getElementsByClassName('search-result-card'));
 
+  // Freeze container height and disable transitions during sort
+  const previousHeight = container.offsetHeight;
+  container.style.height = previousHeight + 'px';
+  container.classList.add('is-switching');
+
   const parseNumber = (text) => {
     if (!text) return 0;
     const cleaned = text.replace(/[^\d.]/g, '');
@@ -595,8 +615,19 @@ function sortSearchResults(sortBy) {
     }
   });
 
+  // Rebuild using DocumentFragment to minimize reflow
+  const fragment = document.createDocumentFragment();
+  cards.forEach(card => fragment.appendChild(card));
   container.innerHTML = '';
-  cards.forEach(card => container.appendChild(card));
+  container.appendChild(fragment);
+
+  // Unfreeze in RAF to allow layout settle without animating
+  requestAnimationFrame(() => {
+    container.style.height = '';
+    requestAnimationFrame(() => {
+      container.classList.remove('is-switching');
+    });
+  });
 
   showToast(`Đã sắp xếp kết quả theo: ${getSortLabel(sortBy)}`, 'info');
 }

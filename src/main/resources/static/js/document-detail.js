@@ -567,21 +567,29 @@ function initStickyElements() {
   const contentTabs = document.querySelector('.content-tabs');
   
   if (documentSidebar) {
-    window.addEventListener('scroll', () => {
+    let ticking = false;
+
+    function updateSidebar() {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
-      // Make sure the sidebar doesn't go below the footer
       const footer = document.querySelector('.footer');
       const footerTop = footer.getBoundingClientRect().top + window.pageYOffset;
       const sidebarHeight = documentSidebar.offsetHeight;
-      const sidebarTop = documentSidebar.getBoundingClientRect().top + window.pageYOffset;
-      
       if (scrollTop + sidebarHeight + 40 >= footerTop) {
         documentSidebar.style.top = `${footerTop - sidebarHeight - scrollTop - 40}px`;
       } else {
         documentSidebar.style.top = 'var(--spacing-6)';
       }
-    });
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(updateSidebar);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
   }
 }
 

@@ -18,20 +18,29 @@ function initHeaderScroll() {
   if (!header) return;
   
   const scrollThreshold = 50;
-  
-  function handleScroll() {
+  let ticking = false;
+
+  function updateHeaderOnScroll() {
     if (window.scrollY > scrollThreshold) {
       header.classList.add('scrolled');
     } else {
       header.classList.remove('scrolled');
     }
+    ticking = false;
+  }
+  
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(updateHeaderOnScroll);
+      ticking = true;
+    }
   }
   
   // Call once on load
-  handleScroll();
+  updateHeaderOnScroll();
   
-  // Add scroll event listener
-  window.addEventListener('scroll', handleScroll);
+  // Add scroll event listener (passive + rAF throttle)
+  window.addEventListener('scroll', onScroll, { passive: true });
 }
 
 // Mobile Menu
@@ -107,14 +116,26 @@ function initBackToTop() {
   const backToTopBtn = document.getElementById('backToTop');
   
   if (backToTopBtn) {
-    // Show/hide button based on scroll position
-    window.addEventListener('scroll', function() {
+    let ticking = false;
+
+    function updateVisibility() {
       if (window.pageYOffset > 300) {
         backToTopBtn.classList.add('visible');
       } else {
         backToTopBtn.classList.remove('visible');
       }
-    });
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(updateVisibility);
+        ticking = true;
+      }
+    }
+
+    // Show/hide button based on scroll position
+    window.addEventListener('scroll', onScroll, { passive: true });
     
     // Scroll to top when clicked
     backToTopBtn.addEventListener('click', function() {

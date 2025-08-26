@@ -5,12 +5,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <title>Tìm kiếm tài liệu - EduShare</title>
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" th:href="@{/css/main.css}" as="style">
+  <link rel="preload" th:href="@{/css/search.css}" as="style">
+  <link rel="preload" th:href="@{/js/search.js}" as="script">
+  
+  <!-- Preconnect to external domains -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://images.unsplash.com">
+  
+  <!-- Load fonts with display=swap for better performance -->
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Load CSS with media queries for better performance -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" th:href="@{/css/main.css}">
   <link rel="stylesheet" th:href="@{/css/responsive.css}">
   <link rel="stylesheet" th:href="@{/css/main-fixes.css}">
@@ -20,6 +33,9 @@
   <link rel="stylesheet" th:href="@{/css/client-header.css}">
   <link rel="stylesheet" th:href="@{/css/client-footer.css}">
   <style>
+    .search-main{
+      padding-top: 0px !important;
+    }
     .filter-options {
       max-height: 250px;
       overflow-y: auto;
@@ -99,7 +115,7 @@
   </header>
 
   <!-- Main Content -->
-  <main>
+  <main class="search-main">
     <!-- Search Hero Section -->
     <section class="search-hero">
       <div class="container">
@@ -113,7 +129,7 @@
               <div class="search-input-wrapper">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" id="searchInput" name="q" class="search-input"
-                  placeholder="Tìm kiếm theo tên, tác giả, chủ đề..." autocomplete="off">
+                  placeholder="Tìm kiếm theo tên, tác giả, chủ đề..." autocomplete="off" th:value="${query}">
               </div>
               <button type="submit" class="search-submit">
                 <i class="fas fa-search"></i> Tìm kiếm
@@ -130,12 +146,15 @@
         <!-- Search Stats Bar -->
         <div class="search-stats-bar">
           <div class="search-stats-info">
-            <div class="search-query-display">
-              <span>Kết quả cho:</span> <strong>""</strong>
+            <div class="search-query-display" th:if="${query != null and !query.trim().isEmpty()}">
+              <span>Kết quả cho:</span> <strong th:text="${query}">""</strong>
             </div>
-            <!-- <div class="search-count-display">
-              <i class="fas fa-file-alt"></i> 215 kết quả
-            </div> -->
+            <div class="search-query-display" th:if="${query == null or query.trim().isEmpty()}">
+              <span>Hiển thị:</span> <strong>Tài liệu phổ biến và mới nhất</strong>
+            </div>
+            <div class="search-count-display" th:if="${searchResults != null}">
+              <i class="fas fa-file-alt"></i> <span th:text="${searchResults.totalElements}">0</span> kết quả
+            </div>
           </div>
 
           <div class="search-options">
@@ -385,18 +404,24 @@
                 <div class="result-thumbnail">
                   <img
                     src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="Thumbnail">
+                    alt="Thumbnail"
+                    loading="lazy" decoding="async" width="800" height="450">
                   <div class="result-badge premium">
-                    <i class="fas fa-coins"></i> <span th:text="${doc.price} + ' xu'">25 xu</span>
+                    <i class="fas fa-coins"></i> <span th:text="${doc.price != null ? doc.price + ' xu' : '0 xu'}">25 xu</span>
                   </div>
                 </div>
 
                 <div class="result-content">
                   <div class="result-category">
                     <i class="fas fa-folder"></i>
-                    <span th:each="docCat, iterStat : ${doc.documentCategories}">
-                      <span th:text="${docCat.category.name}">Công nghệ thông tin</span>
-                      <span th:if="${!iterStat.last}">, </span>
+                    <span th:if="${doc.categoryNames != null and !doc.categoryNames.isEmpty()}">
+                      <span th:each="catName, iterStat : ${doc.categoryNames}">
+                        <span th:text="${catName}">Công nghệ thông tin</span>
+                        <span th:if="${!iterStat.last}">, </span>
+                      </span>
+                    </span>
+                    <span th:if="${doc.categoryNames == null or doc.categoryNames.isEmpty()}">
+                      <span>Chưa phân loại</span>
                     </span>
 
                     <span class="result-format pdf">
@@ -409,7 +434,7 @@
                     </a>
                   </h3>
 
-                  <p class="result-description" th:text="${doc.description}">
+                  <p class="result-description" th:text="${doc.description != null ? doc.description : 'Không có mô tả'}">
                     Mô tả ngắn của tài liệu
                   </p>
 
@@ -417,27 +442,28 @@
                     <div class="meta-author">
                       <img
                         src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt="Author avatar">
-                      <span th:text="${doc.file.uploadedBy.fullName}">Nguyễn Văn A</span>
+                        alt="Author avatar"
+                        loading="lazy" decoding="async" width="32" height="32">
+                      <span th:text="${doc.authorName != null ? doc.authorName : 'Không xác định'}">Nguyễn Văn A</span>
                     </div>
                     <div class="meta-stats">
                       <div class="stat-item rating">
                         <i class="fas fa-star"></i>
-                        <span th:text="${doc.rating}">4.8</span>
+                        <span th:text="${doc.averageRating != null ? #numbers.formatDecimal(doc.averageRating, 1, 1) : '0.0'}">4.8</span>
                       </div>
 
                       <div class="stat-item">
-                        <i class="fas fa-download"></i> <span th:text="${doc.downloadsCount}">875</span>
+                        <i class="fas fa-download"></i> <span th:text="${doc.downloadsCount != null ? doc.downloadsCount : 0}">875</span>
                       </div>
                       <div class="stat-item">
-                        <i class="fas fa-eye"></i> <span th:text="${doc.viewsCount}">3.2k</span>
+                        <i class="fas fa-eye"></i> <span th:text="${doc.viewsCount != null ? doc.viewsCount : 0}">3.2k</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div class="result-actions">
-                  <div class="result-price" th:text="${doc.price + ' xu'}">25 xu</div>
+                  <div class="result-price" th:text="${doc.price != null ? doc.price + ' xu' : '0 xu'}">25 xu</div>
                   <div class="action-buttons">
                     <a th:href="@{/documents/{id}(id=${doc.id})}" class="result-download-btn">
                       <i class="fas fa-download"></i> Tải xuống
@@ -515,9 +541,76 @@
   </script>
 
 
-  <script th:src="@{/js/main.js}"></script>
-  <script th:src="@{/js/search.js}"></script>
-  <script th:src="@{/js/client-header.js}"></script>
+  <script th:src="@{/js/main.js}" defer></script>
+  <script th:src="@{/js/search.js}" defer></script>
+  <script th:src="@{/js/client-header.js}" defer></script>
+  
+  <!-- Inline critical JavaScript for immediate execution -->
+  <script>
+    // Critical performance optimizations
+    document.addEventListener('DOMContentLoaded', function() {
+      // Prevent layout shift by setting initial dimensions
+      const searchResults = document.getElementById('searchResults');
+      if (searchResults) {
+        searchResults.style.minHeight = '600px';
+      }
+      
+      // Optimize scroll performance
+      let ticking = false;
+      function updateScroll() {
+        ticking = false;
+      }
+      
+      function requestTick() {
+        if (!ticking) {
+          requestAnimationFrame(updateScroll);
+          ticking = true;
+        }
+      }
+      
+      // Use passive scroll listener for better performance
+      window.addEventListener('scroll', requestTick, { passive: true });
+      
+      // Preload critical images with Intersection Observer
+      const images = document.querySelectorAll('img[loading="lazy"]');
+      if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              img.src = img.dataset.src || img.src;
+              img.classList.remove('lazy');
+              imageObserver.unobserve(img);
+            }
+          });
+        }, {
+          rootMargin: '50px 0px',
+          threshold: 0.01
+        });
+        
+        images.forEach(img => imageObserver.observe(img));
+      }
+      
+      // Optimize hover effects during scroll
+      let isScrolling = false;
+      const searchCards = document.querySelectorAll('.search-result-card');
+      
+      window.addEventListener('scroll', function() {
+        isScrolling = true;
+        searchCards.forEach(card => {
+          card.style.pointerEvents = 'none';
+        });
+        
+        clearTimeout(window.scrollTimeout);
+        window.scrollTimeout = setTimeout(function() {
+          isScrolling = false;
+          searchCards.forEach(card => {
+            card.style.pointerEvents = 'auto';
+          });
+        }, 150);
+      }, { passive: true });
+    });
+  </script>
 </body>
 
 </html>
