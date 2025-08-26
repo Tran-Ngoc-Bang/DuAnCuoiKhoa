@@ -1,5 +1,6 @@
 package com.fpoly.shared_learning_materials.config;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,9 +31,28 @@ public class SecurityConfig {
                 return new BCryptPasswordEncoder(12);
         }
 
+        @Autowired
+        @org.springframework.context.annotation.Lazy
+        private com.fpoly.shared_learning_materials.service.UserService userService;
+
         @Bean
         public AuthenticationSuccessHandler authenticationSuccessHandler() {
                 return new SavedRequestAwareAuthenticationSuccessHandler() {
+                        @Override
+                        public void onAuthenticationSuccess(jakarta.servlet.http.HttpServletRequest request,
+                                        jakarta.servlet.http.HttpServletResponse response,
+                                        org.springframework.security.core.Authentication authentication)
+                                        throws java.io.IOException, jakarta.servlet.ServletException {
+                                
+                                // Cập nhật thông tin đăng nhập cuối
+                                String username = authentication.getName();
+                                String ipAddress = getClientIpAddress(request);
+                                userService.updateLastLogin(username, ipAddress);
+                                
+                                // Tiếp tục với logic redirect
+                                super.onAuthenticationSuccess(request, response, authentication);
+                        }
+
                         @Override
                         protected String determineTargetUrl(jakarta.servlet.http.HttpServletRequest request,
                                         jakarta.servlet.http.HttpServletResponse response,
@@ -63,14 +83,58 @@ public class SecurityConfig {
                                                 !url.contains("data:") &&
                                                 url.length() < 200; // Giới hạn độ dài
                         }
+
+                        private String getClientIpAddress(jakarta.servlet.http.HttpServletRequest request) {
+                                String xForwardedFor = request.getHeader("X-Forwarded-For");
+                                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+                                        return xForwardedFor.split(",")[0].trim();
+                                }
+                                
+                                String xRealIp = request.getHeader("X-Real-IP");
+                                if (xRealIp != null && !xRealIp.isEmpty()) {
+                                        return xRealIp;
+                                }
+                                
+                                return request.getRemoteAddr();
+                        }
                 };
         }
 
         @Bean
         public AuthenticationFailureHandler authenticationFailureHandler() {
-                SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler();
-                handler.setDefaultFailureUrl("/login?error=true");
-                return handler;
+                return new SimpleUrlAuthenticationFailureHandler() {
+                        @Override
+                        public void onAuthenticationFailure(jakarta.servlet.http.HttpServletRequest request,
+                                        jakarta.servlet.http.HttpServletResponse response,
+                                        org.springframework.security.core.AuthenticationException exception)
+                                        throws java.io.IOException, jakarta.servlet.ServletException {
+                                
+                                // Lấy username từ request
+                                String username = request.getParameter("username");
+                                String redirectUrl = "/login?error=true";
+                                
+                                if (username != null && !username.trim().isEmpty()) {
+                                        // Kiểm tra tài khoản có bị khóa không
+                                        if (userService.isAccountLocked(username)) {
+                                                long remainingMinutes = userService.getRemainingLockTime(username);
+                                                redirectUrl = "/login?locked=true&minutes=" + remainingMinutes;
+                                        } else {
+                                                // Tăng số lần đăng nhập thất bại
+                                                userService.incrementFailedLoginAttempts(username);
+                                                
+                                                // Kiểm tra lại sau khi tăng failed attempts
+                                                if (userService.isAccountLocked(username)) {
+                                                        long remainingMinutes = userService.getRemainingLockTime(username);
+                                                        redirectUrl = "/login?locked=true&minutes=" + remainingMinutes;
+                                                }
+                                        }
+                                }
+                                
+                                // Redirect với thông báo phù hợp
+                                setDefaultFailureUrl(redirectUrl);
+                                super.onAuthenticationFailure(request, response, exception);
+                        }
+                };
         }
 
         @Bean

@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-    <title>Thông Báo - EduShare</title>
+    <title>Chi tiết thông báo - EduShare</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -1157,6 +1157,235 @@
       .dashboard-page {
         margin-top: 2rem;
       }
+      /* Notification Detail Styles */
+      .notification-detail-container {
+        background-color: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+      }
+
+      .notification-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--gray-200);
+        background: linear-gradient(135deg, var(--primary-light), var(--gray-50));
+      }
+
+      .notification-header-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+      }
+
+      .notification-icon {
+        flex-shrink: 0;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: var(--shadow-md);
+      }
+
+      .notification-icon.system {
+        background: var(--primary-gradient);
+        color: white;
+      }
+
+      .notification-icon.document {
+        background: var(--success-light);
+        color: var(--success);
+      }
+
+      .notification-icon.transaction {
+        background: var(--warning-light);
+        color: var(--warning);
+      }
+
+      .notification-icon.report {
+        background: var(--danger-light);
+        color: var(--danger);
+      }
+
+      .notification-header-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .notification-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+      }
+
+      .notification-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+      }
+
+      .notification-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .notification-meta-icon {
+        color: var(--gray-500);
+      }
+
+      .notification-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--radius);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+      }
+
+      .notification-status.read {
+        background-color: var(--success-light);
+        color: var(--success);
+      }
+
+      .notification-status.unread {
+        background-color: var(--warning-light);
+        color: var(--warning);
+      }
+
+      .notification-body {
+        padding: 2rem;
+      }
+
+      .notification-message {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--gray-700);
+        margin-bottom: 2rem;
+        white-space: pre-wrap;
+      }
+
+      .notification-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--gray-200);
+        background-color: var(--gray-50);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1px solid transparent;
+      }
+
+      .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-secondary {
+        background-color: white;
+        color: var(--gray-700);
+        border-color: var(--gray-300);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--gray-50);
+        border-color: var(--gray-400);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        color: var(--primary);
+        border-color: var(--primary);
+      }
+
+      .btn-outline:hover {
+        background-color: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      /* Responsive */
+      @media (max-width: 992px) {
+        .dashboard-content {
+          flex-direction: column;
+        }
+
+        .dashboard-sidebar {
+          width: 100%;
+          position: static;
+          margin-bottom: 2rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .notification-header {
+          padding: 1.5rem;
+        }
+
+        .notification-header-content {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .notification-icon {
+          width: 50px;
+          height: 50px;
+          font-size: 1.25rem;
+        }
+
+        .notification-title {
+          font-size: 1.25rem;
+        }
+
+        .notification-meta {
+          justify-content: center;
+          gap: 1rem;
+        }
+
+        .notification-body {
+          padding: 1.5rem;
+        }
+
+        .notification-actions {
+          padding: 1rem 1.5rem;
+          flex-direction: column;
+        }
+
+        .btn {
+          justify-content: center;
+        }
+      }
     </style>
   </head>
 
@@ -1175,183 +1404,150 @@
 
           <!-- Main Content -->
           <div class="dashboard-main">
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-icon primary">
-                  <i class="fas fa-bell"></i>
-                </div>
-                <div
-                  class="stat-value"
-                  th:text="${notifications != null ? notifications.size() : 0}"
-                >
-                  0
-                </div>
-                <div class="stat-label">Tổng thông báo</div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-icon warning">
-                  <i class="fas fa-envelope"></i>
-                </div>
-                <div
-                  class="stat-value"
-                  th:text="${unreadCount != null ? unreadCount : 0}"
-                >
-                  0
-                </div>
-                <div class="stat-label">Chưa đọc</div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-icon success">
-                  <i class="fas fa-check-circle"></i>
-                </div>
-                <div
-                  class="stat-value"
-                  th:text="${readCount != null ? readCount : 0}"
-                >
-                  0
-                </div>
-                <div class="stat-label">Đã đọc</div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-icon danger">
-                  <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div
-                  class="stat-value"
-                  th:text="${systemCount != null ? systemCount : 0}"
-                >
-                  0
-                </div>
-                <div class="stat-label">Hệ thống</div>
-              </div>
-            </div>
-
-            <!-- Notifications Section -->
-            <div class="dashboard-section">
-              <div class="section-header">
-                <h2 class="section-title">
-                  <i class="fas fa-inbox section-title-icon"></i>
-                  Thông báo của bạn
-                </h2>
-                <div
-                  class="section-actions"
-                  th:if="${unreadCount != null && unreadCount > 0}"
-                >
-                  <button class="mark-read-btn" onclick="markAllAsRead()">
-                    <i class="fas fa-check-double"></i>
-                    Đánh dấu đã đọc tất cả
-                  </button>
-                </div>
-              </div>
-
-              <!-- Filters -->
-              <div class="notification-filters">
-                <button class="filter-btn active" data-filter="all">
-                  <i class="fas fa-list"></i>
-                  Tất cả
-                </button>
-                <button class="filter-btn" data-filter="unread">
-                  <i class="fas fa-envelope"></i>
-                  Chưa đọc
-                </button>
-                <button class="filter-btn" data-filter="system">
-                  <i class="fas fa-cog"></i>
-                  Hệ thống
-                </button>
-                <button class="filter-btn" data-filter="document">
-                  <i class="fas fa-file-alt"></i>
-                  Tài liệu
-                </button>
-                <button class="filter-btn" data-filter="transaction">
-                  <i class="fas fa-credit-card"></i>
-                  Giao dịch
-                </button>
-              </div>
-
-              <!-- Notification List -->
-              <div class="notification-list" id="notificationList">
-                <!-- Error Message -->
-                <div th:if="${error}" class="alert alert-danger">
-                  <i class="fas fa-exclamation-triangle"></i>
-                  <span th:text="${error}">Có lỗi xảy ra</span>
-                </div>
-
-                <!-- Empty State -->
-                <div
-                  th:if="${notifications == null || notifications.isEmpty()}"
-                  class="empty-state"
-                >
-                  <i class="fas fa-bell-slash"></i>
-                  <h3>Chưa có thông báo nào</h3>
-                  <p>Bạn sẽ nhận được thông báo khi có hoạt động mới.</p>
-                </div>
-
-                <!-- Notifications -->
-                <div
-                  th:each="notification : ${notifications}"
-                  class="notification-item"
-                  th:classappend="${!notification.isRead} ? 'unread' : ''"
-                  th:data-type="${notification.type}"
-                  th:data-id="${notification.id}"
-                >
+            <div class="notification-detail-container">
+              <!-- Notification Header -->
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-icon primary">
+                    <i class="fas fa-bell"></i>
+                  </div>
                   <div
-                    class="notification-icon"
-                    th:classappend="${notification.type == 'system'} ? 'primary' : 
-                                   (${notification.type == 'document'} ? 'success' : 
-                                   (${notification.type == 'transaction'} ? 'warning' : 'primary'))"
+                    class="stat-value"
+                    th:text="${notifications != null ? notifications.size() : 0}"
                   >
-                    <i
-                      th:class="${notification.type == 'system'} ? 'fas fa-cog' : 
-                              (${notification.type == 'document'} ? 'fas fa-file-alt' : 
-                              (${notification.type == 'transaction'} ? 'fas fa-credit-card' : 'fas fa-bell'))"
+                    0
+                  </div>
+                  <div class="stat-label">Tổng thông báo</div>
+                </div>
+  
+                <div class="stat-card">
+                  <div class="stat-icon warning">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <div
+                    class="stat-value"
+                    th:text="${unreadCount != null ? unreadCount : 0}"
+                  >
+                    0
+                  </div>
+                  <div class="stat-label">Chưa đọc</div>
+                </div>
+  
+                <div class="stat-card">
+                  <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                  <div
+                    class="stat-value"
+                    th:text="${readCount != null ? readCount : 0}"
+                  >
+                    0
+                  </div>
+                  <div class="stat-label">Đã đọc</div>
+                </div>
+  
+                <div class="stat-card">
+                  <div class="stat-icon danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </div>
+                  <div
+                    class="stat-value"
+                    th:text="${systemCount != null ? systemCount : 0}"
+                  >
+                    0
+                  </div>
+                  <div class="stat-label">Hệ thống</div>
+                </div>
+              </div>
+              <div class="notification-header">
+                <div class="notification-header-content">
+                  <div 
+                    class="notification-icon"
+                    th:classappend="${notification.type}"
+                  >
+                    <i 
+                      th:class="${notification.type == 'system' ? 'fas fa-cog' : 
+                                 notification.type == 'document' ? 'fas fa-file-alt' : 
+                                 notification.type == 'transaction' ? 'fas fa-coins' : 
+                                 notification.type == 'report' ? 'fas fa-exclamation-triangle' : 
+                                 'fas fa-bell'}"
                     ></i>
                   </div>
-
-                  <div class="notification-content" th:onclick="'showNotificationDetail(' + ${notification.id} + ')'" style="cursor: pointer;">
-                    <div
-                      class="notification-title"
-                      th:text="${notification.title}"
-                    >
+                  
+                  <div class="notification-header-info">
+                    <h1 class="notification-title" th:text="${notification.title}">
                       Tiêu đề thông báo
-                    </div>
-                    <div
-                      class="notification-message"
-                      th:text="${#strings.length(notification.message) > 100 ? #strings.substring(notification.message, 0, 100) + '...' : notification.message}"
-                    >
-                      Nội dung thông báo
-                    </div>
-                    <div class="notification-preview-hint" th:if="${#strings.length(notification.message) > 100}">
-                      <small style="color: var(--primary); font-weight: 500;">
-                        <i class="fas fa-eye"></i> Nhấp để xem chi tiết
-                      </small>
-                    </div>
+                    </h1>
+                    
                     <div class="notification-meta">
-                      <div class="notification-time">
-                        <i class="far fa-clock"></i>
-                        <span
-                          th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}"
-                          >01/01/2024 10:00</span
+                      <div class="notification-meta-item">
+                        <i class="fas fa-clock notification-meta-icon"></i>
+                        <span th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">
+                          01/01/2024 10:00
+                        </span>
+                      </div>
+                      
+                      <div class="notification-meta-item">
+                        <i class="fas fa-tag notification-meta-icon"></i>
+                        <span th:text="${notification.type}">system</span>
+                      </div>
+                      
+                      <div class="notification-meta-item">
+                        <span 
+                          class="notification-status"
+                          th:classappend="${notification.isRead ? 'read' : 'unread'}"
                         >
+                          <i 
+                            th:class="${notification.isRead ? 'fas fa-check-circle' : 'fas fa-envelope'}"
+                          ></i>
+                          <span th:text="${notification.isRead ? 'Đã đọc' : 'Chưa đọc'}">
+                            Đã đọc
+                          </span>
+                        </span>
+                      </div>
+                      
+                      <div 
+                        class="notification-meta-item"
+                        th:if="${notification.readAt != null}"
+                      >
+                        <i class="fas fa-eye notification-meta-icon"></i>
+                        <span>
+                          Đọc lúc: 
+                          <span th:text="${#temporals.format(notification.readAt, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2024 10:30
+                          </span>
+                        </span>
                       </div>
                     </div>
                   </div>
-
-                  <div
-                    class="notification-actions"
-                    th:if="${!notification.isRead}"
-                  >
-                    <button
-                      class="mark-read-btn"
-                      th:onclick="'markAsRead(' + ${notification.id} + ')'"
-                    >
-                      <i class="fas fa-check"></i>
-                    </button>
-                  </div>
                 </div>
+              </div>
+
+              <!-- Notification Body -->
+              <div class="notification-body">
+                <div class="notification-message" th:text="${notification.message}">
+                  Nội dung thông báo sẽ được hiển thị ở đây...
+                </div>
+              </div>
+
+              <!-- Notification Actions -->
+              <div class="notification-actions">
+                <a 
+                  href="/account/notifications" 
+                  class="btn btn-primary"
+                >
+                  <i class="fas fa-arrow-left"></i>
+                  Quay lại danh sách
+                </a>
+                
+                <button 
+                  class="btn btn-outline"
+                  th:if="${!notification.isRead}"
+                  onclick="markAsRead()"
+                >
+                  <i class="fas fa-check"></i>
+                  Đánh dấu đã đọc
+                </button>
               </div>
             </div>
           </div>
@@ -1362,181 +1558,31 @@
     <!-- Footer -->
     <div th:replace="~{fragments/client/layout :: footer}"></div>
 
-    <!-- Confirmation Modal -->
-    <div id="confirmModal" class="modal-overlay" style="display: none">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h3 class="modal-title">
-            <i class="fas fa-check-double"></i>
-            Xác nhận thao tác
-          </h3>
-          <button class="modal-close" onclick="closeConfirmModal()">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="modal-icon">
-            <i class="fas fa-question-circle"></i>
-          </div>
-          <p class="modal-message">
-            Bạn có chắc chắn muốn đánh dấu tất cả thông báo là đã đọc?
-          </p>
-          <p class="modal-submessage">Thao tác này không thể hoàn tác.</p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" onclick="closeConfirmModal()">
-            <i class="fas fa-times"></i>
-            Hủy bỏ
-          </button>
-          <button class="btn btn-primary" onclick="confirmMarkAllAsRead()">
-            <i class="fas fa-check"></i>
-            Xác nhận
-          </button>
-        </div>
-      </div>
-    </div>
-    <script th:src="@{/js/main.js}"></script>
-    <script th:src="@{/js/account.js}"></script>
-    <script th:src="@{/js/client-header.js}"></script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      // Get CSRF token
-      function getCsrfToken() {
-        return (
-          document
-            .querySelector('meta[name="_csrf"]')
-            ?.getAttribute("content") || ""
-        );
-      }
-
-      function getCsrfHeader() {
-        return (
-          document
-            .querySelector('meta[name="_csrf_header"]')
-            ?.getAttribute("content") || "X-CSRF-TOKEN"
-        );
-      }
-
-      // Filter functionality
-      document.addEventListener("DOMContentLoaded", function () {
-        const filterBtns = document.querySelectorAll(".filter-btn");
-        const notificationItems =
-          document.querySelectorAll(".notification-item");
-
-        filterBtns.forEach((btn) => {
-          btn.addEventListener("click", function () {
-            // Remove active class from all buttons
-            filterBtns.forEach((b) => b.classList.remove("active"));
-            // Add active class to clicked button
-            this.classList.add("active");
-
-            const filter = this.getAttribute("data-filter");
-
-            notificationItems.forEach((item) => {
-              if (filter === "all") {
-                item.style.display = "flex";
-              } else if (filter === "unread") {
-                item.style.display = item.classList.contains("unread")
-                  ? "flex"
-                  : "none";
-              } else {
-                const itemType = item.getAttribute("data-type");
-                item.style.display = itemType === filter ? "flex" : "none";
-              }
-            });
-          });
+      function markAsRead() {
+        const notificationId = /*[[${notification.id}]]*/ 0;
+        
+        $.ajax({
+          url: `/account/notifications/${notificationId}/mark-read`,
+          type: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="_csrf"]').attr('content')
+          },
+          success: function(response) {
+            if (response.success) {
+              // Reload page to update status
+              window.location.reload();
+            } else {
+              alert('Có lỗi xảy ra: ' + response.message);
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('Error marking notification as read:', error);
+            alert('Có lỗi xảy ra khi đánh dấu thông báo đã đọc');
+          }
         });
-      });
-
-      // Mark single notification as read
-      function markAsRead(notificationId) {
-        const headers = {
-          "Content-Type": "application/json",
-        };
-
-        const csrfToken = getCsrfToken();
-        const csrfHeader = getCsrfHeader();
-        if (csrfToken && csrfHeader) {
-          headers[csrfHeader] = csrfToken;
-        }
-
-        fetch(`/account/notifications/${notificationId}/mark-read`, {
-          method: "POST",
-          headers: headers,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              location.reload();
-            } else {
-              alert("Có lỗi xảy ra: " + data.message);
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            alert("Có lỗi xảy ra khi đánh dấu đã đọc");
-          });
-      }
-
-      // Show confirmation modal
-      function markAllAsRead() {
-        document.getElementById("confirmModal").style.display = "flex";
-      }
-
-      // Close modal
-      function closeConfirmModal() {
-        document.getElementById("confirmModal").style.display = "none";
-      }
-
-      // Confirm mark all as read
-      function confirmMarkAllAsRead() {
-        const headers = {
-          "Content-Type": "application/json",
-        };
-
-        const csrfToken = getCsrfToken();
-        const csrfHeader = getCsrfHeader();
-        if (csrfToken && csrfHeader) {
-          headers[csrfHeader] = csrfToken;
-        }
-
-        fetch("/account/notifications/mark-all-read", {
-          method: "POST",
-          headers: headers,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            closeConfirmModal();
-            if (data.success) {
-              location.reload();
-            } else {
-              alert("Có lỗi xảy ra: " + data.message);
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            closeConfirmModal();
-            alert("Có lỗi xảy ra khi đánh dấu tất cả đã đọc");
-          });
-      }
-
-      // Close modal when clicking outside
-      document.addEventListener("click", function (event) {
-        const modal = document.getElementById("confirmModal");
-        if (event.target === modal) {
-          closeConfirmModal();
-        }
-      });
-
-      // Close modal with Escape key
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") {
-          closeConfirmModal();
-        }
-      });
-
-      // Show notification detail
-      function showNotificationDetail(notificationId) {
-        window.location.href = `/account/notifications/${notificationId}`;
       }
     </script>
   </body>

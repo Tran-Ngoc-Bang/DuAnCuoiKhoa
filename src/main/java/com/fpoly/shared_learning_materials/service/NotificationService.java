@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -97,6 +98,11 @@ public class NotificationService {
     // Xóa thông báo
     public void deleteNotification(Long notificationId) {
         notificationRepository.deleteById(notificationId);
+    }
+
+    // Lấy thông báo theo ID
+    public Optional<Notification> getNotificationById(Long id) {
+        return notificationRepository.findById(id);
     }
 
     // Tạo thông báo khi có tài liệu mới

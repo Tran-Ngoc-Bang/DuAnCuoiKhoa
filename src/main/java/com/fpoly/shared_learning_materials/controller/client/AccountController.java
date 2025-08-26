@@ -16,6 +16,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +59,7 @@ import com.fpoly.shared_learning_materials.config.CustomUserDetailsService;
 import java.time.format.DateTimeFormatter;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 /**
@@ -656,6 +658,64 @@ public class AccountController {
             model.addAttribute("lastLoginIp", currentUser.getLastLoginIp());
             model.addAttribute("failedLoginAttempts", currentUser.getFailedLoginAttempts());
             
+            // Thêm thống kê bảo mật cho stats cards
+            // 1. Trạng thái tài khoản
+            boolean isAccountActive = "active".equalsIgnoreCase(currentUser.getStatus());
+            String accountStatusText = isAccountActive ? "Hoạt động" : "Bị khóa";
+            String accountStatusIcon = isAccountActive ? "success" : "danger";
+            model.addAttribute("isAccountActive", isAccountActive);
+            model.addAttribute("accountStatusText", accountStatusText);
+            model.addAttribute("accountStatusIcon", accountStatusIcon);
+            
+            // 2. Thời gian tạo tài khoản (tuổi tài khoản)
+            long accountAge = 0;
+            String accountAgeText = "Mới tạo";
+            String accountAgeIcon = "info";
+            if (currentUser.getCreatedAt() != null) {
+                accountAge = java.time.Duration.between(currentUser.getCreatedAt(), LocalDateTime.now()).toDays();
+                if (accountAge >= 365) {
+                    accountAgeText = (accountAge / 365) + " năm";
+                    accountAgeIcon = "success";
+                } else if (accountAge >= 30) {
+                    accountAgeText = (accountAge / 30) + " tháng";
+                    accountAgeIcon = "primary";
+                } else if (accountAge > 0) {
+                    accountAgeText = accountAge + " ngày";
+                    accountAgeIcon = "info";
+                }
+            }
+            model.addAttribute("accountAge", accountAge);
+            model.addAttribute("accountAgeText", accountAgeText);
+            model.addAttribute("accountAgeIcon", accountAgeIcon);
+            
+            // 3. Lần đăng nhập cuối
+            String lastLoginText = currentUser.getLastLoginAt() != null 
+                ? currentUser.getLastLoginAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                : "Chưa đăng nhập";
+            model.addAttribute("lastLoginText", lastLoginText);
+            String lastLoginIcon = currentUser.getLastLoginAt() != null ? "success" : "warning";
+            
+            // 4. Mức độ bảo mật tài khoản
+            int securityScore = 0;
+            if (hasEmail) securityScore += 25;
+            if (hasPhone) securityScore += 25;
+            if (currentUser.getEmailVerifiedAt() != null) securityScore += 25;
+            if (currentUser.getLastLoginAt() != null) securityScore += 25;
+            
+            String securityScoreText = securityScore + "%";
+            String securityScoreIcon;
+            if (securityScore >= 75) {
+                securityScoreIcon = "success";
+            } else if (securityScore >= 50) {
+                securityScoreIcon = "warning";
+            } else {
+                securityScoreIcon = "danger";
+            }
+            model.addAttribute("securityScore", securityScore);
+            model.addAttribute("securityScoreText", securityScoreText);
+            model.addAttribute("securityScoreIcon", securityScoreIcon);
+            model.addAttribute("lastLoginIcon", lastLoginIcon);
+            
         } catch (Exception e) {
             model.addAttribute("error", "Không thể tải thông tin bảo mật: " + e.getMessage());
         }
@@ -668,6 +728,7 @@ public class AccountController {
                                 @RequestParam String newPassword,
                                 @RequestParam String confirmPassword,
                                 Authentication authentication,
+                                HttpServletRequest request,
                                 RedirectAttributes redirectAttributes) {
         try {
             // Validate input
@@ -726,8 +787,16 @@ public class AccountController {
                 java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), 
                 "system");
             
-            redirectAttributes.addFlashAttribute("success", "Đổi mật khẩu thành công!");
-            return "redirect:/account/security";
+            // Logout user after successful password change for security
+            SecurityContextHolder.clearContext();
+            
+            // Invalidate session for complete logout
+            if (request.getSession(false) != null) {
+                request.getSession().invalidate();
+            }
+            
+            redirectAttributes.addFlashAttribute("success", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại với mật khẩu mới.");
+            return "redirect:/login";
             
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
@@ -735,95 +804,9 @@ public class AccountController {
         }
     }
 
-    @GetMapping("/notifications")
-    public String notifications(Model model, Authentication authentication) {
-        try {
-            // Lấy user hiện tại
-            String username = authentication.getName();
-            User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            
-            // Tạo thông báo mẫu nếu chưa có (chỉ để test)
-            List<Notification> existingNotifications = notificationService.getUserNotifications(currentUser);
-            if (existingNotifications.isEmpty()) {
-                notificationService.createNotification(currentUser, 
-                    "Chào mừng bạn đến với EduShare", 
-                    "Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá các tài liệu học tập phong phú trên hệ thống của chúng tôi.", 
-                    "system");
-                    
-                // notificationService.createNotification(currentUser, 
-                //     "Tài liệu mới được đăng tải", 
-                //     "Có tài liệu mới về 'Lập trình Java Spring Boot' vừa được đăng tải. Hãy xem ngay!", 
-                //     "document");
-                    
-                // notificationService.createNotification(currentUser, 
-                //     "Giao dịch thành công", 
-                //     "Bạn đã nạp thành công 100.000 VNĐ vào tài khoản. Số xu hiện tại: 500 xu.", 
-                //     "transaction");
-            }
-            
-            // Lấy danh sách thông báo
-            List<Notification> notifications = notificationService.getUserNotifications(currentUser);
-            List<Notification> unreadNotifications = notificationService.getUnreadNotifications(currentUser);
-            long unreadCount = notificationService.getUnreadCount(currentUser);
-            
-            // Tính toán số lượng thông báo theo loại
-            long systemCount = notifications.stream().filter(n -> "system".equals(n.getType())).count();
-            long readCount = notifications.size() - unreadCount;
-            
-            model.addAttribute("pageTitle", "Thông báo");
-            model.addAttribute("notifications", notifications);
-            model.addAttribute("unreadNotifications", unreadNotifications);
-            model.addAttribute("unreadCount", unreadCount);
-            model.addAttribute("systemCount", systemCount);
-            model.addAttribute("readCount", readCount);
-            model.addAttribute("currentUser", currentUser);
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "Không thể tải thông báo: " + e.getMessage());
-        }
-        
-        return "client/account/notifications";
-    }
+
     
-    @PostMapping("/notifications/{id}/mark-read")
-    @ResponseBody
-    public String markNotificationAsRead(@PathVariable Long id, Authentication authentication) {
-        try {
-            String username = authentication.getName();
-            User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            
-            // Kiểm tra notification có thuộc về user hiện tại không
-            List<Notification> userNotifications = notificationService.getUserNotifications(currentUser);
-            boolean hasPermission = userNotifications.stream()
-                    .anyMatch(n -> n.getId().equals(id));
-            
-            if (!hasPermission) {
-                return "error: Không có quyền truy cập thông báo này";
-            }
-            
-            notificationService.markAsRead(id);
-            return "success";
-        } catch (Exception e) {
-            return "error: " + e.getMessage();
-        }
-    }
-    
-    @PostMapping("/notifications/mark-all-read")
-    @ResponseBody
-    public String markAllNotificationsAsRead(Authentication authentication) {
-        try {
-            String username = authentication.getName();
-            User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            
-            notificationService.markAllAsRead(currentUser);
-            return "success";
-        } catch (Exception e) {
-            return "error: " + e.getMessage();
-        }
-    }
+
 
     @GetMapping("/options")
     public String options(Model model) {
@@ -922,5 +905,194 @@ public class AccountController {
                     .body(java.util.Map.of("success", false, "message", e.getMessage()));
         }
 
+    }
+
+    // ===== NOTIFICATION METHODS =====
+    
+    @GetMapping("/notifications")
+    public String notifications(Model model, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Vui lòng đăng nhập để xem thông báo");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return "redirect:/login";
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy thông tin người dùng");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return "redirect:/";
+        }
+         // Tạo thông báo mẫu nếu chưa có (chỉ để test)
+         List<Notification> existingNotifications = notificationService.getUserNotifications(currentUser);
+         if (existingNotifications.isEmpty()) {
+             // Thông báo chào mừng
+             notificationService.createNotification(currentUser, 
+                 "Chào mừng bạn đến với EduShare", 
+                 "Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá các tài liệu học tập phong phú trên hệ thống của chúng tôi. Bạn có thể tìm kiếm tài liệu theo danh mục, tải xuống và chia sẻ kiến thức với cộng đồng.", 
+                 "system");
+                 
+             // Thông báo tài liệu mới
+             notificationService.createNotification(currentUser, 
+                 "Tài liệu mới được đăng tải", 
+                 "Có tài liệu mới về 'Lập trình Java Spring Boot - Từ cơ bản đến nâng cao' vừa được đăng tải bởi Admin. Tài liệu bao gồm 15 chương với nhiều ví dụ thực tế và bài tập. Hãy xem ngay để nâng cao kỹ năng lập trình của bạn!", 
+                 "document");
+                 
+             // Thông báo giao dịch
+             notificationService.createNotification(currentUser, 
+                 "Giao dịch thành công", 
+                 "Bạn đã nạp thành công 100.000 VNĐ vào tài khoản EduShare. Số xu hiện tại của bạn là 500 xu. Bạn có thể sử dụng xu để tải xuống các tài liệu premium hoặc mua gói coin để tiết kiệm hơn.", 
+                 "transaction");
+                 
+             // Thông báo bảo mật
+             notificationService.createNotification(currentUser, 
+                 "Cập nhật bảo mật tài khoản", 
+                 "Chúng tôi khuyến khích bạn cập nhật thông tin bảo mật tài khoản để đảm bảo an toàn. Hãy thêm số điện thoại, xác thực email và sử dụng mật khẩu mạnh. Truy cập trang Bảo mật để cập nhật ngay.", 
+                 "system");
+                 
+             // Thông báo khuyến mãi
+             notificationService.createNotification(currentUser, 
+                 "Khuyến mãi đặc biệt - Giảm 20%", 
+                 "🎉 Chương trình khuyến mãi tháng này: Giảm 20% cho tất cả gói coin! Áp dụng từ ngày 01/12 đến 31/12. Sử dụng mã EDUSHARE20 khi thanh toán. Đây là cơ hội tuyệt vời để nạp coin với giá ưu đãi nhất.", 
+                 "transaction");
+         }
+
+        List<Notification> notifications = notificationService.getUserNotifications(currentUser);
+        long unreadCount = notificationService.getUnreadCount(currentUser);
+        
+        // Tính toán số lượng thông báo theo loại
+        long systemCount = notifications.stream().filter(n -> "system".equals(n.getType())).count();
+        long readCount = notifications.size() - unreadCount;
+
+        model.addAttribute("pageTitle", "Thông báo");
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("systemCount", systemCount);
+        model.addAttribute("readCount", readCount);
+
+        return "client/account/notifications";
+    }
+
+    @GetMapping("/notifications/{id}")
+    public String notificationDetail(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Vui lòng đăng nhập để xem thông báo");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return "redirect:/login";
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy thông tin người dùng");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return "redirect:/";
+        }
+
+        // Tìm notification và kiểm tra quyền truy cập
+        Optional<Notification> notificationOpt = notificationService.getNotificationById(id);
+        if (notificationOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy thông báo");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return "redirect:/account/notifications";
+        }
+
+        Notification notification = notificationOpt.get();
+        
+        // Kiểm tra quyền truy cập - chỉ user sở hữu notification mới được xem
+        if (notification.getUser() != null && !notification.getUser().getId().equals(currentUser.getId())) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Bạn không có quyền xem thông báo này");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return "redirect:/account/notifications";
+        }
+
+        // Đánh dấu đã đọc nếu chưa đọc
+        if (!notification.getIsRead()) {
+            notificationService.markAsRead(id);
+            notification.setIsRead(true);
+            notification.setReadAt(LocalDateTime.now());
+        }
+        List<Notification> notificationss = notificationService.getUserNotifications(currentUser);
+        long unreadCount = notificationService.getUnreadCount(currentUser);
+        
+        // Tính toán số lượng thông báo theo loại
+        long systemCount = notificationss.stream().filter(n -> "system".equals(n.getType())).count();
+        long readCount = notificationss.size() - unreadCount;
+
+        model.addAttribute("pageTitle", "Chi tiết thông báo");
+        model.addAttribute("notification", notification);
+        model.addAttribute("notifications", notificationss);
+        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("systemCount", systemCount);
+        model.addAttribute("readCount", readCount);
+
+        return "client/account/notification-detail";
+    }
+
+    @PostMapping("/notifications/{id}/mark-read")
+    @ResponseBody
+    public ResponseEntity<String> markNotificationAsRead(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        try {
+            Optional<Notification> notificationOpt = notificationService.getNotificationById(id);
+            if (notificationOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Notification not found");
+            }
+
+            Notification notification = notificationOpt.get();
+            
+            // Kiểm tra quyền truy cập
+            if (notification.getUser() != null && !notification.getUser().getId().equals(currentUser.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+            }
+
+            notificationService.markAsRead(id);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/notifications/mark-all-read")
+    @ResponseBody
+    public ResponseEntity<String> markAllNotificationsAsRead() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        try {
+            notificationService.markAllAsRead(currentUser);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
     }
 }
