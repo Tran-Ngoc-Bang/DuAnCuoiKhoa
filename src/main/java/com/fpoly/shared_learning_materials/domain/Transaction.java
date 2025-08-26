@@ -58,7 +58,8 @@ public class Transaction {
     public enum TransactionType {
         PURCHASE("purchase", "Mua xu"),
         WITHDRAWAL("withdrawal", "Rút tiền"),
-        REFUND("refund", "Hoàn tiền");
+        REFUND("refund", "Hoàn tiền"),
+        DOCUMENT_DOWNLOAD("document_download", "Tải tài liệu");
 
         private final String value;
         private final String displayName;
@@ -82,7 +83,8 @@ public class Transaction {
         PROCESSING("processing", "Đang xử lý"),
         COMPLETED("completed", "Hoàn thành"),
         FAILED("failed", "Thất bại"),
-        CANCELLED("cancelled", "Đã hủy");
+        CANCELLED("cancelled", "Đã hủy"),
+        EXPIRED("expired", "Hết hạn");
 
         private final String value;
         private final String displayName;

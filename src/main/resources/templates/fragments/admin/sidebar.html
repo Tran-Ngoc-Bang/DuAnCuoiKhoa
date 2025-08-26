@@ -3,11 +3,11 @@
     <ul class="admin-menu">
       <li
         class="admin-menu-item"
-        th:classappend="${currentPage == 'dashboard'} ? 'active'"
+        th:classappend="${currentPage == 'statistics'} ? 'active'"
       >
         <a th:href="@{/admin}">
           <i class="fas fa-tachometer-alt"></i>
-          <span>Bảng điều khiển</span>
+          <span>Thống kê</span>
         </a>
       </li>
       <li
@@ -62,24 +62,6 @@
         <a th:href="@{/admin/reports}">
           <i class="fas fa-flag"></i>
           <span>Báo cáo vi phạm</span>
-        </a>
-      </li>
-      <li
-        class="admin-menu-item"
-        th:classappend="${currentPage == 'ip-bans'} ? 'active'"
-      >
-        <a th:href="@{/admin/ip-bans}">
-          <i class="fas fa-ban"></i>
-          <span>IP bị cấm</span>
-        </a>
-      </li>
-      <li
-        class="admin-menu-item"
-        th:classappend="${currentPage == 'statistics'} ? 'active'"
-      >
-        <a th:href="@{/admin/statistics}">
-          <i class="fas fa-chart-bar"></i>
-          <span>Thống kê</span>
         </a>
       </li>
       <!-- Revenue Management Dropdown -->

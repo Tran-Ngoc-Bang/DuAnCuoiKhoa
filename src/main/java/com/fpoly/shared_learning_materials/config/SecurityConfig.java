@@ -265,7 +265,7 @@ public class SecurityConfig {
                                         requestHandler.setCsrfRequestAttributeName("_csrf");
 
                                         csrf.csrfTokenRepository(repo)
-                                                        .ignoringRequestMatchers("/api/**", "/login")
+                                                        .ignoringRequestMatchers("/api/**", "/login", "/register")
                                                         .csrfTokenRequestHandler(requestHandler);
                                 })
 

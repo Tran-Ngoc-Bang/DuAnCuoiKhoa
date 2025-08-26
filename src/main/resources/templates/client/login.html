@@ -203,13 +203,13 @@
 
               <!-- Login Form -->
               <form
-                th:action="@{/login}"
+                action="/login"
                 method="post"
                 id="loginForm"
                 class="auth-form active"
                 data-form="login"
               >
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                 <h2 class="form-title">Chào mừng trở lại</h2>
                 <p class="form-description">
                   Đăng nhập để tiếp tục hành trình học tập của bạn

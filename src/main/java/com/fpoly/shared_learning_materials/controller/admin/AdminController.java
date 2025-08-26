@@ -47,14 +47,17 @@ public class AdminController extends BaseAdminController {
     public AdminController(NotificationService notificationService, UserRepository userRepository) {
         super(notificationService, userRepository);
     }
+
     /**
      * Trang chủ admin dashboard
      */
     @GetMapping
     public String index(Model model) {
         // Thêm thông tin cần thiết cho dashboard
-        model.addAttribute("pageTitle", "Admin Dashboard");
-        return "admin/index";
+        model.addAttribute("documents",
+                documentRepository.findTop5ByDeletedAtIsNullOrderByCreatedAtDesc());
+        model.addAttribute("currentPage", "statistics");
+        return "admin/statistics";
     }
 
     /**
@@ -65,12 +68,13 @@ public class AdminController extends BaseAdminController {
         return index(model);
     }
 
-    @GetMapping("/statistics")
-    public String statistics(Model model) {
-        model.addAttribute("documents", documentRepository.findTop5ByDeletedAtIsNullOrderByCreatedAtDesc());
-        model.addAttribute("currentPage", "statistics");
-        return "admin/statistics";
-    }
+    // @GetMapping("/statistics")
+    // public String statistics(Model model) {
+    // model.addAttribute("documents",
+    // documentRepository.findTop5ByDeletedAtIsNullOrderByCreatedAtDesc());
+    // model.addAttribute("currentPage", "statistics");
+    // return "admin/statistics";
+    // }
 
     @GetMapping("/statistics/user-growth")
     public ResponseEntity<Map<String, Integer>> getUserGrowth(@RequestParam(defaultValue = "365") int days) {

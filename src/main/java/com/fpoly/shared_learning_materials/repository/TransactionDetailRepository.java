@@ -32,4 +32,12 @@ public interface TransactionDetailRepository extends JpaRepository<TransactionDe
 
     @Query("SELECT t.user FROM TransactionDetail td JOIN td.transaction t WHERE td.coinPackage.id = :packageId AND t.status = 'COMPLETED' ORDER BY t.createdAt DESC")
     List<User> findRecentBuyersByPackage(@Param("packageId") Long packageId, Pageable pageable);
+
+    // ---- Document purchase history ----
+    @Query("SELECT CASE WHEN COUNT(td) > 0 THEN true ELSE false END FROM TransactionDetail td WHERE td.detailType = 'document' AND td.referenceId = :documentId AND td.transaction.user = :user AND td.transaction.status = 'COMPLETED'")
+    boolean existsCompletedDocumentPurchase(@Param("user") User user, @Param("documentId") Long documentId);
+
+    @Query("SELECT td FROM TransactionDetail td WHERE td.detailType = 'document' AND td.referenceId = :documentId AND td.transaction.user = :user ORDER BY td.createdAt DESC")
+    List<TransactionDetail> findDocumentPurchaseHistory(@Param("user") User user, @Param("documentId") Long documentId,
+            Pageable pageable);
 }

@@ -52,6 +52,8 @@ import org.springframework.beans.factory.annotation.Value;
 import java.nio.file.Files;
 import java.io.IOException;
 
+import com.fpoly.shared_learning_materials.service.DocumentPurchaseService;
+
 /**
  * Controller for client document-related pages
  */
@@ -78,6 +80,9 @@ public class ClientDocumentController {
 
     @Autowired
     private DocumentAnalyticsService documentAnalyticsService;
+
+    @Autowired
+    private DocumentPurchaseService documentPurchaseService;
 
     @Value("${app.uploads.base-path:src/main/resources/static/uploads/documents}")
     private String uploadsBasePath;
@@ -229,42 +234,23 @@ public class ClientDocumentController {
                     .build();
         }
 
-        boolean isOwned = documentOwnerRepository.existsByUserAndDocument(currentUser, document);
-
-        if (!isOwned) {
-            BigDecimal docPrice = document.getPrice();
-            BigDecimal userCoins = currentUser.getCoinBalance();
-
-            if (docPrice.compareTo(BigDecimal.ZERO) > 0 && userCoins.compareTo(docPrice) < 0) {
-                redirectAttributes.addFlashAttribute("toastMessage", "Bạn không đủ xu để tải tài liệu này");
-                redirectAttributes.addFlashAttribute("toastType", "error");
-                return ResponseEntity.status(HttpStatus.FOUND)
-                        .header("Location", "/documents/" + id)
-                        .build();
-            }
-
-            if (docPrice.compareTo(BigDecimal.ZERO) > 0) {
-                currentUser.setCoinBalance(userCoins.subtract(docPrice));
-                userRepository.save(currentUser);
-
-                DocumentOwner owner = new DocumentOwner();
-                owner.setId(new DocumentOwnerId(currentUser.getId(), document.getId()));
-                owner.setUser(currentUser);
-                owner.setDocument(document);
-                owner.setOwnershipType("buyer");
-                owner.setCreatedAt(LocalDateTime.now());
-                documentOwnerRepository.save(owner);
-
-                redirectAttributes.addFlashAttribute("toastMessage",
-                        "Tải xuống thành công. Đã trừ " + docPrice + " xu từ tài khoản của bạn.");
-                redirectAttributes.addFlashAttribute("toastType", "success");
-            }
-
-            document.setDownloadsCount(document.getDownloadsCount() + 1);
-            documentService.save(document);
-        } else {
-            redirectAttributes.addFlashAttribute("toastMessage", "Bạn đã sở hữu tài liệu này. Bắt đầu tải xuống...");
-            redirectAttributes.addFlashAttribute("toastType", "info");
+        try {
+            // Ủy quyền xử lý giao dịch tải tài liệu cho service
+            documentPurchaseService.processDocumentDownload(currentUser, id);
+            redirectAttributes.addFlashAttribute("toastMessage", "Bắt đầu tải xuống...");
+            redirectAttributes.addFlashAttribute("toastType", "success");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("toastMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("toastMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
         }
 
         Path filePath = Paths.get(uploadsBasePath)
