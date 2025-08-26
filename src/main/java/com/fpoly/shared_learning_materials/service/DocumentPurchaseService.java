@@ -10,6 +10,7 @@ import com.fpoly.shared_learning_materials.repository.DocumentOwnerRepository;
 import com.fpoly.shared_learning_materials.repository.TransactionDetailRepository;
 import com.fpoly.shared_learning_materials.repository.TransactionRepository;
 import com.fpoly.shared_learning_materials.repository.UserRepository;
+import com.fpoly.shared_learning_materials.service.EmailConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,9 @@ public class DocumentPurchaseService {
 
     @Autowired(required = false)
     private NotificationService notificationService;
+
+    @Autowired(required = false)
+    private EmailConfigService emailConfigService;
 
     /**
      * Xử lý mua/tải tài liệu bằng xu.
@@ -124,6 +128,21 @@ public class DocumentPurchaseService {
                 notificationService.createNotification(user, "Tải tài liệu thành công",
                         "Bạn đã tải '" + document.getTitle() + "' và bị trừ " + price + " xu.",
                         "transaction");
+            }
+
+            // Gửi email xác nhận
+            if (emailConfigService != null && user.getEmail() != null && !user.getEmail().isBlank()) {
+                String subject = "Xác nhận mua tài liệu thành công";
+                String html = "<p>Chào " + (user.getFullName() != null ? user.getFullName() : user.getUsername())
+                        + ",</p>"
+                        + "<p>Bạn đã mua thành công tài liệu: <strong>" + document.getTitle() + "</strong>.</p>"
+                        + "<p>Số xu đã trừ: <strong>" + price + " xu</strong>.</p>"
+                        + "<p>Mã giao dịch: <strong>" + txn.getCode() + "</strong>.</p>"
+                        + "<p>Cảm ơn bạn đã sử dụng EduShare.</p>";
+                try {
+                    emailConfigService.sendHtmlEmail(user.getEmail(), subject, html);
+                } catch (Exception ignore) {
+                }
             }
 
             return txn;

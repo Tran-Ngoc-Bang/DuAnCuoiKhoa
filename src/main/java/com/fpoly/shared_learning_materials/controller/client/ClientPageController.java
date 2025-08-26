@@ -329,6 +329,10 @@ public class ClientPageController {
         Map<String, Long> categoryCounts = documentService.countDocumentsPerCategorySlug();
         model.addAttribute("categoryCounts", categoryCounts);
 
+        // Thêm danh sách danh mục để render bộ lọc (slug, name)
+        List<CategoryDTO> categories = categoryService.getActiveCategories();
+        model.addAttribute("categories", categories);
+
         // Theo giá
         Map<String, Long> priceCounts = documentService.countByPrice(q);
         model.addAttribute("priceCounts", priceCounts);

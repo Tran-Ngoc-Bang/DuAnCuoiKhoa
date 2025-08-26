@@ -94,7 +94,8 @@ function initDocumentViewer() {
  * Load và hiển thị file PDF
  */
 function loadPdfDocument(pdfPath) {
-  const loadingTask = pdfjsLib.getDocument(pdfPath);
+  const safePath = typeof pdfPath === 'string' ? encodeURI(pdfPath) : pdfPath;
+  const loadingTask = pdfjsLib.getDocument(safePath);
 
   loadingTask.promise.then(function (pdf) {
     console.log('PDF document loaded successfully!');

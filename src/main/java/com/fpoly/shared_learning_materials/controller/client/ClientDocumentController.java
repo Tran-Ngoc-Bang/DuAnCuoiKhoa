@@ -53,6 +53,14 @@ import java.nio.file.Files;
 import java.io.IOException;
 
 import com.fpoly.shared_learning_materials.service.DocumentPurchaseService;
+import com.fpoly.shared_learning_materials.domain.Transaction;
+import com.fpoly.shared_learning_materials.service.FavoriteService;
+import java.util.Map;
+import com.fpoly.shared_learning_materials.repository.DocumentRepository;
+import com.fpoly.shared_learning_materials.repository.ReportRepository;
+import com.fpoly.shared_learning_materials.domain.Report;
+import java.time.LocalDateTime;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Controller for client document-related pages
@@ -84,94 +92,165 @@ public class ClientDocumentController {
     @Autowired
     private DocumentPurchaseService documentPurchaseService;
 
+    @Autowired
+    private FavoriteService favoriteService;
+
+    @Autowired
+    private DocumentRepository documentRepository;
+
     @Value("${app.uploads.base-path:src/main/resources/static/uploads/documents}")
     private String uploadsBasePath;
 
     @GetMapping("/{id}")
     public String documentDetails(@PathVariable Long id,
-            @RequestParam(required = false) Integer rating,
-            @RequestParam(required = false, defaultValue = "recent") String sortBy,
+            @RequestParam(required = false, defaultValue = "0") Integer rating,
+            @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             Model model,
             HttpServletRequest request) {
-        logger.info("Accessing document details for ID: {} with filters - rating: {}, sortBy: {}, page: {}, size: {}",
-                id, rating, sortBy, page, size);
-
-        // Validate input parameters
-        if (id == null || id <= 0) {
-            logger.warn("Invalid document ID provided: {}", id);
-            model.addAttribute("errorMessage", "ID tài liệu không hợp lệ");
+        // Reuse existing logic if already present in this class; otherwise minimal
+        // fetch
+        DocumentDTO document = documentService.getDocumentById(id);
+        if (document == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy tài liệu");
             return "error/404";
         }
 
-        try {
-            DocumentDTO document = documentService.getDocumentById(id);
-            if (document == null) {
-                model.addAttribute("errorMessage", "Không tìm thấy tài liệu");
-                return "error/404";
-            }
+        // Debug logging ngay sau khi load document
+        System.err.println("=== Document Loaded Successfully ===");
+        System.err.println("Document ID: " + id);
+        System.err.println("Document Title: " + document.getTitle());
+        System.err.println("Document Status: " + document.getStatus());
+        System.err.println("Document Visibility: " + document.getVisibility());
+        System.err.println("=====================================");
 
-            // Determine ownership for current user
-            boolean isOwned = false;
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && !("anonymousUser".equals(auth.getPrincipal()))) {
-                String username = auth.getName();
-                User user = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
-                if (user != null) {
-                    Document entity = documentService.findById(id);
-                    if (entity != null) {
-                        isOwned = documentOwnerRepository.existsByUserAndDocument(user, entity);
-                    }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = (auth != null && auth.isAuthenticated()
+                && !("anonymousUser".equals(auth.getPrincipal()))) ? auth.getName() : null;
+
+        boolean isOwned = false;
+        boolean isAdmin = false;
+        if (currentUsername != null) {
+            User user = userRepository.findByUsernameAndDeletedAtIsNull(currentUsername).orElse(null);
+            if (user != null) {
+                isAdmin = user.getRole() != null && user.getRole().toUpperCase().contains("ADMIN");
+                Document entity = documentService.findById(id);
+                if (entity != null) {
+                    isOwned = documentOwnerRepository.existsByUserAndDocument(user, entity);
                 }
             }
+        }
 
-            // TODO: Implement user authentication and comment permission logic
-            // For now, allow all users to comment
-            Map<String, Object> commentPermission = new java.util.HashMap<>();
-            commentPermission.put("canComment", true);
-            commentPermission.put("message", "Bạn có thể bình luận cho tài liệu này");
-            commentPermission.put("action", "allowed");
+        boolean isApprovedOrPublished = document.getStatus() != null &&
+                ("APPROVED".equalsIgnoreCase(document.getStatus())
+                        || "PUBLISHED".equalsIgnoreCase(document.getStatus()));
+        boolean isPublic = document.getVisibility() == null || "public".equalsIgnoreCase(document.getVisibility());
 
-            // Load comments with pagination and filters
-            Page<CommentDTO> commentsPage = commentService.getFilteredComments(id, rating, sortBy, page, size);
+        boolean canView = (isApprovedOrPublished && isPublic) || isOwned || isAdmin;
 
-            // Get related documents
-            List<DocumentDTO> relatedDocuments = documentService.getRelatedDocuments(id, 4);
+        // Debug logging
+        System.err.println("=== Document Access Debug ===");
+        System.err.println("Document ID: " + id);
+        System.err.println("Document Status: " + document.getStatus());
+        System.err.println("Document Visibility: " + document.getVisibility());
+        System.err.println("Is Approved/Published: " + isApprovedOrPublished);
+        System.err.println("Is Public: " + isPublic);
+        System.err.println("Is Owner: " + isOwned);
+        System.err.println("Is Admin: " + isAdmin);
+        System.err.println("Current User: " + (currentUsername != null ? currentUsername : "anonymous"));
+        System.err.println("canView: " + canView);
 
-            // Pass DocumentDTO to template
-            model.addAttribute("document", document);
-            model.addAttribute("pageTitle", document.getTitle());
-            model.addAttribute("comments", commentsPage.getContent());
-            model.addAttribute("relatedDocuments", relatedDocuments);
-            model.addAttribute("commentPermission", commentPermission);
-            model.addAttribute("isOwned", isOwned);
-
-            // Set pagination values from comments page
-            model.addAttribute("currentPage", commentsPage.getNumber());
-            model.addAttribute("totalPages", commentsPage.getTotalPages());
-            model.addAttribute("totalElements", commentsPage.getTotalElements());
-            model.addAttribute("hasNext", commentsPage.hasNext());
-            model.addAttribute("hasPrevious", commentsPage.hasPrevious());
-            model.addAttribute("currentRating", rating);
-            model.addAttribute("currentSortBy", sortBy);
-            model.addAttribute("currentSize", size);
-
-            return "client/document-details";
-
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid argument when accessing document ID {}: {}", id, e.getMessage());
-            model.addAttribute("errorMessage", "Tham số không hợp lệ");
+        if (!canView) {
+            model.addAttribute("errorMessage", "Tài liệu chưa được duyệt hoặc không công khai");
             return "error/404";
-        } catch (SecurityException e) {
-            logger.error("Security exception when accessing document ID {}: {}", id, e.getMessage());
-            model.addAttribute("errorMessage", "Không có quyền truy cập tài liệu này");
-            return "error/404";
+        }
+        System.err.println("ACCESS GRANTED: Document is accessible");
+        System.err.println("================================");
+
+        model.addAttribute("document", document);
+        model.addAttribute("isOwned", isOwned);
+        model.addAttribute("isFavorited",
+                favoriteService.isFavorited(auth != null && auth.isAuthenticated() ? auth.getName() : null, id));
+
+        // Load related documents for sidebar/section
+        try {
+            List<DocumentDTO> related = documentService.getRelatedDocuments(id, 4);
+            model.addAttribute("relatedDocuments", related);
+        } catch (Exception ignore) {
+            model.addAttribute("relatedDocuments", java.util.Collections.emptyList());
+        }
+        return "client/document-details";
+    }
+
+    @PostMapping("/{id}/favorite")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> toggleFavorite(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Bạn cần đăng nhập để lưu tài liệu"));
+            }
+
+            String username = auth.getName();
+            boolean isFavorited = favoriteService.toggleFavorite(username, id);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "favorited", isFavorited,
+                    "message", isFavorited ? "Đã lưu tài liệu" : "Đã xóa khỏi danh sách lưu"));
         } catch (Exception e) {
-            logger.error("Unexpected error when accessing document ID {}: {}", id, e.getMessage(), e);
-            model.addAttribute("errorMessage",
-                    "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau hoặc liên hệ quản trị viên");
-            return "error/500";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Có lỗi xảy ra: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/report")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> reportDocument(
+            @PathVariable Long id,
+            @RequestParam String type,
+            @RequestParam String reason,
+            HttpServletRequest request) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Bạn cần đăng nhập để báo cáo vi phạm"));
+            }
+
+            String username = auth.getName();
+            User reporter = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (reporter == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Không tìm thấy thông tin người dùng"));
+            }
+
+            Document document = documentRepository.findById(id).orElse(null);
+            if (document == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Không tìm thấy tài liệu"));
+            }
+
+            // Tạo báo cáo
+            Report report = new Report();
+            report.setReporter(reporter);
+            report.setDocument(document);
+            report.setType(type);
+            report.setReason(reason);
+            report.setStatus("pending");
+            report.setCreatedAt(LocalDateTime.now());
+
+            reportRepository.save(report);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message",
+                    "Báo cáo vi phạm đã được gửi thành công. Chúng tôi sẽ xem xét và xử lý trong thời gian sớm nhất."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Có lỗi xảy ra: " + e.getMessage()));
         }
     }
 
@@ -203,12 +282,67 @@ public class ClientDocumentController {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<?> downloadDocument(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> downloadDocument(@PathVariable Long id, RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
+        Document document = documentService.findById(id);
+        if (document == null || document.getFile() == null) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy tài liệu");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        }
 
+        // Chặn tải nếu chưa duyệt/không công khai, trừ owner/admin
+        boolean allowPrivateAccess = false;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !("anonymousUser".equals(auth.getPrincipal()))) {
+            String username = auth.getName();
+            User u = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (u != null) {
+                boolean isOwner = documentOwnerRepository.existsByUserAndDocument(u, document);
+                boolean isAdmin = u.getRole() != null && u.getRole().toUpperCase().contains("ADMIN");
+                allowPrivateAccess = isOwner || isAdmin;
+            }
+        }
+        boolean isApprovedOrPublished = document.getStatus() != null &&
+                ("APPROVED".equalsIgnoreCase(document.getStatus())
+                        || "PUBLISHED".equalsIgnoreCase(document.getStatus()));
+        boolean isPublic = document.getVisibility() == null || "public".equalsIgnoreCase(document.getVisibility());
+
+        if ((!isApprovedOrPublished || !isPublic) && !allowPrivateAccess) {
+            redirectAttributes.addFlashAttribute("toastMessage", "Tài liệu chưa được duyệt hoặc không công khai");
+            redirectAttributes.addFlashAttribute("toastType", "error");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/" + id)
+                    .build();
+        }
+
+        // Cho phép tải miễn phí không cần đăng nhập
+        BigDecimal price = document.getPrice() != null ? document.getPrice() : BigDecimal.ZERO;
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+            // Tăng counter rồi redirect tới endpoint phục vụ file chuẩn
+            try {
+                String sessionId = request.getSession().getId();
+                String ipAddress = getClientIpAddress(request);
+                documentAnalyticsService.incrementDownloadCount(id, sessionId, ipAddress);
+            } catch (Exception ignored) {
+            }
+
+            String fileName = document.getFile().getFilePath() != null && !document.getFile().getFilePath().isBlank()
+                    ? Paths.get(document.getFile().getFilePath()).getFileName().toString()
+                    : document.getFile().getFileName();
+            String encoded = java.net.URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/documents/uploads/documents/" + encoded + "?attach=1")
+                    .build();
+        }
+
+        // Tài liệu có phí: yêu cầu đăng nhập và xử lý mua
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal())) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Vui lòng đăng nhập để tải tài liệu");
+            redirectAttributes.addFlashAttribute("toastMessage", "Vui lòng đăng nhập để mua và tải tài liệu");
             redirectAttributes.addFlashAttribute("toastType", "error");
             return ResponseEntity.status(HttpStatus.FOUND)
                     .header("Location", "/documents/" + id)
@@ -225,27 +359,9 @@ public class ClientDocumentController {
                     .build();
         }
 
-        Document document = documentService.findById(id);
-        if (document == null || document.getFile() == null) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy tài liệu");
-            redirectAttributes.addFlashAttribute("toastType", "error");
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .header("Location", "/documents/" + id)
-                    .build();
-        }
-
         try {
-            // Ủy quyền xử lý giao dịch tải tài liệu cho service
             documentPurchaseService.processDocumentDownload(currentUser, id);
-            redirectAttributes.addFlashAttribute("toastMessage", "Bắt đầu tải xuống...");
-            redirectAttributes.addFlashAttribute("toastType", "success");
-        } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("toastMessage", e.getMessage());
-            redirectAttributes.addFlashAttribute("toastType", "error");
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .header("Location", "/documents/" + id)
-                    .build();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("toastMessage", e.getMessage());
             redirectAttributes.addFlashAttribute("toastType", "error");
             return ResponseEntity.status(HttpStatus.FOUND)
@@ -253,39 +369,14 @@ public class ClientDocumentController {
                     .build();
         }
 
-        Path filePath = Paths.get(uploadsBasePath)
-                .resolve(document.getFile().getFileName());
-        File file = filePath.toFile();
-
-        if (!file.exists()) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Tập tin không tồn tại trên hệ thống");
-            redirectAttributes.addFlashAttribute("toastType", "error");
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .header("Location", "/documents/" + id)
-                    .build();
-        }
-
-        try {
-            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-            String contentType;
-            try {
-                contentType = Files.probeContentType(filePath);
-            } catch (IOException ioEx) {
-                contentType = null;
-            }
-            if (contentType == null)
-                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
-                    .body(resource);
-        } catch (FileNotFoundException e) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Không thể mở file để tải về");
-            redirectAttributes.addFlashAttribute("toastType", "error");
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .header("Location", "/documents/" + id)
-                    .build();
-        }
+        // Sau khi mua xong: redirect tới endpoint phục vụ file
+        String fileName = document.getFile().getFilePath() != null && !document.getFile().getFilePath().isBlank()
+                ? Paths.get(document.getFile().getFilePath()).getFileName().toString()
+                : document.getFile().getFileName();
+        String encoded = java.net.URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "/documents/uploads/documents/" + encoded + "?attach=1")
+                .build();
     }
 
     /**
@@ -358,7 +449,7 @@ public class ClientDocumentController {
     }
 
     @GetMapping("/uploads/documents/{fileName:.+}")
-    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) {
+    public ResponseEntity<Resource> serveFile(@PathVariable String fileName, HttpServletRequest request) {
         try {
             // Decode the filename
             String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8.toString());
@@ -373,9 +464,13 @@ public class ClientDocumentController {
                 // Determine content type
                 String contentType = determineContentType(decodedFileName);
 
+                boolean asAttachment = request.getParameter("attach") != null;
+                String disposition = (asAttachment ? "attachment" : "inline") +
+                        "; filename=\"" + decodedFileName + "\"";
+
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + decodedFileName + "\"")
+                        .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
                         .body(resource);
             } else {
                 logger.warn("File not found or not readable: {}", filePath);
@@ -827,6 +922,62 @@ public class ClientDocumentController {
         } catch (Exception e) {
             logger.error("Error filtering comments for document {}: {}", documentId, e.getMessage(), e);
             return "redirect:/documents/" + documentId;
+        }
+    }
+
+    @GetMapping("/{id}/purchase/check")
+    public ResponseEntity<?> checkPurchase(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(java.util.Map.of("success", false, "message", "Vui lòng đăng nhập"));
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(java.util.Map.of("success", false, "message", "Không tìm thấy người dùng"));
+        }
+        Document document = documentService.findById(id);
+        if (document == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(java.util.Map.of("success", false, "message", "Không tìm thấy tài liệu"));
+        }
+        boolean owned = documentOwnerRepository.existsByUserAndDocument(currentUser, document);
+        java.math.BigDecimal price = document.getPrice() != null ? document.getPrice() : java.math.BigDecimal.ZERO;
+        java.math.BigDecimal balance = currentUser.getCoinBalance() != null ? currentUser.getCoinBalance()
+                : java.math.BigDecimal.ZERO;
+        boolean sufficient = balance.compareTo(price) >= 0;
+        return ResponseEntity.ok(java.util.Map.of(
+                "success", true,
+                "owned", owned,
+                "price", price,
+                "balance", balance,
+                "sufficient", sufficient));
+    }
+
+    @PostMapping("/{id}/purchase")
+    public ResponseEntity<?> confirmPurchase(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(java.util.Map.of("success", false, "message", "Vui lòng đăng nhập"));
+        }
+        String username = authentication.getName();
+        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(java.util.Map.of("success", false, "message", "Không tìm thấy người dùng"));
+        }
+        try {
+            Transaction txn = documentPurchaseService.processDocumentDownload(currentUser, id);
+            return ResponseEntity
+                    .ok(java.util.Map.of("success", true, "transactionCode", txn != null ? txn.getCode() : null));
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Map.of("success", false, "message", e.getMessage()));
         }
     }
 }

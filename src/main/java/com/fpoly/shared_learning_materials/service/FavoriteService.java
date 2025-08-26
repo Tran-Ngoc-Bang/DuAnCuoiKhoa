@@ -17,20 +17,20 @@ import jakarta.transaction.Transactional;
 @Service
 public class FavoriteService {
 
-	@Autowired
+    @Autowired
     private FavoriteRepository favoriteRepository;
-	@Autowired
+    @Autowired
     private UserRepository userRepository;
-	@Autowired
+    @Autowired
     private DocumentRepository documentRepository;
 
     @Transactional
     public boolean toggleFavorite(String username, Long documentId) {
         User user = userRepository.findByUsernameAndDeletedAtIsNull(username)
-                                  .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
         Document document = documentRepository.findById(documentId)
-                                              .orElseThrow(() -> new RuntimeException("Không tìm thấy tài liệu"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài liệu"));
 
         Optional<Favorite> existing = favoriteRepository.findByUserAndDocument(user, document);
 
@@ -43,6 +43,28 @@ public class FavoriteService {
             favorite.setDocument(document);
             favoriteRepository.save(favorite);
             return true; // Đã thêm
+        }
+    }
+
+    public boolean isFavorited(String username, Long documentId) {
+        if (username == null || documentId == null) {
+            return false;
+        }
+
+        try {
+            User user = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+            if (user == null) {
+                return false;
+            }
+
+            Document document = documentRepository.findById(documentId).orElse(null);
+            if (document == null) {
+                return false;
+            }
+
+            return favoriteRepository.findByUserAndDocument(user, document).isPresent();
+        } catch (Exception e) {
+            return false;
         }
     }
 }

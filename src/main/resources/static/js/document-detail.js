@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initReviewLoadMore();
   initDocumentTypeSelection();
   showToastFromFlash();
+  initFavoriteButton();
 });
 
 // Initialize tabs (Description, Reviews, etc.)
@@ -361,6 +362,58 @@ function initRatingStars() {
   }
 }
 
+// Initialize favorite button
+function initFavoriteButton() {
+  const favoriteBtn = document.querySelector('.bookmark-button.favorite-btn');
+  console.log('Looking for favorite button:', favoriteBtn);
+  
+  if (favoriteBtn) {
+    favoriteBtn.addEventListener('click', function() {
+      console.log('Favorite button clicked');
+      const documentId = this.getAttribute('data-document-id');
+      console.log('Document ID:', documentId);
+      const icon = this.querySelector('i');
+      const text = this.querySelector('span');
+      
+      fetch(`/documents/${documentId}/favorite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || ''
+        }
+      })
+      .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+          if (data.favorited) {
+            this.classList.add('favorited');
+            icon.className = 'fas fa-heart';
+            text.textContent = 'Đã lưu';
+            showToast(data.message, 'success');
+          } else {
+            this.classList.remove('favorited');
+            icon.className = 'far fa-heart';
+            text.textContent = 'Lưu';
+            showToast(data.message, 'info');
+          }
+        } else {
+          showToast(data.error || 'Có lỗi xảy ra', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+        showToast('Có lỗi xảy ra khi lưu tài liệu', 'error');
+      });
+    });
+  } else {
+    console.log('Favorite button not found');
+  }
+}
+
 // Initialize review form submission with real backend integration
 function initReviewForm() {
   console.log('Initializing review form with real backend integration');
@@ -624,9 +677,12 @@ function initDocumentActions() {
   // Handle report button click
   if (reportButton) {
     reportButton.addEventListener('click', function() {
-      // Show report confirmation
-      if (confirm('Bạn muốn báo cáo tài liệu này vi phạm?')) {
-        showToast('Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét tài liệu này.', 'info');
+      // Open report modal instead of confirm/toast
+      if (typeof openReportModal === 'function') {
+        openReportModal();
+      } else {
+        const modal = document.getElementById('reportModal');
+        if (modal) modal.style.display = 'block';
       }
     });
   }

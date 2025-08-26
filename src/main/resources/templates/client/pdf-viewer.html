@@ -34,7 +34,7 @@
 
 <body>
   <!-- Cách 2: Gắn vào thẻ ẩn -->
-  <input type="hidden" id="pdfDocumentPath" th:value="@{'/uploads/documents/' + ${document.file.fileName}}" />
+  <input type="hidden" id="pdfDocumentPath" th:value="@{'/uploads/documents/' + ${#uris.escapePath(document.file.fileName)}}" />
 
   <!-- Header -->
   <div th:replace="~{fragments/client/layout :: header}"></div>
@@ -115,7 +115,10 @@
               </div>
 
               <div class="document-author">
-                <i class="fas fa-user"></i> <span th:text="${document.file.uploadedBy.fullName}">Ranga Karnan</span>
+                <i class="fas fa-user"></i>
+                <span th:if="${document != null and document.file != null and document.file.uploadedBy != null}"
+                      th:text="${document.file.uploadedBy.fullName}">Tác giả</span>
+                <span th:if="${document == null or document.file == null or document.file.uploadedBy == null}">Không rõ</span>
               </div>
               <div class="document-date">
                 <i class="fas fa-calendar-alt"></i> <span
@@ -214,7 +217,8 @@
                 <div class="thumb-item" th:each="i : ${#numbers.sequence(1,5)}" th:data-page="${i}"
                   th:classappend="${i == 1} ? ' active'">
                   <img th:src="@{'/uploads/thumbnails/' + ${document.file.id} + '_page' + ${i} + '.png'}"
-                    th:alt="'Thumbnail trang ' + ${i}" class="thumb-img">
+                    th:alt="'Thumbnail trang ' + ${i}" loading="lazy"
+                    onerror="this.onerror=null; this.src='/images/default-avatar.png'; this.parentElement.classList.add('thumb-missing');">
                   <span class="thumb-number" th:text="${i}">1</span>
                 </div>
               </div>
@@ -331,7 +335,9 @@
               <div class="info-icon"><i class="fas fa-user"></i></div>
               <div class="info-content">
                 <h3>Tác giả</h3>
-                <p th:text="${document.file.uploadedBy.fullName}">Tên tác giả</p>
+                <p th:if="${document != null and document.file != null and document.file.uploadedBy != null}"
+                   th:text="${document.file.uploadedBy.fullName}">Tác giả</p>
+                <p th:if="${document == null or document.file == null or document.file.uploadedBy == null}">Không rõ</p>
               </div>
             </div>
 

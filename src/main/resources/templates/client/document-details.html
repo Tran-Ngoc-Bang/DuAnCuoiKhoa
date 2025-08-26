@@ -136,16 +136,16 @@
               </div>
               <div class="meta-item">
                 <i class="fas fa-eye"></i> <span
-                  th:text="${document.viewsCount != null ? document.viewsCount : 0}">0</span> lượt xem
+                  th:text="${document.viewsCount != null ? #numbers.formatInteger(document.viewsCount, 1, 'COMMA') : '0'}">0</span> lượt xem
               </div>
               <div class="meta-item">
                 <i class="fas fa-download"></i> <span
-                  th:text="${document.downloadsCount != null ? document.downloadsCount : 0}">0</span> lượt tải
+                  th:text="${document.downloadsCount != null ? #numbers.formatInteger(document.downloadsCount, 1, 'COMMA') : '0'}">0</span> lượt tải
               </div>
               <div class="meta-item">
                 <i class="fas fa-star"></i>
                 <span
-                  th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) : '0.0'}">0.0</span>/5
+                  th:text="${document.averageRating != null ? T(java.lang.Math).round(document.averageRating) : 0}">0</span>/5
                 (<span th:text="${document.comments != null ? document.comments.size() : 0}">0</span> đánh giá)
               </div>
             </div>
@@ -178,51 +178,8 @@
           </div>
 
           <div class="document-preview">
-            <div class="preview-image">
-              <img
-                src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                alt="Document Preview">
-              <!-- Conditional price badge display -->
-              <div th:if="${document.price != null and document.price > 0}" class="document-badge premium">
-                <i class="fas fa-coins"></i>
-                <span th:text="${#numbers.formatDecimal(document.price, 1, 'COMMA', 0, 'POINT')}"></span> xu
-              </div>
-              <div th:if="${document.price == null or document.price == 0}" class="document-badge free">
-                <i class="fas fa-gift"></i> Miễn phí
-              </div>
-            </div>
 
-            <div class="preview-carousel">
-              <button class="preview-nav prev-btn"><i class="fas fa-chevron-left"></i></button>
-              <div class="preview-pages">
-                <div class="preview-page active">
-                  <img
-                    src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="Page 1">
-                </div>
-                <div class="preview-page">
-                  <img
-                    src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="Page 2">
-                </div>
-                <div class="preview-page">
-                  <img
-                    src="https://images.unsplash.com/photo-1593720213428-28a5b9e94613?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="Page 3">
-                </div>
-                <div class="preview-page">
-                  <img
-                    src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="Page 4">
-                </div>
-                <div class="preview-page">
-                  <img
-                    src="https://images.unsplash.com/photo-1566837945700-30057527ade0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="Page 5">
-                </div>
-              </div>
-              <button class="preview-nav next-btn"><i class="fas fa-chevron-right"></i></button>
-            </div>
+
 
             <div class="download-card">
               <div class="download-header">
@@ -252,8 +209,8 @@
                 </div>
                 <div class="download-info-item">
                   <div class="info-value" data-info="rating"
-                    th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) + '/5' : '0.0/5'}">
-                    0.0/5</div>
+                    th:text="${document.averageRating != null ? T(java.lang.Math).round(document.averageRating) + '/5' : '0/5'}">
+                    0/5</div>
                   <div class="info-label">Đánh giá</div>
                 </div>
                 <div class="download-info-item" th:if="${document.createdAt != null}">
@@ -263,12 +220,12 @@
                 </div>
                 <div class="download-info-item">
                   <div class="info-value" data-info="views"
-                    th:text="${document.viewsCount != null ? document.viewsCount : 0}">0</div>
+                    th:text="${document.viewsCount != null ? #numbers.formatInteger(document.viewsCount, 1, 'COMMA') : '0'}">0</div>
                   <div class="info-label">Lượt xem</div>
                 </div>
                 <div class="download-info-item">
                   <div class="info-value" data-info="downloads"
-                    th:text="${document.downloadsCount != null ? document.downloadsCount : 0}">0</div>
+                    th:text="${document.downloadsCount != null ? #numbers.formatInteger(document.downloadsCount, 1, 'COMMA') : '0'}">0</div>
                   <div class="info-label">Lượt tải</div>
                 </div>
               </div>
@@ -284,38 +241,38 @@
               </div>
 
               <div class="download-actions">
-                <!-- Conditional download button text based on price -->
-                <form th:if="${document.price != null and document.price > 0}"
-                  th:action="@{/documents/{id}/download(id=${document.id})}" method="post" style="display: inline;">
-                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                  <button type="submit" class="action-button download-button" data-premium="true">
+                <!-- Conditional download button text based on price and ownership -->
+                <div th:if="${isOwned}">
+                  <a th:href="@{/documents/{id}/download(id=${document.id})}" class="action-button download-button" data-premium="false">
+                    <i class="fas fa-download"></i> Tải xuống
+                  </a>
+                </div>
+                <div th:if="${!isOwned}">
+                  <a th:if="${document.price == null or document.price == 0}"
+                     th:href="@{/documents/{id}/download(id=${document.id})}" class="action-button download-button" data-premium="false">
+                    <i class="fas fa-download"></i> Tải xuống
+                  </a>
+                  <button th:if="${document.price != null and document.price > 0}"
+                          type="button" class="action-button download-button" data-premium="true"
+                          id="buy-now-btn"
+                          th:attr="data-id=${document.id},data-price=${document.price}">
                     <i class="fas fa-shopping-cart"></i> Mua ngay
                   </button>
-                </form>
-                <form th:if="${document.price == null or document.price == 0}"
-                  th:action="@{/documents/{id}/download(id=${document.id})}" method="post" style="display: inline;">
-                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                  <button type="submit" class="action-button download-button" data-premium="false">
-                    <i class="fas fa-download"></i> Tải xuống
-                  </button>
-                </form>
-                <!-- <form th:action="@{/documents/{id}/view(id=${document.id})}" method="post" style="display: inline;"> -->
-                <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
-                <a th:href="@{/documents/{id}/pdf-view(id=${document.id})}" class="action-button preview-button">
-                  <i class="fas fa-eye"></i> Đọc thử
-                </a>
-                <!-- </form> -->
-                <div class="secondary-actions">
-                  <button class="action-button bookmark-button">
-                    <i class="far fa-bookmark"></i> <span>Lưu</span>
-                  </button>
-                  <button class="action-button share-button">
-                    <i class="fas fa-share-alt"></i> Chia sẻ
-                  </button>
-                  <button class="report-button">
-                    <i class="fas fa-flag"></i> Báo cáo
-                  </button>
                 </div>
+                 <!-- <form th:action="@{/documents/{id}/view(id=${document.id})}" method="post" style="display: inline;"> -->
+                 <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
+                 <!-- </form> -->
+                 <div class="secondary-actions">
+                                       <button class="action-button bookmark-button favorite-btn" th:attr="data-document-id=${document.id}" th:classappend="${isFavorited ? 'favorited' : ''}">
+                      <i th:class="${isFavorited ? 'fas fa-heart' : 'far fa-heart'}"></i> <span th:text="${isFavorited ? 'Đã lưu' : 'Lưu'}">Lưu</span>
+                    </button>
+                                        <button class="action-button share-button" onclick="shareDocument()">
+                       <i class="fas fa-share-alt"></i> Chia sẻ
+                     </button>
+                   <button class="report-button action-button" onclick="openReportModal()">
+                     <i class="fas fa-flag"></i> Báo cáo
+                   </button>
+                 </div>
               </div>
             </div>
           </div>
@@ -359,6 +316,15 @@
               <!-- Hidden PDF source for real preview -->
               <div id="pdfSource" th:if="${document != null and document.fileName != null}"
                 th:attr="data-src=@{/documents/{file}(file=${document.filePath})}" style="display:none"></div>
+              <div class="preview-controls" style="margin-bottom:12px;">
+                <button id="prevPage" class="prev-page preview-control-btn"><i class="fas fa-chevron-left"></i> Trang trước</button>
+                <span style="margin:0 8px;">Trang <span class="current-page">1</span>/<span class="total-pages">1</span></span>
+                <button id="nextPage" class="next-page preview-control-btn">Trang sau <i class="fas fa-chevron-right"></i></button>
+                <span class="preview-page-input">
+                  <input id="pageInput" type="number" class="page-input" min="1" value="1" />
+                  <button id="goToPage" class="go-to-page-btn">Đi</button>
+                </span>
+              </div>
               <div class="preview-container"
                 th:attr="data-has-file=${document != null and document.fileName != null ? '1' : '0'}">
                 <div class="preview-page-view active" data-page="1">
@@ -588,11 +554,11 @@ npm start</code></pre>
               <div class="rating-overview">
                 <div class="rating-score">
                   <div class="rating-value"
-                    th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) : '0.0'}">
-                    0.0</div>
+                    th:text="${document.averageRating != null ? T(java.lang.Math).round(document.averageRating) : 0}">
+                    0</div>
                   <div class="rating-stars">
                     <i th:each="i : ${#numbers.sequence(1, 5)}"
-                      th:class="${i <= (document.averageRating != null ? document.averageRating : 0) ? 'fas fa-star' : 'far fa-star'}"></i>
+                      th:class="${i <= (document.averageRating != null ? T(java.lang.Math).round(document.averageRating) : 0) ? 'fas fa-star' : 'far fa-star'}"></i>
                   </div>
                   <div class="rating-count"
                     th:text="${document.comments != null ? document.comments.size() : 0} + ' đánh giá'">0 đánh giá</div>
@@ -692,7 +658,6 @@ npm start</code></pre>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <h4 class="form-title">Đánh giá của bạn</h4>
                 <div class="form-group">
-                  <label class="form-label">Đánh giá sao</label>
                   <div class="form-rating"
                     th:class="${commentPermission != null and !commentPermission.canComment ? 'form-rating disabled' : 'form-rating'}">
                     <div class="rate-star" data-value="1">
@@ -910,8 +875,8 @@ npm start</code></pre>
                 <div class="details-item" th:if="${document.averageRating != null}">
                   <div class="details-label">Đánh giá trung bình</div>
                   <div class="details-value"
-                    th:text="${#numbers.formatDecimal(document.averageRating, 1, 1)} + '/5 (' + ${document.comments != null ? document.comments.size() : 0} + ' đánh giá)'">
-                    0.0/5 (0 đánh giá)</div>
+                    th:text="${(document.averageRating != null ? T(java.lang.Math).round(document.averageRating) : 0)} + '/5 (' + ${(document.comments != null ? document.comments.size() : 0)} + ' đánh giá)'">
+                    0/5 (0 đánh giá)</div>
                 </div>
                 <div class="details-item"
                   th:if="${document.categoryNames != null and !document.categoryNames.isEmpty()}">
@@ -923,13 +888,6 @@ npm start</code></pre>
                   <div class="details-value" th:text="'DOC-' + ${document.id}">Mã tài liệu</div>
                 </div>
               </div>
-
-              <h3 class="tags-header" th:if="${document.tagNames != null and !document.tagNames.isEmpty()}">Tags</h3>
-              <div class="details-tags" th:if="${document.tagNames != null and !document.tagNames.isEmpty()}">
-                <a th:each="tag : ${document.tagNames}" th:href="@{/search(tag=${tag})}" th:text="${tag}"
-                  class="details-tag">Tag</a>
-              </div>
-
               <!-- Hiển thị thông báo nếu không có tags -->
               <div th:if="${document.tagNames == null or document.tagNames.isEmpty()}" class="no-tags">
                 <p>Chưa có tags cho tài liệu này.</p>
@@ -966,8 +924,8 @@ npm start</code></pre>
                 </div>
                 <div class="author-stat">
                   <div class="stat-number"
-                    th:text="${document.averageRating != null ? #numbers.formatDecimal(document.averageRating, 1, 1) : '0.0'}">
-                    0.0</div>
+                    th:text="${document.averageRating != null ? T(java.lang.Math).round(document.averageRating) : 0}">
+                    0</div>
                   <div class="stat-label">Đánh giá</div>
                 </div>
                 <div class="author-stat">
@@ -1009,7 +967,7 @@ npm start</code></pre>
               </h3>
             </div>
             <div class="widget-content">
-              <div class="related-documents">
+              <div >
                 <div th:each="relatedDoc : ${relatedDocuments}" class="related-document">
                   <div class="related-document-thumbnail">
                     <img
@@ -1364,37 +1322,211 @@ npm start</code></pre>
   <div id="reportModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Báo cáo bình luận</h3>
+        <h3>Báo cáo vi phạm</h3>
         <span class="close">&times;</span>
       </div>
       <div class="modal-body">
-        <form id="reportForm" method="post"
-          th:action="@{/documents/{documentId}/comments/{commentId}/report(documentId=${document.id}, commentId='__COMMENT_ID__')}">
+        <form id="reportForm" data-ajax="true">
           <div class="form-group">
-            <label for="reportReason">Lý do báo cáo:</label>
-            <select id="reportReason" name="reason" required>
-              <option value="">Chọn lý do báo cáo</option>
-              <option value="spam">Spam</option>
-              <option value="inappropriate">Nội dung không phù hợp</option>
-              <option value="harassment">Quấy rối</option>
-              <option value="hate_speech">Ngôn từ thù địch</option>
+            <label for="reportType">Loại vi phạm:</label>
+            <select id="reportType" name="type" required>
+              <option value="">Chọn loại vi phạm</option>
               <option value="copyright">Vi phạm bản quyền</option>
-              <option value="misinformation">Thông tin sai lệch</option>
+              <option value="inappropriate">Nội dung không phù hợp</option>
+              <option value="spam">Spam</option>
+              <option value="fake">Thông tin giả mạo</option>
               <option value="other">Khác</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="reportNote">Ghi chú (tùy chọn):</label>
-            <textarea id="reportNote" name="note" rows="3" placeholder="Mô tả chi tiết lý do báo cáo..."></textarea>
+            <label for="reportReason">Lý do báo cáo:</label>
+            <textarea id="reportReason" name="reason" rows="4" placeholder="Mô tả chi tiết lý do báo cáo..." required></textarea>
           </div>
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" onclick="closeReportModal()">Hủy</button>
             <button type="submit" class="btn btn-danger">Gửi báo cáo</button>
           </div>
         </form>
       </div>
     </div>
   </div>
+
+  <div id="purchase-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" id="purchase-modal-close">&times;</span>
+      <h3>Xác nhận mua tài liệu</h3>
+      <p>Bạn sẽ bị trừ <strong><span id="purchase-price"></span> xu</strong>. Tiếp tục?</p>
+      <div class="modal-actions">
+        <button id="confirm-purchase" class="action-button">Xác nhận</button>
+        <a href="/account/recharge" class="action-button secondary" id="recharge-link" style="display:none;">Nạp xu</a>
+      </div>
+      <p id="insufficient-balance" style="color:#d33; display:none; margin-top:8px;">Số dư không đủ. Vui lòng nạp xu.</p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const buyBtn = document.getElementById('buy-now-btn');
+      const modal = document.getElementById('purchase-modal');
+      const closeBtn = document.getElementById('purchase-modal-close');
+      const priceEl = document.getElementById('purchase-price');
+      const confirmBtn = document.getElementById('confirm-purchase');
+      const insufficient = document.getElementById('insufficient-balance');
+      const rechargeLink = document.getElementById('recharge-link');
+
+      if (buyBtn) {
+        buyBtn.addEventListener('click', async function() {
+          const docId = this.getAttribute('data-id');
+          const res = await fetch(`/documents/${docId}/purchase/check`, { credentials: 'same-origin' });
+          if (res.status === 401) { window.location.href = '/auth/login'; return; }
+          const data = await res.json();
+          priceEl.textContent = data.price || 0;
+          if (!data.owned && data.sufficient) {
+            insufficient.style.display = 'none';
+            rechargeLink.style.display = 'none';
+          } else if (!data.owned && !data.sufficient) {
+            insufficient.style.display = 'block';
+            rechargeLink.style.display = 'inline-block';
+          }
+          modal.style.display = 'block';
+          confirmBtn.onclick = async () => {
+            const r = await fetch(`/documents/${docId}/purchase`, { method: 'POST', credentials: 'same-origin' });
+            if (r.ok) {
+              window.location.reload();
+            } else {
+              const d = await r.json().catch(()=>({message:'Lỗi'}));
+              alert(d.message || 'Không thể mua tài liệu');
+            }
+          };
+        });
+      }
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+      }
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+    })();
+  </script>
+
+  <script>
+    (function() {
+      // Preview tab controls init
+      const previewTabContent = document.querySelector('#preview-content');
+      const prevPageBtn = previewTabContent ? previewTabContent.querySelector('.prev-page') : null;
+      const nextPageBtn = previewTabContent ? previewTabContent.querySelector('.next-page') : null;
+      const currentPageDisplay = previewTabContent ? previewTabContent.querySelector('.current-page') : null;
+      const totalPagesDisplay = previewTabContent ? previewTabContent.querySelector('.total-pages') : null;
+      const pageInput = previewTabContent ? previewTabContent.querySelector('.page-input') : null;
+      const goToPageBtn = previewTabContent ? previewTabContent.querySelector('.go-to-page-btn') : null;
+      const previewPages = previewTabContent ? previewTabContent.querySelectorAll('.preview-page') : [];
+      let currentPageIndex = 0;
+      const totalPages = previewPages.length || (totalPagesDisplay ? parseInt(totalPagesDisplay.textContent || '1', 10) : 1);
+      if (totalPagesDisplay) totalPagesDisplay.textContent = String(totalPages);
+
+      function showPage(index){/* giữ nguyên phần logic hiện có ở dưới */}
+    })();
+  </script>
+
+  <script>
+    // Share functionality
+    function shareDocument() {
+      const documentTitle = document.querySelector('.document-title').textContent;
+      const shareUrl = window.location.origin + window.location.pathname;
+      const shareText = `Tôi đã tìm thấy tài liệu "${documentTitle}" trên EduShare: ${shareUrl}`;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: documentTitle,
+          text: shareText,
+          url: shareUrl
+        });
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showToast('Đã sao chép link chia sẻ!', 'success');
+        });
+      }
+    }
+
+    // Report functionality
+    function openReportModal() {
+      document.getElementById('reportModal').style.display = 'block';
+      // Set default action for document-level report to avoid posting to current URL
+      const form = document.getElementById('reportForm');
+      if (form && !form.hasAttribute('data-mode')) {
+        const documentId = window.location.pathname.split('/').pop();
+        form.setAttribute('action', `/documents/${documentId}/report`);
+        form.setAttribute('method', 'post');
+      }
+    }
+
+    function closeReportModal() {
+      document.getElementById('reportModal').style.display = 'none';
+    }
+
+    // Handle report form submission
+    document.getElementById('reportForm').addEventListener('submit', function(e) {
+      // Nếu đang báo cáo bình luận, cho submit native để server redirect và flash toast
+      if (this.getAttribute('data-mode') === 'comment') {
+        return; // Allow native submit
+      }
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const documentId = window.location.pathname.split('/').pop();
+      const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+      // Auto-fill reason by selected type text if no custom reason provided
+      const typeSelect = document.getElementById('reportType');
+      const reasonTextarea = document.getElementById('reportReason');
+      if (typeSelect && reasonTextarea && !reasonTextarea.value.trim() && typeSelect.value) {
+        const selectedText = typeSelect.options[typeSelect.selectedIndex].text;
+        reasonTextarea.value = selectedText;
+        formData.set('reason', selectedText);
+      }
+      
+      // Determine endpoint: prefer explicit form.action, fallback to document report
+      const actionUrl = this.action && this.action.trim().length > 0
+        ? this.action
+        : `/documents/${documentId}/report`;
+      // Ensure form attribute also reflects the target (prevent accidental native submit elsewhere)
+      this.action = actionUrl;
+      
+      fetch(actionUrl, {
+        method: 'POST',
+        headers: csrfToken && csrfHeader ? { [csrfHeader]: csrfToken } : {},
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeReportModal();
+          this.reset();
+        } else {
+          showToast(data.error || 'Có lỗi xảy ra', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra khi gửi báo cáo', 'error');
+      });
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('reportModal');
+      if (event.target === modal) {
+        closeReportModal();
+      }
+    }
+
+    // Close modal when clicking X
+    document.querySelector('.close').onclick = function() {
+      closeReportModal();
+    }
+  </script>
 </body>
 
 </html>

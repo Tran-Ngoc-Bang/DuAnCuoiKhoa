@@ -1529,28 +1529,36 @@ public class DocumentService {
                     break;
                 case "createdat":
                 case "created_at":
-                default:
                     fieldComparator = Comparator
-                            .comparing(doc -> doc.getCreatedAt() != null ? doc.getCreatedAt() : LocalDateTime.MIN);
+                            .comparing(doc -> doc.getCreatedAt() != null ? doc.getCreatedAt() : LocalDateTime.MIN,
+                                    Comparator.nullsLast(Comparator.reverseOrder()));
+                    break;
+                case "updatedat":
+                case "updated_at":
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getUpdatedAt() != null ? doc.getUpdatedAt() : LocalDateTime.MIN);
+                    break;
+                default:
+                    // Default sort by createdAt desc for newest
+                    fieldComparator = Comparator
+                            .comparing(doc -> doc.getCreatedAt() != null ? doc.getCreatedAt() : LocalDateTime.MIN,
+                                    Comparator.nullsLast(Comparator.reverseOrder()));
                     break;
             }
 
-            // Apply sort direction
-            if (order.getDirection() == Sort.Direction.DESC) {
-                fieldComparator = fieldComparator.reversed();
-            }
-
-            // Chain comparators if multiple sort fields
-            if (comparator == null) {
-                comparator = fieldComparator;
-            } else {
-                comparator = comparator.thenComparing(fieldComparator);
+            if (fieldComparator != null) {
+                if (order.isDescending()) {
+                    fieldComparator = fieldComparator.reversed();
+                }
+                comparator = comparator == null ? fieldComparator : comparator.thenComparing(fieldComparator);
             }
         }
 
-        return documents.stream()
-                .sorted(comparator)
-                .collect(Collectors.toList());
+        if (comparator != null) {
+            documents.sort(comparator);
+        }
+
+        return documents;
     }
 
     // Update document status (for archive and suspend actions)
@@ -1767,6 +1775,13 @@ public class DocumentService {
 
             // Only active documents
             predicates.add(cb.isNull(root.get("deletedAt")));
+
+            // Only approved and public documents
+            jakarta.persistence.criteria.Expression<String> statusExp = root.get("status");
+            predicates.add(cb.or(
+                    cb.equal(cb.upper(statusExp), "APPROVED"),
+                    cb.equal(cb.upper(statusExp), "PUBLISHED")));
+            predicates.add(cb.equal(root.get("visibility"), "public"));
 
             // Keyword in title or description
             if (q != null && !q.trim().isEmpty()) {
@@ -2303,5 +2318,4 @@ public class DocumentService {
         setAdditionalFields(dto);
         return dto;
     }
-
 }

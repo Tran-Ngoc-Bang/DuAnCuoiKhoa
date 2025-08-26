@@ -96,7 +96,7 @@ function initReportActions() {
     console.warn('Report modal elements not found');
     return;
   }
-
+ 
   reportActions.forEach(action => {
     action.addEventListener('click', function(e) {
       e.preventDefault();
@@ -106,6 +106,21 @@ function initReportActions() {
       const form = document.getElementById('reportForm');
       const documentId = window.location.pathname.split('/').pop();
       form.action = `/documents/${documentId}/comments/${currentCommentId}/report`;
+      form.setAttribute('data-mode', 'comment');
+      form.setAttribute('method', 'post');
+
+      // Ensure CSRF hidden input exists for native submit
+      const metaToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+      if (metaToken) {
+        let csrfInput = form.querySelector('input[name="_csrf"]');
+        if (!csrfInput) {
+          csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = '_csrf';
+          form.appendChild(csrfInput);
+        }
+        csrfInput.value = metaToken;
+      }
       
       reportModal.style.display = 'block';
       document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -130,19 +145,22 @@ function initReportActions() {
     }
   });
 
-  reportForm.addEventListener('submit', function(e) {
-    const reason = document.getElementById('reportReason').value;
-    const note = document.getElementById('reportNote').value;
+  // Nếu form không dùng AJAX, gắn validate nhẹ; nếu dùng AJAX (data-ajax), không gắn submit handler tại đây
+  if (!reportForm.hasAttribute('data-ajax')) {
+    reportForm.addEventListener('submit', function(e) {
+      const reason = document.getElementById('reportReason').value;
+      const note = document.getElementById('reportNote').value;
 
-    if (!reason) {
-      e.preventDefault();
-      showToast('Vui lòng chọn lý do báo cáo', 'warning');
-      return;
-    }
+      if (!reason) {
+        e.preventDefault();
+        showToast('Vui lòng chọn lý do báo cáo', 'warning');
+        return;
+      }
 
-    // Let the form submit normally - it will redirect back to the document page
-    // The server will handle the redirect and show flash messages
-  });
+      // Let the form submit normally - it will redirect back to the document page
+      // The server will handle the redirect and show flash messages
+    });
+  }
 }
 
 // Close report modal
