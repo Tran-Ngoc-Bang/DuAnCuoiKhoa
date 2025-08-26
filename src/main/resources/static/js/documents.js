@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initBookmarkButtons();
   initRatingSystem();
   initCommentSystem();
+  initConfirmLinks();
 });
 
 // Initialize document cards
@@ -1062,4 +1063,23 @@ function isAuthenticated() {
     return localStorage.getItem('isAuthenticated') === 'true';
   }
   return false;
+}
+
+function initConfirmLinks() {
+  document.addEventListener('click', function (e) {
+    const target = e.target.closest('a[data-confirm]');
+    if (!target) return;
+    const message = target.getAttribute('data-confirm') || 'Bạn có chắc chắn?';
+    if (!confirm(message)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+}
+
+// Initialize on DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initConfirmLinks);
+} else {
+  initConfirmLinks();
 }

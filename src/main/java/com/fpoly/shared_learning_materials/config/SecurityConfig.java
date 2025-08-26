@@ -26,6 +26,8 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import java.io.IOException;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -256,12 +258,16 @@ public class SecurityConfig {
                                                 .expiredUrl("/login?expired=true"))
 
                                 // Configure CSRF protection
-                                .csrf(csrf -> csrf
-                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                                .ignoringRequestMatchers("/api/**", "/login") // Ignore CSRF for API
-                                                                                              // endpoints and login
-                                                .csrfTokenRequestHandler(
-                                                                new org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler()))
+                                .csrf(csrf -> {
+                                        HttpSessionCsrfTokenRepository repo = new HttpSessionCsrfTokenRepository();
+                                        repo.setParameterName("_csrf");
+                                        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+                                        requestHandler.setCsrfRequestAttributeName("_csrf");
+
+                                        csrf.csrfTokenRepository(repo)
+                                                        .ignoringRequestMatchers("/api/**", "/login")
+                                                        .csrfTokenRequestHandler(requestHandler);
+                                })
 
                                 // Configure security headers
                                 .headers(headers -> headers

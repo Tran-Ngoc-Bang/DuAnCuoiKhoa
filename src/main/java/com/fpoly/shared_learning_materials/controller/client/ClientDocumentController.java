@@ -48,6 +48,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import java.nio.file.Files;
+import java.io.IOException;
 
 /**
  * Controller for client document-related pages
@@ -76,6 +79,9 @@ public class ClientDocumentController {
     @Autowired
     private DocumentAnalyticsService documentAnalyticsService;
 
+    @Value("${app.uploads.base-path:src/main/resources/static/uploads/documents}")
+    private String uploadsBasePath;
+
     @GetMapping("/{id}")
     public String documentDetails(@PathVariable Long id,
             @RequestParam(required = false) Integer rating,
@@ -96,39 +102,23 @@ public class ClientDocumentController {
 
         try {
             DocumentDTO document = documentService.getDocumentById(id);
-
-            // Check if document exists
             if (document == null) {
-                logger.warn("Document not found with ID: {}", id);
-                model.addAttribute("errorMessage", "Tài liệu không tồn tại hoặc đã bị xóa");
+                model.addAttribute("errorMessage", "Không tìm thấy tài liệu");
                 return "error/404";
             }
 
-            // Check if document is soft deleted
-            if (document.getDeletedAt() != null) {
-                logger.warn("Attempted to access soft deleted document with ID: {}", id);
-                model.addAttribute("errorMessage", "Tài liệu đã bị xóa và không thể truy cập");
-                return "error/404";
-            }
-
-            // Check document status for public access
-            String status = document.getStatus();
-            if (status == null || (!"APPROVED".equalsIgnoreCase(status) && !"PUBLISHED".equalsIgnoreCase(status))) {
-                logger.warn("Attempted to access non-public document with ID: {} and status: {}", id, status);
-                model.addAttribute("errorMessage", "Tài liệu chưa được công khai hoặc không khả dụng");
-                return "error/404";
-            }
-
-            logger.info("Successfully loaded document: {} (ID: {})", document.getTitle(), id);
-
-            // Tự động tăng lượt xem khi load trang chi tiết
-            try {
-                String sessionId = request.getSession().getId();
-                String ipAddress = getClientIpAddress(request);
-                documentAnalyticsService.incrementViewCount(id, sessionId, ipAddress);
-                logger.info("Auto-incremented view count for document: {}", id);
-            } catch (Exception e) {
-                logger.warn("Failed to auto-increment view count for document: {}", id, e);
+            // Determine ownership for current user
+            boolean isOwned = false;
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !("anonymousUser".equals(auth.getPrincipal()))) {
+                String username = auth.getName();
+                User user = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
+                if (user != null) {
+                    Document entity = documentService.findById(id);
+                    if (entity != null) {
+                        isOwned = documentOwnerRepository.existsByUserAndDocument(user, entity);
+                    }
+                }
             }
 
             // TODO: Implement user authentication and comment permission logic
@@ -150,6 +140,7 @@ public class ClientDocumentController {
             model.addAttribute("comments", commentsPage.getContent());
             model.addAttribute("relatedDocuments", relatedDocuments);
             model.addAttribute("commentPermission", commentPermission);
+            model.addAttribute("isOwned", isOwned);
 
             // Set pagination values from comments page
             model.addAttribute("currentPage", commentsPage.getNumber());
@@ -276,7 +267,7 @@ public class ClientDocumentController {
             redirectAttributes.addFlashAttribute("toastType", "info");
         }
 
-        Path filePath = Paths.get("src/main/resources/static/uploads/documents")
+        Path filePath = Paths.get(uploadsBasePath)
                 .resolve(document.getFile().getFileName());
         File file = filePath.toFile();
 
@@ -290,8 +281,16 @@ public class ClientDocumentController {
 
         try {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+            String contentType;
+            try {
+                contentType = Files.probeContentType(filePath);
+            } catch (IOException ioEx) {
+                contentType = null;
+            }
+            if (contentType == null)
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
             return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
                     .body(resource);
         } catch (FileNotFoundException e) {
@@ -380,7 +379,7 @@ public class ClientDocumentController {
             logger.info("Serving file: {}", decodedFileName);
 
             // Construct the file path
-            Path filePath = Paths.get("src/main/resources/static/uploads/documents").resolve(decodedFileName);
+            Path filePath = Paths.get(uploadsBasePath).resolve(decodedFileName);
             Resource resource = new UrlResource(filePath.toUri());
 
             // Check if file exists
@@ -388,6 +387,28 @@ public class ClientDocumentController {
                 // Determine content type
                 String contentType = determineContentType(decodedFileName);
 
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + decodedFileName + "\"")
+                        .body(resource);
+            } else {
+                logger.warn("File not found or not readable: {}", filePath);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("Error serving file: {}", fileName, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/file/{fileName:.+}")
+    public ResponseEntity<Resource> serveDocumentFile(@PathVariable String fileName) {
+        try {
+            String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8.toString());
+            Path filePath = Paths.get(uploadsBasePath).resolve(decodedFileName);
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() && resource.isReadable()) {
+                String contentType = determineContentType(decodedFileName);
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + decodedFileName + "\"")

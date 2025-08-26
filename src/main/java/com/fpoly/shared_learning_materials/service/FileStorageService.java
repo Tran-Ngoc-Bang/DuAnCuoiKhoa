@@ -75,7 +75,7 @@ public class FileStorageService {
             Path filePath = uploadPath.resolve(uniqueFilename);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            String fileUrl = "/uploads/documents/" + uniqueFilename;
+            String fileUrl = "/documents/file/" + uniqueFilename;
             log.info("File uploaded to local storage: {}", fileUrl);
             return fileUrl;
         } catch (IOException e) {

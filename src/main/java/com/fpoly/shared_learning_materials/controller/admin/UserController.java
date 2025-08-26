@@ -27,6 +27,8 @@ import com.fpoly.shared_learning_materials.service.NotificationService;
 import com.fpoly.shared_learning_materials.service.UserService;
 import com.fpoly.shared_learning_materials.util.ImageUtils;
 import com.fpoly.shared_learning_materials.util.UserExcelExporter;
+import com.fpoly.shared_learning_materials.service.FileService;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +39,9 @@ import jakarta.validation.Valid;
 public class UserController extends BaseAdminController {
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private FileService fileService;
 
 	public UserController(NotificationService notificationService, UserRepository userRepository) {
 		super(notificationService, userRepository);
@@ -132,8 +137,17 @@ public class UserController extends BaseAdminController {
 			return "admin/users/create";
 		}
 
-		Optional<String> uploaded = ImageUtils.upload(userDTO.getFile());
-		uploaded.ifPresent(userDTO::setAvatarUrl);
+		try {
+			MultipartFile avatarFile = userDTO.getFile();
+			if (avatarFile != null && !avatarFile.isEmpty()) {
+				com.fpoly.shared_learning_materials.domain.File saved = fileService.saveFile(avatarFile, null);
+				userDTO.setAvatarUrl("/documents/file/" + saved.getFileName());
+			}
+		} catch (Exception e) {
+			model.addAttribute("errorMessage", "Tải ảnh đại diện thất bại: " + e.getMessage());
+			model.addAttribute("currentPage", "users");
+			return "admin/users/create";
+		}
 
 		userService.createUser(userDTO);
 
@@ -208,8 +222,23 @@ public class UserController extends BaseAdminController {
 			return "admin/users/edit";
 		}
 
-		Optional<String> uploaded = ImageUtils.upload(userDTO.getFile());
-		uploaded.ifPresent(userDTO::setAvatarUrl);
+		// Xử lý upload avatar nếu có file mới
+		try {
+			MultipartFile avatarFile = userDTO.getFile();
+			if (avatarFile != null && !avatarFile.isEmpty()) {
+				com.fpoly.shared_learning_materials.domain.File saved = fileService.saveFile(avatarFile, existing);
+				// Sử dụng endpoint động để phục vụ avatar
+				userDTO.setAvatarUrl("/documents/file/" + saved.getFileName());
+			} else {
+				// Nếu không chọn file mới và DTO không có avatarUrl, giữ nguyên avatar cũ
+				if (userDTO.getAvatarUrl() == null || userDTO.getAvatarUrl().trim().isEmpty()) {
+					userDTO.setAvatarUrl(existing.getAvatarUrl());
+				}
+			}
+		} catch (Exception e) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Tải ảnh đại diện thất bại: " + e.getMessage());
+			return "redirect:/admin/users/" + id + "/edit";
+		}
 
 		userService.updateUserFromDTO(id, userDTO);
 

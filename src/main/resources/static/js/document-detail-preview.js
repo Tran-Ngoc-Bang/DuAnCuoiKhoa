@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// Chuẩn hóa URL và tạo fallback
 	const primaryUrl = originalUrl;
-	const fallbackUrl = originalUrl.replace('/documents/uploads/documents/', '/uploads/documents/');
+	const fallbackUrl = primaryUrl; // Không fallback sang static uploads; luôn dùng endpoint động
 	let activeUrl = primaryUrl;
 
 	console.log('Primary URL:', primaryUrl);

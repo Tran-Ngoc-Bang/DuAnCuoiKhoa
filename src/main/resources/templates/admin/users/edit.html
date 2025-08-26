@@ -1,225 +1,302 @@
 <!DOCTYPE html>
 <html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chỉnh sửa người dùng - EduShare Admin</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/toast.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/admin_users.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Chỉnh sửa người dùng - EduShare Admin</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link
-		href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap"
-		rel="stylesheet">
-	<link rel="stylesheet" th:href="@{/css/main.css}">
-	<link rel="stylesheet" th:href="@{/css/admin/admin.css}">
-	<link rel="stylesheet" th:href="@{/css/admin/toast.css}">
-	<link rel="stylesheet" th:href="@{/css/admin/admin_users.css}">
-	<link rel="stylesheet" th:href="@{/css/admin/coin-packages.css}" />
-	<link rel="stylesheet" th:href="@{/css/admin/notifications.css}" />
+    <script>
+      function validateEmail(email) {
+        const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        return regex.test(email);
+      }
 
-	<script>
-		function validateEmail(email) {
-			const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-			return regex.test(email);
-		}
+      function validateForm(event) {
+        const emailField = document.getElementById("email");
+        const email = emailField.value;
 
-		function validateForm(event) {
-			const emailField = document.getElementById("email");
-			const email = emailField.value;
+        if (!validateEmail(email)) {
+          event.preventDefault();
+          document.getElementById("emailError").textContent =
+            "Email không hợp lệ!";
+          emailField.classList.add("is-invalid");
+        } else {
+          document.getElementById("emailError").textContent = "";
+          emailField.classList.remove("is-invalid");
+        }
+      }
+    </script>
+    <style>
+      .is-invalid {
+        border: 2px solid red;
+      }
 
-			if (!validateEmail(email)) {
-				event.preventDefault();
-				document.getElementById("emailError").textContent = "Email không hợp lệ!";
-				emailField.classList.add("is-invalid");
-			} else {
-				document.getElementById("emailError").textContent = "";
-				emailField.classList.remove("is-invalid");
-			}
-		}
-	</script>
-	<style>
-		.is-invalid {
-			border: 2px solid red;
-		}
+      .text-danger {
+        color: red;
+      }
 
-		.text-danger {
-			color: red;
-		}
+      .form-note {
+        display: block;
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 4px;
+      }
 
-		.form-note {
-			display: block;
-			color: #6c757d;
-			font-size: 0.85rem;
-			margin-top: 4px;
-		}
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+      }
+    </style>
+  </head>
 
-		.form-grid {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			grid-gap: 20px;
-		}
-	</style>
-</head>
+  <body class="admin-body">
+    <!-- Admin Header -->
+    <div th:replace="~{fragments/admin/layout :: header}"></div>
+    <!-- Admin Container -->
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
 
-<body class="admin-body">
-	<!-- Admin Header -->
-	<div th:replace="~{fragments/admin/layout :: header}"></div>
-	<!-- Admin Container -->
-	<div class="admin-container">
-		<!-- Sidebar -->
-		<div th:replace="~{fragments/admin/sidebar :: admin-sidebar}"></div>
+      <!-- Main Content -->
+      <main class="admin-content">
+        <!-- Admin Content Header -->
+        <div class="admin-content-header">
+          <div>
+            <h1 class="admin-page-title">Chỉnh sửa người dùng</h1>
+            <div class="admin-breadcrumbs">
+              <a th:href="@{/admin}">Admin</a>
+              <span class="breadcrumb-separator">/</span>
+              <a th:href="@{/admin/users}">Quản lý người dùng</a>
+              <span class="breadcrumb-separator">/</span>
+              <span>Chỉnh sửa</span>
+            </div>
+          </div>
+        </div>
 
-		<!-- Main Content -->
-		<main class="admin-content">
-			<!-- Admin Content Header -->
-			<div class="admin-content-header">
-				<div>
-					<h1 class="admin-page-title">Chỉnh sửa người dùng</h1>
-					<div class="admin-breadcrumbs">
-						<a th:href="@{/admin}">Admin</a>
-						<span class="breadcrumb-separator">/</span>
-						<a th:href="@{/admin/users}">Quản lý người dùng</a>
-						<span class="breadcrumb-separator">/</span>
-						<span>Chỉnh sửa</span>
-					</div>
-				</div>
-			</div>
+        <!-- Form Container -->
+        <div class="form-container">
+          <div class="form-card">
+            <div class="form-header">
+              <h2>Thông tin người dùng</h2>
+              <p>Cập nhật thông tin người dùng</p>
+            </div>
 
-			<!-- Form Container -->
-			<div class="form-container">
-				<div class="form-card">
-					<div class="form-header">
-						<h2>Thông tin người dùng</h2>
-						<p>Cập nhật thông tin người dùng</p>
-					</div>
+            <form
+              th:action="@{'/admin/users/' + ${userDTO.id} + '/edit'}"
+              th:object="${userDTO}"
+              method="post"
+              enctype="multipart/form-data"
+              onsubmit="validateForm(event)"
+            >
+              <input
+                type="hidden"
+                th:name="${_csrf.parameterName}"
+                th:value="${_csrf.token}"
+              />
 
-					<form th:action="@{'/admin/users/' + ${userDTO.id} + '/edit'}" th:object="${userDTO}" method="post"
-						enctype="multipart/form-data" onsubmit="validateForm(event)">
+              <!-- Thông tin cơ bản -->
+              <div class="form-section">
+                <h3 class="section-title">
+                  <i class="fas fa-user"></i> Thông tin cơ bản
+                </h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="fullName"
+                      >Họ và tên <span class="required">*</span></label
+                    >
+                    <input
+                      type="text"
+                      id="fullName"
+                      th:field="*{fullName}"
+                      class="form-input"
+                      placeholder="Nhập họ tên"
+                      required
+                    />
+                    <span
+                      th:if="${#fields.hasErrors('fullName')}"
+                      th:errors="*{fullName}"
+                      class="error-message"
+                    ></span>
+                  </div>
 
-						<!-- Thông tin cơ bản -->
-						<div class="form-section">
-							<h3 class="section-title"><i class="fas fa-user"></i> Thông tin cơ bản</h3>
-							<div class="form-grid">
-								<div class="form-group">
-									<label for="fullName">Họ và tên <span class="required">*</span></label>
-									<input type="text" id="fullName" th:field="*{fullName}" class="form-input"
-										placeholder="Nhập họ tên" required />
-									<span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"
-										class="error-message"></span>
-								</div>
+                  <div class="form-group">
+                    <label for="email"
+                      >Email <span class="required">*</span></label
+                    >
+                    <input
+                      type="email"
+                      id="email"
+                      th:field="*{email}"
+                      class="form-input"
+                      placeholder="Nhập email"
+                      required
+                    />
+                    <div id="emailError" class="error-message"></div>
+                    <span
+                      th:if="${#fields.hasErrors('email')}"
+                      th:errors="*{email}"
+                      class="error-message"
+                    ></span>
+                    <span
+                      th:if="${emailError}"
+                      th:text="${emailError}"
+                      class="error-message"
+                    ></span>
+                  </div>
 
-								<div class="form-group">
-									<label for="email">Email <span class="required">*</span></label>
-									<input type="email" id="email" th:field="*{email}" class="form-input"
-										placeholder="Nhập email" required />
-									<div id="emailError" class="error-message"></div>
-									<span th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
-										class="error-message"></span>
-									<span th:if="${emailError}" th:text="${emailError}" class="error-message"></span>
-								</div>
+                  <div class="form-group">
+                    <label for="username"
+                      >Tên đăng nhập <span class="required">*</span></label
+                    >
+                    <input
+                      type="text"
+                      id="username"
+                      th:field="*{username}"
+                      class="form-input"
+                      placeholder="Tên đăng nhập"
+                      required
+                    />
+                    <span
+                      th:if="${#fields.hasErrors('username')}"
+                      th:errors="*{username}"
+                      class="error-message"
+                    ></span>
+                    <span
+                      th:if="${usernameError}"
+                      th:text="${usernameError}"
+                      class="error-message"
+                    ></span>
+                  </div>
 
-								<div class="form-group">
-									<label for="username">Tên đăng nhập <span class="required">*</span></label>
-									<input type="text" id="username" th:field="*{username}" class="form-input"
-										placeholder="Tên đăng nhập" required />
-									<span th:if="${#fields.hasErrors('username')}" th:errors="*{username}"
-										class="error-message"></span>
-									<span th:if="${usernameError}" th:text="${usernameError}"
-										class="error-message"></span>
-								</div>
+                  <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input
+                      type="password"
+                      id="password"
+                      th:field="*{password}"
+                      class="form-input"
+                      placeholder="Mật khẩu..."
+                      th:required="${userDTO.id == null}"
+                    />
 
-								<div class="form-group">
-									<label for="password">Mật khẩu</label>
-									<input type="password" id="password" th:field="*{password}" class="form-input"
-										placeholder="Mật khẩu..." th:required="${userDTO.id == null}" />
+                    <small class="form-note" th:if="${userDTO.id != null}">
+                      Để trống nếu không muốn cập nhật mật khẩu
+                    </small>
 
-									<small class="form-note" th:if="${userDTO.id != null}">
-										Để trống nếu không muốn cập nhật mật khẩu
-									</small>
+                    <span
+                      th:if="${#fields.hasErrors('password')}"
+                      th:errors="*{password}"
+                      class="error-message"
+                    ></span>
+                  </div>
 
-									<span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
-										class="error-message"></span>
-								</div>
+                  <div class="form-group">
+                    <label for="role">Vai trò</label>
+                    <select id="role" th:field="*{role}" class="form-input">
+                      <option value="user">Người dùng</option>
+                      <option value="admin">Quản trị viên</option>
+                    </select>
+                  </div>
 
+                  <div class="form-group">
+                    <label for="status">Trạng thái</label>
+                    <select id="status" th:field="*{status}" class="form-input">
+                      <option value="active">Hoạt động</option>
+                      <option value="inactive">Tạm khóa</option>
+                      <option value="pending">Chờ xác nhận</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
 
-								<div class="form-group">
-									<label for="role">Vai trò</label>
-									<select id="role" th:field="*{role}" class="form-input">
-										<option value="user">Người dùng</option>
-										<option value="admin">Quản trị viên</option>
-									</select>
-								</div>
+              <div class="form-section">
+                <h3 class="section-title">
+                  <i class="fas fa-image"></i> Ảnh đại diện
+                </h3>
+                <div class="form-group">
+                  <div class="avatar-upload-group">
+                    <img
+                      id="avatarPreview"
+                      th:src="${userDTO.avatarUrl != null} ? @{${userDTO.avatarUrl}} : @{/assets/images/default-avatar.png}"
+                      alt="avatar"
+                      class="avatar-preview"
+                    />
 
-								<div class="form-group">
-									<label for="status">Trạng thái</label>
-									<select id="status" th:field="*{status}" class="form-input">
-										<option value="active">Hoạt động</option>
-										<option value="inactive">Tạm khóa</option>
-										<option value="pending">Chờ xác nhận</option>
-									</select>
-								</div>
-							</div>
-						</div>
+                    <div>
+                      <button
+                        type="button"
+                        class="secondary-btn"
+                        onclick="document.getElementById('file').click();"
+                      >
+                        <i class="fas fa-upload"></i> Tải ảnh
+                      </button>
+                      <input
+                        type="file"
+                        id="file"
+                        th:field="*{file}"
+                        accept="image/*"
+                        style="display: none"
+                        onchange="previewAvatar(this)"
+                      />
+                      <input type="hidden" th:field="*{avatarUrl}" />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-						<div class="form-section">
-							<h3 class="section-title"><i class="fas fa-image"></i> Ảnh đại diện</h3>
-							<div class="form-group">
-								<div class="avatar-upload-group">
-									<img id="avatarPreview"
-										th:src="${userDTO.avatarUrl != null} ? @{${userDTO.avatarUrl}} : @{/assets/images/default-avatar.png}"
-										alt="avatar" class="avatar-preview" />
+              <div class="form-actions">
+                <a th:href="@{/admin/users}" class="secondary-btn">Hủy bỏ</a>
+                <button type="submit" class="primary-btn">
+                  <i class="fas fa-save"></i> Cập nhật
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
 
-									<div>
-										<button type="button" class="secondary-btn"
-											onclick="document.getElementById('file').click();">
-											<i class="fas fa-upload"></i> Tải ảnh
-										</button>
-										<input type="file" id="file" th:field="*{file}" accept="image/*"
-											style="display: none" onchange="previewAvatar(this)" />
-										<input type="hidden" th:field="*{avatarUrl}" />
-									</div>
-								</div>
-							</div>
-						</div>
+    <script>
+      function previewAvatar(input) {
+        const file = input.files[0];
+        if (!file || !file.type.startsWith("image/")) return;
 
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const preview = document.getElementById("avatarPreview");
+          if (preview) {
+            preview.src = e.target.result;
+          }
 
-						<div class="form-actions">
-							<a th:href="@{/admin/users}" class="secondary-btn">Hủy bỏ</a>
-							<button type="submit" class="primary-btn">
-								<i class="fas fa-save"></i> Cập nhật
-							</button>
-						</div>
-					</form>
-				</div>
-			</div>
-		</main>
-
-	</div>
-
-	<script>
-		function previewAvatar(input) {
-			const file = input.files[0];
-			if (!file || !file.type.startsWith('image/')) return;
-
-			const reader = new FileReader();
-			reader.onload = e => {
-				const preview = document.getElementById('avatarPreview');
-				if (preview) {
-					preview.src = e.target.result;
-				}
-
-				const hiddenInput = document.querySelector('input[name="avatarUrl"]');
-				if (hiddenInput) {
-					hiddenInput.value = '';
-				}
-			};
-			reader.readAsDataURL(file);
-		}
-	</script>
-
-</body>
-<script th:src="@{/js/admin/notifications.js}"></script>
-
+          const hiddenInput = document.querySelector('input[name="avatarUrl"]');
+          if (hiddenInput) {
+            hiddenInput.value = "";
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    </script>
+  </body>
+  <script th:src="@{/js/admin/notifications.js}"></script>
 </html>

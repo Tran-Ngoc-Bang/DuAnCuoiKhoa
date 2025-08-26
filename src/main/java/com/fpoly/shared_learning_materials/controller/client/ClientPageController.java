@@ -278,19 +278,12 @@ public class ClientPageController {
             Model model, RedirectAttributes redirectAttributes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()
-                || "anonymousUser".equals(authentication.getPrincipal())) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Vui lòng đăng nhập để xem trang quản lý");
-            redirectAttributes.addFlashAttribute("toastType", "error");
-            return "redirect:/login";
-        }
-
-        String username = authentication.getName();
-        User currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
-        if (currentUser == null) {
-            redirectAttributes.addFlashAttribute("toastMessage", "Không tìm thấy thông tin người dùng");
-            redirectAttributes.addFlashAttribute("toastType", "error");
-            return "redirect:/";
+        // Make search page public; set currentUser to null if not authenticated
+        User currentUser = null;
+        if (authentication != null && authentication.isAuthenticated()
+                && !("anonymousUser".equals(authentication.getPrincipal()))) {
+            String username = authentication.getName();
+            currentUser = userRepository.findByUsernameAndDeletedAtIsNull(username).orElse(null);
         }
 
         Pageable pageable = PageRequest.of(page, size);
@@ -332,25 +325,21 @@ public class ClientPageController {
         Map<String, Long> formatCounts = documentService.countFormats(q);
         model.addAttribute("formatCounts", formatCounts);
 
-        // Theo danh mục
-        List<CategoryDTO> allCategories = categoryService.getAllCategories();
+        // Theo danh mục (slug)
         Map<String, Long> categoryCounts = documentService.countDocumentsPerCategorySlug();
-        model.addAttribute("categories", allCategories);
         model.addAttribute("categoryCounts", categoryCounts);
 
         // Theo giá
         Map<String, Long> priceCounts = documentService.countByPrice(q);
-        model.addAttribute("price", price);
         model.addAttribute("priceCounts", priceCounts);
+
+        // Theo thời gian
+        Map<String, Long> timeCounts = documentService.countByTime(q);
+        model.addAttribute("timeCounts", timeCounts);
 
         // Theo đánh giá
         Map<String, Long> ratingCounts = documentService.countByRating(q);
-        model.addAttribute("rating", rating);
         model.addAttribute("ratingCounts", ratingCounts);
-
-        Map<String, Long> timeCounts = documentService.countByTime(q);
-        model.addAttribute("time", time);
-        model.addAttribute("timeCounts", timeCounts);
 
         return "client/search";
     }

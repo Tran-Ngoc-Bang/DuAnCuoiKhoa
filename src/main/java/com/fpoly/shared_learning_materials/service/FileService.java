@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,9 @@ public class FileService {
 
     @Autowired
     private FileRepository fileRepository;
+
+    @Value("${app.uploads.base-path:src/main/resources/static/uploads/documents/}")
+    private String uploadsBasePath;
 
     public File saveFile(MultipartFile file, User uploadedBy) throws IOException {
         File newFile = new File();
@@ -36,8 +40,8 @@ public class FileService {
         newFile.setUpdatedAt(LocalDateTime.now());
 
         // Lưu file vào thư mục đúng trong static
-        String uploadDir = "src/main/resources/static/uploads/documents/";
-        Path target = Paths.get(uploadDir + fileName);
+        String uploadDir = uploadsBasePath;
+        Path target = Paths.get(uploadDir).resolve(fileName);
         Files.createDirectories(target.getParent());
         Files.write(target, file.getBytes());
 
@@ -47,7 +51,7 @@ public class FileService {
     public void deleteFile(String filePath) throws IOException {
         try {
             // Xóa file vật lý từ hệ thống file
-            Path path = Paths.get("src/main/resources/static/" + filePath);
+            Path path = Paths.get(uploadsBasePath).resolve(Paths.get(filePath).getFileName());
             if (Files.exists(path)) {
                 Files.delete(path);
                 System.out.println("Successfully deleted physical file: " + filePath);
