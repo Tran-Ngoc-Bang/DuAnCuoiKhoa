@@ -322,9 +322,19 @@
                 </div>
               </td>
               <td>
-                <span class="violation-type" th:text="${report.type}"
-                  th:classappend="' ' + ${report.type.toLowerCase().replace(' ', '-')}">Loại vi phạm</span>
+                <span class="violation-type"
+                      th:classappend="' ' + ${report.type.toLowerCase().replace(' ', '-')}"
+                      th:switch="${report.type}">
+                      
+                  <span th:case="'copyright'">Vi phạm bản quyền</span>
+                  <span th:case="'inappropriate'">Nội dung không phù hợp</span>
+                  <span th:case="'spam'">Spam/Quảng cáo</span>
+                  <span th:case="'fake'">Tài liệu giả mạo</span>
+                  <span th:case="'other'">Vi phạm khác</span>
+                  <span th:case="*">Không xác định</span> <!-- fallback -->
+                </span>
               </td>
+              
               <td th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy')}"></td>
 
               <td>
@@ -347,6 +357,7 @@
                     th:data-reporter-email="${report.reporter.email}"
                     th:data-reporter-avatar="${report.reporter.avatarUrl}"
                     th:data-document-title="${report.document != null ? report.document.title : ''}"
+                    th:data-docid="${report.document != null ? report.document.id : ''}"
                     data-document-author="Nguyen Van A"
                     th:data-document-created="${report.document != null ? #temporals.format(report.document.createdAt, 'dd/MM/yyyy') : ''}"
                     th:data-note="${report.note != null ? report.note : ''}"
@@ -457,42 +468,9 @@
                           Guide" của tác giả John Smith mà không được sự cho phép. Tôi là đại
                           diện của nhà xuất bản CodeMaster và chúng tôi sở hữu bản quyền cho
                           tài liệu gốc.</p>
-                        <p>Cụ thể, các phần từ trang 15-42 của tài liệu này hoàn toàn giống với
-                          nội dung từ cuốn sách của chúng tôi, chỉ có một vài sửa đổi nhỏ.</p>
                       </div>
                     </div>
-                    <div class="info-row full-width">
-                      <div class="info-label">Bằng chứng</div>
-                      <div class="info-value evidence">
-                        <div class="evidence-items">
-                          <div class="evidence-item">
-                            <img
-                              src="https://images.unsplash.com/photo-1606857521015-7f9fcf423740?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
-                              alt="Bằng chứng 1">
-                            <div class="evidence-overlay">
-                              <button class="view-evidence-btn"><i class="fas fa-search-plus"></i></button>
-                            </div>
-                          </div>
-                          <div class="evidence-item">
-                            <img
-                              src="https://images.unsplash.com/photo-1586282391535-74bc5c28a1f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
-                              alt="Bằng chứng 2">
-                            <div class="evidence-overlay">
-                              <button class="view-evidence-btn"><i class="fas fa-search-plus"></i></button>
-                            </div>
-                          </div>
-                          <div class="evidence-item document">
-                            <div class="evidence-document">
-                              <i class="fas fa-file-pdf"></i>
-                              <span>copyright_proof.pdf</span>
-                            </div>
-                            <div class="evidence-overlay">
-                              <button class="download-evidence-btn"><i class="fas fa-download"></i></button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    
                   </div>
                 </div>
 
@@ -540,9 +518,9 @@
                           </div>
                         </div>
                         <div class="document-actions">
-                          <button class="preview-btn">
+                          <a class="preview-btn">
                             <i class="fas fa-eye"></i> Xem tài liệu
-                          </button>
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -640,6 +618,8 @@
             const docCreated = btn.getAttribute('data-document-created');
             const note = btn.getAttribute('data-note');
             const reply = btn.getAttribute('data-reply');
+            const docId = btn.getAttribute('data-docid');
+            modal.querySelector('.preview-btn').href = `/documents/${docId}`;
 
             modal.querySelector('.modal-header h3').textContent = `Chi tiết báo cáo #${id}`;
             modal.querySelector('.report-status .status-badge').textContent = mapStatusText(status);

@@ -326,6 +326,8 @@ public class ClientPageController {
         model.addAttribute("formatCounts", formatCounts);
 
         // Theo danh mục (slug)
+        List<CategoryDTO> allCategories = categoryService.getAllCategories();
+        model.addAttribute("categories", allCategories);
         Map<String, Long> categoryCounts = documentService.countDocumentsPerCategorySlug();
         model.addAttribute("categoryCounts", categoryCounts);
 
@@ -340,6 +342,7 @@ public class ClientPageController {
         // Theo đánh giá
         Map<String, Long> ratingCounts = documentService.countByRating(q);
         model.addAttribute("ratingCounts", ratingCounts);
+        
 
         return "client/search";
     }

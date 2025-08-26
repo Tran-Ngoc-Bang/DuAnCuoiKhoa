@@ -22,11 +22,12 @@ import com.fpoly.shared_learning_materials.domain.User;
 public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSpecificationExecutor<Document> {
         Optional<Document> findFirstByDeletedAtIsNull();
 
-        List<Document> findTop5ByDeletedAtIsNullOrderByCreatedAtDesc();
+        List<Document> findTop5ByDeletedAtIsNullOrderByDownloadsCountDesc();
 
         long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 
         Page<Document> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+        List<Document> findByStatus(String status);
 
         List<Document> findByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime start, LocalDateTime end);
 

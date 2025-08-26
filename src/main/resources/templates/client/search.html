@@ -610,6 +610,41 @@
       }, { passive: true });
     });
   </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const itemsPerPage = 6;
+      const resultContainer = document.getElementById("searchResults");
+      const resultCards = Array.from(resultContainer.getElementsByClassName("search-result-card"));
+      const paginationContainer = document.getElementById("pagination");
+
+      function showPage(page) {
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        resultCards.forEach((card, index) => {
+          card.style.display = (index >= start && index < end) ? "block" : "none";
+        });
+
+        renderPaginationButtons(page);
+      }
+
+      function renderPaginationButtons(currentPage) {
+        const totalPages = Math.ceil(resultCards.length / itemsPerPage);
+        paginationContainer.innerHTML = "";
+
+        for (let i = 1; i <= totalPages; i++) {
+          const button = document.createElement("button");
+          button.innerText = i;
+          button.className = (i === currentPage) ? "active" : "";
+          button.addEventListener("click", () => showPage(i));
+          paginationContainer.appendChild(button);
+        }
+      }
+
+      // Init pagination
+      showPage(1);
+    });
+  </script>
 </body>
 
 </html>

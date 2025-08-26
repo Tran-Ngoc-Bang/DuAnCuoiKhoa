@@ -67,7 +67,7 @@ public class AdminController extends BaseAdminController {
 
     @GetMapping("/statistics")
     public String statistics(Model model) {
-        model.addAttribute("documents", documentRepository.findTop5ByDeletedAtIsNullOrderByCreatedAtDesc());
+        model.addAttribute("documents", documentRepository.findTop5ByDeletedAtIsNullOrderByDownloadsCountDesc());
         model.addAttribute("currentPage", "statistics");
         return "admin/statistics";
     }

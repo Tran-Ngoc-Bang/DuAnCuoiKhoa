@@ -19,6 +19,7 @@ import jakarta.persistence.criteria.JoinType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1723,6 +1724,14 @@ public class DocumentService {
         return score;
     }
 
+    public static String removeVietnameseDiacritics(String input) {
+        if (input == null)
+            return null;
+
+        String temp = Normalizer.normalize(input, Normalizer.Form.NFD);
+        return temp.replaceAll("\\p{M}", "").replaceAll("đ", "d").replaceAll("Đ", "D");
+    }
+
     public Page<Document> searchDocuments(String q,
             List<String> categorySlugs,
             List<String> formats,
@@ -1731,12 +1740,62 @@ public class DocumentService {
             String time,
             Pageable pageable) {
 
-        Specification<Document> spec = buildSearchSpecification(q, categorySlugs, formats, priceFilters, time);
-        Page<Document> pageResult = documentRepository.findAll(spec, pageable);
+        String normalizedQ = removeVietnameseDiacritics(q).toLowerCase();
+        Page<Document> allDocuments = documentRepository.findByKeyword(normalizedQ, pageable);
+        List<Document> documents = allDocuments.getContent();
 
-        List<Document> documents = pageResult.getContent();
+        // Filter: Category
+        if (categorySlugs != null && !categorySlugs.isEmpty()) {
+            documents = documents.stream()
+                    .filter(doc -> doc.getDocumentCategories().stream()
+                            .anyMatch(dc -> categorySlugs.contains(dc.getCategory().getSlug())))
+                    .collect(Collectors.toList());
+        }
 
-        // Optional: Filter by rating on the current page only (quick win)
+        // Filter: File format
+        if (formats != null && !formats.isEmpty()) {
+            Set<String> lowerCaseFormats = formats.stream()
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+
+            documents = documents.stream()
+                    .filter(doc -> doc.getFile() != null
+                            && doc.getFile().getFileType() != null
+                            && lowerCaseFormats.contains(doc.getFile().getFileType().toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter: Price
+        if (priceFilters != null && !priceFilters.isEmpty()) {
+            documents = documents.stream()
+                    .filter(doc -> {
+                        if (priceFilters.contains("free") && doc.getPrice().compareTo(BigDecimal.ZERO) == 0)
+                            return true;
+                        if (priceFilters.contains("paid") && doc.getPrice().compareTo(BigDecimal.ZERO) > 0)
+                            return true;
+                        return false;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // Filter: Time (createdAt)
+        if (time != null && !time.equals("any")) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime after = switch (time) {
+                case "week" -> now.minusDays(7);
+                case "month" -> now.minusDays(30);
+                case "year" -> now.minusYears(1);
+                default -> null;
+            };
+
+            if (after != null) {
+                documents = documents.stream()
+                        .filter(doc -> doc.getCreatedAt() != null && doc.getCreatedAt().isAfter(after))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // Filter: Rating
         if (ratingStr != null && !ratingStr.equals("any")) {
             try {
                 int minRating = Integer.parseInt(ratingStr);
@@ -1747,11 +1806,17 @@ public class DocumentService {
                         })
                         .collect(Collectors.toList());
             } catch (NumberFormatException e) {
-                // ignore invalid rating
+                e.printStackTrace();
             }
         }
 
-        return new PageImpl<>(documents, pageable, pageResult.getTotalElements());
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), documents.size());
+        List<Document> pagedList = (start <= end) ? documents.subList(start, end) : new ArrayList<>();
+
+        System.out.println("Count of documents final: " + pagedList.size());
+
+        return new PageImpl<>(pagedList, pageable, documents.size());
     }
 
     private Specification<Document> buildSearchSpecification(String q,
