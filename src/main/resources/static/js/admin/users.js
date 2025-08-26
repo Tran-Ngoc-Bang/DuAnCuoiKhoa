@@ -966,7 +966,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function getRoleDisplayName(role) {
         const roles = {
             admin: 'Quản trị viên',
-            contributor: 'Cộng tác viên',
             user: 'Người dùng'
         };
         return roles[role] || 'Người dùng';
