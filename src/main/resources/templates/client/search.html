@@ -42,21 +42,22 @@
       padding-right: 6px;
     }
 
-    .filter-options::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .filter-options::-webkit-scrollbar-thumb {
-      background-color: #ccc;
+    .pagination button {
+      margin: 0 5px;
+      padding: 6px 12px;
+      border: none;
+      background-color: #eee;
+      cursor: pointer;
       border-radius: 4px;
     }
 
-    .filter-header.active {
+    .pagination button.active {
       background-color: #007bff;
+      color: white;
+      font-weight: bold;
     }
   </style>
 </head>
-
 <body>
   <!-- Header -->
   <div th:replace="~{fragments/client/layout :: header}"></div>
@@ -168,7 +169,7 @@
             </div>
 
             <div class="search-sort-options">
-              <span class="sort-label">Sắp xếp:</span>
+              <span>Sắp xếp:</span>
               <select id="sortSelect" class="sort-select">
                 <option value="relevance" selected>Độ liên quan</option>
                 <option value="date_desc">Mới nhất</option>
@@ -210,9 +211,6 @@
                       </label>
                     </th:block>
                   </div>
-                  <button class="show-more-btn">
-                    Xem thêm <i class="fas fa-chevron-down"></i>
-                  </button>
                 </div>
               </div>
 
@@ -477,6 +475,7 @@
                 </div>
               </div>
             </div>
+            <div id="pagination" class="pagination"></div>
 
           </div>
         </div>

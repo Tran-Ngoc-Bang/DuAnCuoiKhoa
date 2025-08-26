@@ -953,7 +953,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function getRoleFromBadge(badge) {
         if (!badge) return 'user';
         if (badge.classList.contains('admin')) return 'admin';
-        if (badge.classList.contains('contributor')) return 'contributor';
         return 'user';
     }
 
@@ -967,7 +966,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function getRoleDisplayName(role) {
         const roles = {
             admin: 'Quản trị viên',
-            contributor: 'Cộng tác viên',
             user: 'Người dùng'
         };
         return roles[role] || 'Người dùng';

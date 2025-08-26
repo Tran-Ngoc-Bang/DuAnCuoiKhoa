@@ -77,18 +77,21 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    public void createUser(UserDTO dto) {
-        User user = new User();
-        user.setFullName(dto.getFullName());
-        user.setEmail(dto.getEmail());
-        user.setUsername(dto.getUsername());
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(dto.getRole());
-        user.setStatus(dto.getStatus());
-        user.setAvatarUrl(dto.getAvatarUrl());
-        user.setBio(dto.getBio());
-        userRepository.save(user);
-    }
+	public void createUser(UserDTO dto) {
+		User user = new User();
+		user.setFullName(dto.getFullName());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+		user.setEmail(dto.getEmail());
+		user.setUsername(dto.getUsername());
+		user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+		user.setRole(dto.getRole());
+		user.setStatus(dto.getStatus());
+		user.setAvatarUrl(dto.getAvatarUrl());
+		user.setBio(dto.getBio());
+		userRepository.save(user);
+	}
+
 
     public Optional<UserDTO> getUserDTOById(Long id) {
         return userRepository.findById(id).map(user -> {

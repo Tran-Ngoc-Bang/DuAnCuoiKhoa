@@ -243,7 +243,7 @@ public class DataInitializer implements CommandLineRunner {
                 admin.setEmail("admin@example.com");
                 admin.setPasswordHash(passwordEncoder.encode("password"));
                 admin.setFullName("Administrator");
-                admin.setRole("ADMIN");
+                admin.setRole("admin");
                 admin.setStatus("active");
                 admin.setCoinBalance(BigDecimal.ZERO);
                 admin.setTotalSpent(BigDecimal.ZERO);
@@ -257,7 +257,7 @@ public class DataInitializer implements CommandLineRunner {
                 user1.setEmail("user1@example.com");
                 user1.setPasswordHash(passwordEncoder.encode("password"));
                 user1.setFullName("Người dùng 1");
-                user1.setRole("USER");
+                user1.setRole("user");
                 user1.setStatus("active");
                 user1.setCoinBalance(new BigDecimal("1000"));
                 user1.setTotalSpent(new BigDecimal("158000.00"));
@@ -271,7 +271,7 @@ public class DataInitializer implements CommandLineRunner {
                 user2.setEmail("user2@example.com");
                 user2.setPasswordHash(passwordEncoder.encode("password"));
                 user2.setFullName("Người dùng 2");
-                user2.setRole("USER");
+                user2.setRole("user");
                 user2.setStatus("active");
                 user2.setCoinBalance(new BigDecimal("1000"));
                 user2.setTotalSpent(new BigDecimal("50000.00"));
@@ -285,7 +285,7 @@ public class DataInitializer implements CommandLineRunner {
                 user3.setEmail("user3@example.com");
                 user3.setPasswordHash(passwordEncoder.encode("password"));
                 user3.setFullName("Người dùng 3");
-                user3.setRole("USER");
+                user3.setRole("user");
                 user3.setStatus("active");
                 user3.setCoinBalance(new BigDecimal("1000"));
                 user3.setTotalSpent(new BigDecimal("20000.00"));
@@ -299,7 +299,7 @@ public class DataInitializer implements CommandLineRunner {
                 user4.setEmail("user4@example.com");
                 user4.setPasswordHash(passwordEncoder.encode("password"));
                 user4.setFullName("Người dùng 4");
-                user4.setRole("USER");
+                user4.setRole("user");
                 user4.setStatus("active");
                 user4.setCoinBalance(BigDecimal.ZERO);
                 user4.setTotalSpent(BigDecimal.ZERO);
@@ -313,7 +313,7 @@ public class DataInitializer implements CommandLineRunner {
                 user5.setEmail("user5@example.com");
                 user5.setPasswordHash(passwordEncoder.encode("password"));
                 user5.setFullName("Người dùng 5");
-                user5.setRole("USER");
+                user5.setRole("user");
                 user5.setStatus("active");
                 user5.setCoinBalance(new BigDecimal("120"));
                 user5.setTotalSpent(new BigDecimal("74000.00"));

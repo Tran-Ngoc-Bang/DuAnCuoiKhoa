@@ -782,7 +782,7 @@
       function viewDocuments(categoryId) {
         console.log("Viewing documents for category:", categoryId);
         // Redirect to documents page with category filter
-        const documentsUrl = `/admin/documents?search=&tab=active&status=&category=${categoryId}&type=&price=&author=&tags=&dateFrom=&dateTo=&fileSize=&views=`;
+        const documentsUrl = `/admin/documents?search=&tab=active&status=&category=${categoryId}&type=&price=&author=&q=&dateFrom=&dateTo=&fileSize=&views=`;
         window.location.href = documentsUrl;
       }
 

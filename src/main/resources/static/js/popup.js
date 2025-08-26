@@ -65,6 +65,9 @@ document.querySelectorAll(".fa-bookmark").forEach(icon => {
                     this.classList.add('far');
                     showToast('Đã xóa tài liệu khỏi mục yêu thích', 'info');
                 }
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             })
             .catch(error => {
                 console.error("Lỗi khi gọi API yêu thích:", error);
@@ -75,7 +78,6 @@ document.querySelectorAll(".fa-bookmark").forEach(icon => {
 
 
 function handleDownload() {
-    // Giả lập tải xuống
     showToast("Tải xuống đang bắt đầu...");
     logActivity("Tải xuống tài liệu");
 }

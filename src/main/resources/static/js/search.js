@@ -513,6 +513,7 @@ function initBookmarkButtons() {
             icon.classList.add('far');
             showToast('Đã xóa tài liệu khỏi mục yêu thích', 'info');
           }
+          window.location.reload();
         })
         .catch(error => {
           console.error("Lỗi khi gọi API yêu thích:", error);
