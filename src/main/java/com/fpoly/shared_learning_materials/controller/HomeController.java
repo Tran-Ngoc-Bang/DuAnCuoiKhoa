@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 import com.fpoly.shared_learning_materials.service.CategoryService;
 import com.fpoly.shared_learning_materials.service.DocumentService;
 import com.fpoly.shared_learning_materials.service.FavoriteService;
@@ -142,7 +141,6 @@ public class HomeController {
 
         return "client/index"; // Reuse the same template
     }
-
 
     @GetMapping("/favicon.ico")
     public void favicon(HttpServletResponse response) throws IOException {

@@ -432,6 +432,8 @@
       color: var(--gray-900);
       margin-bottom: 0.25rem;
       line-height: 1.2;
+      word-break: break-word;
+      text-align: center;
     }
 
     .stat-label {
@@ -442,6 +444,20 @@
       display: block;
       line-height: 1.2;
       white-space: normal;
+    }
+
+    /* Responsive font size for stat values */
+    @media (max-width: 768px) {
+      .stat-value {
+        font-size: 1.25rem;
+      }
+    }
+
+    /* Special styling for coin and datetime values */
+    .stat-card .stat-value {
+      font-size: 1.5rem;
+      overflow-wrap: break-word;
+      hyphens: auto;
     }
 
     .stat-trend {
@@ -1450,6 +1466,171 @@
     .requirement:not(.met) i::before {
       content: '\f00d'; /* fa-times */
     }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 480px;
+      width: 90%;
+      max-height: 90vh;
+      overflow: hidden;
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
+      padding: 24px 24px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title i {
+      color: #f59e0b;
+      font-size: 1.125rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .modal-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #d97706;
+    }
+
+    .modal-content {
+      flex: 1;
+    }
+
+    .modal-message {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .modal-submessage {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .modal-footer {
+      padding: 16px 24px 24px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      background: #f9fafb;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+      border-color: #9ca3af;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4361ee, #3a56d4);
+      color: white;
+      box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #3a56d4, #2d46c7);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+      transform: translateY(-1px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
   </style>
 </head>
 
@@ -1526,28 +1707,36 @@
             </div>
             
             <div class="stat-card">
-              <div class="stat-icon" th:classappend="${hasEmail} ? 'success' : 'danger'">
-                <i class="fas fa-envelope"></i>
+              <div class="stat-icon" th:classappend="${accountStatusIcon}">
+                <i class="fas fa-user-check"></i>
               </div>
-              <div class="stat-value" th:text="${hasEmail} ? 'Đã có' : 'Chưa có'">Chưa có</div>
-              <div class="stat-label">Email</div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon" th:classappend="${hasPhone} ? 'success' : 'warning'">
-                <i class="fas fa-phone"></i>
-              </div>
-              <div class="stat-value" th:text="${hasPhone} ? 'Đã có' : 'Chưa có'">Chưa có</div>
-              <div class="stat-label">Số điện thoại</div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon" th:classappend="${statusIcon}">
-                <i class="fas fa-lock"></i>
-              </div>
-              <div class="stat-value" th:text="${accountStatus}">Hoạt động</div>
+              <div class="stat-value" th:text="${accountStatusText}">Hoạt động</div>
               <div class="stat-label">Trạng thái tài khoản</div>
             </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon" th:classappend="${accountAgeIcon}">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <div class="stat-value" th:text="${accountAgeText}">Mới tạo</div>
+              <div class="stat-label">Thời gian tạo</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon" th:classappend="${lastLoginIcon}">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="stat-value" th:text="${lastLoginText}">Chưa đăng nhập</div>
+              <div class="stat-label">Lần đăng nhập cuối</div>
+            </div>
+            
+          <!--  <div class="stat-card">
+              <div class="stat-icon" th:classappend="${securityScoreIcon}">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="stat-value" th:text="${securityScoreText}">0%</div>
+              <div class="stat-label">Mức độ bảo mật</div>
+            </div>-->
           </div>
 
           <!-- Security Status Overview -->
@@ -1706,6 +1895,11 @@
                     </div>
                   </div>
 
+                  <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 12px; margin-bottom: 16px; font-size: 0.875rem; color: #856404;">
+                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                    <strong>Lưu ý:</strong> Sau khi đổi mật khẩu thành công, bạn sẽ được đăng xuất tự động để đảm bảo bảo mật.
+                  </div>
+                  
                   <button type="submit" class="sec-button">
                     <i class="fas fa-save"></i>
                     Cập nhật mật khẩu
@@ -1819,6 +2013,11 @@
         return false;
       }
       
+      // Show confirmation modal before password change
+      e.preventDefault();
+      showPasswordChangeConfirmModal();
+      return false;
+      
       // Show loading state
       const submitBtn = this.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
@@ -1831,6 +2030,46 @@
     // Add password strength listener
     document.getElementById('newPassword').addEventListener('input', function() {
       updatePasswordStrengthUI(this.value);
+    });
+
+    // Password Change Confirmation Modal Functions
+    function showPasswordChangeConfirmModal() {
+      document.getElementById('passwordChangeModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hidePasswordChangeConfirmModal() {
+      document.getElementById('passwordChangeModal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    function confirmPasswordChange() {
+      hidePasswordChangeConfirmModal();
+      
+      // Get the form and submit it
+      const form = document.getElementById('changePasswordForm');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+      
+      // Submit the form
+      form.submit();
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('passwordChangeModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        hidePasswordChangeConfirmModal();
+      }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('passwordChangeModal').style.display === 'flex') {
+        hidePasswordChangeConfirmModal();
+      }
     });
 
     // Placeholder functions for features that would require additional implementation
@@ -1998,6 +2237,46 @@
       }
     }
   </script>
+
+  <!-- Password Change Confirmation Modal -->
+  <div id="passwordChangeModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-shield-alt"></i>
+          Xác nhận đổi mật khẩu
+        </h3>
+        <button type="button" class="modal-close" onclick="hidePasswordChangeConfirmModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="modal-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="modal-content">
+          <p class="modal-message">
+            Sau khi đổi mật khẩu thành công, bạn sẽ được <strong>đăng xuất tự động</strong> để đảm bảo bảo mật tài khoản.
+          </p>
+          <p class="modal-submessage">
+            Bạn sẽ cần đăng nhập lại bằng mật khẩu mới. Bạn có muốn tiếp tục?
+          </p>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="hidePasswordChangeConfirmModal()">
+          <i class="fas fa-times"></i>
+          Hủy bỏ
+        </button>
+        <button type="button" class="btn btn-primary" onclick="confirmPasswordChange()">
+          <i class="fas fa-check"></i>
+          Tiếp tục
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>

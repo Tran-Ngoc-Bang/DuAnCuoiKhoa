@@ -298,4 +298,83 @@ public class UserService {
 
         return true;
     }
-}
+    
+    /**
+     * Cập nhật thông tin đăng nhập cuối
+     */
+    public void updateLastLogin(String username, String ipAddress) {
+        Optional<User> userOpt = userRepository.findByUsernameAndDeletedAtIsNull(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setLastLoginAt(LocalDateTime.now());
+            user.setLastLoginIp(ipAddress);
+            user.setFailedLoginAttempts(0); // Reset failed attempts on successful login
+            user.setUpdatedAt(LocalDateTime.now());
+            userRepository.save(user);
+        }
+    }
+    
+    /**
+     * Tăng số lần đăng nhập thất bại
+     */
+    public void incrementFailedLoginAttempts(String username) {
+        Optional<User> userOpt = userRepository.findByUsernameAndDeletedAtIsNull(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            int currentAttempts = user.getFailedLoginAttempts() != null ? user.getFailedLoginAttempts() : 0;
+            user.setFailedLoginAttempts(currentAttempts + 1);
+            user.setUpdatedAt(LocalDateTime.now());
+            
+            // Khóa tài khoản nếu quá nhiều lần thất bại
+            if (user.getFailedLoginAttempts() >= 5) {
+                user.setLockedUntil(LocalDateTime.now().plusMinutes(15)); // Khóa 15 phút
+            }
+            
+            userRepository.save(user);
+        }
+    }
+    
+    /**
+     * Kiểm tra tài khoản có bị khóa không
+     */
+    public boolean isAccountLocked(String username) {
+        System.out.println("DEBUG: isAccountLocked called for username: " + username);
+        Optional<User> userOpt = userRepository.findByUsernameAndDeletedAtIsNull(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            System.out.println("DEBUG: User found. LockedUntil: " + user.getLockedUntil());
+            if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
+                System.out.println("DEBUG: Account is locked");
+                return true;
+            }
+            // Nếu thời gian khóa đã hết, reset failed attempts
+            if (user.getLockedUntil() != null && user.getLockedUntil().isBefore(LocalDateTime.now())) {
+                user.setLockedUntil(null);
+                user.setFailedLoginAttempts(0);
+                userRepository.save(user);
+                System.out.println("DEBUG: Lock expired, reset attempts");
+            }
+        } else {
+            System.out.println("DEBUG: User not found for lock check: " + username);
+        }
+        System.out.println("DEBUG: Account is not locked");
+        return false;
+    }
+    
+    /**
+     * Lấy thời gian còn lại bị khóa (phút)
+     */
+    public long getRemainingLockTime(String username) {
+        System.out.println("DEBUG: getRemainingLockTime called for username: " + username);
+        Optional<User> userOpt = userRepository.findByUsernameAndDeletedAtIsNull(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
+                long minutes = java.time.Duration.between(LocalDateTime.now(), user.getLockedUntil()).toMinutes();
+                System.out.println("DEBUG: Remaining lock time: " + minutes + " minutes");
+                return minutes;
+            }
+        }
+        System.out.println("DEBUG: No remaining lock time");
+        return 0;
+    }}

@@ -23,6 +23,8 @@ public class AuthController {
             @RequestParam(value = "logout", required = false) String logout,
             @RequestParam(value = "expired", required = false) String expired,
             @RequestParam(value = "registered", required = false) String registered,
+            @RequestParam(value = "locked", required = false) String locked,
+            @RequestParam(value = "minutes", required = false) String minutes,
             Model model) {
 
         // Log để debug
@@ -43,9 +45,12 @@ public class AuthController {
             return "redirect:" + redirectUrl;
         }
 
+
         // Add error message if present
-        if (error != null) {
-            model.addAttribute("error", error);
+        if (locked != null && minutes != null) {
+            model.addAttribute("error", "Tài khoản đã bị khóa do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau " + minutes + " phút!");
+        } else if (error != null) {
+            model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
         }
 
         if (logout != null) {
